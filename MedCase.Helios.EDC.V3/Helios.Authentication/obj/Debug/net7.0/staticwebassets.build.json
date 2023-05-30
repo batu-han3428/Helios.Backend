@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "Zc6h1UVFMVHljpRCfyX0C5oXg9Ak4lOR5y7uuvPtk3o=",
+  "Source": "Helios.Authentication",
+  "BasePath": "_content/Helios.Authentication",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

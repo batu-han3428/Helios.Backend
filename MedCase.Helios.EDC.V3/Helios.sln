@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Authentication", "Helios.Authentication\Helios.Authentication.csproj", "{491B63C9-84F5-46C5-A60D-1B6864A3F6B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.EDC", "Helios.EDC", "{337B2306-BC1D-4EEA-A62E-590DE8C28DA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.TMF", "Helios.TMF", "{CA2ECA06-3D38-47FD-A049-CD37F786E1C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.Monitoring", "Helios.Monitoring", "{1B427EAB-CE54-4EC8-B8BC-8494E3129EC8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.Reprot", "Helios.Reprot", "{2F706957-CB83-4FE0-A257-E3863750DA79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.Auth", "Helios.Auth", "{B91CC4AF-8383-458E-BBA6-F559E71BB760}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helios.eCRF", "Helios.EDC\Helios.eCRF\Helios.eCRF.csproj", "{753B89EF-8567-4C2C-B678-D319E92A0C04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helios.Core", "Helios.EDC\Helios.Core\Helios.Core.csproj", "{062E4F46-3A14-4168-8F79-BE0BF79C3A23}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{753B89EF-8567-4C2C-B678-D319E92A0C04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{753B89EF-8567-4C2C-B678-D319E92A0C04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{753B89EF-8567-4C2C-B678-D319E92A0C04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{753B89EF-8567-4C2C-B678-D319E92A0C04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{062E4F46-3A14-4168-8F79-BE0BF79C3A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{062E4F46-3A14-4168-8F79-BE0BF79C3A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{062E4F46-3A14-4168-8F79-BE0BF79C3A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{062E4F46-3A14-4168-8F79-BE0BF79C3A23}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9} = {B91CC4AF-8383-458E-BBA6-F559E71BB760}
+		{753B89EF-8567-4C2C-B678-D319E92A0C04} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
+		{062E4F46-3A14-4168-8F79-BE0BF79C3A23} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88E65DC4-AECE-4811-99C8-D2802F83B1E1}
+	EndGlobalSection
+EndGlobal
