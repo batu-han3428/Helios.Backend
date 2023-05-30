@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {}
+    "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {
+    "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
+        "projectUniqueName": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
         "projectName": "Helios.Core",
-        "projectPath": "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
+        "projectPath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
         "packagesPath": "C:\\Users\\sjang\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\obj\\",
+        "outputPath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sjang\\AppData\\Roaming\\NuGet\\NuGet.Config",

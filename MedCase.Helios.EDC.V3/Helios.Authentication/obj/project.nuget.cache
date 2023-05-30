@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "x7Eu+q+TlqBo8p8ySO3X9uzPVuaNVlNBRlEsavkECRXFQ1Zguo9jwqDpc/d0tpMDhJGXw8HBzuyRsPk19r5iKw==",
+  "dgSpecHash": "af0iOStLMYjknNgpfG06MYj8KziCQBSDs6AZn67eNTeftW5/IcnRRnLJRxPsMfsynkgkLzECidoee4ew8wjeIQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\sjang\\source\\repos\\Helios.V3\\MedCase.Helios.EDC.V3\\Helios.Authentication\\Helios.Authentication.csproj",
+  "projectFilePath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.Authentication\\Helios.Authentication.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sjang\\.nuget\\packages\\google.protobuf\\3.21.9\\google.protobuf.3.21.9.nupkg.sha512",
     "C:\\Users\\sjang\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
