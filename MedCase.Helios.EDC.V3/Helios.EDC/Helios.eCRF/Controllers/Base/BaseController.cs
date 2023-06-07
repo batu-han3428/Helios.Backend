@@ -1,0 +1,18 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using RestSharp;
+
+namespace Helios.eCRF.Controllers.Base
+{
+    public class BaseController : Controller
+    {
+        protected readonly IConfiguration configuration;
+
+        protected readonly ILogger<AccountController> _logger;
+        protected RestClient DatasetServiceClient { get { return new RestClient(new Uri(configuration["Halios.Auth:Authentication"])); } }
+        public BaseController(ILogger<AccountController> logger, IConfiguration _configuration)
+        {
+            _logger = logger;
+            configuration = _configuration;
+        }
+    }
+}

@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Helios.V3",
-    "\\Helios.V3\\Helios"
+    "\\MedCase.Helios.EDC.V3",
+    "\\MedCase.Helios.EDC.V3\\Helios.Authentication",
+    "\\MedCase.Helios.EDC.V3\\Helios.Authentication\\Entities"
   ],
-  "SelectedNode": "\\Helios.V3\\Helios\\Helios.sln",
+  "SelectedNode": "\\MedCase.Helios.EDC.V3\\Helios.Authentication\\Entities\\Subscription.cs",
   "PreviewInSolutionExplorer": false
 }

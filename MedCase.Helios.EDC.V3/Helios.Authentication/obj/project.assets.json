@@ -3289,7 +3289,8 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\sjang\\.nuget\\packages\\": {}
+    "C:\\Users\\sjang\\.nuget\\packages\\": {},
+    "C:\\Program Files\\DevExpress 22.2\\Components\\Offline Packages": {}
   },
   "project": {
     "version": "1.0.0",
@@ -3300,8 +3301,12 @@
       "packagesPath": "C:\\Users\\sjang\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.Authentication\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\DevExpress 22.2\\Components\\Offline Packages"
+      ],
       "configFilePaths": [
         "C:\\Users\\sjang\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 22.2.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -3309,6 +3314,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\DevExpress 22.2\\Components\\System\\Components\\Packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

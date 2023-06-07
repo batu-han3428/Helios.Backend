@@ -43,7 +43,7 @@ namespace Helios.Authentication.Contexts
 
         }
 
-        public DbSet<Tenant> Tenants { get; set; }
-        public DbSet<Research> Researches { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Study> Studies { get; set; }
     }
 }
