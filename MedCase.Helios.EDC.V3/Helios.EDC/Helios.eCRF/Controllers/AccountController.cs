@@ -12,7 +12,7 @@ namespace Helios.eCRF.Controllers
 
         public async Task<IActionResult> Login(string u)
         {
-            using (var client = DatasetServiceClient)
+            using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("/api/Core/Login", Method.Get);
                 req.AddParameter("hshId", u);

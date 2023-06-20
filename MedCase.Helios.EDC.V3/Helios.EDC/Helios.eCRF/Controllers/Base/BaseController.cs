@@ -8,7 +8,7 @@ namespace Helios.eCRF.Controllers.Base
         protected readonly IConfiguration configuration;
 
         protected readonly ILogger<AccountController> _logger;
-        protected RestClient DatasetServiceClient { get { return new RestClient(new Uri(configuration["Halios.Auth:Authentication"])); } }
+        protected RestClient AuthServiceClient { get { return new RestClient(new Uri(configuration["Halios.Auth:Authentication"])); } }
         public BaseController(ILogger<AccountController> logger, IConfiguration _configuration)
         {
             _logger = logger;

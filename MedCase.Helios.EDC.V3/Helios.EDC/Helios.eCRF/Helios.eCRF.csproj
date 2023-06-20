@@ -26,87 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\public\js\jquery.easyui.min.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="ClientApp\public\easyui\datagrid-detailview.js" />
-    <Content Include="ClientApp\public\easyui\datagrid-export.js" />
-    <Content Include="ClientApp\public\easyui\datagrid-filter.js" />
-    <Content Include="ClientApp\public\easyui\easyloader.js" />
-    <Content Include="ClientApp\public\easyui\easyui-datagrid.js" />
-    <Content Include="ClientApp\public\easyui\jquery.easyui.min.js" />
-    <Content Include="ClientApp\public\easyui\locale\easyui-lang-tr.js" />
-    <Content Include="ClientApp\public\easyui\material-blue\accordion.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\calendar.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\checkbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\combo.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\combobox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\datagrid.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\datalist.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\datebox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\dialog.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\drawer.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\easyui.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\filebox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\flex.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\accordion_arrows.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\blank.gif" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\calendar_arrows.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\combo_arrow.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\datagrid_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\datebox_arrow.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\layout_arrows.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\linkbutton_bg.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\loading.gif" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\menu_arrows.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\menu_arrows1.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\menu_arrows2.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\messager_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\messager_icons16.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\pagination_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\panel_tools.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\passwordbox_close.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\passwordbox_open.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\searchbox_button.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\slider_handle.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\spinner_arrows.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\tabs_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\tagbox_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\tree_icons.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\images\validatebox_warning.png" />
-    <Content Include="ClientApp\public\easyui\material-blue\layout.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\linkbutton.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\menu.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\menubutton.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\messager.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\numberbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\pagination.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\panel.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\passwordbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\progressbar.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\propertygrid.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\radiobutton.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\searchbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\sidemenu.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\slider.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\spinner.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\splitbutton.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\switchbutton.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\tabs.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\tagbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\textbox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\timepicker.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\tooltip.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\tree.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\validatebox.css" />
-    <Content Include="ClientApp\public\easyui\material-blue\window.css" />
-    <Content Include="ClientApp\public\js\jquery-3.7.0.js" />
-    <Content Include="ClientApp\public\js\jquery-3.7.0.min.js" />
-    <Content Include="ClientApp\public\js\jquery.easyui.min.js" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Folder Include="ClientApp\src\Common\js\" />
+    <Folder Include="ClientApp\src\Common\Layouts\" />
     <Folder Include="Helpers\" />
   </ItemGroup>
 
