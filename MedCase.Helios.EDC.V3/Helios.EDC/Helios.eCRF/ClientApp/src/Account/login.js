@@ -9,62 +9,63 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle, faWarning } from '../../../../../node_modules/@fortawesome/free-solid-svg-icons/index';
 
 //class Login extends React.Component {
-    const Login = () => {
-    const user = [];
+const Login = () => {
 
-    const [Username, setUsername] = useState('');
-    const [Password, setPassword] = useState('');
+    const [user, setUser] = useState({
+        Username: '',
+        Password: ''
+    });
 
-    const url = "https://localhost:7299/api/Account";
-    //const GreetingComponent = () => {
-    //    const { language } = useContext(LanguageContext);
-    //    const translations = require(`./${language}.json`);
+    //const url = "https://localhost:7299/api/Account";
 
-    //    return <h1>{translations.greeting}</h1>;
-    //};
+    const GreetingComponent = () => {
+        const { language } = useContext(LanguageContext);
+        const translations = require(`./${language}.json`);
+
+        return <h1>{translations.greeting}</h1>;
+    };
     //const cntxt = useContext(LanguageContext);
     const Language = () => {
         const { language } = useContext(LanguageContext);
         const greetingText = language.Login;
         const translations = require(`./${language}.json`);
     };
-    //const { language } = useContext(LanguageContext);
 
-    const handleSubmit = (e) => {
-            debugger;
-        //if (Username == '')
-        //    alert('Username cannot be empty!');
+    const handleSubmit = (event) => {
+        debugger;
 
-        //if (Password == '')
-        //    alert('Password cannot be empty!')
+        const formData = new FormData();
+        formData.append('Username', user.Username);
+        formData.append('Password', user.Password);
 
-        axios.get(url).then((response) => {
-            debugger;
-            alert(response);
-
-            setInterval(function () {
-                console.log("Delayed for 1 second.");
-            }, 100000);
-
-            //setTimeout(() => {
-            //    console.log("Delayed for 1 second.");
-            //}, 100000);
-        });
-
-        //setTimeout(() => {
-        //    console.log("Delayed for 1 second.");
-        //}, 100000);
+        //axios.get('/api/Account').then((response) => {
+        //    debugger;
+        //    alert(response);
+        //});
+        // Send form data to the controller
+        fetch('/api/Account/Post', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                debugger;
+                // Handle response from the controller
+                console.log(data);
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
     };
 
 
+    const handleUsernameChange = (e) => {
+        setUser({ ...user, Username: e.target.value });
+    };
 
-    function handleUsernameChange(e) {
-        setUsername(e.target.value);
-    }
-
-    function handlePasswordChange(e) {
-        setPassword(e.target.value);
-    }
+    const handlePasswordChange = (e) => {
+        setUser({ ...user, Password: e.target.value });
+    };
 
     return (
         <>
@@ -86,11 +87,12 @@ import { faUserCircle, faWarning } from '../../../../../node_modules/@fortawesom
                                     <h3><FontAwesomeIcon icon={faUserCircle} style={{ paddingRight: '5px' }} />Login</h3>
                                 </div>
                                 <div className='panel-body' style={{ border: 'none' }}>
-                                    <Form
-                                        style={{ maxWidth: 500 }}
-                                        model={user}
-                                        labelPosition="top"
-                                        floatingLabel>
+                                    {/*<Form*/}
+                                    {/*    style={{ maxWidth: 500 }}*/}
+                                    {/*    model={user}*/}
+                                    {/*    labelPosition="top"*/}
+                                    {/*    onSubmit={handleSubmit}*/}
+                                    {/*    floatingLabel>*/}
                                         {/*onChange={this.handleChange.bind(this)}>*/}
                                         <div className='form-group'>
                                             <label> Username</label>
@@ -98,13 +100,13 @@ import { faUserCircle, faWarning } from '../../../../../node_modules/@fortawesom
                                         </div>
                                         <div className='form-group'>
                                             <label> Password</label>
-                                            <input className='form-control' value={user.Password} onChange={handlePasswordChange} type='password' id='Username' />
+                                            <input className='form-control' value={user.Password} onChange={handlePasswordChange} type='password' id='Password' />
                                         </div>
-                                        <FormField name="accept" label="Remember me!" labelPosition="after" labelWidth={120} style={{ fontSize: '12px', marginBottom: '10px' }}>
+                                        <div name="accept" label="Remember me!" style={{ fontSize: '12px', marginBottom: '10px' }}>
                                             <CheckBox checked={user.RememberMe}></CheckBox>
-                                        </FormField>
+                                        </div>
                                         <div className='form-group'>
-                                            <div style={{ marginBottom:'7px' }}>
+                                            <div style={{ marginBottom: '7px' }}>
                                                 <a href="https://example.com" style={{ textDecoration: 'none', color: '#337ab7', fontSize: '12px', fontWeight: '400' }}>
                                                     Forgot password?
                                                 </a>
@@ -115,10 +117,10 @@ import { faUserCircle, faWarning } from '../../../../../node_modules/@fortawesom
                                                 </a>
                                             </div>
                                         </div>
-                                        <FormField>
-                                            <button type='submit' className='btn btn-success' onClick={() => handleSubmit(user)} style={{ width: '100%' }}> Login</button>
-                                        </FormField>
-                                    </Form>
+                                    <div>
+                                        <button type='submit' className='btn btn-success' onClick={handleSubmit } style={{ width: '100%' }}> Login</button>
+                                        </div>
+                                    {/*</Form>*/}
                                 </div>
 
 
