@@ -6,12 +6,18 @@ services:
     build:
       context: .
       dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
+    networks:
+        vpcbr:
+            ipv4_address: 10.5.0.2
 
   helios.authentication:
     image: ${DOCKER_REGISTRY-}heliosauthentication
     build:
       context: .
       dockerfile: Helios.Authentication/Dockerfile
+    networks:
+        vpcbr:
+            ipv4_address: 10.5.0.3
 
 
   helios.core:
@@ -19,4 +25,14 @@ services:
     build:
       context: .
       dockerfile: Helios.EDC/Helios.Core/Dockerfile
+    networks:
+        vpcbr:
+            ipv4_address: 10.5.0.4
 
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1

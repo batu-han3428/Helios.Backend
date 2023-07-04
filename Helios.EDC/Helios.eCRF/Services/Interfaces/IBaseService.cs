@@ -1,4 +1,5 @@
-﻿using Helios.eCRF.Services.Base;
+﻿using Helios.eCRF.Helpers;
+using Helios.eCRF.Services.Base;
 using System.Xml.Linq;
 
 namespace Helios.eCRF.Services.Interfaces
@@ -13,9 +14,13 @@ namespace Helios.eCRF.Services.Interfaces
         Guid GetTenantId(Guid researchId);
     }
 
-
+    public interface IAuthService
+    {
+        Task<bool> LoginAsync   (string email, string password);
+    }
     public interface IApiBaseService
     {
+        RestSharpBaseClient RestClient { get; }
         string ClientIp { get; set; }
         string HttpContextRequestPath { get; set; }
         Guid UserId { get; set; }
