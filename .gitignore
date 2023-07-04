@@ -3,7 +3,10 @@
 ################################################################################
 
 *.vsidx
+bin
+obj
 **/obj/**
 **/obj/*.g.props
 **/obj/*.nuget.dgspec.json
-/MedCase.Helios.EDC.V3/Helios.Authentication/obj/Debug/net7.0/Helios.Authentication.assets.cache
+**/obj/*/*.assets.cache
+

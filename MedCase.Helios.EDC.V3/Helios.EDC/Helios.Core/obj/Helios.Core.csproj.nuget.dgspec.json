@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {}
+    "C:\\Projects\\v3\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {
+    "C:\\Projects\\v3\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
+        "projectUniqueName": "C:\\Projects\\v3\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
         "projectName": "Helios.Core",
-        "projectPath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
-        "packagesPath": "C:\\Users\\sjang\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sjang\\source\\repos\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\obj\\",
+        "projectPath": "C:\\Projects\\v3\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\Helios.Core.csproj",
+        "packagesPath": "C:\\Users\\inan\\.nuget\\packages\\",
+        "outputPath": "C:\\Projects\\v3\\Medcase\\MedCase.Helios.EDC.V3\\Helios.EDC\\Helios.Core\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\DevExpress 22.2\\Components\\Offline Packages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\sjang\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 22.2.config",
+          "C:\\Users\\inan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,7 +22,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\DevExpress 22.2\\Components\\System\\Components\\Packages": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
