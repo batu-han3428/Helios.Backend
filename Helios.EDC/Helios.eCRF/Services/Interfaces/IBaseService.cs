@@ -16,7 +16,7 @@ namespace Helios.eCRF.Services.Interfaces
 
     public interface IAuthService
     {
-        Task<bool> LoginAsync(string email, string password);
+        Task<bool> LoginAsync   (string email, string password);
     }
     public interface IApiBaseService
     {

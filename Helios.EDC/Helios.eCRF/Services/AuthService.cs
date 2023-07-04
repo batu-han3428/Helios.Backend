@@ -15,7 +15,7 @@ namespace Helios.eCRF.Services
             var req = new RestSharp.RestRequest("/Account/Login", RestSharp.Method.Post);
             req.AddBody(new { email, password });
             var result = await base.RestClient.ExecuteAsync(req, default);
-            return Task.FromResult(false);
+            return Task.FromResult(result.);
         }
     }
 }
