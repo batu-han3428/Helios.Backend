@@ -18,12 +18,10 @@
 
   <ItemGroup>
     <Folder Include="Domains\Elements\" />
-    <Folder Include="Domains\Entities\" />
-    <Folder Include="Domains\Base\" />
+    <Folder Include="Enums\" />
     <Folder Include="Helpers\" />
     <Folder Include="Resources\" />
     <Folder Include="Models\" />
-    <Folder Include="Enums\" />
     <Folder Include="Contexts\" />
     <Folder Include="Consumers\" />
     <Folder Include="Constants\" />

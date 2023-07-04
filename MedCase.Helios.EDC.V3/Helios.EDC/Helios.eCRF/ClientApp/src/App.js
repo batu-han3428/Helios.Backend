@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Login from './Account/login';
+import Login from './Pages/Account/login';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
 import './Common/css/adminCommon.css';

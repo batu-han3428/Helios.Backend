@@ -1,6 +1,7 @@
 ﻿using Helios.Authentication.Contexts;
 using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
+using Helios.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,14 +20,14 @@ namespace Helios.Authentication.Controllers
             _context = context;
         }
 
-        [HttpGet(Name = "Login")]
-        public async Task<bool> Login(Guid tenantId, string username, string password)
+        [HttpPost]
+        public async Task<bool> Login(LoginInfoDTO model)
         {
-            var user = await UserManager.Users.FirstOrDefaultAsync(p => p.UserName == username && p.TenantId == tenantId);
+            var user = await UserManager.Users.FirstOrDefaultAsync(p => p.UserName == model.Username && p.TenantId == model.TenantId);
 
             if (user == null) { return false; }
 
-            var checkPassword = await UserManager.CheckPasswordAsync(user, password);
+            var checkPassword = await UserManager.CheckPasswordAsync(user, model.Password);
 
             return checkPassword;
         }
