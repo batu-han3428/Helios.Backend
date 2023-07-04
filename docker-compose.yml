@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  helios.ecrf:
+    image: ${DOCKER_REGISTRY-}heliosecrf
+    build:
+      context: .
+      dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
+
+  helios.authentication:
+    image: ${DOCKER_REGISTRY-}heliosauthentication
+    build:
+      context: .
+      dockerfile: Helios.Authentication/Dockerfile
+
+
+  helios.core:
+    image: ${DOCKER_REGISTRY-}helioscore
+    build:
+      context: .
+      dockerfile: Helios.EDC/Helios.Core/Dockerfile
+
