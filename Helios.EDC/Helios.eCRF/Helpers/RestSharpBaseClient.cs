@@ -1,21 +1,27 @@
 ﻿using RestSharp;
-using RestSharp.Serializers;
-using System.Diagnostics;
+using System.Text.Json;
 
 namespace Helios.eCRF.Helpers
 {
     public class RestSharpBaseClient : RestClient
     {
-        private readonly string serviceUrl;
-        public RestSharpBaseClient(string baseUrl)
+
+        public RestSharpBaseClient(string serviceHost) : base(new RestClientOptions(new Uri(serviceHost)))
         {
-            serviceUrl = baseUrl;
+
         }
-        public async Task<RestResponse> ExecuteAsync(RestRequest request)
+        public async Task<T> ExecuteAsync<T>(RestRequest request)
         {
+
             var response = await base.ExecuteAsync(request);
             //TimeoutCheck(request, response);
-            return response;
+            if (!response.IsSuccessful)
+                throw new Exception(response.ErrorMessage);
+
+            var data = JsonSerializer.Deserialize<T>(response.Content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return data;
         }
+
     }
 }
