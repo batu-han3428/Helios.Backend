@@ -15,7 +15,7 @@ namespace Helios.Authentication.Contexts
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseMySQL("Server=127.0.0.1; port=3306; Database=helios.authentication_db; Uid=root; Pwd=123Asd!!; SslMode=Preferred;");
+            //options.UseMySQL("Server=127.0.0.1; port=3306; Database=helios.authentication_db; Uid=root; Pwd=123Asd!!; SslMode=Preferred;");
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
