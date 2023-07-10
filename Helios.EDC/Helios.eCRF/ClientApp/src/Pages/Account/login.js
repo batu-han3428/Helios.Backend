@@ -6,13 +6,13 @@ import logo from '../../Common/images/helios_222_70.png';
 import footerLogo from '../../Common/images/med-case.png';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle, faWarning } from '../../../../../../node_modules/@fortawesome/free-solid-svg-icons/index';
+import { faUserCircle, faWarning } from '../../../node_modules/@fortawesome/free-solid-svg-icons/index';
 
 //class Login extends React.Component {
 const Login = () => {
 
     const [user, setUser] = useState({
-        Username: '',
+        Email: '',
         Password: ''
     });
 
@@ -35,7 +35,7 @@ const Login = () => {
         debugger;
 
         const formData = new FormData();
-        formData.append('Username', user.Username);
+        formData.append('Email', user.Email);
         formData.append('Password', user.Password);
 
         //axios.get('/api/Account').then((response) => {
@@ -59,8 +59,8 @@ const Login = () => {
     };
 
 
-    const handleUsernameChange = (e) => {
-        setUser({ ...user, Username: e.target.value });
+    const handleEmailChange = (e) => {
+        setUser({ ...user, Email: e.target.value });
     };
 
     const handlePasswordChange = (e) => {
@@ -95,8 +95,8 @@ const Login = () => {
                                     {/*    floatingLabel>*/}
                                     {/*onChange={this.handleChange.bind(this)}>*/}
                                     <div className='form-group'>
-                                        <label> Username</label>
-                                        <input className='form-control' value={user.Username} onChange={handleUsernameChange} type='text' id='Username' />
+                                        <label> Email</label>
+                                        <input className='form-control' value={user.Email} onChange={handleEmailChange} type='text' id='Email' />
                                     </div>
                                     <div className='form-group'>
                                         <label> Password</label>

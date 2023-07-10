@@ -1,3 +1,6 @@
+using Helios.eCRF.Services;
+using Helios.eCRF.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -16,13 +20,7 @@ if (!app.Environment.IsDevelopment())
 else
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Helios V3");
-
-        // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-        c.RoutePrefix = string.Empty;
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -30,7 +28,5 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapControllers();
-
-app.MapFallbackToFile("index.html");
 
 app.Run();

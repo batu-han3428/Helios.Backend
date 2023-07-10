@@ -1,4 +1,5 @@
 ﻿using Helios.eCRF.Helpers;
+using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using System.Xml.Linq;
 
@@ -16,7 +17,7 @@ namespace Helios.eCRF.Services.Interfaces
 
     public interface IAuthService
     {
-        Task<bool> LoginAsync   (string email, string password);
+        Task<bool> LoginAsync(AccountModel model);
     }
     public interface IApiBaseService
     {

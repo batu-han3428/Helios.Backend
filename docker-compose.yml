@@ -6,6 +6,9 @@ services:
     build:
       context: .
       dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
+    ports:
+     - 2000:80
+     - 2001:443
     networks:
         vpcbr:
             ipv4_address: 10.5.0.2
@@ -15,6 +18,9 @@ services:
     build:
       context: .
       dockerfile: Helios.Authentication/Dockerfile
+    ports:
+     - 3000:80
+     - 3001:443
     networks:
         vpcbr:
             ipv4_address: 10.5.0.3
@@ -25,6 +31,9 @@ services:
     build:
       context: .
       dockerfile: Helios.EDC/Helios.Core/Dockerfile
+    ports:
+     - 4000:80
+     - 4001:443
     networks:
         vpcbr:
             ipv4_address: 10.5.0.4
