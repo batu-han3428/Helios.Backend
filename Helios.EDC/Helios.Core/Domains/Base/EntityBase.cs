@@ -7,6 +7,7 @@ namespace Helios.Core.Domains.Base
     {
         [Key]
         public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
         public Guid AddedById { get; set; }
         public Guid? UpdatedById { get; set; }
         public bool IsActive { get; set; }

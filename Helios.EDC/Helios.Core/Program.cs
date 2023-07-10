@@ -1,6 +1,12 @@
+using Helios.Core.Contexts;
+using Helios.Core.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+var activeSql = builder.Configuration["AppConfig:ActiveSql"];
+builder.Services.ConfigureMysqlPooled<CoreContext>(builder.Configuration, connectionString: $"{activeSql}_DefaultConnection", MigrationsAssembly: "Helios.Core");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

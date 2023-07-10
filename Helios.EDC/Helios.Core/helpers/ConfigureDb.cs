@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Helios.Authentication.Helpers
+namespace Helios.Core.Helpers
 {
     public static class ConfigureDb
     {
