@@ -7,11 +7,11 @@ services:
       context: .
       dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
     ports:
-     - 2000:80
-     - 2001:443
+     - 3200:80
+     - 3201:443
     networks:
         vpcbr:
-            ipv4_address: 10.5.0.2
+            ipv4_address: 10.7.0.3
 
   helios.authentication:
     image: ${DOCKER_REGISTRY-}heliosauthentication
@@ -19,11 +19,11 @@ services:
       context: .
       dockerfile: Helios.Authentication/Dockerfile
     ports:
-     - 3000:80
-     - 3001:443
+     - 5200:80
+     - 5201:443
     networks:
         vpcbr:
-            ipv4_address: 10.5.0.3
+            ipv4_address: 10.7.0.5
 
 
   helios.core:
@@ -32,16 +32,16 @@ services:
       context: .
       dockerfile: Helios.EDC/Helios.Core/Dockerfile
     ports:
-     - 4000:80
-     - 4001:443
+     - 4200:80
+     - 4201:443
     networks:
         vpcbr:
-            ipv4_address: 10.5.0.4
+            ipv4_address: 10.7.0.4
 
 networks:
   vpcbr:
     driver: bridge
     ipam:
      config:
-       - subnet: 10.5.0.0/16
-         gateway: 10.5.0.1
+       - subnet: 10.7.0.0/16
+         gateway: 10.7.0.1

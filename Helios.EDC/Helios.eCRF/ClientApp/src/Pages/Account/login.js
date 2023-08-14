@@ -16,8 +16,6 @@ const Login = () => {
         Password: ''
     });
 
-    //const url = "https://localhost:7299/api/Account";
-
     const GreetingComponent = () => {
         const { language } = useContext(LanguageContext);
         const translations = require(`./${language}.json`);
@@ -43,7 +41,7 @@ const Login = () => {
         //    alert(response);
         //});
         // Send form data to the controller
-        fetch('/Account/Post', {
+        fetch('/Account/Login', {
             method: 'POST',
             body: formData
         })

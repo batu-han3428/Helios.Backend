@@ -576,3 +576,7 @@ button.close {
     margin: 20px;
     height: 40px;
 }
+
+.nav-third-level li a {
+    padding-left: 45px;
+}

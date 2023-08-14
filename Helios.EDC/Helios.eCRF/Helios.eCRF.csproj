@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -31,18 +31,31 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\src\Common\js\**" />
+    <Compile Remove="ClientApp\src\Common\Layouts\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\src\Common\js\**" />
+    <Content Remove="ClientApp\src\Common\Layouts\**" />
+    <EmbeddedResource Remove="ClientApp\src\Common\js\**" />
+    <EmbeddedResource Remove="ClientApp\src\Common\Layouts\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="ClientApp\src\Common\js\**" />
+    <None Remove="ClientApp\src\Common\Layouts\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\Common\js\" />
-    <Folder Include="ClientApp\src\Common\Layouts\" />
+    <None Remove="ClientApp\src\components\Layout.js" />
+    <None Remove="ClientApp\src\components\NavMenu.css" />
+    <None Remove="ClientApp\src\components\NavMenu.js" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Helios.Core\Helios.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Helpers\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

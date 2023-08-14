@@ -10,12 +10,12 @@ namespace Helios.Authentication.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class AccountController : Controller
+    public class AuthAccountController : Controller
     {
-        private readonly AuthenticationContext _context;
+        private AuthenticationContext _context;
         UserManager<ApplicationUser> UserManager { get; set; }
 
-        public AccountController(AuthenticationContext context)
+        public AuthAccountController(AuthenticationContext context)
         {
             _context = context;
         }
@@ -27,9 +27,9 @@ namespace Helios.Authentication.Controllers
         //}
 
         [HttpPost]
-        public async Task<bool> Login(LoginInfoDTO model)
+        public async Task<bool> Login(AccountModel model)
         {
-            var user = await UserManager.Users.FirstOrDefaultAsync(p => p.UserName == model.Username && p.TenantId == model.TenantId);
+            var user = await UserManager.Users.Where(p => p.Email == model.Email).FirstOrDefaultAsync();
 
             if (user == null) { return false; }
 
@@ -75,6 +75,22 @@ namespace Helios.Authentication.Controllers
             };
 
             var userResult = UserManager.CreateAsync(usr, firstPassword);
+
+            return result;
+        }
+
+        //Tenant crud
+        [HttpPost]
+        public async Task<bool> AddTenant(TenantModel model)
+        {
+            _context.Tenants.Add(new Tenant
+            {
+                Name = model.Name,
+                CreatedAt = DateTimeOffset.Now
+            });
+
+            //var result = _context.SaveAuthenticationContext(new Guid(), DateTimeOffset.Now) > 0;
+            var result = _context.SaveChanges() > 0;
 
             return result;
         }

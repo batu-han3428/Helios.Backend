@@ -1,11 +1,10 @@
 ﻿using RestSharp;
 using System.Text.Json;
 
-namespace Helios.eCRF.Helpers
+namespace Helios.eCRF.Services.Helper
 {
     public class RestSharpBaseClient : RestClient
     {
-
         public RestSharpBaseClient(string serviceHost) : base(new RestClientOptions(new Uri(serviceHost)))
         {
 
@@ -22,6 +21,5 @@ namespace Helios.eCRF.Helpers
 
             return data;
         }
-
     }
 }

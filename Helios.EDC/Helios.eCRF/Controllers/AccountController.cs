@@ -3,8 +3,6 @@ using Helios.eCRF.Models;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using RestSharp;
-using RestSharp.Serializers;
 
 namespace Helios.eCRF.Controllers
 {
@@ -13,27 +11,25 @@ namespace Helios.eCRF.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAuthService authService;
-        
+
         public AccountController(IAuthService authService)
         {
             this.authService = authService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromForm] AccountModel user)
+        public async Task<IActionResult> Login([FromForm] AccountModel user)
         {
-            var a = authService.LoginAsync(user);
-            //using (var client = AuthServiceClient)
-            //{
-            //    var req = new RestRequest("/api/Account/Login", Method.Get);
-            //    req.AddJsonBody(user);
-            //    //req.AddParameter("hshId", u);
-            //    var result = await client.ExecuteAsync<string>(req);
-            //    var retval = result.Content;
+            var result = await authService.LoginAsync(user);
 
-            //    //return View("~/Views/Home/Redirect.cshtml", retval);
-            //}
+            return Ok("Form data received successfully");
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> AddTenant(string name)
+        {
+            var model = new TenantModel { Name = name };
+            var result = await authService.AddTenant(model);
             return Ok("Form data received successfully");
         }
     }

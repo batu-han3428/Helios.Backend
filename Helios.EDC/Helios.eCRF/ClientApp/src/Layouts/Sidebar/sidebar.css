@@ -1,0 +1,44 @@
+.nav-link {
+    color: #333;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.nav-link-a {
+    margin: 0px 15px !important;
+}
+
+.nav-link:hover {
+    color: black;
+    background-color: #ffc600;
+}
+
+#app {
+    /*margin: 50px 0px 0px 70px;*/
+}
+
+.card {
+    width: 250px;
+}
+
+#circle-avatar {
+    display: grid;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #9b59b6;
+    place-items: center;
+    color:#fff;
+    cursor:pointer;
+}
+
+
+#circle-avatar span {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.jGeaPm{
+    border:none !important;
+}

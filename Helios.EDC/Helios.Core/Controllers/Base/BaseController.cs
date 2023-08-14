@@ -7,9 +7,9 @@ namespace Helios.Core.Controllers.Base
     {
         protected readonly IConfiguration configuration;
 
-        protected readonly ILogger<AccountController> _logger;
+        protected readonly ILogger<CoreAccountController> _logger;
         protected RestClient AuthServiceClient { get { return new RestClient(new Uri(configuration["Halios.Auth:Authentication"])); } }
-        public BaseController(ILogger<AccountController> logger, IConfiguration _configuration)
+        public BaseController(ILogger<CoreAccountController> logger, IConfiguration _configuration)
         {
             _logger = logger;
             configuration = _configuration;
