@@ -1,68 +1,43 @@
 import React from 'react';
-import {
-    CDBSidebar,
-    CDBSidebarHeader,
-    CDBSidebarMenuItem,
-    CDBSidebarContent,
-    CDBSidebarMenu,
-    CDBSidebarSubMenu,
-    CDBSidebarFooter,
-} from 'cdbreact';
-import { NavLink } from 'react-router-dom';
-import { PopupMenu } from "react-simple-widgets";
-import "./sidebar.css";
+import { Sidebar, Menu, MenuItem, useProSidebar, SubMenu, useLegacySidebar } from "react-pro-sidebar";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
+import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
+import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import ProfileMenu from '../profileMenu';
+import "./sidebar.css";
 
-const Sidebar = () => {
+const Side = () => {
+
+    const { collapseSidebar, toggleSidebar, collapsed, toggled, broken, rtl } =
+        useProSidebar();
+
     return (
-        <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
-            <CDBSidebar textColor="#333" backgroundColor="#eaebec">
-                <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large" style={{ border: 'none' }}></i>}>
-                    {/*<a href="/" className="text-decoration-none" style={{ color: 'inherit' }}>*/}
-                    {/*    Sidebar*/}
-                    {/*</a>*/}
+        <Sidebar style={{ height: "100vh" }}>
+            <Menu>
+                <MenuItem style={{ height: '70px', transition: "width, 300ms", width: `${collapsed ? '90px' : ''}` }  }><ProfileMenu></ProfileMenu></MenuItem>
+                <MenuItem
+                    icon={<MenuOutlinedIcon />}
+                    onClick={() => { collapseSidebar(); }}
+                    style={{ textAlign: "center" }}
+                >
+                    {" "}
+                    {/*<ProfileMenu></ProfileMenu>*/}
+                </MenuItem>
+                <SubMenu icon={<HomeOutlinedIcon />} label="Home">
+                    <MenuItem icon={<HomeOutlinedIcon />}>home 1</MenuItem>
+                </SubMenu>
+                <MenuItem icon={<PeopleOutlinedIcon />}>Team</MenuItem>
+                <MenuItem icon={<ContactsOutlinedIcon />}>Contacts</MenuItem>
+                <MenuItem icon={<ReceiptOutlinedIcon />}>Profile</MenuItem>
+                <MenuItem icon={<HelpOutlineOutlinedIcon />}>FAQ</MenuItem>
+                <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
+            </Menu>
+        </Sidebar>
+    )
+}
 
-                    <div style={{ margin:"50px 0px 0px 70px" }}>
-                        <ProfileMenu></ProfileMenu>
-                    </div>
-                </CDBSidebarHeader>
-
-                <CDBSidebarContent className="sidebar-content" style={{ marginTop: "20px" }}>
-                    <CDBSidebarMenu>
-                        <NavLink exact to="/" activeClassName="activeClicked" className="nav-link">
-                            <CDBSidebarMenuItem icon="columns" className="nav-link-a">Dashboard</CDBSidebarMenuItem>
-                        </NavLink>
-                        <NavLink exact to="/tables" activeClassName="activeClicked" className="nav-link">
-                            <CDBSidebarMenuItem icon="table" className="nav-link-a">Tables</CDBSidebarMenuItem>
-                        </NavLink>
-                        <NavLink exact to="/profile" activeClassName="activeClicked" className="nav-link">
-                            <CDBSidebarMenuItem icon="user" className="nav-link-a">Profile page</CDBSidebarMenuItem>
-                        </NavLink>
-                        {/*<NavLink exact to="/analytics1" activeClassName="activeClicked" className="nav-link">*/}
-                        {/*        <CDBSidebarSubMenu title="Sidemenu" icon="th">*/}
-                        {/*            <CDBSidebarMenuItem> submenu 1</CDBSidebarMenuItem>*/}
-                        {/*            <CDBSidebarMenuItem> submenu 2</CDBSidebarMenuItem>*/}
-                        {/*            <CDBSidebarMenuItem> submenu 3</CDBSidebarMenuItem>*/}
-                        {/*        </CDBSidebarSubMenu>*/}
-                        {/*</NavLink>*/}
-                        <NavLink exact to="/analytics" activeClassName="activeClicked" className="nav-link">
-                            <CDBSidebarMenuItem icon="chart-line" className="nav-link-a">Analytics</CDBSidebarMenuItem>
-                        </NavLink>
-
-                        <NavLink exact to="/hero404" target="_blank" activeClassName="activeClicked" className="nav-link">
-                            <CDBSidebarMenuItem icon="exclamation-circle" className="nav-link-a">404 page</CDBSidebarMenuItem>
-                        </NavLink>
-                    </CDBSidebarMenu>
-                </CDBSidebarContent>
-
-                <CDBSidebarFooter style={{ textAlign: 'center' }}>
-                    <div style={{ padding: '20px 5px', }}>
-                        Sidebar Footer
-                    </div>
-                </CDBSidebarFooter>
-            </CDBSidebar>
-        </div>
-    );
-};
-
-export default Sidebar;
+export default Side;

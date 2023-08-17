@@ -5,7 +5,7 @@ const ProfileMenu = () => {
         <div id="app">
             <div className="text-end">
                 <PopupMenu>
-                    <div id="circle-avatar" className="text-center mx-auto mb-4">
+                    <div id="circle-avatar" className="text-center mx-auto">
                         <span>Z</span>
                     </div>
                     <div className="card text-start">

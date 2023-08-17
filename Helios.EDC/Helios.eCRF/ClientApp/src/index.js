@@ -3,6 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { ProSidebarProvider } from "react-pro-sidebar";
 //import "./index.css";
 //import { ProSidebarProvider } from "react-pro-sidebar";
 
@@ -13,7 +14,9 @@ const root = createRoot(rootElement);
 
 root.render(
     <BrowserRouter basename={baseUrl}>
-      <App />
+        <ProSidebarProvider>
+            <App />
+        </ProSidebarProvider>
     </BrowserRouter>);
     //<React.StrictMode>
     //    <ProSidebarProvider>
