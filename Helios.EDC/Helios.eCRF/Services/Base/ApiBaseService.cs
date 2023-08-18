@@ -11,17 +11,14 @@ namespace Helios.eCRF.Services.Base
         public ApiBaseService(IConfiguration configuration)
         {
             this.configuration = configuration;
-            var aa = configuration["Services:Core"];
         }
 
-        //public ApiBaseService(IConfiguration configuration, string serviceConfig )
-        //{
-        //    RestClient = new RestSharpBaseClient(serviceHost: configuration["Services:Core"]);
-        //}
         protected RestClient AuthServiceClient {
-            get { return new RestClient(new Uri("https://localhost:5201/")); }
-            //get { return new RestClient(new Uri("https://localhost:4201/")); }
-            //get { return new RestClient(configuration["Services:Core"]); }
+            get { return new RestClient(new Uri("https://localhost:5200/")); }
+        }
+        
+        protected RestClient CoreServiceClient {
+            get { return new RestClient(new Uri("https://localhost:4200/")); }
         }
 
         public string ClientIp { get; set; }

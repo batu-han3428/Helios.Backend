@@ -1,4 +1,7 @@
 ﻿using Helios.eCRF.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 namespace Helios.eCRF.Services.Interfaces
 {
@@ -11,6 +14,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> SendNewPasswordForUser(Guid userId);
         Task<bool> UpdateUser(UserDTO model);
         Task<bool> UserProfileResetPassword(UserDTO model);
-
+        Task<List<TenantModel>> GetTenantList();
     }
 }

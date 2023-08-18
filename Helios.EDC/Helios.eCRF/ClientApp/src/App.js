@@ -6,7 +6,7 @@ import './Common/css/adminCommon.css';
 import './Common/css/style.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TopNavBarLayout from './Layouts/TopNavBar/TopNavBarLayout';
-import Home from './Pages/Tenant/home';
+import TenantList from './Pages/Tenant/tenantList';
 import AddTenant from './Pages/Tenant/addTenant';
 import { DataGrid, GridColumn } from 'rc-easyui';
 import Studies from './Pages/SSO/studies';
@@ -16,7 +16,7 @@ const App = () => {
     return (
         <div>
             {/*<AddTenant></AddTenant>*/}
-            {<Home />}
+            {<TenantList />}
             {/*<Studies></Studies>*/}
   {/*          <Login></Login>*/}
         </div>
