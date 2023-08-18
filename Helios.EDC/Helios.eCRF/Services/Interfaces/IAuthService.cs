@@ -6,6 +6,11 @@ namespace Helios.eCRF.Services.Interfaces
     {
         Task<bool> LoginAsync(AccountModel model);
         Task<bool> AddTenant(TenantModel model);
+        Task<bool> AddUser(UserDTO model);
+        Task<bool> PassiveOrActiveUser(UserDTO model);
+        Task<bool> SendNewPasswordForUser(Guid userId);
+        Task<bool> UpdateUser(UserDTO model);
+        Task<bool> UserProfileResetPassword(UserDTO model);
 
     }
 }
