@@ -16,6 +16,7 @@
 
 #app {
     /*margin: 50px 0px 0px 70px;*/
+    padding:10px 0;
 }
 
 .card {
@@ -41,4 +42,20 @@
 
 .jGeaPm{
     border:none !important;
+}
+
+.collapse {
+    height: 5vh;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.collapse:hover {
+    background-color: #ffc600;
+}
+
+.sidebar {
+    height: 100vh;
 }

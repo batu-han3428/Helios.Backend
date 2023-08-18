@@ -7,9 +7,12 @@ import footerLogo from '../../Common/images/med-case.png';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle, faWarning } from '../../../node_modules/@fortawesome/free-solid-svg-icons/index';
+import { useTranslation } from 'react-i18next';
 
 //class Login extends React.Component {
 const Login = () => {
+
+    const { t, i18n } = useTranslation();
 
     const [user, setUser] = useState({
         Email: '',
@@ -67,6 +70,10 @@ const Login = () => {
 
     return (
         <>
+            {t('Welcome') }
+            <button onClick={() => { i18n.changeLanguage(i18n.language === 'tr-TR' ? 'en-US' : 'tr-TR') }}>
+                {i18n.language === 'tr-TR' ? 'EN' : 'TR'}
+            </button>
             <div className='header-login'>
                 <img src={logo} />
             </div>
