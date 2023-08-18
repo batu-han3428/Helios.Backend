@@ -10,7 +10,7 @@ import TenantList from './Pages/Tenant/tenantList';
 import AddTenant from './Pages/Tenant/addTenant';
 import { DataGrid, GridColumn } from 'rc-easyui';
 import Studies from './Pages/SSO/studies';
-
+import './Language/i18n';
 
 const App = () => {
     return (
@@ -18,7 +18,7 @@ const App = () => {
             {/*<AddTenant></AddTenant>*/}
             {<TenantList />}
             {/*<Studies></Studies>*/}
-            {/*<Login></Login>*/}
+  {/*          <Login></Login>*/}
         </div>
     );
 };
