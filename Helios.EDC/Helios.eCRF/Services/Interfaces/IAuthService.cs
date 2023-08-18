@@ -6,6 +6,7 @@ namespace Helios.eCRF.Services.Interfaces
     {
         Task<bool> LoginAsync(AccountModel model);
         Task<bool> AddTenant(TenantModel model);
+        Task<List<TenantModel>> GetTenantList();
 
     }
 }

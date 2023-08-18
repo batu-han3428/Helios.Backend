@@ -1,4 +1,5 @@
 import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
+import Sidebar from '../../Layouts/Sidebar/sidebar';
 
 //export default class AddTenant extends Component {
 const AddTenant = () => {
@@ -20,7 +21,6 @@ const AddTenant = () => {
             .then(data => {
                 debugger;
                 // Handle response from the controller
-                console.log(data);
             })
             .catch(error => {
                 //console.error('Error:', error);
@@ -28,9 +28,11 @@ const AddTenant = () => {
     };
 
     return (
-        <div className='page-container'>
-            <div className='middle-box  animated fadeInDown mainLoginDiv' style={{ maxWidth: '800px', paddingBottom: '150px' }}>
-
+        <div style={({ height: "100vh" }, { display: "flex" })} >
+            <Sidebar></Sidebar>
+            <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
+                <div><h1>Add Tenants</h1></div>
+                <hr />
                 <div className='row'>
                     <div className='form-group'>
                         <label> Name</label>
@@ -42,7 +44,6 @@ const AddTenant = () => {
                 </div>
             </div>
         </div>
-
     );
 };
 

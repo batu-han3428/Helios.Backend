@@ -26,11 +26,20 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddTenant(string name)
+        public async Task<bool> AddTenant(string name)
         {
             var model = new TenantModel { Name = name };
             var result = await authService.AddTenant(model);
-            return Ok("Form data received successfully");
+            return result;
+            //return Ok("Form data received successfully"); 
+        }
+    
+        [HttpGet]
+        public async Task<List<TenantModel>> GetTenantList()
+        {
+            var result = await authService.GetTenantList();
+
+            return result;
         }
     }
 }

@@ -85,12 +85,25 @@ namespace Helios.Authentication.Controllers
         {
             _context.Tenants.Add(new Tenant
             {
+                Id = Guid.NewGuid(),
                 Name = model.Name,
-                CreatedAt = DateTimeOffset.Now
+                CreatedAt = DateTimeOffset.Now,
+                IsActive = true
             });
 
-            //var result = _context.SaveAuthenticationContext(new Guid(), DateTimeOffset.Now) > 0;
-            var result = _context.SaveChanges() > 0;
+            var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<TenantModel>> GetTenantList()
+        {
+            var result = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
+            {
+                Id = x.Id,
+                Name = x.Name
+            }).ToListAsync();
 
             return result;
         }

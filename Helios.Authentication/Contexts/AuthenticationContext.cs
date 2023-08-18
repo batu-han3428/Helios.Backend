@@ -43,7 +43,7 @@ namespace Helios.Authentication.Contexts
 
         }
 
-        public int SaveAuthenticationContext(Guid userId, DateTimeOffset saveDate)
+        public async Task<int> SaveAuthenticationContextAsync(Guid userId, DateTimeOffset saveDate)
         {
             var transId = -1;
             if (this.ChangeTracker.HasChanges())
@@ -57,7 +57,7 @@ namespace Helios.Authentication.Contexts
                             InsertAuthenticationBaseEntity(this, userId, saveDate);
                             UpdateAuthenticationBaseEntity(this, userId, saveDate);
                             DeleteAuthenticationBaseEntity(this, userId);
-                            transId = this.SaveChanges();
+                            transId = await this.SaveChangesAsync();
                             dbContextTransaction.Commit();
                         }
                     }

@@ -162,10 +162,7 @@ namespace Helios.Authentication.Migrations
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("AddedById1")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
+                   b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<bool>("IsActive")
@@ -184,14 +181,7 @@ namespace Helios.Authentication.Migrations
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("UpdatedById1")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("AddedById1");
-
-                    b.HasIndex("UpdatedById1");
 
                     b.ToTable("Tenants");
                 });
@@ -437,18 +427,6 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.Tenant", b =>
                 {
-                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "AddedBy")
-                        .WithMany()
-                        .HasForeignKey("AddedById1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("AddedBy");
 
                     b.Navigation("UpdatedBy");
