@@ -3,6 +3,7 @@ using Helios.eCRF.Models;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Helios.eCRF.Controllers
 {
@@ -41,5 +42,41 @@ namespace Helios.eCRF.Controllers
 
             return result;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveUser(UserDTO model)
+        {
+            var result = await authService.AddUser(model);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PassiveOrActiveUser(UserDTO model)
+        {
+            var result = await authService.PassiveOrActiveUser(model);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SendNewPasswordForUser(Guid userId)
+        {
+            var result = await authService.SendNewPasswordForUser(userId);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser(UserDTO model)
+        {
+            var result = await authService.UpdateUser(model);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UserProfileResetPassword(UserDTO model)
+        {
+            var result = await authService.UpdateUser(model);
+            return Ok(result);
+        }
+
     }
 }

@@ -41,6 +41,66 @@ namespace Helios.eCRF.Services
             return false;
         }
 
+        public async Task<bool> AddUser(UserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/AddUser", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> PassiveOrActiveUser(UserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/PassiveOrActiveUser", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> SendNewPasswordForUser(Guid userId)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/SendNewPasswordForUser", Method.Get);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> UpdateUser(UserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/UpdateUser", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> UserProfileResetPassword(UserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/UserProfileResetPassword", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+
         public async Task<List<TenantModel>> GetTenantList()
         {
             var tenantList = new List<TenantModel>();
@@ -54,6 +114,5 @@ namespace Helios.eCRF.Services
 
             return tenantList;
         }
-
     }
 }
