@@ -16,9 +16,9 @@ const App = () => {
     return (
         <div>
             {/*<AddTenant></AddTenant>*/}
-            {<TenantList />}
+            {/*{<TenantList />}*/}
             {/*<Studies></Studies>*/}
-  {/*          <Login></Login>*/}
+            <Login></Login>
         </div>
     );
 };
