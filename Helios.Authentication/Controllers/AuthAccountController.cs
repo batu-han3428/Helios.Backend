@@ -2,10 +2,12 @@
 using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.ComponentModel;
 using System.Security.Principal;
 
 namespace Helios.Authentication.Controllers
@@ -16,11 +18,13 @@ namespace Helios.Authentication.Controllers
     {
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
+        private readonly IBus _backgorundWorker;
 
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager)
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus)
         {
             _context = context;
             _userManager = userManager;
+            _backgorundWorker = _bus;
         }
         //public async Task<bool> AddRole(Guid tenantId, string firstName, string lastName, string email)
         //{
@@ -102,13 +106,27 @@ namespace Helios.Authentication.Controllers
         [HttpGet]
         public async Task<List<TenantModel>> GetTenantList()
         {
-            var result = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
+            try
             {
-                Id = x.Id,
-                Name = x.Name
-            }).ToListAsync();
+                await _backgorundWorker.Publish(new UserDTO()
+                {
+                    TenantId = Guid.NewGuid()
+                });
 
-            return result;
+                var result = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToListAsync();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+          
         }
 
 

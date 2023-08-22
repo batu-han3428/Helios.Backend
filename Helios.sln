@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Core", "Helios.EDC\H
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{1AA6083A-7F7C-4BC6-9443-4F1795137ADC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helios.EventBus.Base", "..\Helios.EventBus.Base\Helios.EventBus.Base.csproj", "{260AC726-7D9C-468D-88DB-AD04E4B6944B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{1AA6083A-7F7C-4BC6-9443-4F1795137ADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AA6083A-7F7C-4BC6-9443-4F1795137ADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AA6083A-7F7C-4BC6-9443-4F1795137ADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{260AC726-7D9C-468D-88DB-AD04E4B6944B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{260AC726-7D9C-468D-88DB-AD04E4B6944B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{260AC726-7D9C-468D-88DB-AD04E4B6944B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{260AC726-7D9C-468D-88DB-AD04E4B6944B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{491B63C9-84F5-46C5-A60D-1B6864A3F6B9} = {B91CC4AF-8383-458E-BBA6-F559E71BB760}
 		{753B89EF-8567-4C2C-B678-D319E92A0C04} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
 		{062E4F46-3A14-4168-8F79-BE0BF79C3A23} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
+		{260AC726-7D9C-468D-88DB-AD04E4B6944B} = {B91CC4AF-8383-458E-BBA6-F559E71BB760}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {88E65DC4-AECE-4811-99C8-D2802F83B1E1}
