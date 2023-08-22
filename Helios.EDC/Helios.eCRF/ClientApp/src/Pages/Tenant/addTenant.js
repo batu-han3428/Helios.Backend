@@ -2,7 +2,7 @@ import React, { Component, useState, useContext, Form, FormField, TextBox, Combo
 import Sidebar from '../../Layouts/Sidebar/sidebar';
 
 //export default class AddTenant extends Component {
-const AddTenant = () => {
+function AddTenant() {
 
     const [Name, setName] = useState('');
 
