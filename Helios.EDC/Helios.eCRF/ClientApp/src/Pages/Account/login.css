@@ -175,3 +175,11 @@ input#Password {
     width: 15px;
     border-color: #6d6e70;
 }
+
+.div-box {
+    width: 40%;
+    float: left;
+    margin: 50px;
+    padding: 20px;
+    border: 1px solid #eee;
+}

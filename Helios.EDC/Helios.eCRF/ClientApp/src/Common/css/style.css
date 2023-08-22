@@ -10620,3 +10620,12 @@ table.helios-data-grid tr.odd:hover {
 .form-group {
     margin-bottom: 15px;
 }
+
+
+.floatl {
+    float: left;
+}
+
+.floatr {
+    float: right;
+}
