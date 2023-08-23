@@ -167,7 +167,5 @@ namespace Helios.Authentication.Controllers
             return new { isSuccess = false, messsage = "Invalid Reset Password" };
         }
 
-        #endregion
-
     }
 }

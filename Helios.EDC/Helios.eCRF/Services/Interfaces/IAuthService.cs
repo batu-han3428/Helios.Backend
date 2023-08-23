@@ -11,6 +11,7 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> LoginAsync(AccountModel model);
         Task<bool> SendNewPasswordForUser(Guid userId);
         Task<bool> UserProfileResetPassword(UserDTO model);
+        Task ContactUsMailAsync(ContactUsDTO contactUsDTO);
         Task<dynamic> SaveForgotPassword(string Mail);
         Task<dynamic> ResetPasswordGet(string code, string username, bool firstPassword);
         Task<dynamic> ResetPasswordPost(ResetPasswordViewModel model);
