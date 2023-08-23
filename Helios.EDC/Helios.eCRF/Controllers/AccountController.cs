@@ -1,5 +1,4 @@
-﻿using Helios.eCRF.Controllers.Base;
-using Helios.eCRF.Models;
+﻿using Helios.eCRF.Models;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +10,12 @@ namespace Helios.eCRF.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAuthService authService;
+        private readonly IUserService userService;
 
-        public AccountController(IAuthService authService)
+        public AccountController(IAuthService authService, IUserService userService)
         {
             this.authService = authService;
+            this.userService = userService;
         }
 
         [HttpPost]
@@ -25,37 +26,6 @@ namespace Helios.eCRF.Controllers
             return Ok("Form data received successfully");
         }
 
-        [HttpPost]
-        public async Task<bool> AddTenant(string name)
-        {
-            var model = new TenantModel { Name = name };
-            var result = await authService.AddTenant(model);
-            return result;
-            //return Ok("Form data received successfully"); 
-        }
-    
-        [HttpGet]
-        public async Task<List<TenantModel>> GetTenantList()
-        {
-            var result = await authService.GetTenantList();
-
-            return result;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SaveUser(UserDTO model)
-        {
-            var result = await authService.AddUser(model);
-            return Ok(result);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PassiveOrActiveUser(UserDTO model)
-        {
-            var result = await authService.PassiveOrActiveUser(model);
-            return Ok(result);
-        }
-
         [HttpGet]
         public async Task<IActionResult> SendNewPasswordForUser(Guid userId)
         {
@@ -64,16 +34,9 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateUser(UserDTO model)
-        {
-            var result = await authService.UpdateUser(model);
-            return Ok(result);
-        }
-
-        [HttpPost]
         public async Task<IActionResult> UserProfileResetPassword(UserDTO model)
         {
-            var result = await authService.UpdateUser(model);
+            var result = await userService.UpdateUser(model);
             return Ok(result);
         }
 
