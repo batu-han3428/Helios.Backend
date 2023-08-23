@@ -3,6 +3,7 @@ using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Net.Mail;
 
 namespace Helios.eCRF.Services
 {
@@ -113,6 +114,16 @@ namespace Helios.eCRF.Services
             }
 
             return tenantList;
+        }
+
+        public async Task ContactUsMailAsync(ContactUsDTO contactUsDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/ContactUsMailAsync", Method.Post);
+                req.AddJsonBody(contactUsDTO);
+                var result = await client.ExecuteAsync(req);
+            }
         }
     }
 }

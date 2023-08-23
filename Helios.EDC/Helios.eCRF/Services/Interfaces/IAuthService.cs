@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using System.Net.Mail;
 
 namespace Helios.eCRF.Services.Interfaces
 {
@@ -15,5 +16,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> UpdateUser(UserDTO model);
         Task<bool> UserProfileResetPassword(UserDTO model);
         Task<List<TenantModel>> GetTenantList();
+        Task ContactUsMailAsync(ContactUsDTO contactUsDTO);
     }
 }
