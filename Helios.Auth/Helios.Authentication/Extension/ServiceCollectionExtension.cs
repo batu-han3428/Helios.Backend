@@ -21,8 +21,14 @@ namespace Helios.Authentication.Extension
             //    .AddDefaultTokenProviders()
             //    .AddUserStore<UserStore<ApplicationUser, ApplicationRole, AuthenticationContext, Guid>>()
             //    .AddRoleStore<RoleStore<ApplicationRole, AuthenticationContext, Guid>>();
+
+            var host = System.Net.Dns.GetHostName();
             var activeSql = Configuration["AppConfig:ActiveSql"];
-            services.ConfigureMysqlPooled<AuthenticationContext>(Configuration, connectionString: $"{activeSql}_DefaultConnection", MigrationsAssembly: "Helios.Authentication");
+            var conn = $"{activeSql}_DefaultConnection";
+            if (host == "MON-NOTE-44")
+                conn = conn + "_MON-NOTE-44";
+
+            services.ConfigureMysqlPooled<AuthenticationContext>(Configuration, connectionString: conn, MigrationsAssembly: "Helios.Authentication");
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<AuthenticationContext>()
