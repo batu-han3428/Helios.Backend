@@ -3,16 +3,20 @@ using Helios.Authentication.Entities;
 using Helios.Authentication.Enums;
 using Helios.Authentication.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 
 namespace Helios.Authentication.Services
 {
     public class BaseService : IBaseService
     {
         private AuthenticationContext _context;
-
-        protected BaseService(AuthenticationContext context)
+        private readonly SmtpClient _smtpClient;
+        private readonly IConfiguration _config;
+        public BaseService(AuthenticationContext context, SmtpClient smtpClient, IConfiguration config)
         {
             _context = context;
+            _smtpClient = smtpClient;
+            _config = config;
         }
 
         public void SaveSystemAuditTrail(Guid TenantId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Guid UserId, string ClientIp)
@@ -32,6 +36,15 @@ namespace Helios.Authentication.Services
             };
 
             _context.SystemAuditTrails.Add(auditTrailModel);
+        }
+
+        public async Task SendMail(string mail, string subject, string content)
+        {
+            var mailMessage = new MailMessage(_config["EmailSender:UserName"], mail, subject, content)
+            { IsBodyHtml = true, Sender = new MailAddress(_config["EmailSender:UserName"]) };
+
+            var isSend = _smtpClient.SendMailAsync(mailMessage);
+            isSend.Wait();
         }
     }
 }

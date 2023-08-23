@@ -21,25 +21,13 @@ namespace Helios.eCRF.Models
         public List<MailAddress> MailAddresses { get =>
             new List<MailAddress>()
             {
-                //new MailAddress("accounts@helios-crf.com"),
-                //new MailAddress("zeynepmineh@monitorcro.com"),
-                //new MailAddress("inans@monitorcro.com"),
-                //new MailAddress("cano@monitorcro.com"),
-                //new MailAddress("gamzea@monitorcro.com")
-                 new MailAddress("batu_6407@hotmail.com.tr")
+                new MailAddress("accounts@helios-crf.com"),
+                new MailAddress("zeynepmineh@monitorcro.com"),
+                new MailAddress("inans@monitorcro.com"),
+                new MailAddress("cano@monitorcro.com"),
+                new MailAddress("gamzea@monitorcro.com")
             };
         }
-        //public List<MailAddress> GetMailAddresses()
-        //{
-        //    return new List<MailAddress>()
-        //    {
-        //        new MailAddress("accounts@helios-crf.com"),
-        //            new MailAddress("zeynepmineh@monitorcro.com"),
-        //            new MailAddress("inans@monitorcro.com"),
-        //            new MailAddress("cano@monitorcro.com"),
-        //            new MailAddress("gamzea@monitorcro.com")
-        //        };
-        //}
     }
 }
 

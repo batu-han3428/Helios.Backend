@@ -5,6 +5,10 @@ using Helios.Authentication.EventBusBase;
 using Helios.Authentication.Helpers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using System.Net.Mail;
+using System.Net;
+using Helios.Authentication.Services.Interfaces;
+using Helios.Authentication.Services;
 
 namespace Helios.Authentication.Extension
 {
@@ -96,7 +100,6 @@ namespace Helios.Authentication.Extension
             return services;
         }
 
-        [Obsolete]
         public static void ConfigurationEventBusConsumers(this IServiceCollection services, IConfiguration Configuration, IWebHostEnvironment env)
         {
             try
@@ -532,7 +535,6 @@ namespace Helios.Authentication.Extension
            
         }
 
-
         public static void ConfigurationEventBusJob(this IServiceCollection services)
         {
             try
@@ -545,6 +547,34 @@ namespace Helios.Authentication.Extension
 
                 throw;
             }
+        }
+    
+        public static void SmtpSettings(this IServiceCollection services)
+        {
+            services.AddScoped<SmtpClient>
+               ((serviceProvider) =>
+               {
+                   var config = serviceProvider.GetRequiredService<IConfiguration>();
+
+                   var host = config["EmailSender:Host"];
+                   var port = config.GetValue<int>("EmailSender:Port");
+                   var enableSSL = config.GetValue<bool>("EmailSender:EnableSSL");
+                   var userName = config["EmailSender:UserName"];
+                   var password = config["EmailSender:Password"];
+                   var client = new SmtpClient(host, port)
+                   {
+                       Credentials = new NetworkCredential(userName, password),
+                       EnableSsl = enableSSL
+                   };
+
+                   return client;
+
+               });
+        }
+    
+        public static void DependencyInjection(this IServiceCollection services)
+        {
+            services.AddScoped<IBaseService, BaseService>();
         }
     }
 }

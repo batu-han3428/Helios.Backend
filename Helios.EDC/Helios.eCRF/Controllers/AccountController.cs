@@ -83,83 +83,15 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<IActionResult> ContactUs(ContactUsDTO contactUsModel)
         {
-
-            //var verified = true;
-            //TokenResponseModel tokenResponse = new TokenResponseModel() { Success = false };
-
-            //var values = new
-            //{
-            //    secret = googleSecretKey,
-            //    response = captcha,
-            //};
-            //JsonContent content = JsonContent.Create(values);
-            //using (var client = _clientFactory.CreateClient())
-            //{
-            //    var response = await client.PostAsync($"{googleRecaptchaVerifyApi}", content);
-            //    var responseString = await response.Content.ReadAsStringAsync();
-            //    tokenResponse = JsonConvert.DeserializeObject<TokenResponseModel>(responseString);
-            //}
-
-            //// Recaptcha V3 Verify Api send score 0-1. If score is low such as less than 0.5, you can think that it is a bot and return false.     
-            //// If token is not success then return false
-            //if (!tokenResponse.Success)
-            //    verified = false;
-
-            //if (!verified)
-            ////if (!await _captchaValidator.IsCaptchaPassedAsync(captcha))
-            //{
-
-            //    ViewBag.captcha = "Captcha validation failed.";
-            //    ViewBag.Success = false;
-            //    return View(new ContactUsDTO());
-            //}
-
-
             try
             {
-
-                //var client = new SmtpClient("smtp.office365.com", 587)
-                //{
-                //    Credentials = new NetworkCredential("accounts@helios-crf.com", "Vuw24048"),
-                //    EnableSsl = true
-                //};
-
-
-                //var subject = "Helios e-CRF Contact Us";
-                //var mailadress = new List<MailAddress>() {
-                //    new MailAddress("accounts@helios-crf.com"),
-                //    new MailAddress("zeynepmineh@monitorcro.com"),
-                //    new MailAddress("inans@monitorcro.com"),
-                //    new MailAddress("cano@monitorcro.com"),
-                //    new MailAddress("gamzea@monitorcro.com")
-                //};
                 await authService.ContactUsMailAsync(contactUsModel);
                 return Ok(true);
-
-                //await emailservice.ContactUsMailAsync(contactUsModel.Name, contactUsModel.Email, contactUsModel.Company, contactUsModel.StudyCode, contactUsModel.Message, mailadress, subject, environment, this.httpContextAccessor);
-                //return Json(true);
-
-                //string messageBody = $"{contactUsModel.Name}<br><br>{contactUsModel.Email}<br><br>{contactUsModel.Company}<br> Study : {contactUsModel.StudyCode}<br><br>Mesaj : {contactUsModel.Message}";
-
-                //MailAddress inan = new MailAddress("inans@monitorcro.com");
-                //MailAddress canMail = new MailAddress("cano@monitorcro.com");
-                //MailAddress gamzeMail = new MailAddress("gamzea@monitorcro.com");
-                //var mailMessage = new MailMessage("accounts@helios-crf.com", "zeynepmineh@monitorcro.com", "Helios e-CRF Contact Us", messageBody)
-                //{
-                //    IsBodyHtml = true,
-                //};
-                //mailMessage.CC.Add(inan);
-                //mailMessage.CC.Add(canMail);
-                //mailMessage.CC.Add(gamzeMail);
-                //_SmtpClient.Send(mailMessage);
-                //ViewBag.Success = true;
-                //return Json(true);
             }
             catch (Exception ex)
             {
                 return NotFound(false);
             }
-
         }
     }
 }

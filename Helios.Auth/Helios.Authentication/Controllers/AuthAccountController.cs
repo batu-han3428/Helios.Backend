@@ -2,11 +2,11 @@
 using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
+using Helios.Authentication.Services.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Mail;
 
 namespace Helios.Authentication.Controllers
 {
@@ -18,14 +18,14 @@ namespace Helios.Authentication.Controllers
         readonly UserManager<ApplicationUser> _userManager;
         private readonly IBus _backgorundWorker;       
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly SmtpClient _smtpClient;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus/*, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnv*/, IHttpContextAccessor contextAccessor, SmtpClient smtpClient)
+        private readonly IBaseService _baseService;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService)
         {
             _context = context;
             _userManager = userManager;
             _backgorundWorker = _bus;
             _contextAccessor = contextAccessor;
-            _smtpClient = smtpClient;
+            _baseService = baseService;
         }
         //public async Task<bool> AddRole(Guid tenantId, string firstName, string lastName, string email)
         //{
@@ -319,11 +319,7 @@ namespace Helios.Authentication.Controllers
            
             for (int i = 0; i < contactUsDTO.MailAddresses.Count; i++)
             {
-                var mailMessage = new MailMessage("accounts@helios-crf.com", contactUsDTO.MailAddresses[i].ToString(), mailSubject, mailContent)
-                { IsBodyHtml = true, Sender = new MailAddress("accounts@helios-crf.com") };
-
-                var isSend = _smtpClient.SendMailAsync(mailMessage);
-                isSend.Wait();
+                await _baseService.SendMail(contactUsDTO.MailAddresses[i].ToString(), mailSubject, mailContent);
             }
         }
 

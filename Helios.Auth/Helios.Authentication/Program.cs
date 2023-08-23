@@ -12,37 +12,24 @@ try
     Microsoft.Extensions.Configuration.ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
     IWebHostEnvironment env = builder.Environment;
 
-    builder.Services.IdentityServerSettings(configuration);
 
-    builder.Services.CookieSettings();
-
-    #region Smtp
-
-    builder.Services.AddScoped<SmtpClient>
-    ((serviceProvider) =>
-    {
-        var config = serviceProvider.GetRequiredService<IConfiguration>();
-
-        var host = config["EmailSender:Host"];
-        var port = config.GetValue<int>("EmailSender:Port");
-        var enableSSL = config.GetValue<bool>("EmailSender:EnableSSL");
-        var userName = config["EmailSender:UserName"];
-        var password = config["EmailSender:Password"];
-        var client = new SmtpClient(host, port)
-        {
-            Credentials = new NetworkCredential(userName, password),
-            EnableSsl = enableSSL
-        };
-
-        return client;
-
-    });
+    #region Identity
+        builder.Services.IdentityServerSettings(configuration);
+        builder.Services.CookieSettings();
     #endregion
 
+    #region Rabbit Mq Pub/Sub
+        builder.Services.ConfigurationEventBusConsumers(configuration, env);
+        builder.Services.ConfigurationEventBusJob();
+    #endregion
 
-    //Rabbit Mq Pub/Sub
-    builder.Services.ConfigurationEventBusConsumers(configuration, env);
-    builder.Services.ConfigurationEventBusJob();
+    #region Smtp
+        builder.Services.SmtpSettings();
+    #endregion
+
+    #region Dependency Injection 
+        builder.Services.DependencyInjection();
+    #endregion
 
 
     //builder.Services.AddDbContext<AuthenticationContext>(options =>
