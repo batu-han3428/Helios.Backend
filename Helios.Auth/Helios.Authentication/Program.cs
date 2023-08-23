@@ -41,8 +41,8 @@ try
 
 
     //Rabbit Mq Pub/Sub
-    builder.Services.ConfigurationEventBusConsumers(configuration, env);
-    builder.Services.ConfigurationEventBusJob();
+    //builder.Services.ConfigurationEventBusConsumers(configuration, env);
+    //builder.Services.ConfigurationEventBusJob();
 
    
     //builder.Services.AddDbContext<AuthenticationContext>(options =>
