@@ -125,5 +125,39 @@ namespace Helios.eCRF.Services
                 var result = await client.ExecuteAsync(req);
             }
         }
+
+        public async Task<dynamic> SaveForgotPassword(string Mail)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest($"AuthAccount/SaveForgotPassword?Mail={Mail}", Method.Post);
+                var result = await client.ExecuteAsync<dynamic>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<dynamic> ResetPasswordGet(string code, string username, bool firstPassword)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/ResetPasswordGet", Method.Get);
+                req.AddParameter("code", code);
+                req.AddParameter("username", username);
+                req.AddParameter("firstPassword", firstPassword);
+                var result = await client.ExecuteAsync<dynamic>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<dynamic> ResetPasswordPost(ResetPasswordViewModel model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/ResetPasswordPost", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync<dynamic>(req);
+                return result.Data;
+            }
+        }
     }
 }
