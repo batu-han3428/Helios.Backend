@@ -6,15 +6,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.ComponentModel;
 using System.Net.Mail;
-using System.Security.Principal;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Http;
-using System.Reflection;
-using System.Net.Http;
 
 namespace Helios.Authentication.Controllers
 {
@@ -24,17 +16,16 @@ namespace Helios.Authentication.Controllers
     {
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
-        private readonly IBus _backgorundWorker;
-        //private Microsoft.AspNetCore.Hosting.IHostingEnvironment _hostingEnv;
-        //private readonly IHttpContextAccessor _contextAccessor;
-
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus/*, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnv*//*, IHttpContextAccessor contextAccessor*/)
+        private readonly IBus _backgorundWorker;       
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly SmtpClient _smtpClient;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus/*, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnv*/, IHttpContextAccessor contextAccessor, SmtpClient smtpClient)
         {
             _context = context;
             _userManager = userManager;
             _backgorundWorker = _bus;
-            //_hostingEnv = hostingEnv;
-            //_contextAccessor = contextAccessor;
+            _contextAccessor = contextAccessor;
+            _smtpClient = smtpClient;
         }
         //public async Task<bool> AddRole(Guid tenantId, string firstName, string lastName, string email)
         //{
@@ -302,42 +293,38 @@ namespace Helios.Authentication.Controllers
             return result;
         }
 
+        [HttpPost]
         public async Task ContactUsMailAsync(ContactUsDTO contactUsDTO)
         {
-            //var veri = _contextAccessor.HttpContext.Request.Scheme;
-            //var veri1 = _contextAccessor.HttpContext.Request.Host.Value;
+            string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ContactUsMailLayout.html");
+            string mailContent = "";
 
-      //      string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ContactUsMailLayout");
-      //      string mailContent = "";
+            var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
+            byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
+            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
 
-      //      var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
-      //      byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
-      //      string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+            var mailSubject = contactUsDTO.Subject;
 
-      //      var mailSubject = contactUsDTO.Subject;
+            using (StreamReader reader = System.IO.File.OpenText(tempPath))
+            {
+                mailContent = reader.ReadToEnd()
+                    .Replace("@userName", contactUsDTO.Name)
+                    .Replace("@email", contactUsDTO.Email)
+                    .Replace("@institution", contactUsDTO.Company)
+                    .Replace("@studycode", contactUsDTO.StudyCode)
+                    .Replace("@usermessage", contactUsDTO.Message)
+                    .Replace("@imgbase64", base64ImageRepresentation)
+                    .Replace("@dynamicdomain", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value));
+            }
+           
+            for (int i = 0; i < contactUsDTO.MailAddresses.Count; i++)
+            {
+                var mailMessage = new MailMessage("accounts@helios-crf.com", contactUsDTO.MailAddresses[i].ToString(), mailSubject, mailContent)
+                { IsBodyHtml = true, Sender = new MailAddress("accounts@helios-crf.com") };
 
-      //      using (StreamReader reader = System.IO.File.OpenText(tempPath))
-      //      {
-      //          mailContent = reader.ReadToEnd()
-      //              .Replace("@userName", contactUsDTO.Name)
-      //              .Replace("@email", contactUsDTO.Email)
-      //              .Replace("@institution", contactUsDTO.Company)
-      //              .Replace("@studycode", contactUsDTO.StudyCode)
-      //              .Replace("@usermessage", contactUsDTO.Message)
-      //              .Replace("@imgbase64", base64ImageRepresentation)
-      ///*              .Replace("@dynamicdomain", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value))*/;
-      //      }
-      //      SmtpClient smtpClient= new SmtpClient();
-      //      for (int i = 0; i < contactUsDTO.MailAddresses.Count; i++)
-      //      {
-      //          var mailMessage = new System.Net.Mail.MailMessage("accounts@helios-crf.com", contactUsDTO.MailAddresses[i].ToString(), mailSubject, mailContent)
-      //          { IsBodyHtml = true, Sender = new MailAddress("accounts@helios-crf.com") };
-
-      //          var isSend = smtpClient.SendMailAsync(mailMessage);
-      //          isSend.Wait();
-      //      }
-
-            //return Task.CompletedTask;
+                var isSend = _smtpClient.SendMailAsync(mailMessage);
+                isSend.Wait();
+            }
         }
 
         #endregion

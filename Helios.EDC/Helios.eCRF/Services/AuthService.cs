@@ -120,7 +120,7 @@ namespace Helios.eCRF.Services
         {
             using (var client = AuthServiceClient)
             {
-                var req = new RestRequest("AuthAccount/ContactUsMailAsync", Method.Post);
+                var req = new RestRequest("AuthAccount/ContactUsMail", Method.Post);
                 req.AddJsonBody(contactUsDTO);
                 var result = await client.ExecuteAsync(req);
             }

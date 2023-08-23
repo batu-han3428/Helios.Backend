@@ -81,7 +81,7 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ContactUs(ContactUsDTO contactUsModel, string captcha)
+        public async Task<IActionResult> ContactUs(ContactUsDTO contactUsModel)
         {
 
             //var verified = true;
