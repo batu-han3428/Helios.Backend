@@ -2,13 +2,11 @@
 using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
+using Helios.Authentication.Services.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.ComponentModel;
-using System.Security.Principal;
 
 namespace Helios.Authentication.Controllers
 {
@@ -18,13 +16,16 @@ namespace Helios.Authentication.Controllers
     {
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
-        private readonly IBus _backgorundWorker;
-
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus)
+        private readonly IBus _backgorundWorker;       
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IBaseService _baseService;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService)
         {
             _context = context;
             _userManager = userManager;
             _backgorundWorker = _bus;
+            _contextAccessor = contextAccessor;
+            _baseService = baseService;
         }
         //public async Task<bool> AddRole(Guid tenantId, string firstName, string lastName, string email)
         //{
@@ -291,7 +292,36 @@ namespace Helios.Authentication.Controllers
 
             return result;
         }
-        
+
+        [HttpPost]
+        public async Task ContactUsMailAsync(ContactUsDTO contactUsDTO)
+        {
+            string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ContactUsMailLayout.html");
+            string mailContent = "";
+
+            var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
+            byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
+            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+            var mailSubject = contactUsDTO.Subject;
+
+            using (StreamReader reader = System.IO.File.OpenText(tempPath))
+            {
+                mailContent = reader.ReadToEnd()
+                    .Replace("@userName", contactUsDTO.Name)
+                    .Replace("@email", contactUsDTO.Email)
+                    .Replace("@institution", contactUsDTO.Company)
+                    .Replace("@studycode", contactUsDTO.StudyCode)
+                    .Replace("@usermessage", contactUsDTO.Message)
+                    .Replace("@imgbase64", base64ImageRepresentation)
+                    .Replace("@dynamicdomain", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value));
+            }
+           
+            for (int i = 0; i < contactUsDTO.MailAddresses.Count; i++)
+            {
+                await _baseService.SendMail(contactUsDTO.MailAddresses[i].ToString(), mailSubject, mailContent);
+            }
+        }
 
         #endregion
         //Permissions

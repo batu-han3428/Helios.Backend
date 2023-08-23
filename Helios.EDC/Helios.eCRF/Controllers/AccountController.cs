@@ -3,7 +3,9 @@ using Helios.eCRF.Models;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using System;
+using System.Net.Mail;
 
 namespace Helios.eCRF.Controllers
 {
@@ -78,5 +80,18 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ContactUs(ContactUsDTO contactUsModel)
+        {
+            try
+            {
+                await authService.ContactUsMailAsync(contactUsModel);
+                return Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(false);
+            }
+        }
     }
 }
