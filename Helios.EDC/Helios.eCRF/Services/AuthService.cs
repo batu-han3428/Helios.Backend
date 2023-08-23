@@ -52,6 +52,16 @@ namespace Helios.eCRF.Services
             return false;
         }
 
+        public async Task ContactUsMailAsync(ContactUsDTO contactUsDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/ContactUsMail", Method.Post);
+                req.AddJsonBody(contactUsDTO);
+                var result = await client.ExecuteAsync(req);
+            }
+        }
+
         public async Task<dynamic> SaveForgotPassword(string Mail)
         {
             using (var client = AuthServiceClient)
