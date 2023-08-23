@@ -3,9 +3,6 @@ using Helios.eCRF.Models;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Net.Mail;
 
 namespace Helios.eCRF.Controllers
 {
@@ -92,6 +89,45 @@ namespace Helios.eCRF.Controllers
             {
                 return NotFound(false);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveForgotPassword([FromBody] string Mail)
+        {   
+            if (string.IsNullOrEmpty(Mail))
+            {
+                return NotFound(new { isSuccess= false, message = "Mail alanı boş bırakılamaz" });
+            }
+
+            var result = await authService.SaveForgotPassword(Mail);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string code = null, string username = null, bool firstPassword = false)
+        {
+            if (code == null || username == null)
+            {
+                return Ok(new { isSuccess = false, messsage = "Şifre sıfırlama için kod, kullanıcı adı ve çalışma adı sağlanmalıdır." });
+            }
+
+            var result = await authService.ResetPasswordGet(code, username, firstPassword);
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Ok(model);
+            }
+
+            var result = await authService.ResetPasswordPost(model);
+
+            return Ok(result);
         }
     }
 }

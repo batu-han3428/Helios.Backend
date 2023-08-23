@@ -1,9 +1,4 @@
-using Helios.Authentication.Contexts;
 using Helios.Authentication.Extension;
-using Helios.Authentication.Helpers;
-using System.Configuration;
-using System.Net.Mail;
-using System.Net;
 
 try
 {
