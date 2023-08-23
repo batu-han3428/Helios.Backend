@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../Layouts/Sidebar/sidebar';
 import './tenant.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faArrowRight } from '../../../node_modules/@fortawesome/free-solid-svg-icons/index';
+import { faEdit, faCog, faArrowRight } from '../../../node_modules/@fortawesome/free-solid-svg-icons/index';
 import { Routes, Route, useNavigate } from "react-router-dom";
-import AddTenant from './addTenant';
+import AddOrUpdateTenant from './addOrUpdateTenant';
 
 function TenantList() {
     const navigate = useNavigate();
 
     const navigateAddTenant = () => {
-        navigate('/addTenant');
+        navigate('/addOrUpdateTenant');
     };
 
     //useEffect(() => {
@@ -43,8 +43,8 @@ function TenantList() {
                         <Route path="/addTenant" element={<AddTenant />} />
                     </Routes>
                 </div>
-                <br/>
-                <br/>
+                <br />
+                <br />
                 <div>
                     {
                         tenantList.map((tenantList) => {
@@ -60,6 +60,10 @@ function TenantList() {
                                         <br></br>
                                         <button className="btn" data-id={tenantList.id}>
                                             <FontAwesomeIcon icon={faArrowRight} />
+                                        </button>
+                                        <br></br>
+                                        <button className="btn" data-id={tenantList.id}>
+                                            <FontAwesomeIcon icon={faEdit} />
                                         </button>
                                     </div>
                                 </div>

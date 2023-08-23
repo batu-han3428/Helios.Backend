@@ -8,7 +8,7 @@ import './Common/css/style.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TopNavBarLayout from './Layouts/TopNavBar/TopNavBarLayout';
 //import TenantList from './Pages/Tenant/tenantList';
-import AddTenant from './Pages/Tenant/addTenant';
+import AddTenant from './Pages/Tenant/addOrUpdateTenant';
 import { DataGrid, GridColumn } from 'rc-easyui';
 import Studies from './Pages/SSO/studies';
 import './Language/i18n';

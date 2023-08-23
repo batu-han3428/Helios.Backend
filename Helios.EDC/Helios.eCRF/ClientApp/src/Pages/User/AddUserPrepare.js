@@ -2,7 +2,7 @@ import React, { Component, useState, useContext, Form, FormField, TextBox, Combo
 import Sidebar from '../../Layouts/Sidebar/sidebar';
 
 //export default class AddTenant extends Component {
-function AddOrUpdateUser() {
+function AddUserPrepare() {
 
     const [Email, setEmail] = useState('');
 
@@ -47,4 +47,4 @@ function AddOrUpdateUser() {
     );
 };
 
-export default AddOrUpdateUser;
+export default AddUserPrepare;
