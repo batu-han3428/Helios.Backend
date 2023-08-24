@@ -4,20 +4,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Helios.eCRF.Controllers
 {
+    [ApiController]
+    [Route("[controller]/[action]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserService userService;
+        private readonly IUserService _userService;
 
         public UserController(IUserService userService)
         {
-            this.userService = userService;
+            this._userService = userService;
         }
 
         [HttpPost]
         public async Task<bool> AddTenant(string name)
         {
             var model = new TenantModel { Name = name };
-            var result = await userService.AddTenant(model);
+            var result = await _userService.AddTenant(model);
             return result;
             //return Ok("Form data received successfully"); 
         }
@@ -25,7 +27,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<bool> UpdateTenant(TenantModel model)
         {
-            var result = await userService.AddTenant(model);
+            var result = await _userService.AddTenant(model);
             return result;
             //return Ok("Form data received successfully"); 
         }
@@ -33,7 +35,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<TenantModel> GetTenant(Guid id)
         {
-            var result = await userService.GetTenant(id);
+            var result = await _userService.GetTenant(id);
 
             return result;
         }
@@ -41,7 +43,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<List<TenantModel>> GetTenantList()
         {
-            var result = await userService.GetTenantList();
+            var result = await _userService.GetTenantList();
 
             return result;
         }
@@ -49,7 +51,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<UserDTO> GetUserByEmail(string mail)
         {
-            var result = await userService.GetUserByEmail(mail);
+            var result = await _userService.GetUserByEmail(mail);
             return result;
         }
 
@@ -58,12 +60,12 @@ namespace Helios.eCRF.Controllers
         {
             if (model.Id == Guid.Empty)
             {
-                var result = await userService.AddUser(model);
+                var result = await _userService.AddUser(model);
                 return Ok(result);
             }
             else
             {
-                var result = await userService.UpdateUser(model);
+                var result = await _userService.UpdateUser(model);
                 return Ok(result);
             }
         }
@@ -71,7 +73,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<IActionResult> PassiveOrActiveUser(UserDTO model)
         {
-            var result = await userService.PassiveOrActiveUser(model);
+            var result = await _userService.PassiveOrActiveUser(model);
             return Ok(result);
         }
     }

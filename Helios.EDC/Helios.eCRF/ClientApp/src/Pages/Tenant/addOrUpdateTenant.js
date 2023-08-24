@@ -12,7 +12,7 @@ function AddOrUpdateTenant() {
 
     const handleSubmit = (event) => {
         debugger;
-        fetch('/Account/AddTenant?Name=' + Name, {
+        fetch('/User/AddTenant?Name=' + Name, {
             method: 'POST',
             //body: Name
 
