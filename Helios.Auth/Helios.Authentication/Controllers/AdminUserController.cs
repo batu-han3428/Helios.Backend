@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Helios.Authentication.Controllers
 {
+    [ApiController]
+    [Route("[controller]/[action]")]
     public class AdminUserController : Controller
     {
         private AuthenticationContext _context;
@@ -55,6 +57,8 @@ namespace Helios.Authentication.Controllers
 
             return result;
         }
+
+        
 
         [HttpGet]
         public async Task<List<TenantModel>> GetTenantList()
