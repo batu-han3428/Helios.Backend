@@ -19,11 +19,11 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromForm] AccountModel user)
+        public async Task<IActionResult> Login(AccountModel user)
         {
             var result = await authService.LoginAsync(user);
 
-            return Ok("Form data received successfully");
+            return Ok(result);
         }
 
         [HttpGet]

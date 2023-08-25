@@ -9,7 +9,6 @@ namespace Helios.Authentication.Entities
             UserRoles = new List<ApplicationUserRole>();
 
         }
-        public Guid TenantId { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public bool ChangePassword { get; set; }

@@ -8,5 +8,6 @@ namespace Helios.Authentication.Entities
         public override Guid RoleId { get; set; }
         public ApplicationUser User { get; set; }
         public ApplicationRole Role { get; set; }
+        public Guid TenantId { get; set; }
     }
 }

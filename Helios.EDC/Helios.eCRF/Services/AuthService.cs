@@ -13,19 +13,15 @@ namespace Helios.eCRF.Services
         {
         }
 
-        public async Task<bool> LoginAsync(AccountModel model)
+        public async Task<dynamic> LoginAsync(AccountModel model)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AuthAccount/Login", Method.Post);
-                //var req = new RestRequest("CoreAccount/Login", Method.Post);
                 req.AddJsonBody(model);
-                //req.AddParameter("Email", model.Email);
-                //req.AddParameter("Parameter", model.Password);
-                var result = await client.ExecuteAsync(req);
+                var result = await client.ExecuteAsync<dynamic>(req);
+                return result.Data;
             }
-            //return Task.FromResult(result.);
-            return false;
         }
 
         public async Task<bool> SendNewPasswordForUser(Guid userId)

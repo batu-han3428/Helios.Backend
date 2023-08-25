@@ -33,30 +33,11 @@ const Login = () => {
     };
 
     const handleSubmit = (event) => {
-        debugger;
 
-        const formData = new FormData();
-        formData.append('Email', user.Email);
-        formData.append('Password', user.Password);
+        const data = { Email: user.Email, Password: user.Password };
 
-        //axios.get('/api/Account').then((response) => {
-        //    debugger;
-        //    alert(response);
-        //});
-        // Send form data to the controller
-        fetch('/Account/Login', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                debugger;
-                // Handle response from the controller
-                console.log(data);
-            })
-            .catch(error => {
-                //console.error('Error:', error);
-            });
+        axios.post('/Account/Login', data, { withCredentials: true })
+            .then(response => console.log(response.data));
     };
 
 
