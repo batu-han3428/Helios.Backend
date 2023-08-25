@@ -3,9 +3,15 @@ using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System;
+using System.Net.Sockets;
+using System.Text.Encodings.Web;
+using Helios.Authentication.Services.Interfaces;
 
 namespace Helios.Authentication.Controllers
 {
@@ -16,12 +22,17 @@ namespace Helios.Authentication.Controllers
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
         private readonly IBus _backgorundWorker;
-
-        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus)
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IBaseService _baseService;
+        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService)
         {
             _context = context;
             _userManager = userManager;
             _backgorundWorker = _bus;
+            _roleManager = roleManager;
+            _contextAccessor = contextAccessor;
+            _baseService = baseService;
         }
 
         #region Tenant
@@ -99,7 +110,6 @@ namespace Helios.Authentication.Controllers
             var result = new UserDTO()
             {
                 UserId = user.Id,
-                TenantId = user.TenantId,
                 Email = user.Email,
                 FirstName = user.Name, 
                 LastName = user.Name
@@ -109,48 +119,106 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> AddUser(UserDTO model)
+        public async Task<dynamic> AddUser(UserDTO model)
         {
             //burası güncellenecek. şimdilik userın girdiği şifre kaydediliyor.
             try
             {
-                var result = false;
-                //string firstPassword = StringExtensionsHelper.GenerateRandomPassword();
-                var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.FirstName).Substring(0, 1).ToLower();
-                var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
-                var userName = string.Format("{0}_{1}{2}", model.TenantId, firstChar, lastNameEng);
-
-                var newUserName = userName;
-                int i = 0;
-
-                while (await _userManager.Users.AnyAsync(x => x.UserName == newUserName))
+                if (await _userManager.FindByEmailAsync(model.Email) == null)
                 {
-                    i++;
-                    newUserName = string.Format("{0}_{1}", userName, i);
+                    var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.FirstName).Substring(0, 1).ToLower();
+                    var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
+                    var userName = string.Format("{0}_{1}{2}", model.TenantId, firstChar, lastNameEng);
+
+                    var newUserName = userName;
+                    int i = 0;
+
+                    while (await _userManager.Users.AnyAsync(x => x.UserName == newUserName))
+                    {
+                        i++;
+                        newUserName = string.Format("{0}_{1}", userName, i);
+                    }
+
+                    var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == model.Role.ToString());
+
+                    var usr = new ApplicationUser
+                    {
+                        Id = Guid.NewGuid(),
+                        Email = model.Email.Trim(),
+                        UserName = newUserName,
+                        Name = model.FirstName,
+                        LastName = model.LastName,
+                        ChangePassword = false,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        PhotoBase64String = "",
+                        LastChangePasswordDate = DateTime.Now
+                    };
+
+                    usr.UserRoles.Add(new ApplicationUserRole
+                    {
+                        Role = role,
+                        User = usr,
+                        RoleId = role.Id,
+                        UserId = usr.Id,
+                    });
+
+                    if (model.Role == Enums.Roles.StudyUser)
+                    {
+                        //studyuser ve rolüne de ekleme yapılmalı
+                    }
+
+                    var password = StringExtensionsHelper.GenerateRandomPassword();
+
+                    var userResult = await _userManager.CreateAsync(usr, password);
+
+                    if (userResult.Succeeded)
+                    {
+
+                        string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ConfirmationMail_TR.html");
+
+                        //string researchName = research.Name;
+                        //if (research.IsDemo)
+                        //{
+                        //    researchName = research.Name.Replace("DEMO-", "");
+                        //}
+                        string mailContent = "";
+
+                        var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
+                        byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
+                        string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+                        //var mailSubject = HeliosResource.js_MailConfirmationSbjMsg.Replace("{researchname}", researchName);
+                        //if (!string.IsNullOrEmpty(mailSbj))
+                        //{
+                        //    mailSubject = mailSbj;
+                        //}
+
+
+                        using (StreamReader reader = System.IO.File.OpenText(tempPath))
+                        {
+                            mailContent = reader.ReadToEnd()
+                                .Replace("@FullName", usr.Name + " " + usr.LastName)
+                                .Replace("@UserName", usr.Email)
+                                .Replace("@Password", password)
+                                .Replace("@ResearchName", "Şimdilik çalışma yok")
+                                .Replace("@ContactLink", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value) + "/Account/ContactUs")
+                                .Replace("@StudyWebLink", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value) + "/Account/Login")
+                                .Replace("@imgbase64", base64ImageRepresentation)
+                                    .Replace("@dynamicdomain", "https://localhost:44458/");
+                        }
+
+                        await _baseService.SendMail(usr.Email, "Aktivasyon", mailContent);
+
+                        return new { isSuccess = true, message = "Kullanıcı oluşturuldu. Mail gönderildi" };
+                    }
+
+                    return new { isSuccess = false, message = "İşlem başarısız" };
                 }
-
-                var usr = new ApplicationUser
+                else
                 {
-                    Id = Guid.NewGuid(),
-                    Email = model.Email.Trim(),
-                    UserName = newUserName,
-                    Name = model.FirstName,
-                    LastName = model.LastName,
-                    ChangePassword = false,
-                    EmailConfirmed = true,
-                    IsActive = true,
-                    TenantId = model.TenantId,
-                    PhotoBase64String = ""
-                };
-
-                var userResult = await _userManager.CreateAsync(usr, model.Password);
-
-                if (userResult.Succeeded)
-                {
-                    result = true;
+                    return new { isSuccess = false, message = "Kullanıcı zaten kayıtlı" };
                 }
-
-                return result;
             }
             catch (Exception e)
             {

@@ -1,12 +1,15 @@
 ﻿using Helios.Authentication.Contexts;
 using Helios.Authentication.Entities;
+using Helios.Authentication.Enums;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
 
 namespace Helios.Authentication.Controllers
@@ -16,19 +19,229 @@ namespace Helios.Authentication.Controllers
     public class AuthAccountController : Controller
     {
         private AuthenticationContext _context;
-        readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IBus _backgorundWorker;       
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService)
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
             _backgorundWorker = _bus;
             _contextAccessor = contextAccessor;
             _baseService = baseService;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
+        [HttpPost]
+        public async Task<dynamic> AddRole(int role)
+        {
+            var selectRole = (Roles)role;
+
+            bool exists = await _roleManager.RoleExistsAsync(selectRole.ToString());
+            if (!exists)
+            {
+                var result = await _roleManager.CreateAsync(new ApplicationRole { Name = selectRole.ToString() });
+                if (result.Succeeded)
+                {
+                    return new { isSuccess = true, message = "İşlem başarılı" };
+                }
+                return new { isSuccess = false, message = "İşlem başarısız" };
+            }
+
+            return new { isSuccess = false, message = "Rol zaten var" };
+        }
+
+        [HttpPost]
+        public async Task<dynamic> AddUserRole(string mail, int role, Guid tenantId)
+        {
+            try
+            {
+                var user = _userManager.Users.FirstOrDefault(p => p.Email == mail);
+                if (user != null)
+                {
+                    var selectRole = (Roles)role;
+                    
+                    var existsUserRole = await _userManager.IsInRoleAsync(user, selectRole.ToString());
+                    if (!existsUserRole)
+                    {
+                        var roleDb = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == selectRole.ToString());
+                        await _context.UserRoles.AddAsync(new ApplicationUserRole
+                        {
+                            User= user,
+                            UserId = user.Id,
+                            Role = roleDb,
+                            RoleId = roleDb.Id,
+                            TenantId = tenantId
+                        });
+
+                        if (selectRole == Roles.StudyUser)
+                        {
+                            //studyuserroles e de ekleme yapılmalı.
+                        }
+
+                        var result = await _context.SaveChangesAsync() > 0;
+
+                        //var result = await _userManager.AddToRoleAsync(user, selectRole.ToString());
+                        if (result)
+                        {
+                            return new { isSuccess = true, message = "Başarılı." };
+                        }
+                        return new { isSuccess = false, message = "İşlem başarısız." };
+                    }
+                    return new { isSuccess = false, message = "Kullanıcıda zaten rol tanımlı." };
+                }
+                return new { isSuccess = false, message = "Kullanıcı bulunamadı." };
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+          
+        }
+
+        [HttpPost]
+        public async Task<dynamic> Login(AccountModel model)
+        {
+            try
+            {
+                var user = _userManager.Users.FirstOrDefault(p => p.Email == model.Email);
+                if (user != null)
+                {
+                    if (!user.IsActive)
+                    {
+                        return new { isSuccess = false, message = "Hesabınızın açılması için lütfen sistem yöneticisi ile iletişime geçiniz." };
+                    }
+
+                    if (user.AccessFailedCount == 5)
+                    {
+                        user.IsActive = false;
+                        var updateResult = await _userManager.UpdateAsync(user);
+                        if (updateResult.Succeeded)
+                        {
+                            return new { isSuccess = false, message = "Giriş deneme limitinizi aştığınız için hesabınız kitlenmiştir. Yardım için sistem yöneticinize başvurun." };
+                        }
+                    }
+
+                    var checkPassword = await _userManager.CheckPasswordAsync(user, model.Password);
+
+                    if (!checkPassword)
+                    {
+                        user.AccessFailedCount++;
+                        var remainAttemp = 5 - user.AccessFailedCount;
+                        var failMsg = user.AccessFailedCount == 4 ? "Eğer şifrenizi yanlış girerseniz hesabınız bloke olacaktır, lütfen sistem yöneticisi ile iletişime geçiniz." : "Şifrenizin kullanım geçerliliği için @Number deneme hakkınız kalmıştır.".Replace("@Number", remainAttemp.ToString());
+                        var updateResult = await _userManager.UpdateAsync(user);
+ 
+                        return new { isSuccess = false, message = failMsg };
+                    }
+
+                    var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
+                    var now = DateTime.UtcNow;
+                    var returnMessage = "";
+                    bool firstLogin = true;
+                    //if (user.LastChangePasswordDate >= passUpdateDate)
+                    if (now >= passUpdateDate)
+                    {
+                        firstLogin = false;
+                        user.ChangePassword = false;
+                        returnMessage = "Sayın @UserFullName,\r\n\r\nŞifrenizin kullanım süresi dolmuştur.\r\nYeni şifrenizi oluşturmak için aşağıda bulunan \"Yeni şifre gönder\" butonuna tıklayınız.".Replace("@UserFullName", user.Email);
+                    }
+
+                    if (!user.ChangePassword)
+                    {
+                        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var username = user.Email;
+                        //return RedirectToAction("ResetPassword", "Account", new { firstlogin = firstLogin, code = code, username = username, firstPassword = true, shortName, returnMessage = returnMessage });
+                        return new { isSuccess = false, message = "ResetPassword git", values = new { code = code, username = username, firstPassword = true } };
+                    }
+
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        var userRoles = await _userManager.GetRolesAsync(user);
+                        var enumList = userRoles.Select(x => Enum.Parse<Roles>(x))
+                         .ToList();
+
+                        switch (enumList)
+                        {
+                            case var _ when
+                            (
+                                enumList.Contains(Roles.SuperAdmin)
+                                ||
+                                enumList.Contains(Roles.SystemAdmin)
+                            )
+                            ||
+                            (
+                             (
+                                enumList.Contains(Roles.SuperAdmin)
+                                ||
+                                enumList.Contains(Roles.SystemAdmin)
+                             )
+                             &&
+                               enumList.Contains(Roles.TenantAdmin)
+                            ):
+                                return new { isSuccess = true, message = "1. sayfa" };
+                            case var _ when
+                            enumList.Contains(Roles.TenantAdmin):
+                                return new { isSuccess = true, message = "2. sayfa" };
+                            case var _ when
+                            (
+                                enumList.Contains(Roles.SuperAdmin)
+                                ||
+                                enumList.Contains(Roles.SystemAdmin)
+                                ||
+                                enumList.Contains(Roles.TenantAdmin)
+                            )
+                            &&
+                            (
+                                enumList.Contains(Roles.StudyUser)
+                                ||
+                                enumList.Contains(Roles.StudySubject)
+                            ):
+                                return new { isSuccess = true, message = "3. sayfa" };
+                            case var _ when enumList.Contains(Roles.StudyUser):
+
+
+                            // altta ki geçersiz. diğer db ye gidip studyusers da ki rollerine bakıp sayısın
+                            // örn. _context.studyusers.Where(x=>x.aspnetUserId = user.Id).include(x=>x.studyuserroles).GroupBy(x => x.TenantId).Select(n => new
+                            //{
+                            //    tenantId = n.Key,
+                            //}).ToList();
+
+                            //var tenants = _context.UserRoles.Where(x=>x.UserId == user.Id).GroupBy(x => x.TenantId).Select(n => new
+                            //{
+                            //    tenantId = n.Key,
+                            //}).ToList();
+                            //if (tenants.Count > 1)
+                            //{
+                            //    return new { isSuccess = true, message = "5. sayfa" };
+                            //}
+                            //else
+                            //{
+                            //    return new { isSuccess = true, message = "4. sayfa" };
+                            //}
+                            default:
+                                break;
+                        }
+
+                        return new { isSuccess = true, message = "Giriş başarılı!" };
+                    }
+                }
+
+                return new { isSuccess = false, message = "Geçersiz giriş denemesi!" };
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
+        }
 
         [HttpPost]
         public async Task<dynamic> SaveForgotPassword(string Mail)

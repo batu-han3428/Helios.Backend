@@ -9,6 +9,8 @@ using System.Net.Mail;
 using System.Net;
 using Helios.Authentication.Services.Interfaces;
 using Helios.Authentication.Services;
+using Microsoft.AspNetCore.DataProtection;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Helios.Authentication.Extension
 {
@@ -94,12 +96,34 @@ namespace Helios.Authentication.Extension
                 //options.ExpireTimeSpan = TimeSpan.FromMinutes(40);
 
 
-
+                //options.Cookie.Domain = "localhost:44458";
+                //options.Cookie.Path = "localhost:44458";
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromDays(60);
-                options.LoginPath = "/Account/AccessDenied";
-                options.AccessDeniedPath = "/Account/AccessDenied";
+                //options.LoginPath = "/Account/AccessDenied";
+                //options.AccessDeniedPath = "/Account/AccessDenied";
                 options.SlidingExpiration = true;
+
+
+                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                options.Cookie.Name = "UserCookie";
+                options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+
+                options.LoginPath = new PathString("/");
+                options.LogoutPath = new PathString("/");
+                options.AccessDeniedPath = new PathString("/");
+
+
+
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                options.Events = new Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationEvents()
+                {
+                    OnRedirectToAccessDenied = ctx =>
+                    {
+                        ctx.Response.Redirect("/Login/UserAccessDenied?code=401");
+                        return Task.CompletedTask;
+                    }
+                };
 
             });
 

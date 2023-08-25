@@ -67,16 +67,15 @@ namespace Helios.eCRF.Services
             return user;
         }
 
-        public async Task<bool> AddUser(UserDTO model)
+        public async Task<dynamic> AddUser(UserDTO model)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/AddUser", Method.Post);
                 req.AddJsonBody(model);
-                var result = await client.ExecuteAsync(req);
+                var result = await client.ExecuteAsync<dynamic>(req);
+                return result.Data;
             }
-
-            return false;
         }
 
         public async Task<bool> PassiveOrActiveUser(UserDTO model)
