@@ -5,10 +5,12 @@ using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Math;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
 
@@ -380,5 +382,119 @@ namespace Helios.Authentication.Controllers
             return new { isSuccess = false, messsage = "Invalid Reset Password" };
         }
 
+
+        [HttpGet]
+        public async Task<dynamic> UserProfileSetting(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var rolName = await _userManager.GetRolesAsync(user);
+
+                return new
+                {
+                    isSuccess = true,
+                    message = "",
+                    values = new
+                    {
+                        ApplicationUser = user,
+                        ProfileViewModel = new ProfileViewModel
+                        {
+                            Email = user.Email,
+                            FirstName = user.Name,
+                            LastName = user.LastName,
+                            UserName = user.UserName,
+                        },
+                        ResetPasswordViewModel = new ResetPasswordViewModel
+                        {
+                            Username = user.UserName,
+                            Code = "",
+                        },
+                        UserRolName = rolName.FirstOrDefault()
+                    }
+                };
+            }
+            return new { isSuccess = false, message = "Kullanıcı bulunamadı." };
+        }
+
+        [HttpPost]
+        public async Task<dynamic> UserNameUpdate(ProfileViewModel profileViewModel)
+        {
+            if (string.IsNullOrEmpty(profileViewModel.FirstName) || string.IsNullOrEmpty(profileViewModel.LastName))
+            {
+                return new { isSuccess = false, messsage = "Ad veya Soyad boş bırakılmamalıdır." };
+            }
+            else
+            {
+                var user = await _userManager.FindByEmailAsync(profileViewModel.Email);
+
+                if (user != null)
+                {
+                    user.Name = profileViewModel.FirstName;
+                    user.LastName = profileViewModel.LastName;
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+                        return new { isSuccess = false, messsage = "Güncelleme hatası." };
+                    }
+                }
+                else
+                {
+                    return new { isSuccess = false, messsage = "Kullanıcı bulunamadı veya hala e-posta onayı bekliyor." };
+                }
+
+            }
+
+            if (!String.IsNullOrEmpty(profileViewModel.Password))
+            {
+                var user = await _userManager.FindByEmailAsync(profileViewModel.Email);
+
+                if (user == null)
+                {
+                    return new { isSuccess = false, messsage = "Kullanıcı bulunamadı veya hala e-posta onayı bekliyor." };
+                }
+
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, profileViewModel.Password);
+                if (!passwordCheck)
+                {
+                    return new { isSuccess = false, messsage = "Mevcut şifre yanlış." };
+                }
+
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, profileViewModel.NewPassword);
+                if (!validPassword.Succeeded)
+                {
+                    string errmes = "";
+                    foreach (var item in validPassword.Errors)
+                    {
+                        errmes += "<br>" + item.Description;
+                    }
+                    return new { isSuccess = false, messsage = errmes };
+                }
+
+                if (profileViewModel.NewPassword != profileViewModel.ConfirmPassword)
+                {
+                    return new { isSuccess = false, messsage = "Şifre veya onay şifresi eşleşmiyor." };
+                }
+
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, code, profileViewModel.NewPassword);
+                if (resetResult.Succeeded)
+                {
+                    var passwordResult = await _userManager.UpdateAsync(user);
+                    if (!passwordResult.Succeeded)
+                    {
+                        string errmes = "";
+                        foreach (var item in passwordResult.Errors)
+                        {
+                            errmes += "<br>" + item.Description;
+                        }
+                        return new { isSuccess = false, messsage = errmes };
+                    }
+                }
+            }
+
+            return new { isSuccess = true, messsage = "İşlem başarılı." };
+        }
     }
 }
