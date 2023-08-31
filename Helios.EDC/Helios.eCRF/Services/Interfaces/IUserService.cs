@@ -14,6 +14,7 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> AddUser(UserDTO model);
         Task<bool> PassiveOrActiveUser(UserDTO model);
         Task<bool> UpdateUser(UserDTO model);
+        Task<bool> AddRole(UserDTO model);
         Task<List<TenantModel>> GetTenantList();
     }
 }

@@ -15,13 +15,13 @@ namespace Helios.Authentication.Controllers
     {
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
-        private readonly IBus _backgorundWorker;
+        //private readonly IBus _backgorundWorker;
 
-        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus)
+        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager/*, IBus _bus*/)
         {
             _context = context;
             _userManager = userManager;
-            _backgorundWorker = _bus;
+            //_backgorundWorker = _bus;
         }
 
         #region Tenant
@@ -30,7 +30,7 @@ namespace Helios.Authentication.Controllers
         {
             _context.Tenants.Add(new Tenant
             {
-                Id = Guid.NewGuid(),
+                AddedById = model.UserId,
                 Name = model.Name,
                 CreatedAt = DateTimeOffset.Now,
                 IsActive = true
@@ -44,31 +44,49 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<bool> UpdateTenant(TenantModel model)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
+            var tenant = await _context.Tenants.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            if(tenant == null)
+            if (tenant == null)
             {
                 return false;
             }
 
             tenant.Name = model.Name;
-            _context.Tenants.Update(tenant);
-            var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
+            tenant.UpdatedAt = DateTimeOffset.Now;
+            tenant.UpdatedById = model.UserId;
 
-            return result;
+            _context.Tenants.Update(tenant);
+            //var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
+            //var result = _context.SaveChanges() > 0;
+
+            return true;
         }
 
-        
+        [HttpGet]
+        public async Task<TenantModel> GetTenant(Guid id)
+        {
+            var model = new TenantModel();
+
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(x => x.Id == id && x.IsActive && !x.IsDeleted);
+
+            if (tenant != null)
+            {
+                model.Id = tenant.Id;
+                model.Name = tenant.Name;
+            }
+
+            return model;
+        }
 
         [HttpGet]
         public async Task<List<TenantModel>> GetTenantList()
         {
             try
             {
-                await _backgorundWorker.Publish(new UserDTO()
-                {
-                    TenantId = Guid.NewGuid()
-                });
+                //await _backgorundWorker.Publish(new UserDTO()
+                //{
+                //    TenantId = Guid.NewGuid()
+                //});
 
                 var result = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
                 {
@@ -92,7 +110,7 @@ namespace Helios.Authentication.Controllers
         public async Task<UserDTO> GetUserByEmail(string mail)
         {
             var user = _userManager.Users.FirstOrDefault(x => x.Email == mail);
-            
+
             if (user == null)
                 return new UserDTO();
 
@@ -101,7 +119,7 @@ namespace Helios.Authentication.Controllers
                 UserId = user.Id,
                 TenantId = user.TenantId,
                 Email = user.Email,
-                FirstName = user.Name, 
+                FirstName = user.Name,
                 LastName = user.Name
             };
 

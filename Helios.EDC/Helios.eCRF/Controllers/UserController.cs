@@ -27,7 +27,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<bool> UpdateTenant(TenantModel model)
         {
-            var result = await _userService.AddTenant(model);
+            var result = await _userService.UpdateTenant(model);
             return result;
             //return Ok("Form data received successfully"); 
         }

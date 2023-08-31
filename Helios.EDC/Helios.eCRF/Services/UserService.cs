@@ -45,6 +45,7 @@ namespace Helios.eCRF.Services
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/GetTenant", Method.Get);
+                req.AddParameter("id", id);
                 var result = await client.ExecuteAsync(req);
                 tenant = JsonConvert.DeserializeObject<TenantModel>(result.Content);
             }
@@ -96,6 +97,18 @@ namespace Helios.eCRF.Services
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/UpdateUser", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync(req);
+            }
+
+            return false;
+        }
+        
+        public async Task<bool> AddRole(UserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/AddRole", Method.Post);
                 req.AddJsonBody(model);
                 var result = await client.ExecuteAsync(req);
             }
