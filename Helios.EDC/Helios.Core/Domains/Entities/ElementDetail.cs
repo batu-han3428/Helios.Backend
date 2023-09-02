@@ -43,6 +43,7 @@ namespace Helios.Core.Domains.Entities
         //public List<SelectListItem> CustomCodingTags { get; set; }//**??
         public Guid SelectedLabGuid { get; set; }
         public string MetaDataUID { get; set; }
+        public string MetaDataTags { get; set; }
         public int EProPageNumber { get; set; }
         public string ButtonText { get; set; }
         public string DefaultValue { get; set; }
