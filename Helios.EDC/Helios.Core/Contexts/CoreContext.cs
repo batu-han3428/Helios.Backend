@@ -25,6 +25,11 @@ namespace Helios.Core.Contexts
         public DbSet<StudyUser> StudyUsers{ get; set; }
         public DbSet<StudyUserRole> StudyUserRoles{ get; set; }
         public DbSet<StudyUserSite> StudyUserSites{ get; set; }
+        public DbSet<Element> Elements{ get; set; }
+        public DbSet<ElementDetail> ElementDetails{ get; set; }
+        public DbSet<Module> Modules{ get; set; }
+        public DbSet<ModuleElementEvent> ModuleElementEvents{ get; set; }
+        public DbSet<SystemAuditTrail> SystemAuditTrails{ get; set; }
 
     }
 }

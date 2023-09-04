@@ -1,11 +1,13 @@
 ﻿using Helios.Core.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Helios.Core.Domains.Entities
 {
     public class ElementDetail
     {
-        public Guid ElementId { get; set; }
+        [Key]
+        public Guid ElementKey { get; set; }
         public int RowIndex { get; set; }
         public int ColunmIndex { get; set; }
         public Guid StudyVisitModuleId { get; set; }
@@ -54,6 +56,5 @@ namespace Helios.Core.Domains.Entities
         public bool MarkedAsNull { get; set; }
         public string Icon { get; set; }
 
-        public Element Element { get; set; }
     }
 }
