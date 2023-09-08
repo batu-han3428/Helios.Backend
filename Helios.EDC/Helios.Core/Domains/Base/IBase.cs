@@ -11,9 +11,9 @@ namespace Helios.Core.Domains.Base
         bool IsDeleted { get; set; }
 
         [Column(TypeName = "datetime")]
-        DateTime CreatedAt { get; set; }
+        DateTimeOffset CreatedAt { get; set; }
 
         [Column(TypeName = "datetime")]
-        DateTime UpdatedAt { get; set; }
+        DateTimeOffset UpdatedAt { get; set; }
     }
 }

@@ -14,10 +14,10 @@ namespace Helios.Core.Domains.Base
         public bool IsDeleted { get; set; }
 
         [Column(TypeName = "datetime")]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         [Column(TypeName = "datetime")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
 
     }
 }
