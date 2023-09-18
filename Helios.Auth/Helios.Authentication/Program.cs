@@ -14,8 +14,8 @@ try
     #endregion
 
     #region Rabbit Mq Pub/Sub
-        builder.Services.ConfigurationEventBusConsumers(configuration, env);
-        builder.Services.ConfigurationEventBusJob();
+        //builder.Services.ConfigurationEventBusConsumers(configuration, env);
+        //builder.Services.ConfigurationEventBusJob();
     #endregion
 
     #region Smtp

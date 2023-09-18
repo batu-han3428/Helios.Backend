@@ -1,37 +1,20 @@
-﻿using Helios.Authentication.Consumers;
-using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
-using Helios.Authentication.EventBusBase;
-using Helios.Authentication.Helpers;
-using MassTransit;
+﻿using Helios.Core.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System.Net.Mail;
 using System.Net;
-using Helios.Authentication.Services.Interfaces;
-using Helios.Authentication.Services;
-using Microsoft.AspNetCore.DataProtection;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+using Helios.Core.Contexts;
+using MassTransit;
 
-namespace Helios.Authentication.Extension
+namespace Helios.Core.Extension
 {
     public static class ServiceCollectionExtension
     {
         public static IServiceCollection IdentityServerSettings(this IServiceCollection services, IConfiguration Configuration)
         {
-            //services.AddIdentity<ApplicationUser, ApplicationRole>()
-            //    .AddEntityFrameworkStores<AuthenticationContext>()
-            //    .AddDefaultTokenProviders()
-            //    .AddUserStore<UserStore<ApplicationUser, ApplicationRole, AuthenticationContext, Guid>>()
-            //    .AddRoleStore<RoleStore<ApplicationRole, AuthenticationContext, Guid>>();
-
             var activeSql = Configuration["AppConfig:ActiveSql"];
             var conn = $"{activeSql}_DefaultConnection";
 
-            services.ConfigureMysqlPooled<AuthenticationContext>(Configuration, connectionString: conn, MigrationsAssembly: "Helios.Authentication");
-
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-            .AddEntityFrameworkStores<AuthenticationContext>()
-            .AddDefaultTokenProviders();
+            services.ConfigureMysqlPooled<CoreContext>(Configuration, connectionString: conn, MigrationsAssembly: "Helios.Authentication");
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -192,7 +175,7 @@ namespace Helios.Authentication.Extension
                 var relationInputConsumer = qPrefix + Configuration["AppConfig:RabbitMQueueName_RelationInputAuditQueueName"];
 
 
-                services.AddScoped<UserConsumer>();
+                //services.AddScoped<UserConsumer>();
                 //services.AddScoped<DoubleEntryUserResearchStatusConsumer>();
                 //services.AddScoped<ImportQueryMessagesConsumer>();
                 //services.AddScoped<ImportDoubleEntryQueryMessagesConsumer>();
@@ -220,48 +203,48 @@ namespace Helios.Authentication.Extension
                 //services.AddScoped<ReportMailConsumer>();
                 //services.AddScoped<RelationInputAuditConsumer>();
 
-                services.AddMassTransit(c =>
-                {
-              c.AddConsumer<UserConsumer>();
-                    //c.AddConsumer<DoubleEntryUserResearchStatusConsumer>();
-                    //c.AddConsumer<ImportQueryMessagesConsumer>();
-                    //c.AddConsumer<ImportDoubleEntryQueryMessagesConsumer>();
-                    //c.AddConsumer<EProLinkMailConsumer>();
-                    //c.AddConsumer<TermOfUseSignedConsumer>();
-                    //c.AddConsumer<AdversEventPdfMailConsumer>();
-                    //c.AddConsumer<ModuleDataStatusConsumerOverride>();
-                    //c.AddConsumer<UserResearchMailConsumer>();
-                    //c.AddConsumer<MultiCycleMailConsumer>();
-                    //c.AddConsumer<CycleMailConsumer>();
-                    //c.AddConsumer<UserInputMailConsumer>();
-                    //c.AddConsumer<TmfMailConsumer>();
-                    //c.AddConsumer<TmfRequestConsumer>();
-                    //c.AddConsumer<TmfShareConsumer>();
-                    //c.AddConsumer<IwrsSiteAlertConsumer>();
-                    //c.AddConsumer<MonitoringMailConsumer>();
-                    //c.AddConsumer<OpenQueryMailConsumer>();
-                    //c.AddConsumer<VisitMriFileConsumer>();
-                    //c.AddConsumer<ArchivedMailConsumer>();
-                    //c.AddConsumer<MultiCycleAnnotatedPdfMailConsumer>();
-                    //c.AddConsumer<ReportMailConsumer>();
-                    //c.AddConsumer<IwrsMailConsumer>();
-                    //c.AddConsumer<EProCompletedMailConsumer>();
-                    //c.AddConsumer<SettingMailConsumer>();
-                    //c.AddConsumer<RelationInputAuditConsumer>();
+                //services.AddMassTransit(c =>
+                //{
+                //    c.AddConsumer<UserConsumer>();
+                //    //c.AddConsumer<DoubleEntryUserResearchStatusConsumer>();
+                //    //c.AddConsumer<ImportQueryMessagesConsumer>();
+                //    //c.AddConsumer<ImportDoubleEntryQueryMessagesConsumer>();
+                //    //c.AddConsumer<EProLinkMailConsumer>();
+                //    //c.AddConsumer<TermOfUseSignedConsumer>();
+                //    //c.AddConsumer<AdversEventPdfMailConsumer>();
+                //    //c.AddConsumer<ModuleDataStatusConsumerOverride>();
+                //    //c.AddConsumer<UserResearchMailConsumer>();
+                //    //c.AddConsumer<MultiCycleMailConsumer>();
+                //    //c.AddConsumer<CycleMailConsumer>();
+                //    //c.AddConsumer<UserInputMailConsumer>();
+                //    //c.AddConsumer<TmfMailConsumer>();
+                //    //c.AddConsumer<TmfRequestConsumer>();
+                //    //c.AddConsumer<TmfShareConsumer>();
+                //    //c.AddConsumer<IwrsSiteAlertConsumer>();
+                //    //c.AddConsumer<MonitoringMailConsumer>();
+                //    //c.AddConsumer<OpenQueryMailConsumer>();
+                //    //c.AddConsumer<VisitMriFileConsumer>();
+                //    //c.AddConsumer<ArchivedMailConsumer>();
+                //    //c.AddConsumer<MultiCycleAnnotatedPdfMailConsumer>();
+                //    //c.AddConsumer<ReportMailConsumer>();
+                //    //c.AddConsumer<IwrsMailConsumer>();
+                //    //c.AddConsumer<EProCompletedMailConsumer>();
+                //    //c.AddConsumer<SettingMailConsumer>();
+                //    //c.AddConsumer<RelationInputAuditConsumer>();
 
-                    c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
-                    {
-                        cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
-                              b => { b.Username(rabbitMQUserName); b.Password(rabbitMQPassword); });
+                //    c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                //    {
+                //        cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
+                //              b => { b.Username(rabbitMQUserName); b.Password(rabbitMQPassword); });
 
-                        cfg.ReceiveEndpoint(rabbitMQueueName_UserConsumer, ep =>
-                        {
-                            ep.PrefetchCount = 16;
-                            ep.UseMessageRetry(r => r.Interval(2, 100));
-                            ep.ConfigureConsumer<UserConsumer>(provider);
-                        });
-                    }));
-                });
+                //        cfg.ReceiveEndpoint(rabbitMQueueName_UserConsumer, ep =>
+                //        {
+                //            ep.PrefetchCount = 16;
+                //            ep.UseMessageRetry(r => r.Interval(2, 100));
+                //            ep.ConfigureConsumer<UserConsumer>(provider);
+                //        });
+                //    }));
+                //});
 
                 //services.AddSingleton(provider => Bus.Factory.CreateUsingRabbitMq(
                 //      cfg =>
@@ -559,7 +542,7 @@ namespace Helios.Authentication.Extension
 
                 throw;
             }
-           
+
         }
 
         public static void ConfigurationEventBusJob(this IServiceCollection services)
@@ -567,7 +550,7 @@ namespace Helios.Authentication.Extension
             try
             {
                 services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-                services.AddSingleton<IHostedService, Helios.EventBus.Base.MassTransitBusHostedService>();
+                //services.AddSingleton<IHostedService, Helios.EventBus.Base.MassTransitBusHostedService>();
             }
             catch (Exception e)
             {
@@ -575,7 +558,7 @@ namespace Helios.Authentication.Extension
                 throw;
             }
         }
-    
+
         public static void SmtpSettings(this IServiceCollection services)
         {
             services.AddScoped<SmtpClient>
@@ -598,10 +581,10 @@ namespace Helios.Authentication.Extension
 
                });
         }
-    
+
         public static void DependencyInjection(this IServiceCollection services)
         {
-            services.AddScoped<IBaseService, BaseService>();
+            //services.AddScoped<IBaseService, BaseService>();
         }
     }
 }

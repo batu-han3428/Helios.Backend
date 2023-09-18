@@ -11,15 +11,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helios.Authentication.Migrations
 {
     [DbContext(typeof(AuthenticationContext))]
-    [Migration("20230811085921_Second")]
-    partial class Second
+    [Migration("20230911092011_FirstMigrationInNewDb")]
+    partial class FirstMigrationInNewDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Helios.Authentication.Entities.ApplicationRole", b =>
@@ -116,9 +116,6 @@ namespace Helios.Authentication.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -146,6 +143,9 @@ namespace Helios.Authentication.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
@@ -153,7 +153,7 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Helios.Authentication.Entities.Tenant", b =>
+            modelBuilder.Entity("Helios.Authentication.Entities.SystemAuditTrail", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -162,7 +162,66 @@ namespace Helios.Authentication.Migrations
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
 
-                   b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<string>("Changer")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ClientIp")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<byte>("SystemAuditChangeType")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddedById");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("SystemAuditTrails");
+                });
+
+            modelBuilder.Entity("Helios.Authentication.Entities.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("AddedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<bool>("IsActive")
@@ -175,7 +234,7 @@ namespace Helios.Authentication.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
+                    b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<Guid?>("UpdatedById")
@@ -425,8 +484,18 @@ namespace Helios.Authentication.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Helios.Authentication.Entities.Tenant", b =>
+            modelBuilder.Entity("Helios.Authentication.Entities.SystemAuditTrail", b =>
                 {
+                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "AddedBy")
+                        .WithMany()
+                        .HasForeignKey("AddedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
                     b.Navigation("AddedBy");
 
                     b.Navigation("UpdatedBy");

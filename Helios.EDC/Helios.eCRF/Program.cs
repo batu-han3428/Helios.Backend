@@ -1,15 +1,18 @@
+using Helios.eCRF.Extension;
 using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.DefaultConfigurationService(configuration);
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

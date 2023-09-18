@@ -1,0 +1,29 @@
+﻿using Helios.Core.Domains.Base;
+using Helios.Core.enums;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Helios.Core.Domains.Entities
+{
+    public class Subject : EntityBase
+    {
+        public Guid SiteId { get; set; }
+        public Guid StudyId { get; set; }
+        public string InitialName { get; set; }
+        public string SubjectNumber { get; set; }
+        public DataStatus DataStatus { get; set; }
+        public SubjectValidationStatus ValidationStatus { get; set; }
+        public GeneralStatus SubjectStatus { get; set; }
+        public bool Signature { get; set; }
+        public bool Lock { get; set; }
+        public bool Freeze { get; set; }
+        public string RandomData { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTimeOffset RandomDataDate { get; set; }
+        [Column(TypeName = "datetime")]
+        public DateTimeOffset? UserValueUpdateDate { get; set; }
+        public Site Site { get; set; }
+        public Study Study { get; set; }
+        public ICollection<SubjectVisit> SubjectVisits { get; set; }
+    }
+}
