@@ -11,11 +11,8 @@ namespace Helios.Core.Extension
     {
         public static IServiceCollection IdentityServerSettings(this IServiceCollection services, IConfiguration Configuration)
         {
-            var host = System.Net.Dns.GetHostName();
             var activeSql = Configuration["AppConfig:ActiveSql"];
             var conn = $"{activeSql}_DefaultConnection";
-            if (host == "MON-NOTE-44")
-                conn = conn + "_MON-NOTE-44";
 
             services.ConfigureMysqlPooled<CoreContext>(Configuration, connectionString: conn, MigrationsAssembly: "Helios.Authentication");
 

@@ -1,12 +1,12 @@
-﻿using Helios.Core.Enums;
+﻿using Helios.Core.Domains.Base;
+using Helios.Core.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Helios.Core.Domains.Entities
 {
-    public class ModuleElementEvent
+    public class ModuleElementEvent : EntityBase
     {
-        [Key]
         public Guid ModuleId { get; set; }
         public ActionType ActionType { get; set; }
         public Guid SourceElementKey { get; set; }

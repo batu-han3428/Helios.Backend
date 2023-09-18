@@ -93,17 +93,28 @@ namespace Helios.Core.Contexts
             }
         }
 
+        public DbSet<ElementDetail> ElementDetails { get; set; }
+        public DbSet<Element> Elements { get; set; }
+        public DbSet<ModuleElementEvent> ModuleElementEvents { get; set; }
+        public DbSet<Module> Modules { get; set; }
         public DbSet<Site> Sites { get; set; }
         public DbSet<Study> Studies { get; set; }
-        public DbSet<StudyRole> StudyRoles { get; set; }
         public DbSet<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
-        public DbSet<StudyUser> StudyUsers { get; set; }
+        public DbSet<StudyRole> StudyRoles { get; set; }
         public DbSet<StudyUserRole> StudyUserRoles { get; set; }
+        public DbSet<StudyUser> StudyUsers { get; set; }
         public DbSet<StudyUserSite> StudyUserSites { get; set; }
-        public DbSet<Element> Elements { get; set; }
-        public DbSet<ElementDetail> ElementDetails { get; set; }
-        public DbSet<Module> Modules { get; set; }
-        public DbSet<ModuleElementEvent> ModuleElementEvents { get; set; }
+        public DbSet<StudyVisit> StudyVisits { get; set; }
+        public DbSet<StudyVisitPageModuleElementDetail> StudyVisitPageModuleElementDetails { get; set; }
+        public DbSet<StudyVisitPageModuleElement> StudyVisitPageModuleElements { get; set; }
+        public DbSet<StudyVisitPageModule> StudyVisitPageModules { get; set; }
+        public DbSet<StudyVisitPage> StudyVisitPages { get; set; }
+        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<SubjectVisitPageModuleDetail> SubjectVisitModuleDetails { get; set; }
+        public DbSet<SubjectVisitPageModuleElement> SubjectVisitPageModuleElements { get; set; }
+        public DbSet<SubjectVisitPageModule> SubjectVisitPageModules { get; set; }
+        public DbSet<SubjectVisitPage> SubjectVisitPages { get; set; }
+        public DbSet<SubjectVisit> SubjectVisits { get; set; }
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }
 
     }

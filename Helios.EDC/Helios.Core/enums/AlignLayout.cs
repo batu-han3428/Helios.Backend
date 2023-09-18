@@ -1,4 +1,4 @@
-﻿namespace Helios.Core.Enums
+﻿namespace Helios.Core.enums
 {
     public enum AlignLayout : byte
     {

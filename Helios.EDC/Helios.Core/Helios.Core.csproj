@@ -11,6 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20230911092623_FirstMigrationInNewDb.cs" />
+    <Compile Remove="Migrations\20230911092623_FirstMigrationInNewDb.Designer.cs" />
+    <Compile Remove="Migrations\20230915123347_SecondMigrationInNewDb.cs" />
+    <Compile Remove="Migrations\20230915123347_SecondMigrationInNewDb.Designer.cs" />
+    <Compile Remove="Migrations\CoreContextModelSnapshot.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MassTransit" Version="8.1.0" />
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.0" />
@@ -30,6 +38,7 @@
     <Folder Include="Domains\Elements\" />
     <Folder Include="Consumers\" />
     <Folder Include="Constants\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Resources\" />
     <Folder Include="Services\" />
   </ItemGroup>

@@ -26,7 +26,6 @@ namespace Helios.Authentication.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
         public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService)
-        //private readonly IBus _backgorundWorker;
         {
             _context = context;
             _userManager = userManager;

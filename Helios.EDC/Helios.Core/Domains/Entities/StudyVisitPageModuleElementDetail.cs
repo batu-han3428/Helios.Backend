@@ -1,14 +1,13 @@
 ﻿using Helios.Core.Domains.Base;
 using Helios.Core.enums;
-using Helios.Core.Enums;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Helios.Core.Domains.Entities
 {
-    public class ElementDetail : EntityBase
+    public class StudyVisitPageModuleElementDetail : EntityBase
     {
         public Guid ElementKey { get; set; }
+        public Guid StudyVisitPageModuleElementId { get; set; }
         public Guid ParentId { get; set; }
         public int RowIndex { get; set; }
         public int ColunmIndex { get; set; }
@@ -28,6 +27,6 @@ namespace Helios.Core.Domains.Entities
         public string Mask { get; set; }
         public AlignLayout Layout { get; set; }
         public string Options { get; set; }
-
+        public StudyVisitPageModuleElement StudyVisitPageModuleElement { get; set; }
     }
 }

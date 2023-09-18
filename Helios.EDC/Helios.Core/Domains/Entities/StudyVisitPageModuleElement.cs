@@ -1,18 +1,15 @@
 ﻿using Helios.Core.Domains.Base;
 using Helios.Core.Enums;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
 {
-    public class Element : EntityBase
+    public class StudyVisitPageModuleElement : EntityBase
     {
-        public Guid ModuleId { get; set; }
+        public Guid StudyVisitPageModuleId { get; set; }
         public Guid ElementKey { get; set; }
         public ElementType ElementType { get; set; }
-        public string ElementName{ get; set; }
+        public string ElementName { get; set; }
         public string Title { get; set; }
         public bool IsTitleHidden { get; set; }
         public int Order { get; set; }
@@ -22,7 +19,8 @@ namespace Helios.Core.Domains.Entities
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
         public bool CanMissing { get; set; }
-        public Module Module { get; set; }
+        public StudyVisitPageModule StudyVisitPageModule { get; set; }
+        public ICollection<StudyVisitPageModuleElementDetail> StudyVisitPageModuleElementDetails { get; set; }
 
     }
 }

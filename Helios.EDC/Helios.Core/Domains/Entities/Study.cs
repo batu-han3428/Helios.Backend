@@ -4,9 +4,10 @@ namespace Helios.Core.Domains.Entities
 {
     public class Study : EntityBase
     {
-        public Guid ReferansKey { get; set; }
-        public Guid VersiyonKey { get; set; }
+        public Guid ReferenceKey { get; set; }
+        public Guid VersionKey { get; set; }
         public Guid? EquivalentStudyId { get; set; }
+        public string StudyState{ get; set; }
         public int StudyType { get; set; }
         public bool AskInitial { get; set; }
         public bool IsDemo { get; set; }
@@ -18,5 +19,12 @@ namespace Helios.Core.Domains.Entities
         public string CompanyLogoPath { get; set; }
         public string Language { get; set; }
         public Study EquivalentStudy { get; set; }
+        public ICollection<Site> Sites { get; set; }
+        public ICollection<StudyVisit> StudyVisits { get; set; }
+        public ICollection<StudyRole> StudyRoles { get; set; }
+        public ICollection<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
+        public ICollection<StudyUser> StudyUsers { get; set; }
+        public ICollection<Subject> Subjects { get; set; }
+
     }
 }
