@@ -1,26 +1,20 @@
-import 'bootstrap/dist/css/bootstrap.css';
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import { ProSidebarProvider } from "react-pro-sidebar";
-//import "./index.css";
-//import { ProSidebarProvider } from "react-pro-sidebar";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
+import { BrowserRouter } from "react-router-dom";
+import "./i18n";
+import { Provider } from "react-redux";
 
-const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
-const rootElement = document.getElementById('root');
-const root = createRoot(rootElement);
-//const root = ReactDOM.createRoot(document.getElementById("root"));
+import store from "./store";
 
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <BrowserRouter basename={baseUrl}>
-        <ProSidebarProvider>
-            <App />
-        </ProSidebarProvider>
-    </BrowserRouter>);
-    //<React.StrictMode>
-    //    <ProSidebarProvider>
-    //        <App />
-    //    </ProSidebarProvider>
-    //</React.StrictMode>
-//);
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+);
+
+serviceWorker.unregister();
