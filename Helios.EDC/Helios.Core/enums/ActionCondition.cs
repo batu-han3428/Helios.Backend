@@ -1,6 +1,6 @@
 ﻿namespace Helios.Core.Enums
 {
-    public enum ValueCondition
+    public enum ActionCondition
     {
         Less = 1,
         More = 2,

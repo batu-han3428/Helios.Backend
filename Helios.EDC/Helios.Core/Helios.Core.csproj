@@ -35,9 +35,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domains\Elements\" />
     <Folder Include="Consumers\" />
     <Folder Include="Constants\" />
+    <Folder Include="Domains\Elements\Base\" />
     <Folder Include="Migrations\" />
     <Folder Include="Resources\" />
     <Folder Include="Services\" />

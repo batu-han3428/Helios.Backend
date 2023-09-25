@@ -41,7 +41,7 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("ElementKey")
+                    b.Property<Guid>("ElementDetailId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ElementName")
@@ -61,6 +61,9 @@ namespace Helios.Core.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsHidden")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsReadonly")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRequired")
@@ -93,6 +96,8 @@ namespace Helios.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ElementDetailId");
+
                     b.HasIndex("ModuleId");
 
                     b.ToTable("Elements");
@@ -103,6 +108,9 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<bool>("AddTodayDate")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
@@ -139,8 +147,25 @@ namespace Helios.Core.Migrations
                     b.Property<int>("EProPageNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ElementKey")
+                    b.Property<Guid>("ElementId")
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("ElementOptions")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("EndDay")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EndMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EndYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
@@ -150,6 +175,10 @@ namespace Helios.Core.Migrations
 
                     b.Property<byte>("Layout")
                         .HasColumnType("tinyint unsigned");
+
+                    b.Property<string>("LeftText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("LowerLimit")
                         .IsRequired()
@@ -163,18 +192,34 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Options")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<int>("ParentElementEProPageNumber")
                         .HasColumnType("int");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("PlaceholderValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("RightText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("RowIndex")
                         .HasColumnType("int");
+
+                    b.Property<int>("StartDay")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StartMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StartYear")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TargetElementId")
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("char(36)");
@@ -240,11 +285,12 @@ namespace Helios.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<bool>("ActionResult")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("ActionType")
                         .HasColumnType("int");
+
+                    b.Property<string>("ActionValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
@@ -258,21 +304,13 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("JavascriptCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("MainJsCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<Guid>("ModuleId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("SourceElementKey")
+                    b.Property<Guid>("SourceElementId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("TargetElementKey")
+                    b.Property<Guid>("TargetElementId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("TenantId")
@@ -630,6 +668,9 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("StudyId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid>("StudyRoleModulePermissionId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("char(36)");
 
@@ -663,6 +704,8 @@ namespace Helios.Core.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StudyId");
+
+                    b.HasIndex("StudyRoleModulePermissionId");
 
                     b.ToTable("StudyRoles");
                 });
@@ -700,7 +743,13 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("SDV")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("StudyId")
+                    b.Property<Guid?>("StudyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("StudyRoleId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("StudyVisitPageModuleId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("TenantId")
@@ -874,6 +923,9 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("CanSign")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("CanVerify")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
@@ -892,6 +944,12 @@ namespace Helios.Core.Migrations
 
                     b.Property<Guid>("ReferenceKey")
                         .HasColumnType("char(36)");
+
+                    b.Property<bool>("SAELockAction")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("SAELockHour")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("StudyId")
                         .HasColumnType("char(36)");
@@ -926,6 +984,24 @@ namespace Helios.Core.Migrations
 
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
+
+                    b.Property<bool>("CanFreeze")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanLock")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanQuery")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanSdv")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanSign")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanVerify")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -977,6 +1053,24 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
 
+                    b.Property<bool>("CanFreeze")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanLock")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanQuery")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanSdv")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanSign")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanVerify")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
@@ -990,6 +1084,9 @@ namespace Helios.Core.Migrations
                         .HasColumnType("int");
 
                     b.Property<Guid>("ReferenceKey")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("StudyRoleModulePermissionId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("StudyVisitPageId")
@@ -1008,6 +1105,9 @@ namespace Helios.Core.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StudyRoleModulePermissionId")
+                        .IsUnique();
 
                     b.HasIndex("StudyVisitPageId");
 
@@ -1032,9 +1132,6 @@ namespace Helios.Core.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<Guid>("ElementKey")
-                        .HasColumnType("char(36)");
 
                     b.Property<string>("ElementName")
                         .IsRequired()
@@ -1130,9 +1227,6 @@ namespace Helios.Core.Migrations
 
                     b.Property<int>("EProPageNumber")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("ElementKey")
-                        .HasColumnType("char(36)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
@@ -1285,6 +1379,14 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
+                    b.Property<string>("FormName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FormNo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("Freeze")
                         .HasColumnType("tinyint(1)");
 
@@ -1297,7 +1399,19 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("Lock")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<Guid>("ParentSubjectVisitId")
+                        .HasColumnType("char(36)");
+
                     b.Property<bool>("Query")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid>("RelatedSubjectVisitId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("RowIndex")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("SAELockStatus")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("Sdv")
@@ -1425,9 +1539,6 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("StudyVisitPageModuleId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("SubjectVisitId")
-                        .HasColumnType("char(36)");
-
                     b.Property<Guid?>("SubjectVisitPageId")
                         .HasColumnType("char(36)");
 
@@ -1444,59 +1555,9 @@ namespace Helios.Core.Migrations
 
                     b.HasIndex("StudyVisitPageModuleId");
 
-                    b.HasIndex("SubjectVisitId");
-
                     b.HasIndex("SubjectVisitPageId");
 
                     b.ToTable("SubjectVisitPageModules");
-                });
-
-            modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModuleDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("FormNo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("RowIndex")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SubjectVisitPageModuleId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubjectVisitPageModuleId");
-
-                    b.ToTable("SubjectVisitModuleDetails");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModuleElement", b =>
@@ -1511,16 +1572,10 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid>("ElementKey")
-                        .HasColumnType("char(36)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("MarkedAsNull")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("MissingData")
@@ -1553,9 +1608,6 @@ namespace Helios.Core.Migrations
                     b.Property<string>("UserValue")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<bool>("VisibilityOnScreen")
-                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 
@@ -1623,11 +1675,19 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Element", b =>
                 {
+                    b.HasOne("Helios.Core.Domains.Entities.ElementDetail", "ElementDetail")
+                        .WithMany()
+                        .HasForeignKey("ElementDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Helios.Core.Domains.Entities.Module", "Module")
                         .WithMany()
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ElementDetail");
 
                     b.Navigation("Module");
                 });
@@ -1671,18 +1731,22 @@ namespace Helios.Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Study");
-                });
-
-            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
-                {
-                    b.HasOne("Helios.Core.Domains.Entities.Study", "Study")
-                        .WithMany("StudyRoleModulePermissions")
-                        .HasForeignKey("StudyId")
+                    b.HasOne("Helios.Core.Domains.Entities.StudyRoleModulePermission", "StudyRoleModulePermission")
+                        .WithMany()
+                        .HasForeignKey("StudyRoleModulePermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Study");
+
+                    b.Navigation("StudyRoleModulePermission");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
+                {
+                    b.HasOne("Helios.Core.Domains.Entities.Study", null)
+                        .WithMany("StudyRoleModulePermissions")
+                        .HasForeignKey("StudyId");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUser", b =>
@@ -1758,11 +1822,19 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModule", b =>
                 {
+                    b.HasOne("Helios.Core.Domains.Entities.StudyRoleModulePermission", "StudyRoleModulePermission")
+                        .WithOne("StudyVisitPageModule")
+                        .HasForeignKey("Helios.Core.Domains.Entities.StudyVisitPageModule", "StudyRoleModulePermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Helios.Core.Domains.Entities.StudyVisitPage", "StudyVisitPage")
                         .WithMany("StudyVisitPageModules")
                         .HasForeignKey("StudyVisitPageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("StudyRoleModulePermission");
 
                     b.Navigation("StudyVisitPage");
                 });
@@ -1854,30 +1926,11 @@ namespace Helios.Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Helios.Core.Domains.Entities.SubjectVisit", "SubjectVisit")
-                        .WithMany()
-                        .HasForeignKey("SubjectVisitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Helios.Core.Domains.Entities.SubjectVisitPage", null)
                         .WithMany("SubjectVisitPageModules")
                         .HasForeignKey("SubjectVisitPageId");
 
                     b.Navigation("StudyVisitPageModule");
-
-                    b.Navigation("SubjectVisit");
-                });
-
-            modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModuleDetail", b =>
-                {
-                    b.HasOne("Helios.Core.Domains.Entities.SubjectVisitPageModule", "SubjectVisitPageModule")
-                        .WithMany()
-                        .HasForeignKey("SubjectVisitPageModuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SubjectVisitPageModule");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModuleElement", b =>
@@ -1912,6 +1965,12 @@ namespace Helios.Core.Migrations
                     b.Navigation("StudyVisits");
 
                     b.Navigation("Subjects");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
+                {
+                    b.Navigation("StudyVisitPageModule")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisit", b =>
