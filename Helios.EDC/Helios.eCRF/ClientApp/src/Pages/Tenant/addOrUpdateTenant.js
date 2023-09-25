@@ -1,5 +1,5 @@
 import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
-import Sidebar from '../../Layouts/Sidebar/sidebar';
+// import Sidebar from '../../Layouts/Sidebar/sidebar';
 
 //export default class AddTenant extends Component {
 function AddOrUpdateTenant() {
@@ -29,7 +29,7 @@ function AddOrUpdateTenant() {
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
-            <Sidebar></Sidebar>
+            {/* <Sidebar></Sidebar> */}
             <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
                 <div><h1>Add Tenants</h1></div>
                 <hr />
