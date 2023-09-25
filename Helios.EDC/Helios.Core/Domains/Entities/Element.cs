@@ -10,7 +10,8 @@ namespace Helios.Core.Domains.Entities
     public class Element : EntityBase
     {
         public Guid ModuleId { get; set; }
-        public Guid ElementKey { get; set; }
+        [ForeignKey("ElementDetail")]
+        public Guid ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName{ get; set; }
         public string Title { get; set; }
@@ -21,8 +22,10 @@ namespace Helios.Core.Domains.Entities
         public bool IsHidden { get; set; }
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
+        public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
         public Module Module { get; set; }
+        public ElementDetail ElementDetail { get; set; }
 
     }
 }

@@ -6,7 +6,6 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyVisitPageModuleElementDetail : EntityBase
     {
-        public Guid ElementKey { get; set; }
         public Guid StudyVisitPageModuleElementId { get; set; }
         public Guid ParentId { get; set; }
         public int RowIndex { get; set; }

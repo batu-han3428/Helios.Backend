@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Helios.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationInNewDb : Migration
+    public partial class _230921 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,7 @@ namespace Helios.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ParentId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     RowIndex = table.Column<int>(type: "int", nullable: false),
                     ColunmIndex = table.Column<int>(type: "int", nullable: false),
@@ -42,10 +42,26 @@ namespace Helios.Core.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UpperLimit = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Extension = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Mask = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    PlaceholderValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Layout = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    Options = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    StartDay = table.Column<int>(type: "int", nullable: false),
+                    EndDay = table.Column<int>(type: "int", nullable: false),
+                    StartMonth = table.Column<int>(type: "int", nullable: false),
+                    EndMonth = table.Column<int>(type: "int", nullable: false),
+                    EndYear = table.Column<int>(type: "int", nullable: false),
+                    StartYear = table.Column<int>(type: "int", nullable: false),
+                    AddTodayDate = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ElementOptions = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    LeftText = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RightText = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -168,7 +184,7 @@ namespace Helios.Core.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ElementDetailId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ElementType = table.Column<int>(type: "int", nullable: false),
                     ElementName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -182,6 +198,7 @@ namespace Helios.Core.Migrations
                     IsHidden = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsRequired = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDependent = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsReadonly = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanMissing = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -194,6 +211,12 @@ namespace Helios.Core.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Elements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Elements_ElementDetails_ElementDetailId",
+                        column: x => x.ElementDetailId,
+                        principalTable: "ElementDetails",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Elements_Modules_ModuleId",
                         column: x => x.ModuleId,
@@ -211,14 +234,11 @@ namespace Helios.Core.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ActionType = table.Column<int>(type: "int", nullable: false),
-                    SourceElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TargetElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    JavascriptCode = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MainJsCode = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SourceElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ValueCondition = table.Column<int>(type: "int", nullable: false),
-                    ActionResult = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ActionValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -281,13 +301,15 @@ namespace Helios.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Read = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Write = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     SDV = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StudyId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -303,6 +325,124 @@ namespace Helios.Core.Migrations
                         name: "FK_StudyRoleModulePermissions_Studies_StudyId",
                         column: x => x.StudyId,
                         principalTable: "Studies",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
+                name: "StudyUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AuthUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SuperUserIdList = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudyUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudyUsers_Studies_StudyId",
+                        column: x => x.StudyId,
+                        principalTable: "Studies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
+                name: "StudyVisits",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    VisitType = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    CanFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSign = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanVerify = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SAELockHour = table.Column<int>(type: "int", nullable: false),
+                    SAELockAction = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudyVisits", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudyVisits_Studies_StudyId",
+                        column: x => x.StudyId,
+                        principalTable: "Studies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
+                name: "Subjects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    InitialName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SubjectNumber = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DataStatus = table.Column<int>(type: "int", nullable: false),
+                    ValidationStatus = table.Column<int>(type: "int", nullable: false),
+                    SubjectStatus = table.Column<int>(type: "int", nullable: false),
+                    Signature = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RandomData = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RandomDataDate = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UserValueUpdateDate = table.Column<DateTimeOffset>(type: "datetime", nullable: true),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subjects", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Subjects_Sites_SiteId",
+                        column: x => x.SiteId,
+                        principalTable: "Sites",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Subjects_Studies_StudyId",
+                        column: x => x.StudyId,
+                        principalTable: "Studies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -315,6 +455,7 @@ namespace Helios.Core.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyRoleModulePermissionId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Add = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -398,154 +539,10 @@ namespace Helios.Core.Migrations
                         principalTable: "Studies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
-                name: "StudyUsers",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AuthUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SuperUserIdList = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StudyUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyUsers_Studies_StudyId",
-                        column: x => x.StudyId,
-                        principalTable: "Studies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
-                name: "StudyVisits",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VisitType = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Order = table.Column<int>(type: "int", nullable: false),
-                    CanFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSign = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StudyVisits", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StudyVisits_Studies_StudyId",
-                        column: x => x.StudyId,
-                        principalTable: "Studies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
-                name: "Subjects",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    InitialName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SubjectNumber = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DataStatus = table.Column<int>(type: "int", nullable: false),
-                    ValidationStatus = table.Column<int>(type: "int", nullable: false),
-                    SubjectStatus = table.Column<int>(type: "int", nullable: false),
-                    Signature = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RandomData = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    RandomDataDate = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UserValueUpdateDate = table.Column<DateTimeOffset>(type: "datetime", nullable: true),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Subjects", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Subjects_Sites_SiteId",
-                        column: x => x.SiteId,
-                        principalTable: "Sites",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Subjects_Studies_StudyId",
-                        column: x => x.StudyId,
-                        principalTable: "Studies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
-                name: "StudyUserRoles",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StudyUserRoles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StudyUserRoles_StudyRoles_StudyRoleId",
-                        column: x => x.StudyRoleId,
-                        principalTable: "StudyRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_StudyUserRoles_StudyUsers_StudyUserId",
-                        column: x => x.StudyUserId,
-                        principalTable: "StudyUsers",
+                        name: "FK_StudyRoles_StudyRoleModulePermissions_StudyRoleModulePermiss~",
+                        column: x => x.StudyRoleModulePermissionId,
+                        principalTable: "StudyRoleModulePermissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -597,6 +594,12 @@ namespace Helios.Core.Migrations
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Order = table.Column<int>(type: "int", nullable: false),
+                    CanFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSign = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanVerify = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -625,14 +628,22 @@ namespace Helios.Core.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     SubjectId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ParentSubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    RelatedSubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Signature = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Sdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SAELockStatus = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Verification = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    FormNo = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FormName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RowIndex = table.Column<int>(type: "int", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -661,14 +672,55 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
+                name: "StudyUserRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudyUserRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudyUserRoles_StudyRoles_StudyRoleId",
+                        column: x => x.StudyRoleId,
+                        principalTable: "StudyRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudyUserRoles_StudyUsers_StudyUserId",
+                        column: x => x.StudyUserId,
+                        principalTable: "StudyUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
                 name: "StudyVisitPageModules",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitPageId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyRoleModulePermissionId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Order = table.Column<int>(type: "int", nullable: false),
+                    CanFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSign = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanVerify = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -680,6 +732,12 @@ namespace Helios.Core.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudyVisitPageModules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudyVisitPageModules_StudyRoleModulePermissions_StudyRoleMo~",
+                        column: x => x.StudyRoleModulePermissionId,
+                        principalTable: "StudyRoleModulePermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StudyVisitPageModules_StudyVisitPages_StudyVisitPageId",
                         column: x => x.StudyVisitPageId,
@@ -738,7 +796,6 @@ namespace Helios.Core.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ElementType = table.Column<int>(type: "int", nullable: false),
                     ElementName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -779,7 +836,6 @@ namespace Helios.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     SubjectVisitPageId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -805,12 +861,6 @@ namespace Helios.Core.Migrations
                         column: x => x.SubjectVisitPageId,
                         principalTable: "SubjectVisitPages",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_SubjectVisitPageModules_SubjectVisits_SubjectVisitId",
-                        column: x => x.SubjectVisitId,
-                        principalTable: "SubjectVisits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
@@ -820,7 +870,6 @@ namespace Helios.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ParentId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     RowIndex = table.Column<int>(type: "int", nullable: false),
@@ -871,50 +920,15 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
-                name: "SubjectVisitModuleDetails",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SubjectVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    RowIndex = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FormNo = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SubjectVisitModuleDetails", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SubjectVisitModuleDetails_SubjectVisitPageModules_SubjectVis~",
-                        column: x => x.SubjectVisitPageModuleId,
-                        principalTable: "SubjectVisitPageModules",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
                 name: "SubjectVisitPageModuleElements",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     SubjectVisitModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    VisibilityOnScreen = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ShowOnScreen = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MarkedAsNull = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     MissingData = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Sdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -946,6 +960,11 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Elements_ElementDetailId",
+                table: "Elements",
+                column: "ElementDetailId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Elements_ModuleId",
                 table: "Elements",
                 column: "ModuleId");
@@ -974,6 +993,11 @@ namespace Helios.Core.Migrations
                 name: "IX_StudyRoles_StudyId",
                 table: "StudyRoles",
                 column: "StudyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudyRoles_StudyRoleModulePermissionId",
+                table: "StudyRoles",
+                column: "StudyRoleModulePermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudyUserRoles_StudyRoleId",
@@ -1011,6 +1035,12 @@ namespace Helios.Core.Migrations
                 column: "StudyVisitPageModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudyVisitPageModules_StudyRoleModulePermissionId",
+                table: "StudyVisitPageModules",
+                column: "StudyRoleModulePermissionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudyVisitPageModules_StudyVisitPageId",
                 table: "StudyVisitPageModules",
                 column: "StudyVisitPageId");
@@ -1036,11 +1066,6 @@ namespace Helios.Core.Migrations
                 column: "StudyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SubjectVisitModuleDetails_SubjectVisitPageModuleId",
-                table: "SubjectVisitModuleDetails",
-                column: "SubjectVisitPageModuleId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SubjectVisitPageModuleElements_StudyVisitPageModuleElementId",
                 table: "SubjectVisitPageModuleElements",
                 column: "StudyVisitPageModuleElementId");
@@ -1054,11 +1079,6 @@ namespace Helios.Core.Migrations
                 name: "IX_SubjectVisitPageModules_StudyVisitPageModuleId",
                 table: "SubjectVisitPageModules",
                 column: "StudyVisitPageModuleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubjectVisitPageModules_SubjectVisitId",
-                table: "SubjectVisitPageModules",
-                column: "SubjectVisitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubjectVisitPageModules_SubjectVisitPageId",
@@ -1090,16 +1110,10 @@ namespace Helios.Core.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ElementDetails");
-
-            migrationBuilder.DropTable(
                 name: "Elements");
 
             migrationBuilder.DropTable(
                 name: "ModuleElementEvents");
-
-            migrationBuilder.DropTable(
-                name: "StudyRoleModulePermissions");
 
             migrationBuilder.DropTable(
                 name: "StudyUserRoles");
@@ -1111,13 +1125,13 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPageModuleElementDetails");
 
             migrationBuilder.DropTable(
-                name: "SubjectVisitModuleDetails");
-
-            migrationBuilder.DropTable(
                 name: "SubjectVisitPageModuleElements");
 
             migrationBuilder.DropTable(
                 name: "SystemAuditTrails");
+
+            migrationBuilder.DropTable(
+                name: "ElementDetails");
 
             migrationBuilder.DropTable(
                 name: "Modules");
@@ -1139,6 +1153,9 @@ namespace Helios.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "SubjectVisitPages");
+
+            migrationBuilder.DropTable(
+                name: "StudyRoleModulePermissions");
 
             migrationBuilder.DropTable(
                 name: "StudyVisitPages");

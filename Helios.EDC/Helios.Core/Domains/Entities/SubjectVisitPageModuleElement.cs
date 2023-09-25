@@ -6,11 +6,8 @@ namespace Helios.Core.Domains.Entities
     {
         public Guid StudyVisitPageModuleElementId { get; set; }
         public Guid SubjectVisitModuleId { get; set; }
-        public Guid ElementKey { get; set; }
         public string UserValue { get; set; }
-        public bool VisibilityOnScreen { get; set; }
         public bool ShowOnScreen { get; set; }
-        public bool MarkedAsNull { get; set; }
         public bool MissingData { get; set; }
         public bool Sdv { get; set; }
         public bool Query { get; set; }
