@@ -56,5 +56,7 @@ namespace Helios.Core.Domains.Entities
         public string LeftText { get; set; }
         public string RightText { get; set; }
 
+        public Element Element { get; set; }
+
     }
 }
