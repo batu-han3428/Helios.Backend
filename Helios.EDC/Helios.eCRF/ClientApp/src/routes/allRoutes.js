@@ -1,105 +1,109 @@
 import React from "react";
 
 // Profile
-import UserProfile from "../pages/Authentication/user-profile";
+import UserProfile from "../Pages/Template/Authentication/user-profile";
 
 //Email
-import EmailInbox from "../pages/Email/email-inbox";
-import EmailRead from "../pages/Email/email-read";
-import EmailCompose from "../pages/Email/email-compose";
+import EmailInbox from "../Pages/Template/Email/email-inbox";
+import EmailRead from "../Pages/Template/Email/email-read";
+import EmailCompose from "../Pages/Template/Email/email-compose";
 
-import Emailtemplatealert from "../pages/EmailTemplate/email-template-alert";
-import Emailtemplatebasic from "../pages/EmailTemplate/email-template-basic";
-import Emailtemplatebilling from "../pages/EmailTemplate/email-template-billing";
+import Emailtemplatealert from "../Pages/Template/EmailTemplate/email-template-alert";
+import Emailtemplatebasic from "../Pages/Template/EmailTemplate/email-template-basic";
+import Emailtemplatebilling from "../Pages/Template/EmailTemplate/email-template-billing";
 
-// Authentication related pages
-import Login from "../pages/Authentication/Login";
-import Logout from "../pages/Authentication/Logout";
-import Register from "../pages/Authentication/Register";
-import ForgetPwd from "../pages/Authentication/ForgetPassword";
+// Authentication related Pages
+import Login from "../Pages/Template/Authentication/Login";
+import Logout from "../Pages/Template/Authentication/Logout";
+import Register from "../Pages/Template/Authentication/Register";
+import ForgetPwd from "../Pages/Template/Authentication/ForgetPassword";
 
 //  // Inner Authentication
-import Login1 from "../pages/AuthenticationInner/Login";
-import Login2 from "../pages/AuthenticationInner/Login2";
-import Register1 from "../pages/AuthenticationInner/Register";
-import Register2 from "../pages/AuthenticationInner/Register2";
-import Recoverpw from "../pages/AuthenticationInner/Recoverpw";
-import Recoverpw2 from "../pages/AuthenticationInner/Recoverpw2";
-import ForgetPwd1 from "../pages/AuthenticationInner/ForgetPassword";
-import LockScreen from "../pages/AuthenticationInner/auth-lock-screen";
-import LockScreen2 from "../pages/AuthenticationInner/auth-lock-screen-2";
-import ConfirmMail from "../pages/AuthenticationInner/page-confirm-mail";
-import ConfirmMail2 from "../pages/AuthenticationInner/page-confirm-mail-2";
-import EmailVerification from "../pages/AuthenticationInner/auth-email-verification";
-import EmailVerification2 from "../pages/AuthenticationInner/auth-email-verification-2";
-import TwostepVerification from "../pages/AuthenticationInner/auth-two-step-verification";
-import TwostepVerification2 from "../pages/AuthenticationInner/auth-two-step-verification-2";
+import Login1 from "../Pages/Template/AuthenticationInner/Login";
+import Login2 from "../Pages/Template/AuthenticationInner/Login2";
+import Register1 from "../Pages/Template/AuthenticationInner/Register";
+import Register2 from "../Pages/Template/AuthenticationInner/Register2";
+import Recoverpw from "../Pages/Template/AuthenticationInner/Recoverpw";
+import Recoverpw2 from "../Pages/Template/AuthenticationInner/Recoverpw2";
+import ForgetPwd1 from "../Pages/Template/AuthenticationInner/ForgetPassword";
+import LockScreen from "../Pages/Template/AuthenticationInner/auth-lock-screen";
+import LockScreen2 from "../Pages/Template/AuthenticationInner/auth-lock-screen-2";
+import ConfirmMail from "../Pages/Template/AuthenticationInner/page-confirm-mail";
+import ConfirmMail2 from "../Pages/Template/AuthenticationInner/page-confirm-mail-2";
+import EmailVerification from "../Pages/Template/AuthenticationInner/auth-email-verification";
+import EmailVerification2 from "../Pages/Template/AuthenticationInner/auth-email-verification-2";
+import TwostepVerification from "../Pages/Template/AuthenticationInner/auth-two-step-verification";
+import TwostepVerification2 from "../Pages/Template/AuthenticationInner/auth-two-step-verification-2";
 
 // Dashboard
-import Dashboard from "../pages/Dashboard/index";
+import Dashboard from "../Pages/Template/Dashboard/index";
 
 
 //Icons
-import IconDripicons from "../pages/Icons/IconDripicons";
-import IconMaterialdesign from "../pages/Icons/IconMaterialdesign";
-import TypiconsIcon from "../pages/Icons/IconTypicons";
-import IconIon from "../pages/Icons/IconIon";
-import ThemifyIcon from "../pages/Icons/IconThemify";
-import IconFontawesome from "../pages/Icons/IconFontawesome";
+import IconDripicons from "../Pages/Template/Icons/IconDripicons";
+import IconMaterialdesign from "../Pages/Template/Icons/IconMaterialdesign";
+import TypiconsIcon from "../Pages/Template/Icons/IconTypicons";
+import IconIon from "../Pages/Template/Icons/IconIon";
+import ThemifyIcon from "../Pages/Template/Icons/IconThemify";
+import IconFontawesome from "../Pages/Template/Icons/IconFontawesome";
 
 //Tables
-import BasicTables from "../pages/Tables/BasicTables";
-import DatatableTables from "../pages/Tables/DatatableTables";
-import ResponsiveTables from "../pages/Tables/ResponsiveTables";
+import BasicTables from "../Pages/Template/Tables/BasicTables";
+import DatatableTables from "../Pages/Template/Tables/DatatableTables";
+import ResponsiveTables from "../Pages/Template/Tables/ResponsiveTables";
 
 // Forms
-import FormElements from "../pages/Forms/FormElements";
-import FormAdvanced from "../pages/Forms/FormAdvanced";
-import FormEditors from "../pages/Forms/FormEditors";
-import FormValidations from "../pages/Forms/FormValidations";
-import FormMask from "../pages/Forms/FormMask";
-import FormRepeater from "../pages/Forms/FormRepeater";
-import FormUpload from "../pages/Forms/FormUpload";
-import FormWizard from "../pages/Forms/FormWizard";
-import FormXeditable from "../pages/Forms/FormXeditable";
+import FormElements from "../Pages/Template/Forms/FormElements";
+import FormAdvanced from "../Pages/Template/Forms/FormAdvanced";
+import FormEditors from "../Pages/Template/Forms/FormEditors";
+import FormValidations from "../Pages/Template/Forms/FormValidations";
+import FormMask from "../Pages/Template/Forms/FormMask";
+import FormRepeater from "../Pages/Template/Forms/FormRepeater";
+import FormUpload from "../Pages/Template/Forms/FormUpload";
+import FormWizard from "../Pages/Template/Forms/FormWizard";
+import FormXeditable from "../Pages/Template/Forms/FormXeditable";
 
 //Ui
-import UiAlert from "../pages/Ui/UiAlert";
-import UiButtons from "../pages/Ui/UiButtons";
-import UiCards from "../pages/Ui/UiCards";
-import UiCarousel from "../pages/Ui/UiCarousel";
-import UiColors from "../pages/Ui/UiColors";
-import UiDropdown from "../pages/Ui/UiDropdown";
-import UiGeneral from "../pages/Ui/UiGeneral";
-import UiGrid from "../pages/Ui/UiGrid";
-import UiImages from "../pages/Ui/UiImages";
-import UiModal from "../pages/Ui/UiModal";
-import UiProgressbar from "../pages/Ui/UiProgressbar";
-import UiTabsAccordions from "../pages/Ui/UiTabsAccordions";
-import UiTypography from "../pages/Ui/UiTypography";
-import UiVideo from "../pages/Ui/UiVideo";
-import UiSessionTimeout from "../pages/Ui/UiSessionTimeout";
-import UiOffcanvas from "../pages/Ui/UiOffcanvas";
+import UiAlert from "../Pages/Template/Ui/UiAlert";
+import UiButtons from "../Pages/Template/Ui/UiButtons";
+import UiCards from "../Pages/Template/Ui/UiCards";
+import UiCarousel from "../Pages/Template/Ui/UiCarousel";
+import UiColors from "../Pages/Template/Ui/UiColors";
+import UiDropdown from "../Pages/Template/Ui/UiDropdown";
+import UiGeneral from "../Pages/Template/Ui/UiGeneral";
+import UiGrid from "../Pages/Template/Ui/UiGrid";
+import UiImages from "../Pages/Template/Ui/UiImages";
+import UiModal from "../Pages/Template/Ui/UiModal";
+import UiProgressbar from "../Pages/Template/Ui/UiProgressbar";
+import UiTabsAccordions from "../Pages/Template/Ui/UiTabsAccordions";
+import UiTypography from "../Pages/Template/Ui/UiTypography";
+import UiVideo from "../Pages/Template/Ui/UiVideo";
+import UiSessionTimeout from "../Pages/Template/Ui/UiSessionTimeout";
+import UiOffcanvas from "../Pages/Template/Ui/UiOffcanvas";
 
 //Pages
-import PagesStarter from "../pages/Utility/pages-starter";
-import PagesMaintenance from "../pages/Utility/pages-maintenance";
-import PagesComingsoon from "../pages/Utility/pages-comingsoon";
-import PagesTimeline from "../pages/Utility/pages-timeline";
-import PagesInvoice from "../pages/Utility/PagesInvoice";
-import PagesFaqs from "../pages/Utility/pages-faqs";
-import PagesPricing from "../pages/Utility/pages-pricing";
-import Pages404 from "../pages/Utility/pages-404";
-import Pages500 from "../pages/Utility/pages-500";
-import PagesDirectory from "../pages/Utility/PagesDirectory";
-import PagesProfile from "../pages/Utility/pages-profile";
+//import PagesStarter from "../Pages/Template/Utility/Pages-starter";
+//import PagesMaintenance from "../Pages/Template/Utility/Pages-maintenance";
+//import PagesComingsoon from "../Pages/Template/Utility/Pages-comingsoon";
+//import PagesTimeline from "../Pages/Template/Utility/Pages-timeline";
+//import PagesInvoice from "../Pages/Template/Utility/PagesInvoice";
+//import PagesFaqs from "../Pages/Template/Utility/Pages-faqs";
+//import PagesPricing from "../Pages/Template/Utility/Pages-pricing";
+//import Pages404 from "../Pages/Utility/Template/Pages-404";
+//import Pages500 from "../Pages/Utility/Template/Pages-500";
+//import PagesDirectory from "../Pages/Utility/Template/PagesDirectory";
+//import PagesProfile from "../Pages/Utility/Template/Pages-profile";
 
-import TenantList from "../pages/Tenant/tenantList.js";
-import TenantAddOrUpdate from "../pages/Tenant/addOrUpdateTenant.js";
+import TenantList from "../Pages/Tenant/tenantList.js";
+import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
+
+import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
 
 const userRoutes = [
     { path: "/Tenant", component: <TenantList /> },
     { path: "/addTenant", component: <TenantAddOrUpdate /> },
+
+    { path: "/formBuilder", component: <FormBuilder /> },
 
 
   { path: "/dashboard", component: <Dashboard /> },
@@ -161,13 +165,13 @@ const userRoutes = [
   { path: "/ui-offcanvas", component: <UiOffcanvas /> },
 
   //Utility
-  { path: "/pages-starter", component: <PagesStarter /> },
-  { path: "/pages-timeline", component: <PagesTimeline /> },
-  { path: "/pages-invoice", component: <PagesInvoice /> },
-  { path: "/pages-directory", component: <PagesDirectory /> },
-  { path: "/pages-faqs", component: <PagesFaqs /> },
-  { path: "/pages-pricing", component: <PagesPricing /> },
-  { path: "/pages-profile", component: <PagesProfile /> },
+  //{ path: "/Pages-starter", component: <PagesStarter /> },
+  //{ path: "/Pages-timeline", component: <PagesTimeline /> },
+  //{ path: "/Pages-invoice", component: <PagesInvoice /> },
+  //{ path: "/Pages-directory", component: <PagesDirectory /> },
+  //{ path: "/Pages-faqs", component: <PagesFaqs /> },
+  //{ path: "/Pages-pricing", component: <PagesPricing /> },
+  //{ path: "/Pages-profile", component: <PagesProfile /> },
 
   // this route should be at the end of all other routes
   { path: "/", component: <TenantList /> },
@@ -179,19 +183,19 @@ const authRoutes = [
   { path: "/forgot-password", component: <ForgetPwd /> },
   { path: "/register", component: <Register /> },
 
-  { path: "/pages-maintenance", component: <PagesMaintenance /> },
-  { path: "/pages-comingsoon", component: <PagesComingsoon /> },
-  { path: "/pages-404", component: <Pages404 /> },
-  { path: "/pages-500", component: <Pages500 /> },
+  //{ path: "/Pages-maintenance", component: <PagesMaintenance /> },
+  //{ path: "/Pages-comingsoon", component: <PagesComingsoon /> },
+  //{ path: "/Pages-404", component: <Pages404 /> },
+  //{ path: "/Pages-500", component: <Pages500 /> },
 
   // Authentication Inner
-  { path: "/pages-login", component: <Login1 /> },
-  { path: "/pages-login-2", component: <Login2 /> },
-  { path: "/pages-register", component: <Register1 /> },
-  { path: "/pages-register-2", component: <Register2 /> },
+  { path: "/Pages-login", component: <Login1 /> },
+  { path: "/Pages-login-2", component: <Login2 /> },
+  { path: "/Pages-register", component: <Register1 /> },
+  { path: "/Pages-register-2", component: <Register2 /> },
   { path: "/page-recoverpw", component: <Recoverpw /> },
   { path: "/page-recoverpw-2", component: <Recoverpw2 /> },
-  { path: "/pages-forgot-pwd", component: <ForgetPwd1 /> },
+  { path: "/Pages-forgot-pwd", component: <ForgetPwd1 /> },
   { path: "/auth-lock-screen", component: <LockScreen /> },
   { path: "/auth-lock-screen-2", component: <LockScreen2 /> },
   { path: "/page-confirm-mail", component: <ConfirmMail /> },

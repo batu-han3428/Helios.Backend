@@ -1,0 +1,12 @@
+﻿.elmlst {
+    background-color: #67a1e8 !important;
+    border-color: #67a1e8 !important;
+    color: #FFFFFF !important;
+    margin: 2px !important;
+    cursor: pointer !important;
+    border-radius: 3px !important;
+    height: 30px;
+    font-size: 12px !important;
+    width:100%;
+    text-align:left !important;
+}
