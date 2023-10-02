@@ -13,8 +13,8 @@ import Emailtemplatebasic from "../Pages/Template/EmailTemplate/email-template-b
 import Emailtemplatebilling from "../Pages/Template/EmailTemplate/email-template-billing";
 
 // Authentication related Pages
-import Login from "../Pages/Template/Authentication/Login";
-import Logout from "../Pages/Template/Authentication/Logout";
+import Login from "../Pages/Authentication/Login";
+import Logout from "../Pages/Authentication/Logout";
 import Register from "../Pages/Template/Authentication/Register";
 import ForgetPwd from "../Pages/Template/Authentication/ForgetPassword";
 
