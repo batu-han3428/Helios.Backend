@@ -8,3 +8,5 @@ export * from "./auth/profile/actions"
 
 //Calendar
 export * from "./calendar/actions"
+
+export * from "./auth/user/actions"

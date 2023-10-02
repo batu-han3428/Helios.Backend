@@ -1,45 +1,67 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import VerticalLayout from "../../components/VerticalLayout";
-
-
-//constants
+import { getLocalStorage, removeLocalStorage } from '../../helpers/local-storage/localStorageProcess';
+import { loginuser } from "../../store/actions";
 import { layoutTypes } from "../../constants/layout";
+import { onLogin } from "../../helpers/Auth/useAuth";
 
-const Authmiddleware = (props) => {
+const AuthMiddleware = (props) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const layoutType = useSelector(state => state.rootReducer.Layout.layoutType);
+    const user = getLocalStorage("accessToken");
+    const { element: Element, roles } = props;
+    //const performRedirect = () => {
+    //    debugger;
+    //    if (!user) {
+    //        return <Navigate to={{ pathname: "/login", state: { from: props.location } }} />;
+    //    } else {
+    //        const result = onLogin(); // Burada onLogin fonksiyonunuzu çaðýrarak kullanýcý giriþini kontrol edin.
+    //        if (result === false) {
+    //            // Kullanýcý giriþi baþarýsýzsa localStorage'dan accessToken'ý kaldýrýn ve login sayfasýna yönlendirin.
+    //            removeLocalStorage("accessToken");
+    //            return <Navigate to={{ pathname: "/login", state: { from: props.location } }} />;
+    //        } else {
+    //            // Kullanýcý giriþi baþarýlýysa redux store'a kullanýcý bilgilerini ekleyin.
+    //            dispatch(loginuser(result));
+    //            return null; // Yönlendirme yapýlacaksa, null döndürün.
+    //        }
+    //    }
+    //};
 
-  const { layoutType } = useSelector(state => ({
-    layoutType: state.Layout.layoutType,
-  }));
+    //useEffect(() => {
+    //    const redirect = performRedirect();
+    //    if (redirect) {
+    //        navigate({ pathname: "/login", state: { from: props.location } });
+    //    }
+    //}, [dispatch, navigate, props.location, user]);
 
-  const getLayout = (layoutType) => {
-    let Layout = VerticalLayout;
-    switch (layoutType) {
-      case layoutTypes.VERTICAL:
-        Layout = VerticalLayout;
-        break;
-      case layoutTypes.HORIZONTAL:
-      /*  Layout = HorizontalLayout;*/
-        break;
-      default:
-        break;
+    if (!user) {
+        return <Navigate to={{ pathname: "/login", state: { from: props.location } }} />;
+    } else {
+        const result = onLogin(); // Burada onLogin fonksiyonunuzu çaðýrarak kullanýcý giriþini kontrol edin.
+        if (result === false) {
+            // Kullanýcý giriþi baþarýsýzsa localStorage'dan accessToken'ý kaldýrýn ve login sayfasýna yönlendirin.
+            removeLocalStorage("accessToken");
+            return <Navigate to={{ pathname: "/login", state: { from: props.location } }} />;
+        } else {
+            // Kullanýcý giriþi baþarýlýysa redux store'a kullanýcý bilgilerini ekleyin.
+            dispatch(loginuser(result));
+    /*        return null; // Yönlendirme yapýlacaksa, null döndürün.*/
+            
+            if (roles && !roles.some(role => result.roles.includes(role))) {
+                // Kullanýcýnýn rolü yetki gerektiren sayfayý açmak için yeterli deðilse unauthorized sayfasýna yönlendir
+                return <Navigate to="/unauthorized" />;
+            }
+
+        }
     }
-    return Layout;
-  };
 
-  const Layout = getLayout(layoutType);
+    const Layout = layoutType === layoutTypes.VERTICAL ? VerticalLayout : VerticalLayout; // HorizontalLayout kullanacaksanýz burayý güncelleyin.
 
-  if (!localStorage.getItem("authUser")) {
-    return (
-      <Navigate to={{ pathname: "/login", state: { from: props.location } }} />
-    );
-  }
-
-  return (
-    <React.Fragment>
-      <Layout>{props.children}</Layout>
-    </React.Fragment>);
+    return <Layout>{Element}</Layout>;
 };
 
-export default Authmiddleware;
+export default AuthMiddleware;

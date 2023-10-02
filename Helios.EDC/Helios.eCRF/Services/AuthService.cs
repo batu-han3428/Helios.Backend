@@ -1,4 +1,5 @@
-﻿using Helios.eCRF.Models;
+﻿using Helios.Common.DTO;
+using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
 using Newtonsoft.Json;
@@ -13,13 +14,13 @@ namespace Helios.eCRF.Services
         {
         }
 
-        public async Task<dynamic> LoginAsync(AccountModel model)
+        public async Task<ApiResponse<dynamic>> LoginAsync(AccountModel model)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AuthAccount/Login", Method.Post);
                 req.AddJsonBody(model);
-                var result = await client.ExecuteAsync<dynamic>(req);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
         }

@@ -4,7 +4,6 @@ import { combineReducers } from "redux"
 import Layout from "./layout/reducer"
 
 // Authentication
-import Login from "./auth/login/reducer"
 import Account from "./auth/register/reducer"
 import ForgetPassword from "./auth/forgetpwd/reducer"
 import Profile from "./auth/profile/reducer"
@@ -12,14 +11,15 @@ import Profile from "./auth/profile/reducer"
 //Calendar
 import calendar from "./calendar/reducer"
 
-const rootReducer = combineReducers({
-  // public
-  Layout,
-  Login,
-  Account,
-  ForgetPassword,
-  Profile,
-  calendar,
-})
+import Login from './auth/user/reducer'
 
-export default rootReducer
+export const rootReducer = combineReducers({
+    // public
+    Layout,
+    Login,
+    Account,
+    ForgetPassword,
+    Profile,
+    calendar,
+
+});

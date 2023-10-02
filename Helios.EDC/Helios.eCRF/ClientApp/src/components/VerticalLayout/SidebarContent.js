@@ -162,6 +162,13 @@ const SidebarContent = props => {
             </li>
 
             <li>
+              <Link to="/study" className="waves-effect">
+                <i className="ti-home"></i>
+                <span>{props.t("Study")}</span>
+              </Link>
+            </li>
+
+            <li>
               <Link to="/dashboard" className="waves-effect">
                 <i className="ti-home"></i>
                 <span className="badge rounded-pill bg-primary float-end">1</span>

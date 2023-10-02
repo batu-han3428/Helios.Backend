@@ -26,7 +26,6 @@ class Layout extends Component {
     };
     this.toggleMenuCallback = this.toggleMenuCallback.bind(this);
     this.hideRightbar = this.hideRightbar.bind(this);
-    console.log(this.props.leftSideBarTheme, this.props.leftSideBarType, this.state.isMobile);
   }
 
   capitalizeFirstLetter = string => {

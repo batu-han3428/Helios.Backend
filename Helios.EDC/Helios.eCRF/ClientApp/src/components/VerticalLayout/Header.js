@@ -220,7 +220,7 @@ const mapStatetoProps = state => {
     showRightSidebar,
     leftMenu,
     leftSideBarType,
-  } = state.Layout;
+  } = state.rootReducer.Layout;
   return { layoutType, showRightSidebar, leftMenu, leftSideBarType };
 };
 

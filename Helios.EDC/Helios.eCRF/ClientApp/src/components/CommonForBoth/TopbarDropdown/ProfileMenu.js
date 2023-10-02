@@ -83,7 +83,7 @@ ProfileMenu.propTypes = {
 };
 
 const mapStatetoProps = state => {
-  const { error, success } = state.Profile;
+    const { error, success } = state.rootReducer.Profile;
   return { error, success };
 };
 

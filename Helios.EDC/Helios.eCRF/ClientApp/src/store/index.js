@@ -1,16 +1,19 @@
-import { createStore, applyMiddleware, compose } from "redux"
-import createSagaMiddleware from "redux-saga"
+import { rootReducer } from "./reducers"
 
-import rootReducer from "./reducers"
-import rootSaga from "./sagas"
 
-const sagaMiddleware = createSagaMiddleware()
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+import { configureStore } from '@reduxjs/toolkit'
+import { setupListeners } from '@reduxjs/toolkit/query'
+import { LoginApi } from './services/Login'
+import { StudyApi } from './services/Study'
 
-const store = createStore(
-  rootReducer,
-  composeEnhancers(applyMiddleware(sagaMiddleware))
-)
-sagaMiddleware.run(rootSaga)
+export const store = configureStore({
+    reducer: {
+        rootReducer,
+        [LoginApi.reducerPath]: LoginApi.reducer,
+        [StudyApi.reducerPath]: StudyApi.reducer
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(LoginApi.middleware).concat(StudyApi.middleware),
+})
 
-export default store
+setupListeners(store.dispatch)

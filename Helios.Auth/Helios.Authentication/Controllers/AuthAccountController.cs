@@ -4,6 +4,7 @@ using Helios.Authentication.Enums;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
+using Helios.Common.DTO;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Math;
+using System.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
 
@@ -27,7 +29,8 @@ namespace Helios.Authentication.Controllers
         private readonly IBus _backgorundWorker;       
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
+        private readonly IConfiguration _configuration;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
@@ -36,6 +39,7 @@ namespace Helios.Authentication.Controllers
             _baseService = baseService;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -107,16 +111,20 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<dynamic> Login(AccountModel model)
+        public async Task<ApiResponse<dynamic>> Login(AccountModel model)
         {
             try
             {
-                var user = _userManager.Users.FirstOrDefault(p => p.Email == model.Email);
+                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);
                 if (user != null)
                 {
                     if (!user.IsActive)
                     {
-                        return new { isSuccess = false, message = "Hesabınızın açılması için lütfen sistem yöneticisi ile iletişime geçiniz." };
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Hesabınızın açılması için lütfen sistem yöneticisi ile iletişime geçiniz."
+                        };
                     }
 
                     if (user.AccessFailedCount == 5)
@@ -125,7 +133,11 @@ namespace Helios.Authentication.Controllers
                         var updateResult = await _userManager.UpdateAsync(user);
                         if (updateResult.Succeeded)
                         {
-                            return new { isSuccess = false, message = "Giriş deneme limitinizi aştığınız için hesabınız kitlenmiştir. Yardım için sistem yöneticinize başvurun." };
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Giriş deneme limitinizi aştığınız için hesabınız kitlenmiştir. Yardım için sistem yöneticinize başvurun."
+                            };
                         }
                     }
 
@@ -137,8 +149,12 @@ namespace Helios.Authentication.Controllers
                         var remainAttemp = 5 - user.AccessFailedCount;
                         var failMsg = user.AccessFailedCount == 4 ? "Eğer şifrenizi yanlış girerseniz hesabınız bloke olacaktır, lütfen sistem yöneticisi ile iletişime geçiniz." : "Şifrenizin kullanım geçerliliği için @Number deneme hakkınız kalmıştır.".Replace("@Number", remainAttemp.ToString());
                         var updateResult = await _userManager.UpdateAsync(user);
- 
-                        return new { isSuccess = false, message = failMsg };
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = failMsg
+                        };
                     }
 
                     var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
@@ -158,7 +174,12 @@ namespace Helios.Authentication.Controllers
                         var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                         var username = user.Email;
                         //return RedirectToAction("ResetPassword", "Account", new { firstlogin = firstLogin, code = code, username = username, firstPassword = true, shortName, returnMessage = returnMessage });
-                        return new { isSuccess = false, message = "ResetPassword git", values = new { code = code, username = username, firstPassword = true } };
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "ResetPassword git",
+                            Values = new { code = code, username = username, firstPassword = true }
+                        };
                     }
 
                     var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
@@ -167,7 +188,13 @@ namespace Helios.Authentication.Controllers
                     {
                         var userRoles = await _userManager.GetRolesAsync(user);
                         var enumList = userRoles.Select(x => Enum.Parse<Roles>(x))
-                         .ToList();
+                        .ToList();
+
+                        TokenHandler tokenHandler = new TokenHandler(_configuration);
+                        Token token = tokenHandler.CreateAccessToken(user);
+                        user.RefreshToken = token.RefreshToken;
+                        user.RefrestTokenEndDate = token.Expiration.AddMinutes(3);
+                        await _context.SaveChangesAsync();
 
                         switch (enumList)
                         {
@@ -187,10 +214,15 @@ namespace Helios.Authentication.Controllers
                              &&
                                enumList.Contains(Roles.TenantAdmin)
                             ):
-                                return new { isSuccess = true, message = "1. sayfa" };
+                                //return new { isSuccess = true, message = "1. sayfa" };
                             case var _ when
                             enumList.Contains(Roles.TenantAdmin):
-                                return new { isSuccess = true, message = "2. sayfa" };
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "2. sayfa",
+                                    Values = new { accessToken = token.AccessToken }
+                                };
                             case var _ when
                             (
                                 enumList.Contains(Roles.SuperAdmin)
@@ -205,7 +237,7 @@ namespace Helios.Authentication.Controllers
                                 ||
                                 enumList.Contains(Roles.StudySubject)
                             ):
-                                return new { isSuccess = true, message = "3. sayfa" };
+                                //return new { isSuccess = true, message = "3. sayfa" };
                             case var _ when enumList.Contains(Roles.StudyUser):
 
 
@@ -231,11 +263,19 @@ namespace Helios.Authentication.Controllers
                                 break;
                         }
 
-                        return new { isSuccess = true, message = "Giriş başarılı!" };
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Giriş başarılı!"
+                        };
                     }
                 }
 
-                return new { isSuccess = false, message = "Geçersiz giriş denemesi!" };
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Geçersiz giriş denemesi!"
+                };
             }
             catch (Exception e)
             {

@@ -99,12 +99,20 @@ import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
 
 import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
 
+//Study
+import StudyList from "../pages/Study/StudyList";
+import AddOrUpdateStudy from "../pages/Study/AddOrUpdateStudy";
+
+
 const userRoutes = [
+    //tenant
     { path: "/Tenant", component: <TenantList /> },
     { path: "/addTenant", component: <TenantAddOrUpdate /> },
 
     { path: "/formBuilder", component: <FormBuilder /> },
-
+    //study
+    { path: "study", component: <StudyList />, roles: ['TenantAdmin'] },
+    { path: "addstudy", component: <AddOrUpdateStudy />},
 
   { path: "/dashboard", component: <Dashboard /> },
 

@@ -61,9 +61,8 @@ const App = () => {
             <Route
               path={route.path}
               element={
-                <Authmiddleware>
-                  {route.component}
-                </Authmiddleware>}
+                  <Authmiddleware element={route.component} roles={route.roles} />
+              }
               key={idx}
               exact={true}
             />
