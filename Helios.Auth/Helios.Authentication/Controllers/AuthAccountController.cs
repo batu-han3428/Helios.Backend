@@ -143,48 +143,48 @@ namespace Helios.Authentication.Controllers
 
                     var checkPassword = await _userManager.CheckPasswordAsync(user, model.Password);
 
-                    if (!checkPassword)
-                    {
-                        user.AccessFailedCount++;
-                        var remainAttemp = 5 - user.AccessFailedCount;
-                        var failMsg = user.AccessFailedCount == 4 ? "Eğer şifrenizi yanlış girerseniz hesabınız bloke olacaktır, lütfen sistem yöneticisi ile iletişime geçiniz." : "Şifrenizin kullanım geçerliliği için @Number deneme hakkınız kalmıştır.".Replace("@Number", remainAttemp.ToString());
-                        var updateResult = await _userManager.UpdateAsync(user);
+                    //if (!checkPassword)
+                    //{
+                    //    user.AccessFailedCount++;
+                    //    var remainAttemp = 5 - user.AccessFailedCount;
+                    //    var failMsg = user.AccessFailedCount == 4 ? "Eğer şifrenizi yanlış girerseniz hesabınız bloke olacaktır, lütfen sistem yöneticisi ile iletişime geçiniz." : "Şifrenizin kullanım geçerliliği için @Number deneme hakkınız kalmıştır.".Replace("@Number", remainAttemp.ToString());
+                    //    var updateResult = await _userManager.UpdateAsync(user);
 
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = false,
-                            Message = failMsg
-                        };
-                    }
+                    //    return new ApiResponse<dynamic>
+                    //    {
+                    //        IsSuccess = false,
+                    //        Message = failMsg
+                    //    };
+                    //}
 
-                    var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
-                    var now = DateTime.UtcNow;
-                    var returnMessage = "";
-                    bool firstLogin = true;
-                    //if (user.LastChangePasswordDate >= passUpdateDate)
-                    if (now >= passUpdateDate)
-                    {
-                        firstLogin = false;
-                        user.ChangePassword = false;
-                        returnMessage = "Sayın @UserFullName,\r\n\r\nŞifrenizin kullanım süresi dolmuştur.\r\nYeni şifrenizi oluşturmak için aşağıda bulunan \"Yeni şifre gönder\" butonuna tıklayınız.".Replace("@UserFullName", user.Email);
-                    }
+                    //var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
+                    //var now = DateTime.UtcNow;
+                    //var returnMessage = "";
+                    //bool firstLogin = true;
+                    ////if (user.LastChangePasswordDate >= passUpdateDate)
+                    //if (now >= passUpdateDate)
+                    //{
+                    //    firstLogin = false;
+                    //    user.ChangePassword = false;
+                    //    returnMessage = "Sayın @UserFullName,\r\n\r\nŞifrenizin kullanım süresi dolmuştur.\r\nYeni şifrenizi oluşturmak için aşağıda bulunan \"Yeni şifre gönder\" butonuna tıklayınız.".Replace("@UserFullName", user.Email);
+                    //}
 
-                    if (!user.ChangePassword)
-                    {
-                        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                        var username = user.Email;
-                        //return RedirectToAction("ResetPassword", "Account", new { firstlogin = firstLogin, code = code, username = username, firstPassword = true, shortName, returnMessage = returnMessage });
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = false,
-                            Message = "ResetPassword git",
-                            Values = new { code = code, username = username, firstPassword = true }
-                        };
-                    }
+                    //if (!user.ChangePassword)
+                    //{
+                    //    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    //    var username = user.Email;
+                    //    //return RedirectToAction("ResetPassword", "Account", new { firstlogin = firstLogin, code = code, username = username, firstPassword = true, shortName, returnMessage = returnMessage });
+                    //    return new ApiResponse<dynamic>
+                    //    {
+                    //        IsSuccess = false,
+                    //        Message = "ResetPassword git",
+                    //        Values = new { code = code, username = username, firstPassword = true }
+                    //    };
+                    //}
 
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                    //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
 
-                    if (result.Succeeded)
+                    if (/*result.Succeeded*/true)
                     {
                         var userRoles = await _userManager.GetRolesAsync(user);
                         var enumList = userRoles.Select(x => Enum.Parse<Roles>(x))
