@@ -43,4 +43,8 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Helios.Common\Helios.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,39 @@
+﻿import { decodeToken } from "../Util/tokenUtil";
+import { getLocalStorage, removeLocalStorage } from '../local-storage/localStorageProcess';
+
+
+
+export const onLogin = () => {
+    debugger;
+    let token = getLocalStorage("accessToken");
+
+    if (token !== null) {
+        var auth = decodeToken(token);
+        let exp = new Date(auth.exp * 1000);
+
+        if (exp < new (Date)) {
+            return false;
+        }
+
+        let mainRoles = [...auth.roles];
+        let roles = [];
+        mainRoles.forEach(role => roles.push(role));
+
+        return {
+            token: token,
+            name: auth.name,
+            roles: roles,
+            isAuthenticated: auth.isAuthenticated,
+            exp: exp.toISOString(),
+            mail: auth.mail,
+            userId: auth.userId,
+            tenantId: auth.tenantId,
+        };
+    }
+    return false;
+};
+
+export const onLogout = (navigate) => {
+    removeLocalStorage("accessToken");
+    navigate("/login");
+};

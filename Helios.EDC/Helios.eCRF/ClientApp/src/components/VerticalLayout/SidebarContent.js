@@ -99,7 +99,6 @@ const SidebarContent = props => {
   };
 
     const activeMenu = useCallback(() => {
-        debugger;
     const pathName = location.pathname;
     const fullPath = pathName;
     let matchingMenuItem = null;
@@ -152,6 +151,13 @@ const SidebarContent = props => {
               <Link to="/" className="waves-effect">
                 <i className="ti-home"></i>
                 <span>{props.t("Tenant")}</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/study" className="waves-effect">
+                <i className="ti-home"></i>
+                <span>{props.t("Study")}</span>
               </Link>
             </li>
 

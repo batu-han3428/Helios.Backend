@@ -1,6 +1,9 @@
-﻿using Helios.eCRF.Models;
+﻿using Helios.Common.DTO;
+using Helios.Common.Model;
+using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
+using MassTransit.Internals.GraphValidation;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -72,6 +75,38 @@ namespace Helios.eCRF.Services
             }
 
             return moduleList;
+        }
+
+        public async Task<List<StudyDTO>> GetStudyList()
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/GetStudyList", Method.Get);
+                var result = await client.ExecuteAsync<List<StudyDTO>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<StudyDTO> GetStudy(Guid studyId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/GetStudy", Method.Get);
+                req.AddParameter("studyId", studyId);
+                var result = await client.ExecuteAsync<StudyDTO>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/StudySave", Method.Post);
+                req.AddJsonBody(studyModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
         }
     }
 }

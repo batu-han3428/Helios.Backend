@@ -1,0 +1,44 @@
+﻿.dataTables_wrapper thead:last-child tr:last-child th {
+    display: none;
+}
+
+.dataTables_wrapper thead:first-child th:nth-child(1) {
+    display: none !important;
+}
+
+.dataTables_wrapper tbody td:nth-child(1) {
+    display: none;
+}
+
+.icon-container {
+    display:flex;
+    justify-content:space-around;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    background-color: #6d6e70;
+    mask-size: cover;
+    cursor:pointer;
+}
+
+.icon-update {
+    mask: url('../../assets/images/underline-button.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/underline-button.png') no-repeat center center;
+}
+
+.icon-demo {
+    mask: url('../../assets/images/curve-arrows.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/curve-arrows.png') no-repeat center center;
+}
+
+.icon-unlock {
+    mask: url('../../assets/images/open-padlock.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/open-padlock.png') no-repeat center center;
+}
+
+.icon-live {
+    mask: url('../../assets/images/testing-tube.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/testing-tube.png') no-repeat center center;
+}

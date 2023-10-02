@@ -94,13 +94,23 @@ import Pages500 from "../pages/Utility/pages-500";
 import PagesDirectory from "../pages/Utility/PagesDirectory";
 import PagesProfile from "../pages/Utility/pages-profile";
 
+//Tenant
 import TenantList from "../pages/Tenant/tenantList.js";
 import TenantAddOrUpdate from "../pages/Tenant/addOrUpdateTenant.js";
 
+//Study
+import StudyList from "../pages/Study/StudyList";
+import AddOrUpdateStudy from "../pages/Study/AddOrUpdateStudy";
+
+
 const userRoutes = [
+    //tenant
     { path: "/Tenant", component: <TenantList /> },
     { path: "/addTenant", component: <TenantAddOrUpdate /> },
 
+    //study
+    { path: "study", component: <StudyList />, roles: ['TenantAdmin'] },
+    { path: "addstudy", component: <AddOrUpdateStudy />},
 
   { path: "/dashboard", component: <Dashboard /> },
 
