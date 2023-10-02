@@ -100,8 +100,8 @@ import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
 import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
 
 //Study
-import StudyList from "../pages/Study/StudyList";
-import AddOrUpdateStudy from "../pages/Study/AddOrUpdateStudy";
+import StudyList from "../Pages/Study/StudyList";
+import AddOrUpdateStudy from "../Pages/Study/AddOrUpdateStudy";
 
 
 const userRoutes = [
