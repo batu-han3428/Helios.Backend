@@ -13,6 +13,8 @@ import calendar from "./calendar/reducer"
 
 import Login from './auth/user/reducer'
 
+import Loader from './loader/reducer'
+
 export const rootReducer = combineReducers({
     // public
     Layout,
@@ -21,5 +23,5 @@ export const rootReducer = combineReducers({
     ForgetPassword,
     Profile,
     calendar,
-
+    Loader,
 });

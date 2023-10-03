@@ -11,6 +11,8 @@ import {
 } from "reactstrap";
 import { useStudyListGetQuery } from '../../store/services/Study';
 import './study.css';
+import { useDispatch } from "react-redux";
+import { startloading, endloading } from '../../store/loader/actions';
 
 
 const StudyList = props => {
@@ -20,12 +22,13 @@ const StudyList = props => {
 
     const navigate = useNavigate();
 
+    const dispatch = useDispatch();
+
     const toggle = () => {
         setMenu(!menu);
     };
 
     const studyUpdate = (id) => {
-        console.log(`Edit button clicked for study with ID: ${id}`);
         navigate(`/addstudy`, { state: { studyId: id } });
     };
 
@@ -39,6 +42,7 @@ const StudyList = props => {
             </div>);
         return actions;
     };
+
     const data = {
         columns: [
             {
@@ -90,6 +94,7 @@ const StudyList = props => {
     const { data: studyData, error, isLoading } = useStudyListGetQuery();
 
     useEffect(() => {
+        dispatch(startloading());
         if (!isLoading && !error) {
             const updatedStudyData = studyData.map(item => {
                 return {
@@ -98,6 +103,7 @@ const StudyList = props => {
                 };
             });
             setTableData(updatedStudyData);
+            dispatch(endloading());
         }
     }, [studyData, error, isLoading]);
 
@@ -114,9 +120,6 @@ const StudyList = props => {
                         <Row className="align-items-center">
                             <Col md={8}>
                                 <h6 className="page-title">Study list</h6>
-                                {/*<ol className="breadcrumb m-0">*/}
-                                {/*    <li className="breadcrumb-item active">Study list</li>*/}
-                                {/*</ol>*/}
                             </Col>
 
                             <Col md="4">

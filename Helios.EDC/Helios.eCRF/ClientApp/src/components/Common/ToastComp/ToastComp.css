@@ -1,0 +1,19 @@
+﻿.toast {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    z-index: 1;
+    color: #5e666d !important;
+}
+
+.tost .toast-header {
+    background-color: #fafcfb;
+}
+
+.success .toast-body {
+    background-color: #ddede6;
+}
+
+.error .toast-body {
+    background-color: #fae1e3;
+}

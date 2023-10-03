@@ -181,8 +181,9 @@ const userRoutes = [
   //{ path: "/Pages-pricing", component: <PagesPricing /> },
   //{ path: "/Pages-profile", component: <PagesProfile /> },
 
-  // this route should be at the end of all other routes
-  { path: "/", component: <TenantList /> },
+    // this route should be at the end of all other routes
+    { path: "/", roles: ["TenantAdmin"], component: <StudyList />}, 
+    { path: "/", component: <Dashboard /> },
 ];
 
 const authRoutes = [

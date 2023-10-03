@@ -1,19 +1,16 @@
-﻿import PropTypes, { object } from 'prop-types';
-import React, { useState, useEffect, useCallback } from "react";
+﻿import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
 import { withTranslation } from "react-i18next";
-import { Link, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
     Row,
     Col,
     Card,
     CardBody,
     FormGroup,
-    Button,
-    CardTitle,
     CardSubtitle,
     Label,
     Input,
-    Container,
     Form,
     FormFeedback,
     Collapse
@@ -24,9 +21,10 @@ import Select from "react-select";
 import './study.css';
 import { useStudySaveMutation } from '../../store/services/Study';
 import { useSelector } from "react-redux";
-import { useStudyGetQuery, usePrefetch, StudyApi } from '../../store/services/Study';
-import GetStudy from './getStudy';
-
+import { useStudyGetQuery } from '../../store/services/Study';
+import ToastComp from '../../components/Common/ToastComp/ToastComp';
+import { useDispatch } from "react-redux";
+import { startloading, endloading } from '../../store/loader/actions';
 
 
 const AddOrUpdateStudy = props => {
@@ -35,11 +33,13 @@ const AddOrUpdateStudy = props => {
     const [studyId, setStudyId] = useState('00000000-0000-0000-0000-000000000000');
     const [skip, setSkip] = useState(true);
     const [apiStudyData, setApiStudyData] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const [newSave, setNewSave] = useState(true);
+    const [stateToast, setStateToast] = useState(true);
 
-    const userInformation = useSelector(state => ({
-        userId: state.rootReducer.Login.userId,
-        tenantId: state.rootReducer.Login.tenantId
-    }));
+    const dispatch = useDispatch();
+
+    const userInformation = useSelector(state => state.rootReducer.Login);
 
     const [studySave] = useStudySaveMutation();
 
@@ -73,24 +73,15 @@ const AddOrUpdateStudy = props => {
             userid: userInformation.userId,
             tenantid: userInformation.tenantId,
             studyId: studyId,
-/*            studyname: '',*/
             studyname: apiStudyData ? apiStudyData.studyName : '',
-/*            studylink: '',*/
             studylink: apiStudyData ? apiStudyData.studyLink : '',
-/*            protocolcode: '',*/
             protocolcode: apiStudyData ? apiStudyData.protocolCode : '',
-   /*         studylanguage: 0,*/
             studylanguage: apiStudyData ? apiStudyData.studyLanguage : 0,
-/*            description: '',*/
             description: apiStudyData ? apiStudyData.description : '',
-/*            subdescription: '',*/
             subdescription: apiStudyData ? apiStudyData.subDescription : '',
-         /*   subjectnumberdigist: '',*/
-/*            doubledataentry: false,*/
+         /* subjectnumberdigist: '',*/
             doubledataentry: apiStudyData ? apiStudyData.doubleDataEntry : false,
-         /*   asksubjectinitial: false,*/
             asksubjectinitial: apiStudyData ? apiStudyData.askSubjectInitial : false,
-/*            reasonforchange: true,*/
             reasonforchange: apiStudyData ? apiStudyData.reasonForChange : true,
         },
         validationSchema: Yup.object().shape({
@@ -110,11 +101,19 @@ const AddOrUpdateStudy = props => {
             //)
         }),
         onSubmit: async (values) => {
+            dispatch(startloading());
             const response = await studySave(values);
             if (response.data.isSuccess) {
-                setStudyId(response.data.values.studyId);
+                dispatch(endloading());
+                setStateToast(true);
+                setShowToast(true);
+                if (studyId === '00000000-0000-0000-0000-000000000000') {
+                    setStudyId(response.data.values.studyId);
+                }
+            } else {
+                dispatch(endloading());
+                setStateToast(false);
             }
-           
         }
     });
 
@@ -126,9 +125,10 @@ const AddOrUpdateStudy = props => {
     }, [studyId]);
 
     useEffect(() => {
-        console.log('useffect')
         setApiStudyData(null);
         if (location.state !== null) {
+            setNewSave(false);
+            dispatch(startloading());
             setStudyId(location.state.studyId);
             setSkip(false);
         }
@@ -142,6 +142,9 @@ const AddOrUpdateStudy = props => {
         if (!isLoading && !error && studyData) {
             setApiStudyData(studyData);
             setSkip(true);
+            dispatch(endloading());
+        } else {
+            dispatch(endloading());
         }
     }, [studyData, error, isLoading]);
 
@@ -361,6 +364,13 @@ const AddOrUpdateStudy = props => {
                     </Row>
                 </div>
             </div>
+            <ToastComp
+                title={ newSave ?  "Kayıt" : "Güncelleme"}
+                message={ newSave ?  " Kayıt başarılı" : "Güncelleme başarılı"}
+                showToast={showToast}
+                setShowToast={setShowToast}
+                state={ stateToast }
+            />
         </React.Fragment>
     );
 };

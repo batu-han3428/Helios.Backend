@@ -1,13 +1,13 @@
 ﻿import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
 
-let token = getLocalStorage("accessToken");
 
 export const StudyApi = createApi({
     reducerPath: 'studyApi',
     baseQuery: fetchBaseQuery({
         baseUrl: 'https://localhost:7196/',
         prepareHeaders: (headers, { getState }) => {
+            let token = getLocalStorage("accessToken");
 
             if (token) {
                 headers.set('Authorization', `Bearer ${token}`);
