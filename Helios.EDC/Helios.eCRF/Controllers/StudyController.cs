@@ -66,6 +66,7 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpGet("{studyId}")]
+        [Authorize(Roles = "TenantAdmin")]
         public async Task<StudyDTO> GetStudy(Guid studyId)
         {
             var result = await _studyService.GetStudy(studyId);
@@ -74,6 +75,7 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> StudySave(StudyModel studyModel)
         {
             var result = await _studyService.StudySave(studyModel);

@@ -114,7 +114,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<StudyDTO>> GetStudyList()
         {
-            var result = await _context.Studies.Where(x => x.IsActive && !x.IsDeleted).Select(x => new StudyDTO()
+            var result = await _context.Studies.Where(x => !x.IsDemo && x.IsActive && !x.IsDeleted).Select(x => new StudyDTO()
             {
                 Id = x.Id,
                 StudyName = x.StudyName,

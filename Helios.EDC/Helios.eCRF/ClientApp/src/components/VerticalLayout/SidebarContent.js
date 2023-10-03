@@ -148,7 +148,7 @@ const SidebarContent = props => {
             <li className="menu-title">{props.t("Main")} </li>
 
             <li>
-              <Link to="/" className="waves-effect">
+              <Link to="/tenant" className="waves-effect">
                 <i className="ti-home"></i>
                 <span>{props.t("Tenant")}</span>
               </Link>
