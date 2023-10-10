@@ -17,7 +17,8 @@ namespace Helios.eCRF.Controllers
         {
             _studyService = studyService;
         }
-        
+
+        #region Study
         [HttpGet]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<List<StudyDTO>> GetStudyList()
