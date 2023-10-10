@@ -4,6 +4,7 @@ using Helios.Authentication.Enums;
 using Helios.Authentication.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
+using System.Net.Mime;
 
 namespace Helios.Authentication.Services
 {
@@ -38,7 +39,7 @@ namespace Helios.Authentication.Services
             _context.SystemAuditTrails.Add(auditTrailModel);
         }
 
-        public async Task SendMail(string mail, string subject, string content)
+        public async Task SendMail(string mail, string subject, string content, Attachment attachment = null)
         {
             var mailMessage = new MailMessage(_config["EmailSender:UserName"], mail, subject, content)
             { IsBodyHtml = true, Sender = new MailAddress(_config["EmailSender:UserName"]) };

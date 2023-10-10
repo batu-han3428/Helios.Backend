@@ -42,3 +42,8 @@
     mask: url('../../assets/images/testing-tube.png') no-repeat center center;
     -webkit-mask: url('../../assets/images/testing-tube.png') no-repeat center center;
 }
+
+.icon-delete {
+    mask: url('../../assets/images/delete.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/delete.png') no-repeat center center;
+}

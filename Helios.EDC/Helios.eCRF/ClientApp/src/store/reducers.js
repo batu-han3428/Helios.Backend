@@ -15,6 +15,8 @@ import Login from './auth/user/reducer'
 
 import Loader from './loader/reducer'
 
+import Study from './study/reducer'
+
 export const rootReducer = combineReducers({
     // public
     Layout,
@@ -24,4 +26,5 @@ export const rootReducer = combineReducers({
     Profile,
     calendar,
     Loader,
+    Study,
 });

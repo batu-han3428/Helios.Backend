@@ -9,7 +9,6 @@ import {
   changeSidebarType,
   changeTopbarTheme,
   changeLayoutWidth,
-  showRightSidebarAction
 } from "../../store/actions";
 
 // Layout Related Components
@@ -32,7 +31,7 @@ class Layout extends Component {
     return string.charAt(1).toUpperCase() + string.slice(2);
   };
 
-  componentDidMount() {
+    componentDidMount() {
 
     // Scroll Top to 0
     window.scrollTo(0, 0);
@@ -57,7 +56,7 @@ class Layout extends Component {
       this.props.changeTopbarTheme(this.props.topbarTheme);
     }
   }
-  toggleMenuCallback = () => {
+    toggleMenuCallback = () => {
     if (this.props.leftSideBarType === "default") {
       this.props.changeSidebarType("condensed", this.state.isMobile);
     } else if (this.props.leftSideBarType === "condensed") {
@@ -76,16 +75,17 @@ class Layout extends Component {
       }
     }
   };
-  
+
   render() {
     return (
-      <React.Fragment>
-        <div id="layout-wrapper">
+        <React.Fragment>
+            <div id="layout-wrapper">
           <Header toggleMenuCallback={this.toggleMenuCallback} />
           <Sidebar
             theme={this.props.leftSideBarTheme}
             type={this.props.leftSideBarType}
             isMobile={this.state.isMobile}
+            pageType={this.props.pageType}
           />
           <div className="main-content">{this.props.children}</div>
           <Footer />
@@ -112,7 +112,7 @@ Layout.propTypes = {
 };
 
 const mapStatetoProps = state => {
-  return {
+    return {
     ...state.Layout,
   };
 };
@@ -122,5 +122,4 @@ export default connect(mapStatetoProps, {
   changeSidebarType,
   changeTopbarTheme,
   changeLayoutWidth,
-  showRightSidebarAction
 })(withRouter(Layout));

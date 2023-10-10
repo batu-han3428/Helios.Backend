@@ -6,6 +6,7 @@ using Helios.Core.Domains.Entities;
 using Helios.Core.helpers;
 using Helios.Core.Models;
 using MassTransit.Internals.GraphValidation;
+using MassTransit.JobService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -59,7 +60,7 @@ namespace Helios.Core.Controllers
 
             return true;
         }
-        
+
         [HttpPost]
         public async Task<bool> DeleteModule(ModuleModel model)
         {
@@ -117,6 +118,7 @@ namespace Helios.Core.Controllers
             var result = await _context.Studies.Where(x => !x.IsDemo && x.IsActive && !x.IsDeleted).Select(x => new StudyDTO()
             {
                 Id = x.Id,
+                EquivalentStudyId = x.EquivalentStudyId,
                 StudyName = x.StudyName,
                 ProtocolCode = x.ProtocolCode,
                 AskSubjectInitial = x.AskSubjectInitial,
@@ -131,21 +133,23 @@ namespace Helios.Core.Controllers
         public async Task<StudyDTO> GetStudy(Guid studyId)
         {
             var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyId && x.IsActive && !x.IsDeleted);
-               
-            if(study != null)
+
+            if (study != null)
             {
                 return new StudyDTO
                 {
                     Id = study.Id,
+                    EquivalentStudyId = study.EquivalentStudyId,
                     StudyName = study.StudyName,
                     StudyLink = study.StudyLink,
+                    IsDemo = study.IsDemo,
                     ProtocolCode = study.ProtocolCode,
                     StudyLanguage = study.StudyLanguage,
-                    Description= study.Description,
-                    SubDescription= study.SubDescription,
+                    Description = study.Description,
+                    SubDescription = study.SubDescription,
                     DoubleDataEntry = study.StudyType == (int)StudyType.DoubleEntry ? true : false,
                     AskSubjectInitial = study.AskSubjectInitial,
-                    ReasonForChange= study.ReasonForChange,
+                    ReasonForChange = study.ReasonForChange,
                     UpdatedAt = study.UpdatedAt
                 };
             }
@@ -156,7 +160,6 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
         {
-            _context.SetCurrentUser(studyModel.UserId);
             if (studyModel.StudyId == Guid.Empty)
             {
                 Guid _versionKey = Guid.NewGuid();
@@ -229,7 +232,7 @@ namespace Helios.Core.Controllers
                 };
                 _context.Studies.Add(activeResearch);
                 _context.Studies.Add(demoResearch);               
-                var tenantResult = await _context.SaveChangesAsync() > 0;
+                var tenantResult = await _context.SaveAuthenticationContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
                 if (tenantResult)
                 {
                     demoResearch.EquivalentStudyId = activeResearch.Id;
@@ -237,7 +240,7 @@ namespace Helios.Core.Controllers
                     _context.Studies.Update(activeResearch);
                     _context.Studies.Update(demoResearch);
 
-                    var result = await _context.SaveChangesAsync() > 0;
+                    var result = await _context.SaveAuthenticationContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
 
                     return new ApiResponse<dynamic>
                     {
@@ -324,8 +327,175 @@ namespace Helios.Core.Controllers
 
                     throw;
                 }
-               
-            }           
+
+            }
+        }
+        #endregion
+
+        #region Site
+        [HttpGet]
+        public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
+        {
+            var result = await _context.Sites.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted).AsNoTracking().Select(x => new SiteDTO()
+            {
+                Id = x.Id,
+                SiteFullName = x.FullName,
+                Code = x.Code,
+                CountryCode = x.CountryCode,
+                CountryName = x.Country,
+                MaxEnrolmentCount = x.MaxEnrolmentCount,
+                UpdatedAt = x.UpdatedAt
+            }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<SiteDTO> GetSite(Guid siteId)
+        {
+            var site = await _context.Sites.FirstOrDefaultAsync(x => x.Id == siteId && x.IsActive && !x.IsDeleted);
+
+            if (site != null)
+            {
+                return new SiteDTO
+                {
+                    Id = site.Id,
+                    Code = site.Code,
+                    Name = site.Name,
+                    CountryCode = site.CountryCode,
+                    CountryName = site.Country,
+                    MaxEnrolmentCount = site.MaxEnrolmentCount,
+                };
+            }
+
+            return new SiteDTO();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SiteSaveOrUpdate(SiteModel siteModel)
+        {
+            if (siteModel.Id == Guid.Empty)
+            {
+                var hasSite = GetSiteList(siteModel.StudyId).Result.Any(a => a.Code == siteModel.Code && a.CountryCode == siteModel.CountryCode);
+
+                if (hasSite)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "js_DuplicateSiteErrMsg"
+                    };
+                }
+
+                await _context.Sites.AddAsync(new Site
+                {
+                    StudyId = siteModel.StudyId,
+                    Name = siteModel.Name,
+                    Code = siteModel.Code,
+                    Country = siteModel.CountryName,
+                    CountryCode = siteModel.CountryCode,
+                    MaxEnrolmentCount = siteModel.MaxEnrolmentCount,
+                    TenantId = siteModel.TenantId,
+                });
+
+                var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+                if (result)
+                {
+                    //to do addNewSiteToUsersThatSelectedAllSitesBefore
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Kayıt Başarılı"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Kayıt Başarısız"
+                    };
+                }
+            }
+            else
+            {
+                var hasSite = GetSiteList(siteModel.StudyId).Result.Any(a => a.Code == siteModel.Code && a.Id != siteModel.Id && a.CountryCode == siteModel.CountryCode);
+
+                if (hasSite)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "js_DuplicateSiteErrMsg"
+                    };
+                }
+
+                var oldEntity = _context.Sites.SingleOrDefault(a => a.Id == siteModel.Id);
+                if (oldEntity != null)
+                {
+                    oldEntity.Name = siteModel.Name;
+                    oldEntity.Code = siteModel.Code;
+                    oldEntity.MaxEnrolmentCount = siteModel.MaxEnrolmentCount;
+                    oldEntity.Country = siteModel.CountryName;
+                    oldEntity.CountryCode = siteModel.CountryCode;
+
+                    _context.Sites.Update(oldEntity);
+
+                    var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Güncelleme Başarılı"
+                        };
+                    }
+                }
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Güncelleme Başarısız"
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SiteDelete(SiteModel siteModel)
+        {
+            //to do getUserCount
+
+            var oldEntity = _context.Sites.FirstOrDefault(p => p.Id == siteModel.Id);
+            if (oldEntity == null)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Silme İşlemi Başarısız"
+                };
+            }
+                
+            _context.Sites.Remove(oldEntity);
+
+            var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+
+            if (result)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Silme İşlemi Başarılı"
+                };
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Silme İşlemi Başarısız"
+                };
+            }
         }
         #endregion
     }

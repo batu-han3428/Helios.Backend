@@ -49,13 +49,14 @@ namespace Helios.eCRF.Services
             return false;
         }
 
-        public async Task ContactUsMailAsync(ContactUsDTO contactUsDTO)
+        public async Task<ApiResponse<dynamic>> ContactUsMailAsync(ContactUsModel contactUsModel)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AuthAccount/ContactUsMail", Method.Post);
-                req.AddJsonBody(contactUsDTO);
-                var result = await client.ExecuteAsync(req);
+                req.AddJsonBody(contactUsModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
             }
         }
 

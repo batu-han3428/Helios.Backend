@@ -6,11 +6,12 @@ import "./ToastComp.css";
 
 
 const ToastComp = ({ title, message, showToast, setShowToast, stateToast }) => {
+
     useEffect(() => {
         if (showToast) {
             const timer = setTimeout(() => {
                 setShowToast(false);
-            }, 10000);
+            }, 5000);
 
             return () => clearTimeout(timer);
         }

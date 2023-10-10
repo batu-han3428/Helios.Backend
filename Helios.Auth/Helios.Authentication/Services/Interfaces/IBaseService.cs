@@ -1,10 +1,11 @@
 ﻿using Helios.Authentication.Enums;
+using System.Net.Mail;
 
 namespace Helios.Authentication.Services.Interfaces
 {
     public interface IBaseService
     {
         void SaveSystemAuditTrail(Guid ResearchId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Guid UserId, string ClientIp);
-        Task SendMail(string mail, string subject, string content);
+        Task SendMail(string mail, string subject, string content, Attachment attachment = null);
     }
 }

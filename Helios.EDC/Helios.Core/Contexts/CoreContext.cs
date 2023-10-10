@@ -1,12 +1,13 @@
 ﻿using Helios.Core.Contexts.Base;
 using Helios.Core.Controllers.Base;
+using Helios.Core.Domains.Base;
 using Helios.Core.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace Helios.Core.Contexts
 {
-    public class CoreContext : ServiceContextBase
+    public class CoreContext : DbContext
     {
         public CoreContext(DbContextOptions<CoreContext> options) : base(options)
         {
@@ -33,7 +34,7 @@ namespace Helios.Core.Contexts
                             InsertAuthenticationBaseEntity(this, userId, saveDate);
                             UpdateAuthenticationBaseEntity(this, userId, saveDate);
                             DeleteAuthenticationBaseEntity(this, userId);
-                            transId = await this.SaveChangesAsync();
+                            transId = await base.SaveChangesAsync();
                             dbContextTransaction.Commit();
                         }
                     }
@@ -49,7 +50,7 @@ namespace Helios.Core.Contexts
 
         private void InsertAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Added).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Added).ToList())
             {
                 var dd = default(DateTimeOffset).AddDays(1);
                 var dateTime = timeStamp.ToString();
@@ -58,37 +59,28 @@ namespace Helios.Core.Contexts
 
                 entity.Entity.IsDeleted = false;
                 entity.Entity.IsActive = true;
-                if (entity.Entity.AddedById == Guid.Empty)
-                {
-                    entity.Entity.AddedById = userId;
-                }
-            }
+                entity.Entity.AddedById = userId;
+            }          
         }
         private void UpdateAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Modified).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Modified).ToList())
             {
                 var dateTime = timeStamp.ToString();
                 entity.Entity.UpdatedAt = Convert.ToDateTime(dateTime);
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
-                {
-                    entity.Entity.UpdatedById = userId;
-                }
+                entity.Entity.UpdatedById = userId;
             }
         }
 
         private void DeleteAuthenticationBaseEntity(DbContext dbContext, Guid userId)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Deleted).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Deleted).ToList())
             {
                 var dateTime = DateTimeOffset.Now.ToString();
                 entity.Entity.IsDeleted = true;
                 entity.Entity.IsActive = false;
                 entity.Entity.UpdatedAt = Convert.ToDateTime(dateTime);
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
-                {
-                    entity.Entity.UpdatedById = userId;
-                }
+                entity.Entity.UpdatedById = userId;
                 entity.State = EntityState.Modified;
             }
         }

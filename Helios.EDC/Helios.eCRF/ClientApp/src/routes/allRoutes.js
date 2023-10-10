@@ -81,19 +81,8 @@ import UiVideo from "../Pages/Template/Ui/UiVideo";
 import UiSessionTimeout from "../Pages/Template/Ui/UiSessionTimeout";
 import UiOffcanvas from "../Pages/Template/Ui/UiOffcanvas";
 
-//Pages
-//import PagesStarter from "../Pages/Template/Utility/Pages-starter";
-//import PagesMaintenance from "../Pages/Template/Utility/Pages-maintenance";
-//import PagesComingsoon from "../Pages/Template/Utility/Pages-comingsoon";
-//import PagesTimeline from "../Pages/Template/Utility/Pages-timeline";
-//import PagesInvoice from "../Pages/Template/Utility/PagesInvoice";
-//import PagesFaqs from "../Pages/Template/Utility/Pages-faqs";
-//import PagesPricing from "../Pages/Template/Utility/Pages-pricing";
-//import Pages404 from "../Pages/Utility/Template/Pages-404";
-//import Pages500 from "../Pages/Utility/Template/Pages-500";
-//import PagesDirectory from "../Pages/Utility/Template/PagesDirectory";
-//import PagesProfile from "../Pages/Utility/Template/Pages-profile";
 
+//tenant
 import TenantList from "../Pages/Tenant/tenantList.js";
 import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
 
@@ -102,88 +91,94 @@ import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
 //Study
 import StudyList from "../Pages/Study/StudyList";
 import AddOrUpdateStudy from "../Pages/Study/AddOrUpdateStudy";
+import Study from "../Pages/Study/Study";
 
+//Site & Laboratories
+import Sites from "../Pages/SiteLaboratories/Sites";
+
+//Permissions
+import Permission from "../Pages/Permissions/Permission";
 
 const userRoutes = [
     //tenant
-    { path: "/Tenant", component: <TenantList /> },
-    { path: "/addTenant", component: <TenantAddOrUpdate /> },
+    { path: "/Tenant", component: <TenantList />, menuType: "admin" },
+    { path: "/addTenant", component: <TenantAddOrUpdate />, menuType: "admin" },
 
-    { path: "/formBuilder", component: <FormBuilder /> },
+    { path: "/formBuilder", component: <FormBuilder />, menuType: "admin" },
+
     //study
-    { path: "study", component: <StudyList />, roles: ['TenantAdmin'] },
-    { path: "addstudy", component: <AddOrUpdateStudy />},
+    { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin" },
+    { path: "/visits", component: <Study />, menuType: "study" },
 
-  { path: "/dashboard", component: <Dashboard /> },
+    //site & laboratories
+    { path: "/sitelaboratories-sites-site", component: <Sites />, menuType: "study" },
+
+    //permissions
+    { path: "/permissions", component: <Permission />, menuType: "study" },
+
+    { path: "/dashboard", component: <Dashboard />, menuType: "admin" },
 
   // //profile
-  { path: "/profile", component: <UserProfile /> },
+    { path: "/profile", component: <UserProfile />, menuType: "admin" },
 
   //Email
-  { path: "/email-inbox", component: <EmailInbox /> },
-  { path: "/email-read", component: <EmailRead /> },
-  { path: "/email-compose", component: <EmailCompose /> },
+    { path: "/email-inbox", component: <EmailInbox />, menuType: "admin" },
+    { path: "/email-read", component: <EmailRead />, menuType: "admin" },
+    { path: "/email-compose", component: <EmailCompose />, menuType: "admin" },
 
   // Email Template
-  { path: "/email-template-alert", component: <Emailtemplatealert /> },
-  { path: "/email-template-basic", component: <Emailtemplatebasic /> },
-  { path: "/email-template-billing", component: <Emailtemplatebilling /> },
+    { path: "/email-template-alert", component: <Emailtemplatealert />, menuType: "admin" },
+    { path: "/email-template-basic", component: <Emailtemplatebasic />, menuType: "admin" },
+    { path: "/email-template-billing", component: <Emailtemplatebilling />, menuType: "admin" },
 
   // Icons
-  { path: "/icons-dripicons", component: <IconDripicons /> },
-  { path: "/icons-materialdesign", component: <IconMaterialdesign /> },
-  { path: "/icons-fontawesome", component: <IconFontawesome /> },
-  { path: "/icons-ion", component: <IconIon /> },
-  { path: "/icons-themify", component: <ThemifyIcon /> },
-  { path: "/icons-typicons", component: <TypiconsIcon /> },
+    { path: "/icons-dripicons", component: <IconDripicons />, menuType: "study" },
+    { path: "/icons-materialdesign", component: <IconMaterialdesign />, menuType: "study" },
+    { path: "/icons-fontawesome", component: <IconFontawesome />, menuType: "study" },
+    { path: "/icons-ion", component: <IconIon />, menuType: "study" },
+    { path: "/icons-themify", component: <ThemifyIcon />, menuType: "study" },
+    { path: "/icons-typicons", component: <TypiconsIcon />, menuType: "study" },
 
   // Tables
-  { path: "/tables-basic", component: <BasicTables /> },
-  { path: "/tables-datatable", component: <DatatableTables /> },
-  { path: "/tables-responsive", component: <ResponsiveTables /> },
+    { path: "/tables-basic", component: <BasicTables />, menuType: "admin" },
+    { path: "/tables-datatable", component: <DatatableTables />, menuType: "admin" },
+    { path: "/tables-responsive", component: <ResponsiveTables />, menuType: "admin" },
 
 
   // Forms
-  { path: "/form-elements", component: <FormElements /> },
-  { path: "/form-advanced", component: <FormAdvanced /> },
-  { path: "/form-editors", component: <FormEditors /> },
-  { path: "/form-mask", component: <FormMask /> },
-  { path: "/form-repeater", component: <FormRepeater /> },
-  { path: "/form-uploads", component: <FormUpload /> },
-  { path: "/form-wizard", component: <FormWizard /> },
-  { path: "/form-validation", component: <FormValidations /> },
-  { path: "/form-xeditable", component: <FormXeditable /> },
+    { path: "/form-elements", component: <FormElements />, menuType: "admin" },
+    { path: "/form-advanced", component: <FormAdvanced />, menuType: "admin" },
+    { path: "/form-editors", component: <FormEditors />, menuType: "admin" },
+    { path: "/form-mask", component: <FormMask />, menuType: "admin" },
+    { path: "/form-repeater", component: <FormRepeater />, menuType: "admin" },
+    { path: "/form-uploads", component: <FormUpload />, menuType: "admin" },
+    { path: "/form-wizard", component: <FormWizard />, menuType: "admin" },
+    { path: "/form-validation", component: <FormValidations />, menuType: "admin" },
+    { path: "/form-xeditable", component: <FormXeditable />, menuType: "admin" },
 
   // Ui
-  { path: "/ui-alerts", component: <UiAlert /> },
-  { path: "/ui-buttons", component: <UiButtons /> },
-  { path: "/ui-cards", component: <UiCards /> },
-  { path: "/ui-carousel", component: <UiCarousel /> },
-  { path: "/ui-colors", component: <UiColors /> },
-  { path: "/ui-dropdowns", component: <UiDropdown /> },
-  { path: "/ui-general", component: <UiGeneral /> },
-  { path: "/ui-grid", component: <UiGrid /> },
-  { path: "/ui-images", component: <UiImages /> },
-  { path: "/ui-modals", component: <UiModal /> },
-  { path: "/ui-progressbars", component: <UiProgressbar /> },
-  { path: "/ui-tabs-accordions", component: <UiTabsAccordions /> },
-  { path: "/ui-typography", component: <UiTypography /> },
-  { path: "/ui-video", component: <UiVideo /> },
-  { path: "/ui-session-timeout", component: <UiSessionTimeout /> },
-  { path: "/ui-offcanvas", component: <UiOffcanvas /> },
+    { path: "/ui-alerts", component: <UiAlert />, menuType: "admin" },
+    { path: "/ui-buttons", component: <UiButtons />, menuType: "admin" },
+    { path: "/ui-cards", component: <UiCards />, menuType: "admin" },
+    { path: "/ui-carousel", component: <UiCarousel />, menuType: "admin" },
+    { path: "/ui-colors", component: <UiColors />, menuType: "admin" },
+    { path: "/ui-dropdowns", component: <UiDropdown />, menuType: "admin" },
+    { path: "/ui-general", component: <UiGeneral />, menuType: "admin" },
+    { path: "/ui-grid", component: <UiGrid />, menuType: "admin" },
+    { path: "/ui-images", component: <UiImages />, menuType: "admin" },
+    { path: "/ui-modals", component: <UiModal />, menuType: "admin" },
+    { path: "/ui-progressbars", component: <UiProgressbar />, menuType: "admin" },
+    { path: "/ui-tabs-accordions", component: <UiTabsAccordions />, menuType: "admin" },
+    { path: "/ui-typography", component: <UiTypography />, menuType: "admin" },
+    { path: "/ui-video", component: <UiVideo />, menuType: "admin" },
+    { path: "/ui-session-timeout", component: <UiSessionTimeout />, menuType: "admin" },
+    { path: "/ui-offcanvas", component: <UiOffcanvas />, menuType: "admin" },
 
-  //Utility
-  //{ path: "/Pages-starter", component: <PagesStarter /> },
-  //{ path: "/Pages-timeline", component: <PagesTimeline /> },
-  //{ path: "/Pages-invoice", component: <PagesInvoice /> },
-  //{ path: "/Pages-directory", component: <PagesDirectory /> },
-  //{ path: "/Pages-faqs", component: <PagesFaqs /> },
-  //{ path: "/Pages-pricing", component: <PagesPricing /> },
-  //{ path: "/Pages-profile", component: <PagesProfile /> },
 
     // this route should be at the end of all other routes
-    { path: "/", roles: ["TenantAdmin"], component: <StudyList />}, 
-    { path: "/", component: <Dashboard /> },
+    { path: "/", roles: ["TenantAdmin"], component: <StudyList />, menuType: "admin" }, 
+    { path: "/", component: <Dashboard />, menuType: "admin" },
 ];
 
 const authRoutes = [
@@ -192,10 +187,6 @@ const authRoutes = [
   { path: "/forgot-password", component: <ForgetPwd /> },
   { path: "/register", component: <Register /> },
 
-  //{ path: "/Pages-maintenance", component: <PagesMaintenance /> },
-  //{ path: "/Pages-comingsoon", component: <PagesComingsoon /> },
-  //{ path: "/Pages-404", component: <Pages404 /> },
-  //{ path: "/Pages-500", component: <Pages500 /> },
 
   // Authentication Inner
   { path: "/Pages-login", component: <Login1 /> },

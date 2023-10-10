@@ -42,17 +42,10 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ContactUs(ContactUsDTO contactUsModel)
+        public async Task<IActionResult> ContactUs(ContactUsModel contactUsModel)
         {
-            try
-            {
-                await authService.ContactUsMailAsync(contactUsModel);
-                return Ok(true);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(false);
-            }
+            var result = await authService.ContactUsMailAsync(contactUsModel);
+            return Ok(result);
         }
 
         [HttpPost]
