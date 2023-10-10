@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, Component } from "react";
 import {
     Card,
     CardBody,
@@ -13,12 +13,21 @@ import {
     Row,
     TabContent,
     TabPane,
+    Input,
+    Button,
+    Label
 } from "reactstrap";
-
+import Select from "react-select";
 import classnames from "classnames";
 import ElementBase from '../Elements/Base/elementBase.js';
+import { TextElement } from '../Elements/textElement.js'
+import TextElementProperties from '../Elements/textElementProperties.js'
+//import { useFormik } from "formik";
+import NumericElementProperties from '../Elements/numericElementProperties.js'
 
-class Properties extends Component {
+const baseUrl = "https://localhost:7196";
+
+class Properties extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -39,8 +48,95 @@ class Properties extends Component {
             col9: true,
             col10: false,
             col11: false,
+
+            // General properties
+            Id: '',
+            ModuleId: '',
+            ElementDetailId: '',
+            ElementType: props.Type,
+            ElementName: '',
+            Title: '',
+            IsTitleHidden: true,
+            Order: 0,
+            Description: '',
+            Width: 12,
+            IsHidden: true,
+            IsRequired: false,
+            IsDependent: false,
+            IsReadonly: false,
+            CanMissing: true,
+
+            // Dependency properties
+            DependentSourceFieldId: '',
+            DependentTargetFieldId: '',
+            DependentCondition: 0,
+            DependentAction: 0,
+            DependentFieldValue: '',
+
+            // Elements properties
+            Unit: '',
+            LowerLimit: '',
+            UpperLimit: '',
+
+            // Other
+            optionGroup: [],
+            isOpen: false,
+            isOpenClass: "mdi mdi-chevron-up"
         };
+
         this.toggle = this.toggle.bind(this);
+        this.toggleAccordion = this.toggleAccordion.bind(this);
+        this.saveProperties = this.saveProperties.bind(this);
+
+        this.handleIdChange = this.handleIdChange.bind(this);
+        this.handleModuleIdChange = this.handleModuleIdChange.bind(this);
+        this.handleElementDetailIdChange = this.handleElementDetailIdChange.bind(this);
+        this.handleElementNameChange = this.handleElementNameChange.bind(this);
+        this.handleTitleChange = this.handleTitleChange.bind(this);
+        this.handleIsTitleHiddenChange = this.handleIsTitleHiddenChange.bind(this);
+        this.handleOrderChange = this.handleOrderChange.bind(this);
+        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+        this.handleWidthChange = this.handleWidthChange.bind(this);
+        this.handleIsHiddenChange = this.handleIsHiddenChange.bind(this);
+        this.handleIsRequiredChange = this.handleIsRequiredChange.bind(this);
+        this.handleIsDependentChange = this.handleIsDependentChange.bind(this);
+        this.handleIsReadonlyChange = this.handleIsReadonlyChange.bind(this);
+        this.handleCanMissingChange = this.handleCanMissingChange.bind(this);
+        this.handleDependentSourceFieldIdChange = this.handleDependentSourceFieldIdChange.bind(this);
+        this.handleDependentTargetFieldIdChange = this.handleDependentTargetFieldIdChange.bind(this);
+        this.handleDependentConditionChange = this.handleDependentConditionChange.bind(this);
+        this.handleDependentActionChange = this.handleDependentActionChange.bind(this);
+
+        this.changeUnit.bind(this);
+        this.changeLowerLimit.bind(this);
+        this.changeUpperLimit.bind(this);
+        //this.handleSaveModuleContent = this.handleSaveModuleContent.bind(this);
+        //this.setState({ selectedGroup: null });
+        //this.setState({
+        //    optionGroup: [
+        //        {
+        //            label: "Picnic",
+        //            options: [
+        //                { label: "Mustard", value: "Mustard" },
+        //                { label: "Ketchup", value: "Ketchup" },
+        //                { label: "Relish", value: "Relish" }
+        //            ]
+        //        }
+        //    ]
+        //});
+    }
+
+    toggleAccordion() {
+        debugger;
+        this.state.isOpen = !(this.state.isOpen);
+        this.state.isOpenClass = this.state.isOpen ? "mdi mdi-chevron-up" : "mdi mdi-chevron-down";
+    }
+
+    getToggleClass() {
+        if (this.isOpen)
+            return "mdi mdi-chevron-up";
+        else
+            return "mdi mdi-chevron-down";
     }
 
     toggle(tab) {
@@ -49,6 +145,156 @@ class Properties extends Component {
                 activeTab: tab,
             });
         }
+    }
+
+    handleSelectGroup(selectedGroup) {
+        this.state.selectedGroup = selectedGroup;
+    }
+
+    renderElementPropertiesSwitch(param) {
+        switch (param) {
+            case 2:
+                return <TextElementProperties changeUnit={this.changeUnit} />;
+            case 4:
+                return <NumericElementProperties
+                    changeUnit={this.changeUnit}
+                    changeLowerLimit={this.changeLowerLimit}
+                    changeUpperLimit={this.changeUpperLimit}
+                />;
+            default:
+                return <TextElementProperties changeUnit={this.changeUnit} />;
+        }
+    }
+
+    handleIdChange(e) {
+        this.setState({ Id: e.target.value });
+    };
+
+    handleModuleIdChange(e) {
+        this.setState({ ModuleId: e.target.value });
+    };
+
+    handleElementDetailIdChange(e) {
+        this.setState({ ElementDetailId: e.target.value });
+    };
+
+    handleElementNameChange(e) {
+        this.setState({ ElementName: e.target.value });
+    };
+
+    handleTitleChange(e) {
+        this.setState({ Title: e.target.value });
+    };
+
+    handleIsTitleHiddenChange(e) {
+        this.setState({ IsTitleHidden: e.target.value });
+    };
+
+    handleOrderChange(e) {
+        this.setState({ Order: e.target.value });
+    };
+
+    handleDescriptionChange(e) {
+        this.setState({ Description: e.target.value });
+    };
+
+    handleWidthChange(e) {
+        this.setState({ Width: e.target.value });
+    };
+
+    handleIsHiddenChange(e) {
+        this.setState({ IsHidden: e.target.value });
+    };
+
+    handleIsRequiredChange(e) {
+        this.setState({ IsRequired: e.target.value });
+    };
+
+    handleIsDependentChange(e) {
+        this.setState({ IsDependent: e.target.value });
+    };
+
+    handleIsReadonlyChange(e) {
+        this.setState({ IsReadonly: e.target.value });
+    };
+
+    handleCanMissingChange(e) {
+        this.setState({ CanMissing: e.target.value });
+    };
+
+    handleDependentSourceFieldIdChange(e) {
+        this.setState({ DependentSourceFieldId: e.target.value });
+    };
+
+    handleDependentTargetFieldIdChange(e) {
+        this.setState({ DependentTargetFieldId: e.target.value });
+    };
+
+    handleDependentConditionChange(e) {
+        this.setState({ DependentCondition: e.target.value });
+    };
+
+    handleDependentActionChange(e) {
+        this.setState({ DependentAction: e.target.value });
+    };
+
+    //handleIdChange(e) {
+    //    this.setState({ Id: e.target.value });
+    //};
+
+    changeUnit = (newValue) => {
+        this.setState({ Unit: newValue });
+    };
+
+    changeLowerLimit = (newValue) => {
+        this.setState({ LowerLimit: newValue });
+    };
+
+    changeUpperLimit = (newValue) => {
+        this.setState({ UpperLimit: newValue });
+    };
+
+    saveProperties() {
+        debugger;
+        fetch(baseUrl + '/Module/SaveModuleContent', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                Id: this.state.Id,
+                ModuleId: this.state.ModuleId,
+                ElementDetailId: this.state.ElementDetailId,
+                ElementType: this.state.ElementType,
+                ElementName: this.state.ElementName,
+                Title: this.state.Title,
+                IsTitleHidden: this.state.IsTitleHidden,
+                Order: this.state.Order,
+                Description: this.state.Description,
+                Width: this.state.Width,
+                IsHidden: this.state.IsHidden == 'on' ? true : false,
+                IsRequired: this.state.IsRequired == 'on' ? true : false,
+                IsDependent: this.state.IsDependent == 'on' ? true : false,
+                IsReadonly: this.state.IsReadonly,
+                CanMissing: this.state.CanMissing == 'on' ? true : false,
+
+                //// Dependency properties
+                DependentSourceFieldId: this.state.DependentSourceFieldId,
+                DependentTargetFieldId: this.state.DependentTargetFieldId,
+                DependentCondition: this.state.DependentCondition,
+                DependentAction: this.state.DependentAction,
+                DependentFieldValue: this.state.DependentFieldValue,
+
+                //// Elements properties
+                Unit: this.state.Unit,
+                LowerLimit: this.state.LowerLimit,
+                UpperLimit: this.state.UpperLimit,
+
+
+            })
+        }).then(res => res.json())
+            .then(res => console.log(res));
     }
 
     render() {
@@ -127,13 +373,15 @@ class Properties extends Component {
                                                     </label>
                                                     <div className="col-md-10">
                                                         <input
+                                                            value={this.state.Title}
+                                                            onChange={this.handleTitleChange}
                                                             className="form-control"
                                                             type="text"
                                                             placeholder="Title"
                                                         />
                                                     </div>
                                                 </Row>
-                                            <Row className="mb-3">
+                                                <Row className="mb-3">
                                                     <label
                                                         htmlFor="example-text-input"
                                                         className="col-md-2 col-form-label"
@@ -142,13 +390,15 @@ class Properties extends Component {
                                                     </label>
                                                     <div className="col-md-10">
                                                         <input
+                                                            value={this.ElementName}
+                                                            onChange={this.handleElementNameChange}
                                                             className="form-control"
                                                             type="text"
                                                             placeholder="Input name"
                                                         />
                                                     </div>
                                                 </Row>
-                                            <Row className="mb-3">
+                                                <Row className="mb-3">
                                                     <label
                                                         htmlFor="example-text-input"
                                                         className="col-md-2 col-form-label"
@@ -157,12 +407,34 @@ class Properties extends Component {
                                                     </label>
                                                     <div className="col-md-10">
                                                         <input
+                                                            value={this.Description}
+                                                            onChange={this.handleDescriptionChange}
                                                             className="form-control"
                                                             type="text"
                                                             placeholder="Description"
                                                         />
                                                     </div>
                                                 </Row>
+                                                {/*<i onClick={this.toggleAccordion} className={this.state.isOpenClass} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">Advanced options</Label>*/}
+                                                {/*<Collapse isOpen={this.state.isOpen}>*/}
+                                                    {this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                    <Row className="mb-3">
+                                                        <div className="form-check col-md-6">
+                                                            <input type="checkbox" className="form-check-input" checked={this.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
+                                                            <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                        </div>
+                                                        <div className="form-check col-md-6">
+                                                            <input type="checkbox" className="form-check-input" checked={this.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
+                                                            <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
+                                                        </div>
+                                                    </Row>
+                                                    <Row className="mb-3">
+                                                        <div className="form-check col-md-6">
+                                                            <input type="checkbox" className="form-check-input" checked={this.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
+                                                            <label className="form-check-label" htmlFor="canMissing">Can missing</label>
+                                                        </div>
+                                                    </Row>
+                                                {/*</Collapse>*/}
                                             </CardText>
                                         </Col>
                                     </Row>
@@ -170,19 +442,66 @@ class Properties extends Component {
                                 <TabPane tabId="2">
                                     <Row>
                                         <Col sm="12">
-                                            <CardText className="mb-0">
-                                                Food truck fixie locavore, accusamus mcsweeney's
-                                                marfa nulla single-origin coffee squid.
-                                                Exercitation +1 labore velit, blog sartorial PBR
-                                                leggings next level wes anderson artisan four loko
-                                                farm-to-table craft beer twee. Qui photo booth
-                                                letterpress, commodo enim craft beer mlkshk
-                                                aliquip jean shorts ullamco ad vinyl cillum PBR.
-                                                Homo nostrud organic, assumenda labore aesthetic
-                                                magna delectus mollit. Keytar helvetica VHS salvia
-                                                yr, vero magna velit sapiente labore stumptown.
-                                                Vegan fanny pack odio cillum wes anderson 8-bit.
-                                            </CardText>
+                                            <div className="mb-3">
+                                                <Label className="form-label mb-3 d-flex">Is dependent</Label>
+                                                <div className="form-check form-check-inline">
+                                                    <Input
+                                                        type="radio"
+                                                        id="customRadioInline1"
+                                                        name="customRadioInline1"
+                                                        className="form-check-input"
+                                                    />
+                                                    <Label
+                                                        className="form-check-label" htmlFor="customRadioInline1"
+                                                    >
+                                                        Yes
+                                                    </Label>
+                                                </div>
+
+                                                <div className="form-check form-check-inline">
+                                                    <Input
+                                                        type="radio"
+                                                        id="customRadioInline2"
+                                                        name="customRadioInline1"
+                                                        className="form-check-input"
+                                                    />
+                                                    <Label
+                                                        className="form-check-label" htmlFor="customRadioInline2"
+                                                    >
+                                                        No
+                                                    </Label>
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col sm="12">
+                                            <div className="mb-3">
+                                                <Label>Dependent field</Label>
+                                                <Select
+                                                    value={this.selectedGroup}
+                                                    onChange={() => {
+                                                        this.handleSelectGroup();
+                                                    }}
+                                                    options={this.state.optionGroup}
+                                                    classNamePrefix="select2-selection"
+                                                />
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col sm="4">
+                                            <div className="mb-3">
+                                                <Label>Dependency condition</Label>
+                                                <Select
+                                                    value={this.state.selectedGroup}
+                                                    onChange={() => {
+                                                        this.handleSelectGroup();
+                                                    }}
+                                                    options={this.state.optionGroup}
+                                                    classNamePrefix="select2-selection"
+                                                />
+                                            </div>
                                         </Col>
                                     </Row>
                                 </TabPane>
@@ -229,8 +548,13 @@ class Properties extends Component {
                             </TabContent>
                         </CardBody>
                     </Card>
+                    <div style={{ float: 'right' }}>
+                        <Button color="primary" onClick={this.saveProperties}>
+                            Save
+                        </Button>
+                    </div>
                 </Col>
-            {/*</ElementBase>*/}
+                {/*</ElementBase>*/}
             </>
 
         );

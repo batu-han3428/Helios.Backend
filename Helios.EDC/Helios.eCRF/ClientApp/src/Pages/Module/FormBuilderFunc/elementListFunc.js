@@ -50,7 +50,10 @@ function ElementList(props) {
     };
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
+        <>
+            <Button className="elmlst" id={l.key} onClick={e => tog_large(e, l.key)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button><br />
+        </>
+
     );
 
     return (

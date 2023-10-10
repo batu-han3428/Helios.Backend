@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../Layouts/Sidebar/sidebar';
 import './module.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faCog, faArrowRight } from '../../../node_modules/@fortawesome/free-solid-svg-icons/index';
 import { Routes, Route, useNavigate } from "react-router-dom";
 import AddOrUpdateModule from './addOrUpdateModule';
 
@@ -14,7 +11,7 @@ function ModuleList() {
     };
 
     //useEffect(() => {
-    fetch('/Account/GetModuleList', {
+    fetch('/Module/GetModuleList', {
         method: 'GET',
     })
         .then(response => response.json())
@@ -27,9 +24,12 @@ function ModuleList() {
     //});
     const [moduleList, setModuleList] = useState([]);
 
+    const addModule = () => {
+        navigate(`/addOrUpdateModule`);
+    };
+
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
-            <Sidebar></Sidebar>
             <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
                 <div><h1>Modules</h1></div>
                 <hr />
@@ -38,10 +38,10 @@ function ModuleList() {
                         <small>Add Module</small>
                     </button>
                     {/*<Link to="./addModule" className="btn btn-primary">Sign up</Link>*/}
-                    {/*<button onClick={navigateAddModule}>Home</button>*/}
-                    <Routes>
-                        <Route path="/addModule" element={<AddModule />} />
-                    </Routes>
+                    <button onClick={navigateAddModule}>Home</button>
+                    {/*<Routes>*/}
+                    {/*    <Route path="/addModule" element={<AddModule />} />*/}
+                    {/*</Routes>*/}
                 </div>
                 <br />
                 <br />
@@ -55,15 +55,15 @@ function ModuleList() {
                                     </div>
                                     <div className="floatr">
                                         <button className="btn" data-id={moduleList.id}>
-                                            <FontAwesomeIcon icon={faCog} />
+                                            {/*<FontAwesomeIcon icon={faCog} />*/}
                                         </button>
                                         <br></br>
                                         <button className="btn" data-id={moduleList.id}>
-                                            <FontAwesomeIcon icon={faArrowRight} />
+                                            {/*<FontAwesomeIcon icon={faArrowRight} />*/}
                                         </button>
                                         <br></br>
                                         <button className="btn" data-id={moduleList.id}>
-                                            <FontAwesomeIcon icon={faEdit} />
+                                            {/*<FontAwesomeIcon icon={faEdit} />*/}
                                         </button>
                                     </div>
                                 </div>

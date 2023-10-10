@@ -18,7 +18,7 @@ import Breadcrumbs from "../../../components/Common/Breadcrumb";
 
 import ElementList from './elementList.js'
 import './formBuilder.css'
-//import Properties from './properties.js';
+import Properties from './properties.js';
 
 function FormBuilder() {
     const [modal_large, setmodal_large] = useState(false);

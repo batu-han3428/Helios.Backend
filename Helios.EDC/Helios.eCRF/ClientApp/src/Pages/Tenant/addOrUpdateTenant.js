@@ -10,9 +10,11 @@ function AddOrUpdateTenant() {
         setName(e.target.value);
     };
 
+    const baseUrl = "https://localhost:7196";
+
     const handleSubmit = (event) => {
         debugger;
-        fetch('/User/AddTenant?Name=' + Name, {
+        fetch(baseUrl + '/User/AddTenant?Name=' + Name, {
             method: 'POST',
             //body: Name
 
