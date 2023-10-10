@@ -4,6 +4,8 @@ using System.Net.Mail;
 using System.Net;
 using Helios.Core.Contexts;
 using MassTransit;
+using Helios.Core.Services;
+using Helios.Core.Services.Interfaces;
 
 namespace Helios.Core.Extension
 {
@@ -584,7 +586,7 @@ namespace Helios.Core.Extension
 
         public static void DependencyInjection(this IServiceCollection services)
         {
-            //services.AddScoped<IBaseService, BaseService>();
+            services.AddScoped<IBaseService, BaseService>();
         }
     }
 }

@@ -7,14 +7,20 @@ using Helios.Authentication.Services.Interfaces;
 using Helios.Common.DTO;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Math;
+using System;
 using System.Configuration;
+using System.Net.Mail;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Xml.Linq;
+using System.Net.Mime;
 
 namespace Helios.Authentication.Controllers
 {
@@ -350,6 +356,53 @@ namespace Helios.Authentication.Controllers
                 throw;
             }
 
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> ContactUsMail(ContactUsModel contactUsModel)
+        {
+            try
+            {
+                string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ContactUsMailLayout.html");
+                string mailContent = "";
+
+                var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.jpg");
+                byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
+                string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+                var mailSubject = contactUsModel.Subject;
+
+                using (StreamReader reader = System.IO.File.OpenText(tempPath))
+                {
+                    mailContent = reader.ReadToEnd()
+                        .Replace("@userName", contactUsModel.NameSurname)
+                        .Replace("@email", contactUsModel.Email)
+                        .Replace("@institution", contactUsModel.InstitutionName)
+                        .Replace("@studycode", contactUsModel.StudyCode)
+                        .Replace("@usermessage", contactUsModel.YourMessage)
+                        .Replace("@imgbase64", base64ImageRepresentation)
+                        .Replace("@dynamicdomain", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value));
+                }
+
+                for (int i = 0; i < contactUsModel.MailAddresses.Count; i++)
+                {
+                    await _baseService.SendMail(contactUsModel.MailAddresses[i].ToString(), mailSubject, mailContent/*, attachment*/);
+                }
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Mesajınız gönderildi."
+                };
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Beklenmeyen bir hata oluştu."
+                };
+            } 
         }
 
         [HttpGet]

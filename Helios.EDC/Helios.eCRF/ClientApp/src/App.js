@@ -1,5 +1,10 @@
 import PropTypes from 'prop-types'
 import React from "react"
+import "./components/Common/ModalComp/ModalComp.css"
+
+// Import scss
+import "./assets/scss/new-theme.scss"
+
 import { Routes, Route } from 'react-router-dom'
 import { connect } from "react-redux"
 
@@ -12,13 +17,18 @@ import Authmiddleware from "./routes/middleware/Authmiddleware"
 // layouts Format
 import NonAuthLayout from "./components/NonAuthLayout"
 
-// Import scss
-import "./assets/scss/theme.scss"
-
 // Import Firebase Configuration file
 // import { initFirebaseBackend } from "./helpers/firebase_helper"
 
 import fakeBackend from "./helpers/AuthType/fakeBackend"
+
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faCheckSquare, faCoffee, faPlus } from '@fortawesome/free-solid-svg-icons'
+import NotFound from './Pages/NotFound/NotFound'
+import AccessDeniend from './Pages/AccessDenied/AccessDenied'
+import ContactUs from './Pages/ContactUs/ContactUs'
+
+library.add(faCheckSquare, faCoffee, faPlus)
 
 // Activating fake backend
 fakeBackend();
@@ -68,6 +78,11 @@ const App = () => {
             />
           ))}
         </Route>
+
+         <Route path="/ContactUs" element={<ContactUs />} />
+         <Route path="/AccessDenied" element={<AccessDeniend />} />
+         <Route path="*" element={<NotFound />} />
+
       </Routes>
     </React.Fragment>
   )

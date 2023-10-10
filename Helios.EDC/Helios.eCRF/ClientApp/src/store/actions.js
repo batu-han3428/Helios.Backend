@@ -10,3 +10,5 @@ export * from "./auth/profile/actions"
 export * from "./calendar/actions"
 
 export * from "./auth/user/actions"
+
+export * from "./study/actions"

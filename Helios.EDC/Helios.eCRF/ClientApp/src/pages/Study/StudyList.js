@@ -1,22 +1,26 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect } from "react";
 import { withTranslation } from "react-i18next";
-import { Link, Routes, Route, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MDBDataTable } from "mdbreact";
 import {
-    Row, Col, Card, CardBody, CardTitle, CardSubtitle, Dropdown,
+    Row, Col, Card, CardBody, Dropdown,
     DropdownToggle,
     DropdownItem,
     DropdownMenu
 } from "reactstrap";
-import { useStudyListGetQuery } from '../../store/services/Study';
+import { useStudyListGetQuery, useStudyGetQuery } from '../../store/services/Study';
 import './study.css';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../store/loader/actions';
+import { addStudy } from '../../store/study/actions';
+import { formatDate } from "../../helpers/format_date";
 
 
 const StudyList = props => {
 
+    const [studyId, setStudyId] = useState(null); 
+    const [skip, setSkip] = useState(true);
     const [menu, setMenu] = useState(false);
     const [tableData, setTableData] = useState([]);
 
@@ -32,13 +36,28 @@ const StudyList = props => {
         navigate(`/addstudy`, { state: { studyId: id } });
     };
 
-    const getActions = (id) => {
+    const { data: data1, isLoading1, isError1 } = useStudyGetQuery(studyId, {
+        skip, refetchOnMountOrArgChange: true
+    });
+
+    const goToStudy = (id, equivalentStudyId) => {
+        setSkip(false);
+        setStudyId(id);
+    };
+    useEffect(() => {
+        if (data1 && !isLoading1 && !isError1) {
+            dispatch(addStudy(data1));
+            navigate("/visits");
+        }
+    }, [data1, isLoading1, isError1]);
+
+    const getActions = (id, equivalentStudyId) => {
         const actions = (
             <div className="icon-container">
                 <div className="icon icon-update" onClick={() => { studyUpdate(id) }}></div>
-                <div className="icon icon-demo"></div>
+                <div className="icon icon-demo" onClick={() => { goToStudy(equivalentStudyId, id) }}></div>
                 <div className="icon icon-unlock"></div>
-                <div className="icon icon-live"></div>
+                <div className="icon icon-live" onClick={() => { goToStudy(id, equivalentStudyId) }}></div>
             </div>);
         return actions;
     };
@@ -99,7 +118,8 @@ const StudyList = props => {
             const updatedStudyData = studyData.map(item => {
                 return {
                     ...item,
-                    actions: getActions(item.id)
+                    updatedAt: formatDate(item.updatedAt),
+                    actions: getActions(item.id, item.equivalentStudyId)
                 };
             });
             setTableData(updatedStudyData);
@@ -111,7 +131,7 @@ const StudyList = props => {
         navigate(root);
     };
 
-    document.title = "Study | Veltrix - React Admin & Dashboard Template";
+    document.title = "Studylist | Veltrix - React Admin & Dashboard Template";
     return (
         <React.Fragment>
             <div className="page-content">

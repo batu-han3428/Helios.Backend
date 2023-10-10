@@ -48,7 +48,7 @@ const AddOrUpdateStudy = props => {
     const location = useLocation();
 
     const backPage = () => {
-        navigate('/study');
+        navigate('/studylist');
     };
 
     const optionGroup = [
@@ -79,7 +79,6 @@ const AddOrUpdateStudy = props => {
             studylanguage: apiStudyData ? apiStudyData.studyLanguage : 0,
             description: apiStudyData ? apiStudyData.description : '',
             subdescription: apiStudyData ? apiStudyData.subDescription : '',
-         /* subjectnumberdigist: '',*/
             doubledataentry: apiStudyData ? apiStudyData.doubleDataEntry : false,
             asksubjectinitial: apiStudyData ? apiStudyData.askSubjectInitial : false,
             reasonforchange: apiStudyData ? apiStudyData.reasonForChange : true,
@@ -91,14 +90,6 @@ const AddOrUpdateStudy = props => {
             studylink: Yup.string().required(
                 "This value is required"
             ),
-            //studylanguage: Yup.object().nullable().required(
-            //    "This value is required"
-            //),
-            //description: Yup.string().max(225),
-            //subdescription: Yup.string().max(225),
-            //subjectnumberdigist: Yup.string().required(
-            //    "This value is required"    
-            //)
         }),
         onSubmit: async (values) => {
             dispatch(startloading());
@@ -369,7 +360,7 @@ const AddOrUpdateStudy = props => {
                 message={ newSave ?  " Kayıt başarılı" : "Güncelleme başarılı"}
                 showToast={showToast}
                 setShowToast={setShowToast}
-                state={ stateToast }
+                stateToast={ stateToast }
             />
         </React.Fragment>
     );

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import VerticalLayout from "../../components/VerticalLayout";
@@ -10,46 +10,51 @@ import { userRoutes } from "../allRoutes";
 
 const AuthMiddleware = (props) => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const layoutType = useSelector(state => state.rootReducer.Layout.layoutType);
     const user = getLocalStorage("accessToken");
     const { path: Path, element: Element, roles } = props;
     let matchedRoute = null;
-    const Layout = layoutType === layoutTypes.VERTICAL ? VerticalLayout : VerticalLayout; // HorizontalLayout kullanacaksanýz burayý güncelleyin.
+    const Layout = layoutType === layoutTypes.VERTICAL ? VerticalLayout : VerticalLayout;
+
+    const pageType = userRoutes.find(route => route.path === Path)?.menuType ?? 'common';
+
+    var result = null;
 
     useEffect(() => {
-        const handleNavigation = (address) => {
-            navigate(address);
-        };
-
-        if (!user) {
-            handleNavigation('/login');
+        if (user) {
+            dispatch(loginuser(result));
         }
-        else {
-            const result = onLogin();
-            if (result === false) {
-                removeLocalStorage("accessToken");
-                handleNavigation('/login');
-            } else {
-                dispatch(loginuser(result));
-                if (roles && !roles.some(role => result.roles.includes(role))) {
-                    handleNavigation('/unauthorized');
-                }
-                if (Path === "/") {
-                    const matchedRoute = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)));
-                    if (matchedRoute) {
-                        navigate(matchedRoute.path);
-                    } else {
-                        handleNavigation('/dashboard');
-                    }
+    }, [dispatch, user]);
+    if (!user) {
+        return (
+            <Navigate to={{ pathname: "/login", state: { from: props.location } }} />
+        );
+    }
+    else {
+        result = onLogin();
+        if (result === false) {
+            removeLocalStorage("accessToken");
+            return (
+                <Navigate to={{ pathname: "/login", state: { from: props.location } }} />
+            );
+        } else {
+            if (Path !== "/" && roles && !roles.some(role => result.roles.includes(role))) {
+                return (
+                    <Navigate to={{ pathname: "/AccessDenied", state: { from: props.location } }} />
+                );
+            }
+            if (Path === "/") {
+                const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)));
+                if (matchedRoute1) {
+                    matchedRoute = matchedRoute1;
                 }
             }
         }
-    }, [user, roles, navigate]);
+    }
 
 
     return (
-        <Layout>
+        <Layout pageType={pageType}>
             {Path !== "/" ? Element : <Navigate to={matchedRoute?.path || '/dashboard'} />}
         </Layout>
     );

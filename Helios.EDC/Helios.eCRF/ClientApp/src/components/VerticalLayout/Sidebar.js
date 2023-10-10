@@ -13,7 +13,7 @@ const Sidebar = props => {
     <React.Fragment>
       <div className="vertical-menu">
         <div data-simplebar className="h-100">
-          {props.type !== "condensed" ? <SidebarContent /> : <SidebarContent />}
+          {props.type !== "condensed" ? <SidebarContent pageType={ props.pageType } /> : <SidebarContent pageType={ props.pageType } />}
         </div>
       </div>
     </React.Fragment>

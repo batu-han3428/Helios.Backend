@@ -10,6 +10,7 @@ namespace Helios.Common.DTO
     public class StudyDTO
     {
         public Guid Id { get; set; }
+        public Guid? EquivalentStudyId { get; set; }
         public string StudyName { get; set; }
         public string? ProtocolCode { get; set; }
         public bool AskSubjectInitial { get; set; }
@@ -22,5 +23,6 @@ namespace Helios.Common.DTO
         public int SubjectNumberDigist { get; set; }
         public bool DoubleDataEntry { get; set; }
         public bool ReasonForChange { get; set; }
+        public bool IsDemo { get; set; }
     }
 }

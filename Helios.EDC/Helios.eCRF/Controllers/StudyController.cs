@@ -55,6 +55,7 @@ namespace Helios.eCRF.Controllers
 
             return result;
         }
+        #region Study
 
         [HttpGet]
         [Authorize(Roles = "TenantAdmin")]
@@ -82,5 +83,44 @@ namespace Helios.eCRF.Controllers
 
             return Ok(result);
         }
+        #endregion
+
+        #region Site
+        [HttpGet("{studyId}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
+        {
+            var result = await _studyService.GetSiteList(studyId);
+
+            return result;
+        }
+
+        [HttpGet("{siteId}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<SiteDTO> GetSite(Guid siteId)
+        {
+            var result = await _studyService.GetSite(siteId);
+
+            return result;
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> SiteSaveOrUpdate(SiteModel siteModel)
+        {
+            var result = await _studyService.SiteSaveOrUpdate(siteModel);
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> SiteDelete(SiteModel siteModel)
+        {
+            var result = await _studyService.SiteDelete(siteModel);
+
+            return Ok(result);
+        }
+        #endregion
     }
 }
