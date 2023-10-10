@@ -28,7 +28,6 @@ namespace Helios.Core.Domains.Entities
         public string UpperLimit { get; set; }
         public string Extension { get; set; } //numeric description
         public string Mask { get; set; }
-        public string PlaceholderValue { get; set; }
         public AlignLayout Layout { get; set; }
 
         //datagrid, table

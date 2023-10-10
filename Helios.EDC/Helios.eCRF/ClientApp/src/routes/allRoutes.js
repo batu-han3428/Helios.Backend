@@ -102,6 +102,7 @@ import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
 //Study
 import StudyList from "../Pages/Study/StudyList";
 import AddOrUpdateStudy from "../Pages/Study/AddOrUpdateStudy";
+import ModuleList from "../Pages/Module/moduleList.js";
 
 
 const userRoutes = [
@@ -110,6 +111,7 @@ const userRoutes = [
     { path: "/addTenant", component: <TenantAddOrUpdate /> },
 
     { path: "/formBuilder", component: <FormBuilder /> },
+    { path: "/moduleList", component: <ModuleList /> },
     //study
     { path: "study", component: <StudyList />, roles: ['TenantAdmin'] },
     { path: "addstudy", component: <AddOrUpdateStudy />},

@@ -155,6 +155,13 @@ const SidebarContent = props => {
                       </li>
 
             <li>
+              <Link to="/moduleList" className="waves-effect">
+                <i className="ti-home"></i>
+                <span>{props.t("Module")}</span>
+              </Link>
+            </li>
+
+            <li>
               <Link to="/formBuilder" className="waves-effect">
                 <i className="ti-home"></i>
                 <span>{props.t("FormBuilder")}</span>

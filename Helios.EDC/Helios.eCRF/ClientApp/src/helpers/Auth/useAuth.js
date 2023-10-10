@@ -4,7 +4,6 @@ import { getLocalStorage, removeLocalStorage } from '../local-storage/localStora
 
 
 export const onLogin = () => {
-    debugger;
     let token = getLocalStorage("accessToken");
 
     if (token !== null) {

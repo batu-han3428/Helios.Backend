@@ -17,45 +17,7 @@ namespace Helios.eCRF.Controllers
         {
             _studyService = studyService;
         }
-
-        [HttpPost]
-        public async Task<bool> AddModule(string name)
-        {
-            var model = new ModuleModel { Name = name };
-            var result = await _studyService.AddModule(model);
-            return result;
-        }
-
-        [HttpPost]
-        public async Task<bool> UpdateModule(ModuleModel model)
-        {
-            var result = await _studyService.UpdateModule(model);
-            return result;
-        }
         
-        [HttpPost]
-        public async Task<bool> DeleteModule(ModuleModel model)
-        {
-            var result = await _studyService.DeleteModule(model);
-            return result;
-        }
-
-        [HttpGet]
-        public async Task<ModuleModel> GetModule(Guid id)
-        {
-            var result = await _studyService.GetModule(id);
-
-            return result;
-        }
-
-        [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList()
-        {
-            var result = await _studyService.GetModuleList();
-
-            return result;
-        }
-
         [HttpGet]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<List<StudyDTO>> GetStudyList()

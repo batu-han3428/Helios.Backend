@@ -1,5 +1,4 @@
 import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
-import Sidebar from '../../Layouts/Sidebar/sidebar';
 
 //export default class AddModule extends Component {
 function AddOrUpdateModule() {
@@ -12,7 +11,7 @@ function AddOrUpdateModule() {
 
     const handleSubmit = (event) => {
         debugger;
-        fetch('/User/AddModule?Name=' + Name, {
+        fetch('/Module/AddModule?Name=' + Name, {
             method: 'POST',
             //body: Name
 
@@ -29,7 +28,6 @@ function AddOrUpdateModule() {
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
-            <Sidebar></Sidebar>
             <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
                 <div><h1>Add Modules</h1></div>
                 <hr />
