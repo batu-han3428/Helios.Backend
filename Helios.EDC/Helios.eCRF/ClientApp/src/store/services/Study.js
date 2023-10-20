@@ -1,6 +1,7 @@
 ﻿import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
 import { SiteLaboratoriesApi } from './SiteLaboratories';
+import { PermissionsApi } from './Permissions';
 
 
 export const StudyApi = createApi({
@@ -29,6 +30,7 @@ export const StudyApi = createApi({
             async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 await queryFulfilled;
                 dispatch(SiteLaboratoriesApi.util.invalidateTags(["Site"]));
+                dispatch(PermissionsApi.util.invalidateTags(["Role"]));
             },
         }),
         studySave: builder.mutation({

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React from "react";
 import {
     Modal,
     ModalBody,
@@ -6,9 +6,11 @@ import {
     ModalFooter,
     Button,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
+import PropTypes from 'prop-types';
 
 
-const ModalComp = ({ title, body, modal_backdrop, tog_backdrop, handle, buttonText }) => {
+const ModalComp = ({ title, body, modal_backdrop, tog_backdrop, handle, buttonText, t }) => {
     return (
         <Modal isOpen={modal_backdrop} toggle={tog_backdrop} id="staticBackdrop" backdrop={false} size="xl">
             <ModalHeader className="mt-0" toggle={tog_backdrop}>{ title }</ModalHeader>
@@ -17,7 +19,7 @@ const ModalComp = ({ title, body, modal_backdrop, tog_backdrop, handle, buttonTe
             </ModalBody>
             <ModalFooter>
                 <Button color="light" onClick={tog_backdrop}>
-                    Close
+                    {t("Close")}
                 </Button>{' '}
                 <Button color="primary" onClick={handle}>
                     {buttonText}
@@ -27,4 +29,8 @@ const ModalComp = ({ title, body, modal_backdrop, tog_backdrop, handle, buttonTe
     );
 }
 
-export default ModalComp;
+ModalComp.propTypes = {
+    t: PropTypes.any
+};
+
+export default withTranslation()(ModalComp);

@@ -6,8 +6,6 @@ namespace Helios.Core.Domains.Entities
     public class StudyRole : EntityBase
     {
         public Guid StudyId { get; set; }
-        [ForeignKey("StudyRoleModulePermission")]
-        public Guid StudyRoleModulePermissionId { get; set; }
         public string Name { get; set; }
         public bool Add { get; set; }
         public bool View { get; set; }
@@ -75,5 +73,16 @@ namespace Helios.Core.Domains.Entities
         public bool AddMultiVisit { get; set; }
         public Study Study { get; set; }
         public StudyRoleModulePermission StudyRoleModulePermission { get; set; }
+
+        public void NewRole()
+        {
+            foreach (var property in this.GetType().GetProperties())
+            {
+                if (property.PropertyType == typeof(bool))
+                {
+                    property.SetValue(this, false, null);
+                }
+            }
+        }
     }
 }

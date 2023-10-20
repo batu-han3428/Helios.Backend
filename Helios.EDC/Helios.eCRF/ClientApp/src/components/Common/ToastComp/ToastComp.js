@@ -20,9 +20,9 @@ const ToastComp = ({ title, message, showToast, setShowToast, stateToast }) => {
 
     return (
         <Toast isOpen={showToast } className={stateToast? "tost success" : "tost error" }>
-            <ToastHeader>
-                {title}
-            </ToastHeader>
+            {/*<ToastHeader>*/}
+            {/*    {title}*/}
+            {/*</ToastHeader>*/}
             <ToastBody>
                 {message}
             </ToastBody>

@@ -59,12 +59,12 @@ namespace Helios.Authentication.Controllers
                 var result = await _roleManager.CreateAsync(new ApplicationRole { Name = selectRole.ToString() });
                 if (result.Succeeded)
                 {
-                    return new { isSuccess = true, message = "İşlem başarılı" };
+                    return new { isSuccess = true, message = "Successful" };
                 }
-                return new { isSuccess = false, message = "İşlem başarısız" };
+                return new { isSuccess = false, message = "Unsuccessful" };
             }
 
-            return new { isSuccess = false, message = "Rol zaten var" };
+            return new { isSuccess = false, message = "This role already exists." };
         }
 
         [HttpPost]
@@ -100,13 +100,13 @@ namespace Helios.Authentication.Controllers
                         //var result = await _userManager.AddToRoleAsync(user, selectRole.ToString());
                         if (result)
                         {
-                            return new { isSuccess = true, message = "Başarılı." };
+                            return new { isSuccess = true, message = "Successful" };
                         }
-                        return new { isSuccess = false, message = "İşlem başarısız." };
+                        return new { isSuccess = false, message = "Unsuccessful" };
                     }
-                    return new { isSuccess = false, message = "Kullanıcıda zaten rol tanımlı." };
+                    return new { isSuccess = false, message = "The role is already defined in the user." };
                 }
-                return new { isSuccess = false, message = "Kullanıcı bulunamadı." };
+                return new { isSuccess = false, message = "User not found." };
             }
             catch (Exception e)
             {
@@ -129,7 +129,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Hesabınızın açılması için lütfen sistem yöneticisi ile iletişime geçiniz."
+                            Message = "Please contact the system administrator to open your account."
                         };
                     }
 
@@ -142,7 +142,7 @@ namespace Helios.Authentication.Controllers
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = false,
-                                Message = "Giriş deneme limitinizi aştığınız için hesabınız kitlenmiştir. Yardım için sistem yöneticinize başvurun."
+                                Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account."
                             };
                         }
                     }
@@ -272,7 +272,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = true,
-                            Message = "Giriş başarılı!"
+                            Message = "Successful"
                         };
                     }
                 }
@@ -280,7 +280,7 @@ namespace Helios.Authentication.Controllers
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Geçersiz giriş denemesi!"
+                    Message = "Invalid user"
                 };
             }
             catch (Exception e)

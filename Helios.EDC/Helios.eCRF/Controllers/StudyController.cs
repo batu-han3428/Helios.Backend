@@ -19,6 +19,12 @@ namespace Helios.eCRF.Controllers
         }
 
         #region Study
+
+
+        /// <summary>
+        /// çalışma listesini döner
+        /// </summary>
+        /// <returns>çalışmalar</returns>
         [HttpGet]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<List<StudyDTO>> GetStudyList()
@@ -28,6 +34,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// seçili çalışmanın bilgilerini döner
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>çalışma bilgileri</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<StudyDTO> GetStudy(Guid studyId)
@@ -37,6 +49,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// çalışma kaydeder
+        /// </summary>
+        /// <param name="studyModel">çalışma bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
         [HttpPost]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> StudySave(StudyModel studyModel)
@@ -48,6 +66,13 @@ namespace Helios.eCRF.Controllers
         #endregion
 
         #region Site
+
+
+        /// <summary>
+        /// çalışmadaki site listesini döner
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>site listesi</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
@@ -57,6 +82,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// seçili site ı döner
+        /// </summary>
+        /// <param name="siteId">site id</param>
+        /// <returns>site bilgisi</returns>
         [HttpGet("{siteId}")]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<SiteDTO> GetSite(Guid siteId)
@@ -66,6 +97,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// yeni bir site kaydeder veya seçili site ı günceller
+        /// </summary>
+        /// <param name="siteModel">site bilgisi</param>
+        /// <returns>başarılı başarısız</returns>
         [HttpPost]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> SiteSaveOrUpdate(SiteModel siteModel)
@@ -75,6 +112,12 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// seçili site ı siler
+        /// </summary>
+        /// <param name="siteModel">site bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
         [HttpPost]
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> SiteDelete(SiteModel siteModel)

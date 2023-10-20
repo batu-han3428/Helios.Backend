@@ -1,6 +1,9 @@
-﻿using Helios.eCRF.Models;
+﻿using Helios.Common.DTO;
+using Helios.Common.Model;
+using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -128,5 +131,51 @@ namespace Helios.eCRF.Services
 
             return tenantList;
         }
+
+        #region Permissions
+        public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Guid studyId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetPermissionRoleList", Method.Get);
+                req.AddParameter("studyId", studyId);
+                var result = await client.ExecuteAsync<List<UserPermissionDTO>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/SetPermission", Method.Post);
+                req.AddJsonBody(setPermissionModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/AddOrUpdatePermissionRol", Method.Post);
+                req.AddJsonBody(userPermission);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionModel userPermission)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/DeleteRole", Method.Post);
+                req.AddJsonBody(userPermission);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+        #endregion
     }
 }

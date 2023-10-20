@@ -77,9 +77,9 @@ const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
 };
 
 const SidebarContent = props => {
-  const location = useLocation();
-  const ref = useRef();
-  const path = location.pathname;
+    const location = useLocation();
+    const ref = useRef();
+    const path = location.pathname;
 
     const [metisMenuInstance, setMetisMenuInstance] = useState(null);
     const items = menuItems[props.pageType] || menuItems.common;
@@ -206,7 +206,6 @@ const SidebarContent = props => {
         setMetisMenuInstance(newMetisMenu);
         activeMenu();
 
-
         return () => {
             newMetisMenu.dispose();
         };
@@ -218,28 +217,14 @@ const SidebarContent = props => {
         activeMenu();
     },[props.pageType, location.pathname]);
 
-function scrollElement(item) { 
-    if (item) {
-      const currentPosition = item.offsetTop;
-      if (currentPosition > window.innerHeight) {
-        ref.current.getScrollElement().scrollTop = currentPosition - 300;
-      }
+    function scrollElement(item) { 
+        if (item) {
+          const currentPosition = item.offsetTop;
+          if (currentPosition > window.innerHeight) {
+            ref.current.getScrollElement().scrollTop = currentPosition - 300;
+          }
+        }
     }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
 
   return (
     <React.Fragment>
@@ -247,28 +232,26 @@ function scrollElement(item) {
         <div id="sidebar-menu">
           <ul className="metismenu list-unstyled" id="side-menu">
             <li className="menu-title">{props.t("Main")} </li>
-                      {items.map((item, index) => {
-                          const hasIsDemoProperty = "isDemo" in item;
+                {items.map((item, index) => {
+                    const hasIsDemoProperty = "isDemo" in item;
 
-                          if (hasIsDemoProperty && (isDemoStudy === null || isDemoStudy === undefined)) {
-                              return;
-                          }
-                           if (hasIsDemoProperty && isDemoStudy !== null && item.isDemo === isDemoStudy) {
-        return;
-    }
+                    if (hasIsDemoProperty && (isDemoStudy === null || isDemoStudy === undefined)) {
+                        return;
+                    }
+                    if (hasIsDemoProperty && isDemoStudy !== null && item.isDemo === isDemoStudy) {
+                        return;
+                    }
 
-
-                          return (
-                              <MenuItem
-                                  pageType={props.pageType}
-                                  isDemoStudy={props.pageType === "study" ? isDemoStudy : null}
-                                  key={index}
-                                  item={item}
-                                  t={props.t}
-                              />
-                          );
-                      })}
-
+                    return (
+                        <MenuItem
+                            pageType={props.pageType}
+                            isDemoStudy={props.pageType === "study" ? isDemoStudy : null}
+                            key={index}
+                            item={item}
+                            t={props.t}
+                        />
+                    );
+                })}
           </ul>
         </div>
       </SimpleBar>
