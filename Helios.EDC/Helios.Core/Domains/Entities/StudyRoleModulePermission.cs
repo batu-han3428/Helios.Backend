@@ -5,6 +5,7 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyRoleModulePermission : EntityBase
     {
+        [ForeignKey("StudyRole")]
         public Guid StudyRoleId { get; set; }
         public Guid StudyVisitPageModuleId { get; set; }
         public bool Read { get; set; }

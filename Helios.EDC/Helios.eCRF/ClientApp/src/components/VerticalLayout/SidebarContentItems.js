@@ -11,7 +11,7 @@
     ],
     admin: [
         {
-            label: "Study",
+            label: "Studies",
             to: "/studylist",
         },
         {

@@ -9,6 +9,12 @@ namespace Helios.eCRF.Controllers
     public class ModuleController : Controller
     {
         private IStudyService _studyService;
+
+        /// <summary>
+        /// modül ekler
+        /// </summary>
+        /// <param name="name">modül adı</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<bool> AddModule(string name)
         {
@@ -17,6 +23,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// modül günceller
+        /// </summary>
+        /// <param name="model">modül bilgileri</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<bool> UpdateModule(ModuleModel model)
         {
@@ -24,6 +36,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// modül siler
+        /// </summary>
+        /// <param name="model">modül bilgileri</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<bool> DeleteModule(ModuleModel model)
         {
@@ -31,6 +49,12 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// seçili modülün bilgilerini getirir
+        /// </summary>
+        /// <param name="id">modül id</param>
+        /// <returns>istenen modülün bilgilerini döner</returns>
         [HttpGet]
         public async Task<ModuleModel> GetModule(Guid id)
         {
@@ -39,6 +63,11 @@ namespace Helios.eCRF.Controllers
             return result;
         }
 
+
+        /// <summary>
+        /// modülleri döner
+        /// </summary>
+        /// <returns>modüller</returns>
         [HttpGet]
         public async Task<List<ModuleModel>> GetModuleList()
         {

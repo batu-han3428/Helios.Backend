@@ -11,19 +11,19 @@ import translationTR from "./locales/tr/translation.json"
 
 // the translations
 const resources = {
-  gr: {
-    translation: translationGr,
-  },
-  it: {
-    translation: translationIT,
-  },
-  rs: {
-    translation: translationRS,
-  },
-  sp: {
-    translation: translationSP,
-  },
-  eng: {
+  //gr: {
+  //  translation: translationGr,
+  //},
+  //it: {
+  //  translation: translationIT,
+  //},
+  //rs: {
+  //  translation: translationRS,
+  //},
+  //sp: {
+  //  translation: translationSP,
+  //},
+  en: {
     translation: translationENG,
   },
   tr: {

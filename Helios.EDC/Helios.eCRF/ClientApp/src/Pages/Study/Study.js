@@ -6,6 +6,8 @@ import {
     Row,
     Col,
 } from "reactstrap";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 
 const Study = props => {
 
@@ -22,7 +24,7 @@ const Study = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
                             <Col md={8}>
-                                <h6 className="page-title"><i onClick={backPage} className="ti-arrow-left" style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }}></i>Study</h6>
+                                <h6 className="page-title"><FontAwesomeIcon style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }} onClick={backPage} icon="fa-solid fa-left-long" />Study</h6>
                             </Col>
                         </Row>
                     </div>

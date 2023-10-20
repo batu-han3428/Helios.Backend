@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using Helios.Common.DTO;
+using Helios.Common.Model;
 
 namespace Helios.eCRF.Services.Interfaces
 {
@@ -16,5 +18,9 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> UpdateUser(UserDTO model);
         Task<bool> AddRole(UserDTO model);
         Task<List<TenantModel>> GetTenantList();
+        Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission);
+        Task<ApiResponse<dynamic>> DeleteRole(UserPermissionModel userPermission);
+        Task<List<UserPermissionDTO>> GetPermissionRoleList(Guid studyId);
+        Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel);
     }
 }

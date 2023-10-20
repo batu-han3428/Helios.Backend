@@ -25,6 +25,7 @@ import { useStudyGetQuery } from '../../store/services/Study';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../store/loader/actions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 const AddOrUpdateStudy = props => {
@@ -53,10 +54,10 @@ const AddOrUpdateStudy = props => {
 
     const optionGroup = [
         {
-            label: "Language",
+            label: props.t("Languages"),
             options: [
-                { label: "English", value: 1 },
-                { label: "Turkish", value: 2 },
+                { label: props.t("English"), value: 1 },
+                { label: props.t("Turkish"), value: 2 },
             ]
         }
     ];
@@ -85,10 +86,10 @@ const AddOrUpdateStudy = props => {
         },
         validationSchema: Yup.object().shape({
             studyname: Yup.string().required(
-                "This value is required"
+                props.t("This field is required")
             ),
             studylink: Yup.string().required(
-                "This value is required"
+                props.t("This field is required")
             ),
         }),
         onSubmit: async (values) => {
@@ -148,7 +149,7 @@ const AddOrUpdateStudy = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
                             <Col md={8}>
-                                <h6 className="page-title"><i onClick={backPage} className="ti-arrow-left" style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }}></i>Study information</h6>
+                                <h6 className="page-title"><FontAwesomeIcon style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }} onClick={backPage} icon="fa-solid fa-left-long" />{props.t("Study information")}</h6>
                             </Col>
                         </Row>
                     </div>
@@ -156,9 +157,9 @@ const AddOrUpdateStudy = props => {
                         <Col className="col-12">
                             <Card style={{ width: "50%", backgroundColor:"#f8f8fa", boxShadow:"unset", margin: "0 auto" }}>
                                 <CardBody>
-                                    <Label className="form-label">Study information</Label>
+                                    <Label className="form-label">{props.t("Study information")}</Label>
                                     <CardSubtitle className="mb-3">
-                                        Your study will be created on the Azure Server because you are logged in the domain: trials.helios-crf.com.
+                                        {props.t("Your study will be created on the Azure Server because you are logged in the domain: trials.helios-crf.com.")}
                                     </CardSubtitle>
                                      <Form
                                         onSubmit={(e) => {
@@ -167,10 +168,10 @@ const AddOrUpdateStudy = props => {
                                         return false;
                                     }}>
                                         <div className="mb-3">
-                                          <Label className="form-label">Study name</Label>
+                                          <Label className="form-label">{props.t("Study name")}</Label>
                                           <Input
                                             name="studyname"
-                                            placeholder="Study name"
+                                            placeholder={props.t("Study name")}
                                             type="text"
                                             onChange={validationType.handleChange}
                                             onBlur={(e) => {
@@ -187,10 +188,10 @@ const AddOrUpdateStudy = props => {
                                           ) : null}
                                         </div>
                                         <div className="mb-3">
-                                            <Label className="form-label">Study link</Label>
+                                            <Label className="form-label">{props.t("Study link")}</Label>
                                             <Input
                                                 name="studylink"
-                                                placeholder="Study link"
+                                                placeholder={props.t("Study link")}
                                                 type="text"
                                                 onChange={validationType.handleChange}
                                                 onBlur={(e) => {
@@ -207,11 +208,11 @@ const AddOrUpdateStudy = props => {
                                             ) : null}
                                         </div>
                                         <div className="mb-3">
-                                          <Label>Protocol code</Label>
+                                          <Label>{props.t("Protocol code")}</Label>
                                           <Input
                                             name="protocolcode"
                                             type="text"
-                                            placeholder="Protocol code"
+                                            placeholder={props.t("Protocol code")}
                                             onChange={validationType.handleChange}
                                             onBlur={(e) => {
                                                 validationType.handleBlur(e);
@@ -221,7 +222,7 @@ const AddOrUpdateStudy = props => {
                                           />
                                         </div>
                                         <div className="mb-3">
-                                            <Label>Study language</Label>
+                                            <Label>{props.t("Study language")}</Label>
                                             <Select
                                                 value={optionGroup[0].options.find(option => option.value === validationType.values.studylanguage)}
                                                 name="studylanguage"
@@ -234,14 +235,14 @@ const AddOrUpdateStudy = props => {
                                                     };
                                                     validationType.handleChange(formattedValue);
                                                     validationType.submitForm();
-                                                }} 
+                                                }}
                                                 options={optionGroup}
                                                 classNamePrefix="select2-selection"
-                                              
+                                                placeholder={props.t("Select")}
                                             />
                                         </div>
                                         <div className="mb-3">
-                                          <Label className="form-label">Description</Label>
+                                            <Label className="form-label">{props.t("Description")}</Label>
                                             <Input
                                                 name="description"
                                                 type="textarea"
@@ -255,11 +256,11 @@ const AddOrUpdateStudy = props => {
                                                 }}
                                                 value={validationType.values.description || ""}
                                                 rows="3"
-                                                placeholder="Description"
+                                                placeholder={props.t("Description")}
                                             />
                                         </div>
                                         <div className="mb-3">
-                                            <Label className="form-label">Sub description</Label>
+                                            <Label className="form-label">{props.t("Sub description")}</Label>
                                             <Input
                                                 name="subdescription"
                                                 type="textarea"
@@ -272,19 +273,19 @@ const AddOrUpdateStudy = props => {
                                                 }}
                                                 value={validationType.values.subdescription || ""}
                                                 rows="3"
-                                                placeholder="Sub description"
+                                                placeholder={props.t("Sub description")}
                                             />
                                         </div>
                                         <div className="mb-3">
-                                            <i onClick={toggleAccordion} className={isOpen ? "mdi mdi-chevron-up" : "mdi mdi-chevron-down"} style={{ fontSize: "12px", marginRight: "5px", cursor:"pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">Advanced options</Label>
+                                            <i onClick={toggleAccordion} className={isOpen ? "mdi mdi-chevron-up" : "mdi mdi-chevron-down"} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">{props.t("Advanced options")}</Label>
                                             <Collapse isOpen={isOpen}>
                                                 <div style={{ padding:"5px 0" }}>
                                                     <div className="mb-3">
-                                                        <Label>Subject number digist</Label>
+                                                        <Label>{props.t("Subject number digits")}</Label>
                                                         <Input
                                                             name="subjectnumberdigist"
                                                             type="text"
-                                                            placeholder="Subject number digist"
+                                                            placeholder={props.t("Subject number digits")}
                                                             onChange={validationType.handleChange}
                                                             onBlur={(e) => {
                                                                 validationType.handleBlur(e);
@@ -293,7 +294,7 @@ const AddOrUpdateStudy = props => {
                                                             value={validationType.values.subjectnumberdigist || ""}
                                                         />
                                                         <span className="text-muted" style={{ fontSize:"10px" }}>
-                                                            {'{Country code}{Site no}{###1}'}
+                                                            {'{' + props.t("Country code") + '}{'+ props.t("Site no")+'}{###1}'}
                                                         </span>
                                                     </div>
                                                     <div className="mb-3">
@@ -308,7 +309,7 @@ const AddOrUpdateStudy = props => {
                                                                         validationType.submitForm();
                                                                     }}
                                                                 />
-                                                                Double data entry
+                                                                {props.t("Double data entry")}
                                                             </Label>
                                                         </FormGroup>
                                                     </div>
@@ -324,7 +325,7 @@ const AddOrUpdateStudy = props => {
                                                                         validationType.submitForm();
                                                                     }}
                                                                 />
-                                                                Ask subject Initial
+                                                                {props.t("Ask subject Initial")}
                                                             </Label>
                                                         </FormGroup>
                                                     </div>
@@ -340,7 +341,7 @@ const AddOrUpdateStudy = props => {
                                                                         validationType.submitForm();
                                                                     }}
                                                                 />
-                                                                Reason for change
+                                                                {props.t("Reason for change")}
                                                             </Label>
                                                         </FormGroup>
                                                     </div>

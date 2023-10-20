@@ -4,10 +4,7 @@ import { withTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { MDBDataTable } from "mdbreact";
 import {
-    Row, Col, Card, CardBody, Dropdown,
-    DropdownToggle,
-    DropdownItem,
-    DropdownMenu
+    Row, Col, Card, CardBody, Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip
 } from "reactstrap";
 import { useStudyListGetQuery, useStudyGetQuery } from '../../store/services/Study';
 import './study.css';
@@ -15,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../store/loader/actions';
 import { addStudy } from '../../store/study/actions';
 import { formatDate } from "../../helpers/format_date";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 const StudyList = props => {
@@ -44,6 +42,7 @@ const StudyList = props => {
         setSkip(false);
         setStudyId(id);
     };
+
     useEffect(() => {
         if (data1 && !isLoading1 && !isError1) {
             dispatch(addStudy(data1));
@@ -54,11 +53,11 @@ const StudyList = props => {
     const getActions = (id, equivalentStudyId) => {
         const actions = (
             <div className="icon-container">
-                <div className="icon icon-update" onClick={() => { studyUpdate(id) }}></div>
-                <div className="icon icon-demo" onClick={() => { goToStudy(equivalentStudyId, id) }}></div>
-                <div className="icon icon-unlock"></div>
-                <div className="icon icon-live" onClick={() => { goToStudy(id, equivalentStudyId) }}></div>
-            </div>);
+                <div title={props.t("Update")} className="icon icon-update" onClick={() => { studyUpdate(id) }}></div>
+                <div title={props.t("Go to demo study")} className="icon icon-demo" onClick={() => { goToStudy(equivalentStudyId, id) }}></div>
+                <div title={props.t("Lock")} className="icon icon-unlock"></div>
+                <div title={props.t("Go to active study")} className="icon icon-live" onClick={() => { goToStudy(id, equivalentStudyId) }}></div>
+            </div>); 
         return actions;
     };
 
@@ -71,37 +70,37 @@ const StudyList = props => {
                 width: 150
             },
             {
-                label: "Study Name",
+                label: props.t("Study name"),
                 field: "studyName",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Protocol Code",
-                field: "protocolCode",
-                sort: "asc",
-                width: 150
-            },
-            {
-                label: "Ask Subject Initial",
-                field: "askSubjectInitial",
-                sort: "asc",
-                width: 150
-            },
-            {
-                label: "Study Link",
+                label: props.t("Study link"),
                 field: "studyLink",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Last Updated On",
+                label: props.t("Protocol code"),
+                field: "protocolCode",
+                sort: "asc",
+                width: 150
+            },
+            {
+                label: props.t("Ask subject Initial"),
+                field: "askSubjectInitial",
+                sort: "asc",
+                width: 150
+            },
+            {
+                label: props.t("Last updated on"),
                 field: "updatedAt",
                 sort: "asc",
                 width: 150
             },
             {
-                label: 'Actions',
+                label: props.t('Actions'),
                 field: 'actions',
                 sort: 'disabled',
                 width: 100,
@@ -123,12 +122,36 @@ const StudyList = props => {
                 };
             });
             setTableData(updatedStudyData);
+
+            const timer = setTimeout(() => {
+                generateInfoLabel();
+            }, 10)
+            
             dispatch(endloading());
+
+            return () => clearTimeout(timer);
         }
-    }, [studyData, error, isLoading]);
+    }, [studyData, error, isLoading, props.t]);
 
     const navigatePage = (root) => {
         navigate(root);
+    };
+
+    const generateInfoLabel = () => {
+        var infoDiv = document.querySelector('.dataTables_info');
+        var infoText = infoDiv.innerHTML;
+        let words = infoText.split(" ");
+        if (words[0] === "Showing") {
+            let from = words[1];
+            let to = words[3];
+            let total = words[5];
+            infoDiv.innerHTML = props.t("Showing entries").replace("{from}", from).replace("{to}", to).replace("{total}", total);
+        } else {
+            let from = words[2];
+            let to = words[4];
+            let total = words[0];
+            infoDiv.innerHTML = props.t("Showing entries").replace("{from}", from).replace("{to}", to).replace("{total}", total);
+        }
     };
 
     document.title = "Studylist | Veltrix - React Admin & Dashboard Template";
@@ -139,22 +162,22 @@ const StudyList = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center">
                             <Col md={8}>
-                                <h6 className="page-title">Study list</h6>
+                                <h6 className="page-title">{props.t("Study list")}</h6>
                             </Col>
 
                             <Col md="4">
                                 <div className="float-end d-none d-md-block">
                                     <Dropdown isOpen={menu} toggle={toggle}>
                                         <DropdownToggle color="primary" className="btn btn-primary dropdown-toggle waves-effect waves-light">
-                                            Add Study
+                                            {props.t("Add a study")}&nbsp;<FontAwesomeIcon icon="fa-solid fa-caret-down" />
                                         </DropdownToggle>
                                         <DropdownMenu end>
                                             <DropdownItem onClick={() => navigatePage("/addstudy")}>
-                                                <i className="ti-plus" style={{ marginRight:"10px" }}></i>
-                                                <span>Create a new study</span>
+                                                <FontAwesomeIcon style={{ marginRight: "10px" }} icon="fa-solid fa-plus" />
+                                                <span>{props.t("Create a new study")}</span>
                                             </DropdownItem>
                                             <DropdownItem divider />
-                                            <DropdownItem>Add from an existing study</DropdownItem>
+                                            <DropdownItem>{props.t("Add from an existing study")}</DropdownItem>
                                         </DropdownMenu>
                                     </Dropdown>
                                 </div>
@@ -165,7 +188,16 @@ const StudyList = props => {
                 <Col className="col-12">
                     <Card>
                         <CardBody>
-                            <MDBDataTable hover responsive striped bordered data={data} />
+                            <MDBDataTable 
+                                paginationLabel={[props.t("Previous"), props.t("Next")]}
+                                entriesLabel={props.t("Show entries")}
+                                searchLabel={props.t("Search")}
+                                hover
+                                responsive
+                                striped
+                                bordered
+                                data={data}
+                             />
                         </CardBody>
                     </Card>
                 </Col>

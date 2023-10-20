@@ -171,7 +171,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "js_ShortNameWarning"
+                        Message = "The research short name cannot be the same as another research."
                     };
                 }
 
@@ -245,14 +245,14 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,
-                        Message = "Kayıt Başarılı",
+                        Message = "Successful",
                         Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
                     };
                 }
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Kayıt Başarısız"
+                    Message = "Unsuccessful"
                 };
             }
             else
@@ -313,13 +313,13 @@ namespace Helios.Core.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = result,
-                            Message = "Güncelleme Başarılı"
+                            Message = "Successful"
                         };
                     }
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "Güncelleme Başarısız"
+                        Message = "Unsuccessful"
                     };
                 }
                 catch (Exception e)
@@ -383,7 +383,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "js_DuplicateSiteErrMsg"
+                        Message = "The same site number cannot be added again for the same country."
                     };
                 }
 
@@ -406,7 +406,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,
-                        Message = "Kayıt Başarılı"
+                        Message = "Successful"
                     };
                 }
                 else
@@ -414,7 +414,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "Kayıt Başarısız"
+                        Message = "Unsuccessful"
                     };
                 }
             }
@@ -427,7 +427,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "js_DuplicateSiteErrMsg"
+                        Message = "The same site number cannot be added again for the same country."
                     };
                 }
 
@@ -449,14 +449,14 @@ namespace Helios.Core.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = true,
-                            Message = "Güncelleme Başarılı"
+                            Message = "Successful"
                         };
                     }
                 }
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Güncelleme Başarısız"
+                    Message = "Unsuccessful"
                 };
             }
         }
@@ -472,7 +472,7 @@ namespace Helios.Core.Controllers
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Silme İşlemi Başarısız"
+                    Message = "No record to delete was found."
                 };
             }
                 
@@ -485,7 +485,7 @@ namespace Helios.Core.Controllers
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = true,
-                    Message = "Silme İşlemi Başarılı"
+                    Message = "Successful"
                 };
             }
             else
@@ -493,7 +493,7 @@ namespace Helios.Core.Controllers
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Silme İşlemi Başarısız"
+                    Message = "Unsuccessful"
                 };
             }
         }

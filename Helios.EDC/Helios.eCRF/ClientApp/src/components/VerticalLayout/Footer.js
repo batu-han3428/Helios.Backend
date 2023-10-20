@@ -1,15 +1,16 @@
 import React from "react"
 import { Container, Row, Col } from "reactstrap"
+import { withTranslation } from "react-i18next";
+import PropTypes from 'prop-types';
 
-const Footer = () => {
+const Footer = (props) => {
   return (
     <React.Fragment>
       <footer className="footer">
         <Container fluid={true}>
           <Row>
             <div className="col-12">
-              © {new Date().getFullYear()} Veltrix<span className="d-none d-sm-inline-block"> - Crafted with 
-              {" "}<i className="mdi mdi-heart text-danger"></i> by Themesbrand.</span>
+                {props.t("© 2017 Helios - V3.0 prepared by MedCase")}
             </div>
           </Row>
         </Container>
@@ -18,4 +19,8 @@ const Footer = () => {
   )
 }
 
-export default Footer
+Footer.propTypes = {
+    t: PropTypes.any
+};
+
+export default withTranslation()(Footer);

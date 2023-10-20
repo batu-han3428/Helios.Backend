@@ -19,6 +19,11 @@ namespace Helios.eCRF.Controllers
             this.userService = userService;
         }
 
+        /// <summary>
+        /// login işlemi yapar
+        /// </summary>
+        /// <param name="user">login olmak isteyen kullanıcının bilgilerini</param>
+        /// <returns>başarılı başarısız bilgisi döner</returns>
         [HttpPost]
         public async Task<IActionResult> Login(AccountModel user)
         {
@@ -27,6 +32,11 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// kullanıcının şifresi sıfırlanır ve yeni şifre mail olarak atılır
+        /// </summary>
+        /// <param name="userId">kullanıcının id si</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpGet]
         public async Task<IActionResult> SendNewPasswordForUser(Guid userId)
         {
@@ -34,6 +44,12 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// kullanıcının ad, soyad, maili güncellenir
+        /// </summary>
+        /// <param name="model">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<IActionResult> UserProfileResetPassword(UserDTO model)
         {
@@ -41,6 +57,11 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// iletişim sayfasında kullanıcının girdiği bilgileri mail olarak yetkililere gönderir
+        /// </summary>
+        /// <param name="contactUsModel">kullanıcının girdiği bilgiler</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<IActionResult> ContactUs(ContactUsModel contactUsModel)
         {
@@ -48,6 +69,12 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// şifresini unutan kullanıcı için şifre sıfırlama maili gönderilir
+        /// </summary>
+        /// <param name="Mail">kullanıcının mail adresi</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<IActionResult> SaveForgotPassword([FromBody] string Mail)
         {   
@@ -61,6 +88,14 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// kullanıcının şifresini sıfırlamak için tıkladığı linkin geçerli olup olmadığı gibi bilgileri teyit eder
+        /// </summary>
+        /// <param name="code">şifre sıfırlama maili içinde gönderilen sıfırlama kodu</param>
+        /// <param name="username">kullanıcı adı</param>
+        /// <param name="firstPassword"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> ResetPassword(string code = null, string username = null, bool firstPassword = false)
         {
@@ -74,6 +109,12 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// kullanıcının şifresini günceller
+        /// </summary>
+        /// <param name="model">kullancıının bilgileri</param>
+        /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
