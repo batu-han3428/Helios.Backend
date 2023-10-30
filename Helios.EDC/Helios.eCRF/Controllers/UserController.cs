@@ -1,5 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
+using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ namespace Helios.eCRF.Controllers
             return result;
             //return Ok("Form data received successfully"); 
         }
-        
+
 
         /// <summary>
         /// tenant günceller
@@ -44,7 +45,7 @@ namespace Helios.eCRF.Controllers
             return result;
             //return Ok("Form data received successfully"); 
         }
-        
+
 
         /// <summary>
         /// seçili tenantı getirir
@@ -136,6 +137,19 @@ namespace Helios.eCRF.Controllers
 
 
         /// <summary>
+        /// çalışmanın rollerini getirir
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>roller</returns>
+        [HttpGet("{studyId}")]
+        public async Task<IActionResult> GetRoleList(Guid studyId)
+        {
+            var result = await _userService.GetRoleList(studyId);
+            return Ok(result);
+        }
+
+
+        /// <summary>
         /// yetki günceller
         /// </summary>
         /// <param name="setPermissionModel">yetki bilgileri</param>
@@ -170,6 +184,87 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> DeleteRole(UserPermissionModel userPermission)
         {
             var result = await _userService.DeleteRole(userPermission);
+            return Ok(result);
+        }
+        #endregion
+
+        #region Study User
+
+        /// <summary>
+        /// çalışmanın kullanıcılarını listeler
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>kullanıcılar</returns>
+        [HttpGet("{studyId}")]
+        public async Task<IActionResult> GetStudyUserList(Guid studyId)
+        {
+            var result = await _userService.GetStudyUserList(studyId);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// mail adresi girilen kullanıcının bilgilerini getirir. kullanıcı yoksa boş döner. kullanıcı çalışmada kayıtlı ise uyarı döner
+        /// </summary>
+        /// <param name="email">kullanıcı email</param>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>kullanıcı bilgisi ya da uyarı</returns>
+        [HttpGet("{email}/{studyId}")]
+        public async Task<IActionResult> GetStudyUser(string email, Guid studyId)
+        {
+            var result = await _userService.GetStudyUser(email, studyId);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// çalışmaya kullanıcı ekler veya günceller
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetStudyUser(StudyUserModel studyUserModel)
+        {
+            var result = await _userService.SetStudyUser(studyUserModel);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// seçili kullanıcıyı aktif veya pasif hale getirir
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> ActivePassiveStudyUser(StudyUserModel studyUserModel)
+        {
+            var result = await _userService.ActivePassiveStudyUser(studyUserModel);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Seçili kullanıcıyı siler
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> DeleteStudyUser(StudyUserModel studyUserModel)
+        {
+            var result = await _userService.DeleteStudyUser(studyUserModel);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Seçili kullanıcının şifresini sıfırlar ve mail gönderir
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> UserResetPassword(StudyUserModel studyUserModel)
+        {
+            var result = await _userService.UserResetPassword(studyUserModel);
             return Ok(result);
         }
         #endregion

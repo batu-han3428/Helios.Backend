@@ -72,6 +72,7 @@ namespace Helios.Core.Domains.Entities
         public bool AddAdverseEvent { get; set; }
         public bool AddMultiVisit { get; set; }
         public Study Study { get; set; }
+        public List<StudyUser> StudyUsers { get; set; }
         public StudyRoleModulePermission StudyRoleModulePermission { get; set; }
 
         public void NewRole()

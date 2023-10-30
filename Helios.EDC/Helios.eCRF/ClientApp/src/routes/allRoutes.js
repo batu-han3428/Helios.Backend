@@ -99,6 +99,9 @@ import Sites from "../Pages/SiteLaboratories/Sites";
 //Permissions
 import Permission from "../Pages/Permissions/Permission";
 
+//Users
+import User from "../Pages/Users/User";
+
 const userRoutes = [
     //tenant
     { path: "/Tenant", component: <TenantList />, menuType: "admin" },
@@ -116,6 +119,9 @@ const userRoutes = [
 
     //permissions
     { path: "/permissions", component: <Permission />, menuType: "study" },
+
+    //users
+    { path: "/users", component: <User />, menuType: "study" },
 
     { path: "/dashboard", component: <Dashboard />, menuType: "admin" },
 

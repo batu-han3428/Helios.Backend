@@ -165,6 +165,8 @@ namespace Helios.Authentication.Extension
 
                 var rabbitMQueueName_UserConsumer = qPrefix + Configuration["AppConfig:RabbitMQueueName_UserConsumer"];
 
+                var rabbitMQueueName_UserResetPassword = qPrefix + Configuration["AppConfig:RabbitMQueueName_UserResetPassword"];
+
                 var rabbitMQueueName_TmfRequest = qPrefix + Configuration["AppConfig:RabbitMQueueName_TmfRequest"];
 
                 var rabbitMQueueName_TmfShareMail = qPrefix + Configuration["AppConfig:RabbitMQueueName_TmfShareMail"];
@@ -192,7 +194,9 @@ namespace Helios.Authentication.Extension
                 var relationInputConsumer = qPrefix + Configuration["AppConfig:RabbitMQueueName_RelationInputAuditQueueName"];
 
 
-                services.AddScoped<UserConsumer>();
+                services.AddScoped<AddStudyUserConsumer>();
+                services.AddScoped<UserResetPasswordConsumer>();
+                
                 //services.AddScoped<DoubleEntryUserResearchStatusConsumer>();
                 //services.AddScoped<ImportQueryMessagesConsumer>();
                 //services.AddScoped<ImportDoubleEntryQueryMessagesConsumer>();
@@ -222,7 +226,9 @@ namespace Helios.Authentication.Extension
 
                 services.AddMassTransit(c =>
                 {
-              c.AddConsumer<UserConsumer>();
+                    c.AddConsumer<AddStudyUserConsumer>();
+                    c.AddConsumer<UserResetPasswordConsumer>();
+                    
                     //c.AddConsumer<DoubleEntryUserResearchStatusConsumer>();
                     //c.AddConsumer<ImportQueryMessagesConsumer>();
                     //c.AddConsumer<ImportDoubleEntryQueryMessagesConsumer>();
@@ -258,7 +264,14 @@ namespace Helios.Authentication.Extension
                         {
                             ep.PrefetchCount = 16;
                             ep.UseMessageRetry(r => r.Interval(2, 100));
-                            ep.ConfigureConsumer<UserConsumer>(provider);
+                            ep.ConfigureConsumer<AddStudyUserConsumer>(provider);
+                        });
+
+                        cfg.ReceiveEndpoint(rabbitMQueueName_UserResetPassword, ep =>
+                        {
+                            ep.PrefetchCount = 16;
+                            ep.UseMessageRetry(r => r.Interval(2, 100));
+                            ep.ConfigureConsumer<UserResetPasswordConsumer>(provider);
                         });
                     }));
                 });
@@ -602,6 +615,7 @@ namespace Helios.Authentication.Extension
         public static void DependencyInjection(this IServiceCollection services)
         {
             services.AddScoped<IBaseService, BaseService>();
+            services.AddScoped<IEmailService, EmailService>();
         }
     }
 }

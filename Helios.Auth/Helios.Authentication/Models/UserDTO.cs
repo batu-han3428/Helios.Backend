@@ -5,6 +5,7 @@ namespace Helios.Authentication.Models
     public class UserDTO
     {
         public Guid TenantId { get; set; }
+        public Guid StudyId { get; set; }
         public Roles Role{ get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

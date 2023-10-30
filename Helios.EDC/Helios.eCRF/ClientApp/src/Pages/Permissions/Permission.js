@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Row, Col, Button, Label, Input, Form, FormFeedback
 } from "reactstrap";
@@ -10,13 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ModalComp from '../../components/Common/ModalComp/ModalComp';
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useRoleSaveMutation, useRoleListGetQuery, useSetPermissionMutation, useRoleDeleteMutation } from '../../store/services/Permissions';
+import { useRoleSaveMutation, useRolePermissionListGetQuery, useSetPermissionMutation, useRoleDeleteMutation } from '../../store/services/Permissions';
 import { useSelector, useDispatch } from 'react-redux';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { startloading, endloading } from '../../store/loader/actions';
 import Swal from 'sweetalert2'
 
 const Permission = props => {
+
+    const modalRef = useRef();
 
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -25,7 +27,6 @@ const Permission = props => {
     const dispatch = useDispatch();
 
     const [openSections, setOpenSections] = useState({});
-    const [modal_backdrop, setmodal_backdrop] = useState(false);
     const [roleId, setRoleId] = useState('00000000-0000-0000-0000-000000000000');
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
@@ -40,20 +41,6 @@ const Permission = props => {
         }));
     };
 
-    useEffect(() => {
-        if (!modal_backdrop)
-            resetValue();
-    }, [modal_backdrop]);
-
-    const removeBodyCss = () => {
-        document.body.classList.add("no_padding");
-    };
-
-    const tog_backdrop = () => {
-        setmodal_backdrop(!modal_backdrop);
-        removeBodyCss();
-    };
-
     const resetValue = () => {
         validationType.validateForm().then(errors => {
             validationType.setErrors({});
@@ -63,7 +50,7 @@ const Permission = props => {
         setSelectedRole(null);
     };
 
-    const { data: roleData, error, isLoading } = useRoleListGetQuery(studyInformation.studyId);
+    const { data: roleData, error, isLoading } = useRolePermissionListGetQuery(studyInformation.studyId);
 
     useEffect(() => {
         if (!isLoading && !error && roleData) {
@@ -110,7 +97,7 @@ const Permission = props => {
                 studyId: studyInformation.studyId,
                 name: selectedRole,
             });
-            tog_backdrop();
+            modalRef.current.tog_backdrop();
             dispatch(endloading());
         }
     }, [roleId, selectedRole]);
@@ -192,7 +179,7 @@ const Permission = props => {
                 setMessage(response.data.message)
                 setStateToast(true);
                 setShowToast(true);
-                tog_backdrop();
+                modalRef.current.tog_backdrop();
                 dispatch(endloading());
             } else {
                 setMessage(response.data.message)
@@ -218,7 +205,7 @@ const Permission = props => {
                                         color="success"
                                         className="btn btn-success waves-effect waves-light"
                                         type="button"
-                                        onClick={tog_backdrop}
+                                        onClick={() => modalRef.current.tog_backdrop()}
                                     >
                                     <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add a role")}
                                     </Button>
@@ -317,6 +304,8 @@ const Permission = props => {
                 </div>
             </div>
             <ModalComp
+                refs={modalRef}
+                resetValue={resetValue}
                 title={roleId === '00000000-0000-0000-0000-000000000000' ? props.t("Add a role") : props.t("Update role")}
                 body={
                     <>
@@ -350,8 +339,6 @@ const Permission = props => {
                         </Form>
                     </>
                 }
-                modal_backdrop={modal_backdrop}
-                tog_backdrop={tog_backdrop}
                 handle={() => validationType.handleSubmit()}
                 buttonText={roleId === '00000000-0000-0000-0000-000000000000' ? props.t("Save") : props.t("Update")}
             />

@@ -38,6 +38,16 @@
     -webkit-mask: url('../../assets/images/open-padlock.png') no-repeat center center;
 }
 
+.icon-lock {
+    mask: url('../../assets/images/lock.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/lock.png') no-repeat center center;
+}
+
+.icon-resetpassword {
+    mask: url('../../assets/images/reset-password.png') no-repeat center center;
+    -webkit-mask: url('../../assets/images/reset-password.png') no-repeat center center;
+}
+
 .icon-live {
     mask: url('../../assets/images/testing-tube.png') no-repeat center center;
     -webkit-mask: url('../../assets/images/testing-tube.png') no-repeat center center;

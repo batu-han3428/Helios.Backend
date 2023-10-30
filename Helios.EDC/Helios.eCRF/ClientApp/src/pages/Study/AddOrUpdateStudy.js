@@ -26,11 +26,11 @@ import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../store/loader/actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import AccordionComp from '../../components/Common/AccordionComp/AccordionComp';
 
 
 const AddOrUpdateStudy = props => {
 
-    const [isOpen, setIsOpen] = useState(false);
     const [studyId, setStudyId] = useState('00000000-0000-0000-0000-000000000000');
     const [skip, setSkip] = useState(true);
     const [apiStudyData, setApiStudyData] = useState(null);
@@ -61,10 +61,6 @@ const AddOrUpdateStudy = props => {
             ]
         }
     ];
-
-    const toggleAccordion = () => {
-        setIsOpen(!isOpen);
-    };
 
     const validationType = useFormik({
         // enableReinitialize : use this flag when initial values needs to be changed
@@ -277,9 +273,8 @@ const AddOrUpdateStudy = props => {
                                             />
                                         </div>
                                         <div className="mb-3">
-                                            <i onClick={toggleAccordion} className={isOpen ? "mdi mdi-chevron-up" : "mdi mdi-chevron-down"} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">{props.t("Advanced options")}</Label>
-                                            <Collapse isOpen={isOpen}>
-                                                <div style={{ padding:"5px 0" }}>
+                                            <AccordionComp title="Advanced options" body={
+                                                <>
                                                     <div className="mb-3">
                                                         <Label>{props.t("Subject number digits")}</Label>
                                                         <Input
@@ -293,8 +288,8 @@ const AddOrUpdateStudy = props => {
                                                             }}
                                                             value={validationType.values.subjectnumberdigist || ""}
                                                         />
-                                                        <span className="text-muted" style={{ fontSize:"10px" }}>
-                                                            {'{' + props.t("Country code") + '}{'+ props.t("Site no")+'}{###1}'}
+                                                        <span className="text-muted" style={{ fontSize: "10px" }}>
+                                                            {'{' + props.t("Country code") + '}{' + props.t("Site no") + '}{###1}'}
                                                         </span>
                                                     </div>
                                                     <div className="mb-3">
@@ -345,9 +340,8 @@ const AddOrUpdateStudy = props => {
                                                             </Label>
                                                         </FormGroup>
                                                     </div>
-                                                </div>
-                                               
-                                            </Collapse>
+                                                </>
+                                            } />
                                         </div>
                                     </Form>
                                 </CardBody>

@@ -9,5 +9,6 @@ namespace Helios.Authentication.Entities
         public ApplicationUser User { get; set; }
         public ApplicationRole Role { get; set; }
         public Guid TenantId { get; set; }
+        public Guid StudyId { get; set; }
     }
 }

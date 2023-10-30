@@ -45,6 +45,10 @@ namespace Helios.Core.Contexts
                     }
                 }
             }
+            else
+            {
+                transId = 0;
+            }
             return transId;
         }
 
@@ -93,7 +97,6 @@ namespace Helios.Core.Contexts
         public DbSet<Study> Studies { get; set; }
         public DbSet<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
         public DbSet<StudyRole> StudyRoles { get; set; }
-        public DbSet<StudyUserRole> StudyUserRoles { get; set; }
         public DbSet<StudyUser> StudyUsers { get; set; }
         public DbSet<StudyUserSite> StudyUserSites { get; set; }
         public DbSet<StudyVisit> StudyVisits { get; set; }
