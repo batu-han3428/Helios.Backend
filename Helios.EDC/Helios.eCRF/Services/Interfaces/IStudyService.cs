@@ -9,11 +9,6 @@ namespace Helios.eCRF.Services.Interfaces
 {
     public interface IStudyService
     {
-        Task<bool> AddModule(ModuleModel model);
-        Task<bool> UpdateModule(ModuleModel model);
-        Task<bool> DeleteModule(ModuleModel model);
-        Task<ModuleModel> GetModule(Guid id);
-        Task<List<ModuleModel>> GetModuleList();
         Task<List<StudyDTO>> GetStudyList();
         Task<List<SiteDTO>> GetSiteList(Guid studyId);
         Task<ApiResponse<dynamic>> SiteSaveOrUpdate(SiteModel siteModel);

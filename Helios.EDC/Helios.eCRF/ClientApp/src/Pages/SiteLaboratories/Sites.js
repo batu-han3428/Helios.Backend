@@ -14,7 +14,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { formatDate } from "../../helpers/format_date";
-import Swal from 'sweetalert2'
+//import Swal from 'sweetalert2'
 
 const Sites = props => {
 
@@ -46,44 +46,44 @@ const Sites = props => {
     const [siteDelete] = useSiteDeleteMutation();
 
     const siteDeleteHandle = (id) => {
-        Swal.fire({
-            title: "You will not be able to recover this site!",
-            text: "Do you confirm?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3bbfad",
-            confirmButtonText: "Yes",
-            cancelButtonText: "Cancel",
-            closeOnConfirm: false
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    dispatch(startloading());
-                    var deleteData = {
-                        id: id,
-                        userid: userInformation.userId,
-                        tenantid: userInformation.tenantId,
-                        studyId: studyInformation.studyId,
-                        code: '',
-                        name: '',
-                        countrycode: '',
-                        countryname: '',
-                        maxenrolmentcount: 0,
-                    };
-                    const response = await siteDelete(deleteData);
-                    if (response.data.isSuccess) {
-                        dispatch(endloading());
-                        Swal.fire(response.data.message, '', 'success');
-                    } else {
-                        dispatch(endloading());
-                        Swal.fire(response.data.message, '', 'error');
-                    }
-                } catch (error) {
-                    dispatch(endloading());
-                    Swal.fire('An error occurred', '', 'error');
-                }
-            }
-        });
+        //Swal.fire({
+        //    title: "You will not be able to recover this site!",
+        //    text: "Do you confirm?",
+        //    icon: "warning",
+        //    showCancelButton: true,
+        //    confirmButtonColor: "#3bbfad",
+        //    confirmButtonText: "Yes",
+        //    cancelButtonText: "Cancel",
+        //    closeOnConfirm: false
+        //}).then(async (result) => {
+        //    if (result.isConfirmed) {
+        //        try {
+        //            dispatch(startloading());
+        //            var deleteData = {
+        //                id: id,
+        //                userid: userInformation.userId,
+        //                tenantid: userInformation.tenantId,
+        //                studyId: studyInformation.studyId,
+        //                code: '',
+        //                name: '',
+        //                countrycode: '',
+        //                countryname: '',
+        //                maxenrolmentcount: 0,
+        //            };
+        //            const response = await siteDelete(deleteData);
+        //            if (response.data.isSuccess) {
+        //                dispatch(endloading());
+        //                Swal.fire(response.data.message, '', 'success');
+        //            } else {
+        //                dispatch(endloading());
+        //                Swal.fire(response.data.message, '', 'error');
+        //            }
+        //        } catch (error) {
+        //            dispatch(endloading());
+        //            Swal.fire('An error occurred', '', 'error');
+        //        }
+        //    }
+        //});
     };
 
     useEffect(() => {

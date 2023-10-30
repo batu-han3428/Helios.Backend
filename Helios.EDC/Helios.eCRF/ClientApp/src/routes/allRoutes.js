@@ -87,6 +87,8 @@ import TenantList from "../Pages/Tenant/tenantList.js";
 import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
 
 import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
+import Module from "../Pages/Module/moduleList.js";
+import AddOrUpdateModule from "../Pages/Module/addOrUpdateModule.js";
 
 //Study
 import StudyList from "../Pages/Study/StudyList";
@@ -107,6 +109,8 @@ const userRoutes = [
     { path: "/Tenant", component: <TenantList />, menuType: "admin" },
     { path: "/addTenant", component: <TenantAddOrUpdate />, menuType: "admin" },
 
+    { path: "/moduleList", component: <Module />, menuType: "admin" },
+    { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin" },
     { path: "/formBuilder", component: <FormBuilder />, menuType: "admin" },
 
     //study
@@ -139,7 +143,7 @@ const userRoutes = [
     { path: "/email-template-billing", component: <Emailtemplatebilling />, menuType: "admin" },
 
   // Icons
-    { path: "/icons-dripicons", component: <IconDripicons />, menuType: "study" },
+    { path: "/icons-dripicons", component: <IconDripicons />, menuType: "admin" },
     { path: "/icons-materialdesign", component: <IconMaterialdesign />, menuType: "study" },
     { path: "/icons-fontawesome", component: <IconFontawesome />, menuType: "study" },
     { path: "/icons-ion", component: <IconIon />, menuType: "study" },

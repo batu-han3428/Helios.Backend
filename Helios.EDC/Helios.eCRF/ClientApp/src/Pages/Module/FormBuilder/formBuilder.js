@@ -20,17 +20,7 @@ import ElementList from './elementList.js'
 import './formBuilder.css'
 //import Properties from './properties.js';
 
-function FormBuilder() {
-    const [modal_large, setmodal_large] = useState(false);
-
-    const removeBodyCss = () => {
-        document.body.classList.add("no_padding");
-    };
-
-    const tog_large = () => {
-        setmodal_large(!modal_large);
-        removeBodyCss();
-    };
+function FormBuilder(props) {
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
@@ -39,11 +29,7 @@ function FormBuilder() {
                 </div>
                 <hr />
                 <div>
-                    <div style={{ width: "200px", float: 'left' }}>
-                        <ElementList />
-                    </div>
-                    <div style={{ float: 'right' }}>
-                    </div>
+                    <ElementList />
                 </div>
             </div>
         </div>

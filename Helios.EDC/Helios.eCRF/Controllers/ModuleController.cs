@@ -8,7 +8,12 @@ namespace Helios.eCRF.Controllers
     [Route("[controller]/[action]")]
     public class ModuleController : Controller
     {
-        private IStudyService _studyService;
+        private IModuleService _moduleService;
+
+        public ModuleController(IModuleService moduleService)
+        {
+            _moduleService = moduleService;
+        }
 
         /// <summary>
         /// modül ekler
@@ -16,10 +21,27 @@ namespace Helios.eCRF.Controllers
         /// <param name="name">modül adı</param>
         /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
+        public async Task<bool> SaveModule(ModuleModel model)
+        {
+            var result = false;
+
+            if (!string.IsNullOrEmpty(model.Id))
+            {
+                result = await _moduleService.UpdateModule(model);
+            }
+            else
+            {
+                result = await _moduleService.AddModule(model);
+            }
+
+            return result;
+        }
+
+        [HttpPost]
         public async Task<bool> AddModule(string name)
         {
             var model = new ModuleModel { Name = name };
-            var result = await _studyService.AddModule(model);
+            var result = await _moduleService.AddModule(model);
             return result;
         }
 
@@ -32,7 +54,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<bool> UpdateModule(ModuleModel model)
         {
-            var result = await _studyService.UpdateModule(model);
+            var result = await _moduleService.UpdateModule(model);
             return result;
         }
 
@@ -45,7 +67,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<bool> DeleteModule(ModuleModel model)
         {
-            var result = await _studyService.DeleteModule(model);
+            var result = await _moduleService.DeleteModule(model);
             return result;
         }
 
@@ -58,7 +80,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<ModuleModel> GetModule(Guid id)
         {
-            var result = await _studyService.GetModule(id);
+            var result = await _moduleService.GetModule(id);
 
             return result;
         }
@@ -71,7 +93,25 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<List<ModuleModel>> GetModuleList()
         {
-            var result = await _studyService.GetModuleList();
+            var result = await _moduleService.GetModuleList();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<ElementModel>> GetModuleElements(string id)
+        {
+            var moduleId = Guid.Parse(id);
+            var result = await _moduleService.GetModuleElements(moduleId);
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ElementModel> GetElementData(string id)
+        {
+            var elementId = Guid.Parse(id);
+            var result = await _moduleService.GetElementData(elementId);
 
             return result;
         }
@@ -79,7 +119,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async void SaveModuleContent(ElementModel model)
         {
-            //var result = await _studyService.DeleteModule(model);
+            var result = await _moduleService.SaveModuleContent(model);
             //return result;
         }
     }

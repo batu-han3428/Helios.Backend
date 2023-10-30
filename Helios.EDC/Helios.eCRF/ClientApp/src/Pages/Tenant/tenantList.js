@@ -41,9 +41,9 @@ function TenantList() {
                    </button>
                    {/*<Link to="./addTenant" className="btn btn-primary">Sign up</Link>*/}
                    {/*<button onClick={navigateAddTenant}>Home</button>*/}
-                   <Routes>
-                       <Route path="/addTenant" element={<AddTenant />} />
-                   </Routes>
+                   {/*<Routes>*/}
+                   {/*    <Route path="/addTenant" element={<AddTenant />} />*/}
+                   {/*</Routes>*/}
                </div>
                <br />
                <br />

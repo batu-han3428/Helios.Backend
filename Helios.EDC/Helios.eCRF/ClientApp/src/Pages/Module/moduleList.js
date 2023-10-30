@@ -1,79 +1,243 @@
 import React, { useState, useEffect } from 'react';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    CardTitle,
+    Modal,
+    Container,
+    ModalBody,
+    ModalHeader,
+    ModalFooter,
+    Button,
+} from "reactstrap";
+
+import { MDBDataTable } from "mdbreact";
 import './module.css';
 import { Routes, Route, useNavigate } from "react-router-dom";
-import AddOrUpdateModule from './addOrUpdateModule';
+import { startloading, endloading } from '../../store/loader/actions';
+import { formatDate } from "../../helpers/format_date";
+import { useDispatch } from "react-redux";
+
+let id = "";
 
 function ModuleList() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const baseUrl = "https://localhost:7196";
 
-    const navigateAddModule = () => {
-        navigate('/addOrUpdateModule');
+    const [Name, setName] = useState('');
+    const [Id, setId] = useState('');
+    const [NameClass, setNameClass] = useState('form-control');
+    const [RequiredError, setRequiredError] = useState('This value is required');
+    const [modal_large, setmodal_large] = useState(false);
+    const [tableData, setTableData] = useState([]);
+
+    const removeBodyCss = () => {
+        document.body.classList.add("no_padding");
     };
 
-    //useEffect(() => {
-    fetch('/Module/GetModuleList', {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => {
-            setModuleList(data);
+    const getActions = (id) => {
+        const actions = (
+            <div className="icon-container">
+                <div className="icon icon-update" onClick={e => tog_large(e, id)}></div>
+                <div className="icon icon-delete" onClick={() => { deleteModule(id) }}></div>
+                <div className="icon icon-demo" onClick={() => navigate("/formBuilder", { params: { moduleId: id } })}></div>
+            </div>);
+        return actions;
+    };
+
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+    };
+
+    const tog_large = (e, id) => {
+        if (id != "" && id != undefined) {
+            setId(id);
+            fetch(baseUrl + '/Module/GetModule?id=' + id, {
+                method: 'GET',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    setName(data.name);
+                    setNameClass("form-control");
+                })
+                .catch(error => {
+                    //console.error('Error:', error);
+                });
+        }
+        else {
+            setName('');
+        }
+
+        setmodal_large(!modal_large);
+        removeBodyCss();
+    };
+
+    const handleSubmit = (e) => {
+        debugger;
+
+        if (Name == "") {
+            setNameClass("is-invalid form-control");
+            e.preventDefault();
+        }
+        else {
+            fetch(baseUrl + '/Module/SaveModule', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Id: Id,
+                    Name: Name
+                })
+
+            })
+                .then(response => response.json())
+                .then(data => {
+                    debugger;
+                    tog_large();
+                    // Handle response from the controller
+                })
+                .catch(error => {
+                    //console.error('Error:', error);
+                });
+        }
+    };
+
+    const deleteModule = (event, id) => {
+        fetch(baseUrl + '/Module/DeleteModule?id=' + id, {
+            method: 'POST',
         })
-        .catch(error => {
-            //console.error('Error:', error);
-        });
-    //});
-    const [moduleList, setModuleList] = useState([]);
-
-    const addModule = () => {
-        navigate(`/addOrUpdateModule`);
+            .then(response => response.json())
+            .then(data => {
+                // Handle response from the controller
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
     };
+
+    const goToModule = (event, id) => {
+    };
+
+    const data = {
+        columns: [
+            {
+                label: "",
+                field: "id",
+                sort: "asc",
+                width: 150
+            },
+            {
+                label: "Module Name",
+                field: "name",
+                sort: "asc",
+                width: 150
+            },
+            {
+                label: 'Actions',
+                field: 'actions',
+                sort: 'disabled',
+                width: 100,
+            }
+        ],
+        rows: tableData
+    }
+
+    const fetchData = () => {
+        fetch(baseUrl + '/Module/GetModuleList', {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                const updatedModuleData = data.map(item => {
+                    return {
+                        ...item,
+                        updatedAt: formatDate(item.updatedAt),
+                        actions: getActions(item.id)
+                    };
+                });
+
+                setTableData(updatedModuleData);
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
+    }
+
+    useEffect(() => {
+        dispatch(startloading());
+        fetchData();
+        dispatch(endloading());
+    }, [tableData]);
 
     return (
-        <div style={({ height: "100vh" }, { display: "flex" })} >
-            <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
-                <div><h1>Modules</h1></div>
-                <hr />
-                <div className="floatr">
-                    <button className="btn btn-primary" onClick={() => navigate("/addModule")}>
-                        <small>Add Module</small>
-                    </button>
-                    {/*<Link to="./addModule" className="btn btn-primary">Sign up</Link>*/}
-                    <button onClick={navigateAddModule}>Home</button>
-                    {/*<Routes>*/}
-                    {/*    <Route path="/addModule" element={<AddModule />} />*/}
-                    {/*</Routes>*/}
-                </div>
-                <br />
-                <br />
-                <div>
-                    {
-                        moduleList.map((moduleList) => {
-                            return (
-                                <div className='module-box'>
-                                    <div className="floatl">
-                                        <h2>{moduleList.name}</h2>
-                                    </div>
-                                    <div className="floatr">
-                                        <button className="btn" data-id={moduleList.id}>
-                                            {/*<FontAwesomeIcon icon={faCog} />*/}
-                                        </button>
-                                        <br></br>
-                                        <button className="btn" data-id={moduleList.id}>
-                                            {/*<FontAwesomeIcon icon={faArrowRight} />*/}
-                                        </button>
-                                        <br></br>
-                                        <button className="btn" data-id={moduleList.id}>
-                                            {/*<FontAwesomeIcon icon={faEdit} />*/}
-                                        </button>
+        <>
+            <Col sm={6} md={4} xl={3}>
+                <Modal isOpen={modal_large} toggle={tog_large} size="lg">
+                    <ModalBody>
+                        {/*<AddModule id={id}></AddModule>*/}
+                        <div style={({ height: "100vh" }, { display: "flex" })}>
+                            <div id="page-wrap" style={{ padding: "15px", width: '100%' }}>
+                                <div><h3>Add Module</h3></div>
+                                <hr />
+                                <div className='row'>
+                                    <div className='form-group'>
+                                        <label> Name</label>
+                                        <input className={NameClass} value={Name} onChange={handleNameChange} type='text' id='Name' />
+                                        <div type="invalid" class="invalid-feedback">{RequiredError}</div>
                                     </div>
                                 </div>
-                            );
-                        })
-                    }
+                            </div>
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" onClick={tog_large}>
+                            Close
+                        </Button>{' '}
+                        <Button color="primary" onClick={handleSubmit}>
+                            Save
+                        </Button>
+                    </ModalFooter>
+                </Modal>
+            </Col>
+            <React.Fragment>
+                <div className="page-content">
+                    <div className="container-fluid">
+                        <div className="page-title-box">
+                            <Row className="align-items-center">
+                                <Col md={8}>
+                                    <h6 className="page-title">Module list</h6>
+                                </Col>
 
+                                <Col md="4">
+                                    <div className="float-end d-none d-md-block">
+                                        <button className="btn btn-primary" onClick={e => tog_large(e, "")}>
+                                            <small>Add Module</small>
+                                        </button>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </div>
+                        <Row>
+                            <Col className="col-12">
+                                <Card>
+                                    <CardBody>
+                                        <MDBDataTable hover responsive striped bordered data={data} />
+                                    </CardBody>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </React.Fragment>
+
+
+
+        </>
     );
 }
 

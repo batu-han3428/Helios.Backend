@@ -15,15 +15,15 @@ import {
     TabPane,
     Input,
     Button,
+    FormGroup,
     Label
 } from "reactstrap";
 import Select from "react-select";
 import classnames from "classnames";
-import ElementBase from '../Elements/Base/elementBase.js';
-import { TextElement } from '../Elements/textElement.js'
 import TextElementProperties from '../Elements/textElementProperties.js'
-//import { useFormik } from "formik";
 import NumericElementProperties from '../Elements/numericElementProperties.js'
+import Conditions from "./conditions.js";
+import Actions from "./action.js";
 
 const baseUrl = "https://localhost:7196";
 
@@ -50,8 +50,8 @@ class Properties extends React.Component {
             col11: false,
 
             // General properties
-            Id: '',
-            ModuleId: '',
+            Id: props.Id,
+            ModuleId: '08dbc973-abe2-4694-8d6c-b4697950e3f7',
             ElementDetailId: '',
             ElementType: props.Type,
             ElementName: '',
@@ -60,11 +60,11 @@ class Properties extends React.Component {
             Order: 0,
             Description: '',
             Width: 12,
-            IsHidden: true,
+            IsHidden: false,
             IsRequired: false,
             IsDependent: false,
             IsReadonly: false,
-            CanMissing: true,
+            CanMissing: false,
 
             // Dependency properties
             DependentSourceFieldId: '',
@@ -78,6 +78,10 @@ class Properties extends React.Component {
             LowerLimit: '',
             UpperLimit: '',
 
+            // Validation
+            RequiredError: 'This value is required',
+            ElementNameInputClass: 'form-control',
+
             // Other
             optionGroup: [],
             isOpen: false,
@@ -87,6 +91,8 @@ class Properties extends React.Component {
         this.toggle = this.toggle.bind(this);
         this.toggleAccordion = this.toggleAccordion.bind(this);
         this.saveProperties = this.saveProperties.bind(this);
+        this.getElementData = this.getElementData.bind(this);
+        this.fillElementProperties = this.fillElementProperties.bind(this);
 
         this.handleIdChange = this.handleIdChange.bind(this);
         this.handleModuleIdChange = this.handleModuleIdChange.bind(this);
@@ -124,6 +130,8 @@ class Properties extends React.Component {
         //        }
         //    ]
         //});
+
+        this.getElementData();
     }
 
     toggleAccordion() {
@@ -147,9 +155,9 @@ class Properties extends React.Component {
         }
     }
 
-    handleSelectGroup(selectedGroup) {
-        this.state.selectedGroup = selectedGroup;
-    }
+    //handleSelectGroup(selectedGroup) {
+    //    this.state.selectedGroup = selectedGroup;
+    //}
 
     renderElementPropertiesSwitch(param) {
         switch (param) {
@@ -238,9 +246,9 @@ class Properties extends React.Component {
         this.setState({ DependentAction: e.target.value });
     };
 
-    //handleIdChange(e) {
-    //    this.setState({ Id: e.target.value });
-    //};
+    handleDependentFieldValueChange(e) {
+        this.setState({ DependentFieldValue: e.target.value });
+    };
 
     changeUnit = (newValue) => {
         this.setState({ Unit: newValue });
@@ -254,215 +262,329 @@ class Properties extends React.Component {
         this.setState({ UpperLimit: newValue });
     };
 
-    saveProperties() {
-        debugger;
-        fetch(baseUrl + '/Module/SaveModuleContent', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                Id: this.state.Id,
-                ModuleId: this.state.ModuleId,
-                ElementDetailId: this.state.ElementDetailId,
-                ElementType: this.state.ElementType,
-                ElementName: this.state.ElementName,
-                Title: this.state.Title,
-                IsTitleHidden: this.state.IsTitleHidden,
-                Order: this.state.Order,
-                Description: this.state.Description,
-                Width: this.state.Width,
-                IsHidden: this.state.IsHidden == 'on' ? true : false,
-                IsRequired: this.state.IsRequired == 'on' ? true : false,
-                IsDependent: this.state.IsDependent == 'on' ? true : false,
-                IsReadonly: this.state.IsReadonly,
-                CanMissing: this.state.CanMissing == 'on' ? true : false,
-
-                //// Dependency properties
-                DependentSourceFieldId: this.state.DependentSourceFieldId,
-                DependentTargetFieldId: this.state.DependentTargetFieldId,
-                DependentCondition: this.state.DependentCondition,
-                DependentAction: this.state.DependentAction,
-                DependentFieldValue: this.state.DependentFieldValue,
-
-                //// Elements properties
-                Unit: this.state.Unit,
-                LowerLimit: this.state.LowerLimit,
-                UpperLimit: this.state.UpperLimit,
-
-
+    getElementData() {
+        if (this.state.Id != "") {
+            fetch(baseUrl + '/Module/GetElementData?id=' + this.state.Id, {
+                method: 'GET',
             })
-        }).then(res => res.json())
-            .then(res => console.log(res));
+                .then(response => response.json())
+                .then(data => {
+
+                    this.fillElementProperties(data);
+                })
+                .catch(error => {
+                    //console.error('Error:', error);
+                });
+        }
+    }
+
+    fillElementProperties(data) {
+        this.state.Title = data.title;
+        this.state.ElementName = data.elementName;
+        this.state.Description = data.description;
+        this.state.ElementType = data.elementType;
+        this.state.Unit = data.unit != null ? data.unit : "";
+        this.state.LowerLimit = data.lowerLimit != null ? data.lowerLimit : "";
+        this.state.UpperLimit = data.upperLimit != null ? data.upperLimit : "";
+        this.state.IsRequired = data.isRequired;
+        this.state.IsHidden = data.isHidden;
+        this.state.CanMissing = data.canMissing;
+    }
+
+    saveProperties(e) {
+        if (this.state.ElementName == "") {
+            this.setState({ ElementNameInputClass: "is-invalid form-control" });
+            e.preventDefault();
+        }
+        else {
+            debugger;
+            fetch(baseUrl + '/Module/SaveModuleContent', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Id: this.state.Id,
+                    ModuleId: this.state.ModuleId,
+                    UserId: '',
+                    ElementDetailId: this.state.ElementDetailId,
+                    ElementType: this.state.ElementType,
+                    ElementName: this.state.ElementName,
+                    Title: this.state.Title,
+                    IsTitleHidden: this.state.IsTitleHidden,
+                    Order: this.state.Order,
+                    Description: this.state.Description,
+                    Width: this.state.Width,
+                    IsHidden: this.state.IsHidden == 'on' ? true : false,
+                    IsRequired: this.state.IsRequired == 'on' ? true : false,
+                    IsDependent: this.state.IsDependent == 'on' ? true : false,
+                    IsReadonly: this.state.IsReadonly,
+                    CanMissing: this.state.CanMissing == 'on' ? true : false,
+
+                    // Dependency properties
+                    DependentSourceFieldId: this.state.DependentSourceFieldId,
+                    DependentTargetFieldId: this.state.DependentTargetFieldId,
+                    DependentCondition: this.state.DependentCondition,
+                    DependentAction: this.state.DependentAction,
+                    DependentFieldValue: this.state.DependentFieldValue,
+
+                    // Elements properties
+                    Unit: this.state.Unit,
+                    LowerLimit: this.state.LowerLimit,
+                    UpperLimit: this.state.UpperLimit,
+
+
+                })
+            }).then(res => res.json())
+                .then(data => {
+                    debugger;
+                })
+                .catch(error => {
+                    debugger;
+                    //console.error('Error:', error);
+                });
+        }
     }
 
     render() {
         return (
             <>
                 {/*<ElementBase>*/}
-                <Col lg={12}>
-                    <Card>
-                        <CardBody>
-                            <Nav tabs>
-                                <NavItem>
-                                    <NavLink
-                                        style={{ cursor: "pointer" }}
-                                        className={classnames({
-                                            active: this.state.activeTab === "1",
-                                        })}
-                                        onClick={() => {
-                                            this.toggle("1");
-                                        }}
-                                    >
-                                        General
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        style={{ cursor: "pointer" }}
-                                        className={classnames({
-                                            active: this.state.activeTab === "2",
-                                        })}
-                                        onClick={() => {
-                                            this.toggle("2");
-                                        }}
-                                    >
-                                        Dependency
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        style={{ cursor: "pointer" }}
-                                        className={classnames({
-                                            active: this.state.activeTab === "3",
-                                        })}
-                                        onClick={() => {
-                                            this.toggle("3");
-                                        }}
-                                    >
-                                        Validation
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        style={{ cursor: "pointer" }}
-                                        className={classnames({
-                                            active: this.state.activeTab === "4",
-                                        })}
-                                        onClick={() => {
-                                            this.toggle("4");
-                                        }}
-                                    >
-                                        Metadata
-                                    </NavLink>
-                                </NavItem>
-                            </Nav>
+                <form onSubmit={this.saveProperties}>
+                    <Col lg={12}>
+                        <Card>
+                            <CardBody>
+                                <Nav tabs>
+                                    <NavItem>
+                                        <NavLink
+                                            style={{ cursor: "pointer" }}
+                                            className={classnames({
+                                                active: this.state.activeTab === "1",
+                                            })}
+                                            onClick={() => {
+                                                this.toggle("1");
+                                            }}
+                                        >
+                                            General
+                                        </NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink
+                                            style={{ cursor: "pointer" }}
+                                            className={classnames({
+                                                active: this.state.activeTab === "2",
+                                            })}
+                                            onClick={() => {
+                                                this.toggle("2");
+                                            }}
+                                        >
+                                            Dependency
+                                        </NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink
+                                            style={{ cursor: "pointer" }}
+                                            className={classnames({
+                                                active: this.state.activeTab === "3",
+                                            })}
+                                            onClick={() => {
+                                                this.toggle("3");
+                                            }}
+                                        >
+                                            Validation
+                                        </NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink
+                                            style={{ cursor: "pointer" }}
+                                            className={classnames({
+                                                active: this.state.activeTab === "4",
+                                            })}
+                                            onClick={() => {
+                                                this.toggle("4");
+                                            }}
+                                        >
+                                            Metadata
+                                        </NavLink>
+                                    </NavItem>
+                                </Nav>
 
-                            <TabContent activeTab={this.state.activeTab} className="p-3 text-muted">
-                                <TabPane tabId="1">
-                                    <Row>
-                                        <Col sm="12">
-                                            <CardText className="mb-0">
-                                                <Row className="mb-3">
-                                                    <label
-                                                        htmlFor="example-text-input"
-                                                        className="col-md-2 col-form-label"
-                                                    >
-                                                        Title
-                                                    </label>
-                                                    <div className="col-md-10">
-                                                        <input
-                                                            value={this.state.Title}
-                                                            onChange={this.handleTitleChange}
-                                                            className="form-control"
-                                                            type="text"
-                                                            placeholder="Title"
-                                                        />
-                                                    </div>
-                                                </Row>
-                                                <Row className="mb-3">
-                                                    <label
-                                                        htmlFor="example-text-input"
-                                                        className="col-md-2 col-form-label"
-                                                    >
-                                                        Input name
-                                                    </label>
-                                                    <div className="col-md-10">
-                                                        <input
-                                                            value={this.ElementName}
-                                                            onChange={this.handleElementNameChange}
-                                                            className="form-control"
-                                                            type="text"
-                                                            placeholder="Input name"
-                                                        />
-                                                    </div>
-                                                </Row>
-                                                <Row className="mb-3">
-                                                    <label
-                                                        htmlFor="example-text-input"
-                                                        className="col-md-2 col-form-label"
-                                                    >
-                                                        Description
-                                                    </label>
-                                                    <div className="col-md-10">
-                                                        <input
-                                                            value={this.Description}
-                                                            onChange={this.handleDescriptionChange}
-                                                            className="form-control"
-                                                            type="text"
-                                                            placeholder="Description"
-                                                        />
-                                                    </div>
-                                                </Row>
-                                                {/*<i onClick={this.toggleAccordion} className={this.state.isOpenClass} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">Advanced options</Label>*/}
-                                                {/*<Collapse isOpen={this.state.isOpen}>*/}
+                                <TabContent activeTab={this.state.activeTab} className="p-3 text-muted">
+                                    <TabPane tabId="1">
+                                        <Row>
+                                            <Col sm="12">
+                                                <CardText className="mb-0">
+                                                    <Row className="mb-3">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-2 col-form-label"
+                                                        >
+                                                            Title
+                                                        </label>
+                                                        <div className="col-md-10">
+                                                            <input
+                                                                value={this.state.Title}
+                                                                onChange={this.handleTitleChange}
+                                                                className="form-control"
+                                                                type="text"
+                                                                placeholder="Title"
+
+                                                            />
+                                                        </div>
+                                                    </Row>
+                                                    <Row className="mb-3">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-2 col-form-label"
+                                                        >
+                                                            Input name
+                                                        </label>
+                                                        <div className="col-md-10">
+                                                            <input
+                                                                value={this.state.ElementName}
+                                                                onChange={this.handleElementNameChange}
+                                                                className={this.state.ElementNameInputClass}
+                                                                type="text"
+                                                                placeholder="Input name"
+                                                            />
+                                                            <div type="invalid" className="invalid-feedback">{this.state.RequiredError}</div>
+                                                        </div>
+                                                    </Row>
+                                                    <Row className="mb-3">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-2 col-form-label"
+                                                        >
+                                                            Description
+                                                        </label>
+                                                        <div className="col-md-10">
+                                                            <input
+                                                                value={this.state.Description}
+                                                                onChange={this.handleDescriptionChange}
+                                                                className="form-control"
+                                                                type="text"
+                                                                placeholder="Description"
+                                                            />
+                                                        </div>
+                                                    </Row>
+                                                    {/*<i onClick={this.toggleAccordion} className={this.state.isOpenClass} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">Advanced options</Label>*/}
+                                                    {/*<Collapse isOpen={this.state.isOpen}>*/}
                                                     {this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                     <Row className="mb-3">
                                                         <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
+                                                            <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                             <label className="form-check-label" htmlFor="isRequired">Is required</label>
                                                         </div>
                                                         <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
+                                                            <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
                                                             <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
                                                         </div>
                                                     </Row>
                                                     <Row className="mb-3">
                                                         <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
+                                                            <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
                                                             <label className="form-check-label" htmlFor="canMissing">Can missing</label>
                                                         </div>
                                                     </Row>
-                                                {/*</Collapse>*/}
-                                            </CardText>
-                                        </Col>
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="2">
-                                    <Row>
-                                        <Col sm="12">
+                                                    {/*</Collapse>*/}
+                                                </CardText>
+                                            </Col>
+                                        </Row>
+                                    </TabPane>
+                                    <TabPane tabId="2">
+                                        <Row>
+                                            <Col sm="12">
+                                                <div className="mb-3">
+                                                    <Label className="form-label mb-3 d-flex">Is dependent</Label>
+                                                    <div className="form-check form-check-inline">
+                                                        <Input
+                                                            type="radio"
+                                                            id="dependentRadioInline"
+                                                            name="dependentRadioInline"
+                                                            className="form-check-input"
+                                                        />
+                                                        <Label
+                                                            className="form-check-label" htmlFor="dependentRadioInline"
+                                                        >
+                                                            Yes
+                                                        </Label>
+                                                    </div>
+                                                    <div className="form-check form-check-inline">
+                                                        <Input
+                                                            type="radio"
+                                                            id="customRadioInline2"
+                                                            name="dependentRadioInline"
+                                                            className="form-check-input"
+                                                        />
+                                                        <Label
+                                                            className="form-check-label" htmlFor="customRadioInline2"
+                                                        >
+                                                            No
+                                                        </Label>
+                                                    </div>
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col sm="12">
+                                                <div className="mb-3">
+                                                    <Label>Dependent field</Label>
+                                                    <Select
+                                                        value={this.selectedGroup}
+                                                        onChange={() => {
+                                                            this.handleSelectGroup();
+                                                        }}
+                                                        options={this.state.optionGroup}
+                                                        classNamePrefix="select2-selection"
+                                                    />
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col sm="4">
+                                                <Conditions></Conditions>
+                                            </Col>
+                                            <Col sm="4">
+                                                <Actions></Actions>
+                                            </Col>
+                                            <Col sm="4">
+                                                <label
+                                                    htmlFor="example-text-input"
+                                                    className="col-md-12 col-form-label"
+                                                >
+                                                    Dependent filed value
+                                                </label>
+                                                <input
+                                                    value={this.state.DependentFieldValue}
+                                                    onChange={this.handleDependentFieldValueChange}
+                                                    className="form-control"
+                                                    type="text"
+                                                    placeholder="Title"
+                                                />
+                                            </Col>
+                                        </Row>
+                                        <Row>
                                             <div className="mb-3">
-                                                <Label className="form-label mb-3 d-flex">Is dependent</Label>
+                                                <Label className="form-label mb-3 d-flex">Is related</Label>
                                                 <div className="form-check form-check-inline">
                                                     <Input
                                                         type="radio"
-                                                        id="customRadioInline1"
-                                                        name="customRadioInline1"
+                                                        id="relatedRadioInline"
+                                                        name="relatedRadioInline"
                                                         className="form-check-input"
                                                     />
                                                     <Label
-                                                        className="form-check-label" htmlFor="customRadioInline1"
+                                                        className="form-check-label" htmlFor="relatedRadioInline"
                                                     >
                                                         Yes
                                                     </Label>
                                                 </div>
-
                                                 <div className="form-check form-check-inline">
                                                     <Input
                                                         type="radio"
                                                         id="customRadioInline2"
-                                                        name="customRadioInline1"
+                                                        name="relatedRadioInline"
                                                         className="form-check-input"
                                                     />
                                                     <Label
@@ -472,88 +594,56 @@ class Properties extends React.Component {
                                                     </Label>
                                                 </div>
                                             </div>
-                                        </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col sm="12">
-                                            <div className="mb-3">
-                                                <Label>Dependent field</Label>
-                                                <Select
-                                                    value={this.selectedGroup}
-                                                    onChange={() => {
-                                                        this.handleSelectGroup();
-                                                    }}
-                                                    options={this.state.optionGroup}
-                                                    classNamePrefix="select2-selection"
-                                                />
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col sm="4">
-                                            <div className="mb-3">
-                                                <Label>Dependency condition</Label>
-                                                <Select
-                                                    value={this.state.selectedGroup}
-                                                    onChange={() => {
-                                                        this.handleSelectGroup();
-                                                    }}
-                                                    options={this.state.optionGroup}
-                                                    classNamePrefix="select2-selection"
-                                                />
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="3">
-                                    <Row>
-                                        <Col sm="12">
-                                            <CardText className="mb-0">
-                                                Etsy mixtape wayfarers, ethical wes anderson tofu
-                                                before they sold out mcsweeney's organic lomo
-                                                retro fanny pack lo-fi farm-to-table readymade.
-                                                Messenger bag gentrify pitchfork tattooed craft
-                                                beer, iphone skateboard locavore carles etsy
-                                                salvia banksy hoodie helvetica. DIY synth PBR
-                                                banksy irony. Leggings gentrify squid 8-bit cred
-                                                pitchfork. Williamsburg banh mi whatever
-                                                gluten-free, carles pitchfork biodiesel fixie etsy
-                                                retro mlkshk vice blog. Scenester cred you
-                                                probably haven't heard of them, vinyl craft beer
-                                                blog stumptown. Pitchfork sustainable tofu synth
-                                                chambray yr.
-                                            </CardText>
-                                        </Col>
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="4">
-                                    <Row>
-                                        <Col sm="12">
-                                            <CardText className="mb-0">
-                                                Trust fund seitan letterpress, keytar raw denim
-                                                keffiyeh etsy art party before they sold out
-                                                master cleanse gluten-free squid scenester freegan
-                                                cosby sweater. Fanny pack portland seitan DIY, art
-                                                party locavore wolf cliche high life echo park
-                                                Austin. Cred vinyl keffiyeh DIY salvia PBR, banh
-                                                mi before they sold out farm-to-table VHS viral
-                                                locavore cosby sweater. Lomo wolf viral, mustache
-                                                readymade thundercats keffiyeh craft beer marfa
-                                                ethical. Wolf salvia freegan, sartorial keffiyeh
-                                                echo park vegan.
-                                            </CardText>
-                                        </Col>
-                                    </Row>
-                                </TabPane>
-                            </TabContent>
-                        </CardBody>
-                    </Card>
-                    <div style={{ float: 'right' }}>
-                        <Button color="primary" onClick={this.saveProperties}>
-                            Save
-                        </Button>
-                    </div>
-                </Col>
+                                        </Row>
+                                    </TabPane>
+                                    <TabPane tabId="3">
+                                        <Row>
+                                            <Col sm="12">
+                                                <CardText className="mb-0">
+                                                    Etsy mixtape wayfarers, ethical wes anderson tofu
+                                                    before they sold out mcsweeney's organic lomo
+                                                    retro fanny pack lo-fi farm-to-table readymade.
+                                                    Messenger bag gentrify pitchfork tattooed craft
+                                                    beer, iphone skateboard locavore carles etsy
+                                                    salvia banksy hoodie helvetica. DIY synth PBR
+                                                    banksy irony. Leggings gentrify squid 8-bit cred
+                                                    pitchfork. Williamsburg banh mi whatever
+                                                    gluten-free, carles pitchfork biodiesel fixie etsy
+                                                    retro mlkshk vice blog. Scenester cred you
+                                                    probably haven't heard of them, vinyl craft beer
+                                                    blog stumptown. Pitchfork sustainable tofu synth
+                                                    chambray yr.
+                                                </CardText>
+                                            </Col>
+                                        </Row>
+                                    </TabPane>
+                                    <TabPane tabId="4">
+                                        <Row>
+                                            <Col sm="12">
+                                                <CardText className="mb-0">
+                                                    Trust fund seitan letterpress, keytar raw denim
+                                                    keffiyeh etsy art party before they sold out
+                                                    master cleanse gluten-free squid scenester freegan
+                                                    cosby sweater. Fanny pack portland seitan DIY, art
+                                                    party locavore wolf cliche high life echo park
+                                                    Austin. Cred vinyl keffiyeh DIY salvia PBR, banh
+                                                    mi before they sold out farm-to-table VHS viral
+                                                    locavore cosby sweater. Lomo wolf viral, mustache
+                                                    readymade thundercats keffiyeh craft beer marfa
+                                                    ethical. Wolf salvia freegan, sartorial keffiyeh
+                                                    echo park vegan.
+                                                </CardText>
+                                            </Col>
+                                        </Row>
+                                    </TabPane>
+                                </TabContent>
+                            </CardBody>
+                        </Card>
+                        <div style={{ float: 'right' }}>
+                            <input className="btn btn-primary" type="submit" value="Save" />
+                        </div>
+                    </Col>
+                </form>
                 {/*</ElementBase>*/}
             </>
 
