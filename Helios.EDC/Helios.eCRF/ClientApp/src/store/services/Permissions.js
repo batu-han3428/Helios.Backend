@@ -16,7 +16,7 @@ export const PermissionsApi = createApi({
         },
     }),
     endpoints: (builder) => ({
-        roleListGet: builder.query({
+        rolePermissionListGet: builder.query({
             query: (studyId) => `/User/GetPermissionRoleList/${studyId}`,
             providesTags: ['Role'],
         }),
@@ -44,14 +44,19 @@ export const PermissionsApi = createApi({
             }),
             invalidatesTags: ['Role'],
         }),
+        roleListGet: builder.query({
+            query: (studyId) => `/User/GetRoleList/${studyId}`,
+        }),
     }),
 });
 
 
-export const { useRoleListGetQuery } = PermissionsApi;
+export const { useRolePermissionListGetQuery } = PermissionsApi;
 
 export const { useRoleSaveMutation } = PermissionsApi;
 
 export const { useSetPermissionMutation } = PermissionsApi;
 
 export const { useRoleDeleteMutation } = PermissionsApi;
+
+export const { useRoleListGetQuery } = PermissionsApi;

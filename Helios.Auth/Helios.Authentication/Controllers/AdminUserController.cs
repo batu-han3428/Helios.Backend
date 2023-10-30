@@ -12,6 +12,12 @@ using System;
 using System.Net.Sockets;
 using System.Text.Encodings.Web;
 using Helios.Authentication.Services.Interfaces;
+using Google.Protobuf.WellKnownTypes;
+using Helios.Common.DTO;
+using Org.BouncyCastle.Asn1.Crmf;
+using Helios.Authentication.Enums;
+using Newtonsoft.Json.Linq;
+using Helios.Common.Model;
 
 namespace Helios.Authentication.Controllers
 {
@@ -21,18 +27,18 @@ namespace Helios.Authentication.Controllers
     {
         private AuthenticationContext _context;
         readonly UserManager<ApplicationUser> _userManager;
-        private readonly IBus _backgorundWorker;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
-        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService)
+        private readonly IEmailService _emailService;
+        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
-            _backgorundWorker = _bus;
             _roleManager = roleManager;
             _contextAccessor = contextAccessor;
             _baseService = baseService;
+            _emailService = emailService;
         }
 
         #region Tenant
@@ -352,7 +358,173 @@ namespace Helios.Authentication.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<List<AspNetUserDTO>> GetUserList(string AuthUserIds)
+        {
+            string[] authUserIdsArray = AuthUserIds.Split(',');
+            List<Guid> authUserIds = new List<Guid>();
+            foreach (string id in authUserIdsArray)
+            {
+                if (Guid.TryParse(id, out Guid guid))
+                {
+                    authUserIds.Add(guid);
+                }
+            }
+            return await _userManager.Users.Where(x => x.IsActive && authUserIds.Contains(x.Id)).Select(x => new AspNetUserDTO
+            {
+                Id = x.Id,
+                Email = x.Email,
+                Name = x.Name,
+                LastName = x.LastName,
+                IsActive = x.IsActive,
+            }).ToListAsync();
+        }
 
+        [HttpGet]
+        public async Task<AspNetUserDTO> GetUser(string email)
+        {
+            return await _userManager.Users.Where(x => x.IsActive && x.Email == email).Select(x => new AspNetUserDTO
+            {
+                Id = x.Id,
+                Email = x.Email,
+                Name = x.Name,
+                LastName = x.LastName,
+                IsActive = x.IsActive,
+            }).FirstOrDefaultAsync();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<StudyUserDTO>> AddStudyUser(StudyUserModel model)
+        {
+            if (await _userManager.FindByEmailAsync(model.Email) == null)
+            {
+                var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Name).Substring(0, 1).ToLower();
+                var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
+                var userName = string.Format("{0}_{1}{2}", model.TenantId, firstChar, lastNameEng);
+
+                var newUserName = userName;
+                int i = 0;
+
+                while (await _userManager.Users.AnyAsync(x => x.UserName == newUserName))
+                {
+                    i++;
+                    newUserName = string.Format("{0}_{1}", userName, i);
+                }
+
+                var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.StudyUser.ToString());
+
+                var usr = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    Email = model.Email.Trim(),
+                    UserName = newUserName,
+                    Name = model.Name,
+                    LastName = model.LastName,
+                    ChangePassword = false,
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    PhotoBase64String = "",
+                    LastChangePasswordDate = DateTime.Now
+                };
+
+                usr.UserRoles.Add(new ApplicationUserRole
+                {
+                    Role = role,
+                    User = usr,
+                    RoleId = role.Id,
+                    UserId = usr.Id,
+                    StudyId = model.StudyId,
+                    TenantId = model.TenantId,
+                });
+
+                var password = StringExtensionsHelper.GenerateRandomPassword();
+
+                var userResult = await _userManager.CreateAsync(usr, password);
+
+                if (userResult.Succeeded)
+                {
+                    return new ApiResponse<StudyUserDTO>
+                    {
+                        IsSuccess = true,
+                        Message = "",
+                        Values = new StudyUserDTO { AuthUserId = usr.Id, Password = password }
+                    };
+                }
+
+                return new ApiResponse<StudyUserDTO>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+            else
+            {
+                return new ApiResponse<StudyUserDTO>
+                {
+                    IsSuccess = false,
+                    Message = "This user is already registered in the system.",
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task AddStudyUserMail(StudyUserModel model)
+        {
+            await _emailService.AddStudyUserMail(model);
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> UserResetPassword(StudyUserModel model)
+        {
+            if (model.AuthUserId != Guid.Empty)
+            {
+                var user = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
+
+                if (user == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }else if (!user.IsActive)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Please activate the account first and then try this process again."
+                    };
+                }else
+                {
+                    user.ChangePassword = false;
+                    var changePassword = await _userManager.UpdateAsync(user);
+                    if (changePassword.Succeeded)
+                    {
+                        string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                        var removeResult = await _userManager.RemovePasswordAsync(user);
+                        if (removeResult.Succeeded)
+                        {
+                            var passResult = await _userManager.AddPasswordAsync(user, newPassword);
+                            if (passResult.Succeeded)
+                            {
+                                model.Password = newPassword;
+                                await _emailService.UserResetPasswordMail(model);
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
+        }
         #endregion
     }
 }

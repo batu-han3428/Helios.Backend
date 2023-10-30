@@ -4,10 +4,15 @@ using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using RestSharp;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Principal;
 using System.Xml.Linq;
+using static MassTransit.ValidationResultExtensions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -96,6 +101,18 @@ namespace Helios.Core.Controllers
                 ExportPatientForm = x.ExportPatientForm,
                 AddAdverseEvent = x.AddAdverseEvent,
                 AddMultiVisit = x.AddMultiVisit
+            }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<UserPermissionDTO>> GetRoleList(Guid studyId)
+        {
+            var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).AsNoTracking().Select(x => new UserPermissionDTO
+            {
+                Id = x.Id,
+                RoleName = x.Name, 
             }).ToListAsync();
 
             return result;
@@ -255,6 +272,233 @@ namespace Helios.Core.Controllers
             }
         }
 
+        #endregion
+
+        #region Study User
+
+        [HttpGet]
+        public async Task<List<StudyUserDTO>> GetStudyUsers(Guid studyId)
+        {
+            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Include(x => x.StudyRole).Include(x=>x.StudyUserSites).AsNoTracking().Select(x => new StudyUserDTO
+            {
+                StudyUserId = x.Id,
+                AuthUserId = x.AuthUserId,
+                IsActive = x.IsActive,
+                RoleName = x.StudyRole.Name,
+                RoleId = x.StudyRoleId,
+                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, SiteFullName = s.Site.FullName }).ToList(),
+                CreatedOn = x.CreatedAt,
+                LastUpdatedOn = x.UpdatedAt
+            }).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<bool> GetCheckStudyUser(Guid authUserId, Guid studyId)
+        {
+            return await _context.StudyUsers.AnyAsync(x => x.StudyId == studyId && x.AuthUserId == authUserId && !x.IsDeleted);
+        }      
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetStudyUser(StudyUserModel studyUserModel)
+        {
+            if (studyUserModel.StudyUserId == Guid.Empty)
+            {
+                var user = new StudyUser()
+                {
+                    Id = Guid.NewGuid(),
+                    StudyId = studyUserModel.StudyId,
+                    AuthUserId = studyUserModel.AuthUserId,
+                    SuperUserIdList = "",
+                    TenantId = studyUserModel.TenantId,
+                    StudyRoleId = studyUserModel.RoleId != Guid.Empty && studyUserModel.RoleId != null? studyUserModel.RoleId : null
+                };
+                await _context.StudyUsers.AddAsync(user);
+
+                var userSites = studyUserModel.SiteIds.Select(x => new StudyUserSite
+                {
+                    StudyUserId = user.Id,
+                    SiteId = x
+                });
+
+                if (userSites.Count() > 0)
+                {
+                    await _context.StudyUserSites.AddRangeAsync(userSites);
+                }
+
+                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                var user = await _context.StudyUsers.Where(x => x.Id == studyUserModel.StudyUserId).Include(x => x.StudyRole).Include(x => x.StudyUserSites).FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    if (user.StudyRoleId != studyUserModel.RoleId)
+                    {
+                        user.StudyRoleId = studyUserModel.RoleId != Guid.Empty && studyUserModel.RoleId != null ? studyUserModel.RoleId : null;
+                        _context.StudyUsers.Update(user);
+                    }
+                   
+                    var currentSiteIds = user.StudyUserSites.Select(s => s.SiteId).ToList();
+                    var newSiteIds = studyUserModel.SiteIds.ToList();
+
+                    if (!currentSiteIds.SequenceEqual(newSiteIds))
+                    {        
+                        _context.StudyUserSites.RemoveRange(user.StudyUserSites);
+
+                        foreach (var siteId in newSiteIds)
+                        {
+                            var newUserSite = new StudyUserSite
+                            {
+                                StudyUserId = user.Id,
+                                SiteId = siteId
+                            };
+                            await _context.StudyUserSites.AddAsync(newUserSite);
+                        }
+                    }
+
+                    var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+
+                    if (result > 0)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                    else if (result == 0)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "No changes were made. Please make changes to save."
+                        };
+                    }
+                    else
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }              
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> ActivePassiveStudyUser(StudyUserModel studyUserModel)
+        {
+            if (studyUserModel.StudyUserId != Guid.Empty)
+            {
+                var user = await _context.StudyUsers.Where(x=>x.Id == studyUserModel.StudyUserId).Include(x=>x.StudyUserSites).FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    foreach (var site in user.StudyUserSites.Where(x=> !studyUserModel.IsActive ? !x.IsActive && !x.IsDeleted : x.IsActive && !x.IsDeleted))
+                    {
+                        site.IsActive = !studyUserModel.IsActive;
+                    }
+
+                    user.IsActive = !studyUserModel.IsActive;
+                }
+
+                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteStudyUser(StudyUserModel studyUserModel)
+        {
+            if (studyUserModel.StudyUserId != Guid.Empty)
+            {
+                var user = await _context.StudyUsers.Where(x => x.Id == studyUserModel.StudyUserId).Include(x => x.StudyUserSites).FirstOrDefaultAsync();
+
+                if (user != null)
+                {                 
+                    _context.StudyUserSites.RemoveRange(user.StudyUserSites);
+                    _context.StudyUsers.Remove(user);
+                }
+
+                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
         #endregion
     }
 }

@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { withTranslation } from "react-i18next";
 import { MDBDataTable } from "mdbreact";
 import {
@@ -17,14 +17,15 @@ import { formatDate } from "../../helpers/format_date";
 import Swal from 'sweetalert2'
 
 const Sites = props => {
-    
+
+    const modalRef = useRef();
+
     const userInformation = useSelector(state => state.rootReducer.Login);
 
     const studyInformation = useSelector(state => state.rootReducer.Study);
 
     const [skip, setSkip] = useState(true);
     const [tableData, setTableData] = useState([]);
-    const [modal_backdrop, setmodal_backdrop] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
@@ -99,7 +100,7 @@ const Sites = props => {
                 maxenrolmentcount: apiData.maxEnrolmentCount,
             });
             setSkip(true);
-            tog_backdrop();
+            modalRef.current.tog_backdrop();
             dispatch(endloading());
         } 
     }, [apiData, apiError, apiIsLoading]);
@@ -186,20 +187,6 @@ const Sites = props => {
         }
     }, [siteData, error, isLoading]);
 
-    useEffect(() => {
-        if (!modal_backdrop)
-            resetValue();
-    }, [modal_backdrop]);
-
-    const removeBodyCss = () => {
-        document.body.classList.add("no_padding");
-    };
-
-    const tog_backdrop = () => {
-        setmodal_backdrop(!modal_backdrop);
-        removeBodyCss();
-    };
-
     const [siteSaveOrUpdate] = useSiteSaveOrUpdateMutation();
 
     const resetValue = () => {
@@ -238,7 +225,7 @@ const Sites = props => {
                 setMessage(response.data.message)
                 setStateToast(true);
                 setShowToast(true);
-                tog_backdrop();
+                modalRef.current.tog_backdrop();
                 dispatch(endloading());
             } else {
                 setMessage(response.data.message)
@@ -265,7 +252,7 @@ const Sites = props => {
                                         color="success"
                                         className="btn btn-success waves-effect waves-light"
                                         type="button"
-                                        onClick={tog_backdrop}
+                                        onClick={() => modalRef.current.tog_backdrop()}
                                     >
                                         <FontAwesomeIcon icon="fa-solid fa-plus" /> Add a site
                                     </Button>
@@ -285,6 +272,7 @@ const Sites = props => {
                 </div>
             </div>
             <ModalComp
+                refs={modalRef}
                 title={siteId === '00000000-0000-0000-0000-000000000000' ? "Add a site" : "Update site"}
                 body={
                     <>
@@ -385,10 +373,8 @@ const Sites = props => {
                             </div>
                         </Form>
                     </>
-
                 }
-                modal_backdrop={modal_backdrop}
-                tog_backdrop={tog_backdrop}
+                resetValue={resetValue}
                 handle={() => validationType.handleSubmit()}
                 buttonText={siteId === '00000000-0000-0000-0000-000000000000' ? "Save" : "Update" }
             />

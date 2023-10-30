@@ -8,5 +8,9 @@ namespace Helios.Core.Domains.Entities
         public Guid AuthUserId { get; set; }
         public string SuperUserIdList { get; set; }
         public Study Study { get; set; }
+        public Guid? StudyRoleId { get; set; }
+        public StudyRole StudyRole { get; set; }
+        public List<StudyUserSite> StudyUserSites { get; set; }
+        
     }
 }

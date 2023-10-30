@@ -48,6 +48,7 @@ const Login = props => {
 
             }
         } catch (error) {
+            dispatch(endloading());
             console.error('Error:', error);
         }
     };

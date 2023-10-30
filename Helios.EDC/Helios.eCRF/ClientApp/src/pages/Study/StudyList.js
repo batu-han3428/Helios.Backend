@@ -4,7 +4,7 @@ import { withTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { MDBDataTable } from "mdbreact";
 import {
-    Row, Col, Card, CardBody, Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Tooltip
+    Row, Col, Card, CardBody, Dropdown, DropdownToggle, DropdownItem, DropdownMenu
 } from "reactstrap";
 import { useStudyListGetQuery, useStudyGetQuery } from '../../store/services/Study';
 import './study.css';
@@ -145,11 +145,21 @@ const StudyList = props => {
             let from = words[1];
             let to = words[3];
             let total = words[5];
+            if (words[1] === "0") {
+                from = "0";
+                to = "0";
+                total = "0";
+            }
             infoDiv.innerHTML = props.t("Showing entries").replace("{from}", from).replace("{to}", to).replace("{total}", total);
         } else {
             let from = words[2];
             let to = words[4];
             let total = words[0];
+            if (words[0] === "0") {
+                from = "0";
+                to = "0";
+                total = "0";
+            }
             infoDiv.innerHTML = props.t("Showing entries").replace("{from}", from).replace("{to}", to).replace("{total}", total);
         }
     };
