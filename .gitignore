@@ -321,3 +321,7 @@ _Pvt_Extensions
 /MedCase.Helios.EDC.V3/Helios.EDC/Helios.eCRF/ClientApp/src/Common/fonts/.DS_Store
 /MedCase.Helios.EDC.V3/Helios.EDC/Helios.eCRF/ClientApp/.env.development.local
 /Helios.EDC/Helios.eCRF/ClientApp/.env.development.local
+/Helios.EDC/Helios.eCRF/ClientApp/package-lock.json
+/.gitignore
+/Helios.EDC/Helios.eCRF/ClientApp/package.json
+/Helios.EDC/Helios.eCRF/ClientApp/package-lock.json
