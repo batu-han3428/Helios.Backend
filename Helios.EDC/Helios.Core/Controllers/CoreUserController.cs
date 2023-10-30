@@ -131,7 +131,7 @@ namespace Helios.Core.Controllers
                 if (property != null && property.PropertyType == typeof(bool))
                 {
                     property.SetValue(studyRole, setPermissionModel.Value);
-                    var result = await _context.SaveAuthenticationContextAsync(setPermissionModel.UserId, DateTimeOffset.Now) > 0;
+                    var result = await _context.SaveCoreContextAsync(setPermissionModel.UserId, DateTimeOffset.Now) > 0;
 
                     if (result)
                     {
@@ -188,7 +188,7 @@ namespace Helios.Core.Controllers
                 studyRole.Name = userPermission.RoleName;
                 studyRole.NewRole();
                 await _context.StudyRoles.AddAsync(studyRole);
-                var result = await _context.SaveAuthenticationContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
 
                 if (result)
                 {
@@ -216,7 +216,7 @@ namespace Helios.Core.Controllers
 
                     _context.StudyRoles.Update(oldEntity);
 
-                    var result = await _context.SaveAuthenticationContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+                    var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
 
                     if (result)
                     {
@@ -252,7 +252,7 @@ namespace Helios.Core.Controllers
 
             _context.Remove(oldEntity);
 
-            var result = await _context.SaveAuthenticationContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {
@@ -325,7 +325,7 @@ namespace Helios.Core.Controllers
                     await _context.StudyUserSites.AddRangeAsync(userSites);
                 }
 
-                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
 
                 if (result)
                 {
@@ -374,7 +374,7 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+                    var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
                     if (result > 0)
                     {
@@ -429,7 +429,7 @@ namespace Helios.Core.Controllers
                     user.IsActive = !studyUserModel.IsActive;
                 }
 
-                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
                 if (result > 0)
                 {
@@ -471,7 +471,7 @@ namespace Helios.Core.Controllers
                     _context.StudyUsers.Remove(user);
                 }
 
-                var result = await _context.SaveAuthenticationContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
                 if (result > 0)
                 {
