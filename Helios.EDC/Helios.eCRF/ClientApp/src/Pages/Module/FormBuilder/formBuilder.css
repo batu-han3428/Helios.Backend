@@ -8,3 +8,8 @@
     text-align: left !important;
     border: 1px solid #dee2e6 !important;
 }
+
+.actionBtn {
+    border: solid 1px #dee2e6;
+    margin-right:2px;
+}

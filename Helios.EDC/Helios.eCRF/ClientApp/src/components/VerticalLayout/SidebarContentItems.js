@@ -20,10 +20,15 @@
 /*            icon: "ti-home",*/
         },
         {
-            label: "Form Builder",
-            to: "/formBuilder",
+            label: "Module",
+            to: "/moduleList",
 /*            icon: "ti-home",*/
         },
+//        {
+//            label: "Form Builder",
+//            to: "/formBuilder",
+///*            icon: "ti-home",*/
+//        },
         {
             label: "Dashboard",
             to: "/dashboard",

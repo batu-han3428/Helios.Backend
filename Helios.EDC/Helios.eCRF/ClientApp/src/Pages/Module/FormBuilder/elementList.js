@@ -14,8 +14,9 @@ import {
 } from "reactstrap";
 import Properties from './properties.js';
 import './formBuilder.css';
+import { useDispatch } from "react-redux";
+import { startloading, endloading } from '../../../store/loader/actions';
 
-let elementType = 0;
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-ad' },
     { key: 2, name: 'Text', icon: 'fas fa-ad' },
@@ -37,42 +38,95 @@ const elements = [
 ];
 
 function ElementList(props) {
+    const baseUrl = "https://localhost:7196";
+    const [moduleId, setModuleId] = useState("08dbc973-abe2-4694-8d6c-b4697950e3f7");
+    const [elementId, setElementId] = useState("");
+    const [moduleElementList, setModuleElementList] = useState([]);
+    const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
+    const dispatch = useDispatch();
 
     const removeBodyCss = () => {
         document.body.classList.add("no_padding");
     };
 
-    const tog_large = (e, type) => {
+    const tog_large = (e, type, id) => {
+        if (id != "") {
+            setElementId(id);
+        }
+        else {
+            setElementType(type);
+        }
+
         setmodal_large(!modal_large);
         removeBodyCss();
-        elementType = type;
+    };
+
+    const copyElement = (e, id) => {
+
     };
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '')}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
     );
+
+    const fetchData = () => {
+        fetch(baseUrl + '/Module/GetModuleElements?id=' + moduleId, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                setModuleElementList(data);
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
+    }
+
+    const content = moduleElementList.map((item) =>
+        <Row className="mb-3" key={item.id }>
+            <div>
+                <label style={{ marginRight: '5px' }}>
+                    {item.title}
+                </label>
+                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id)}><i className="far fa-edit"></i></Button>
+                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e,item.id)}></i></Button>
+                <Button className="actionBtn"><i className="fas fa-trash-alt"></i></Button>
+            </div>
+            <div className="col-md-10">
+                <input
+                    className="form-control"
+                    type="text"
+                    disabled />
+            </div>
+        </Row>
+    );
+
+    useEffect(() => {
+        dispatch(startloading());
+        fetchData();
+        dispatch(endloading());
+    });
 
     return (
         <>
-            <div>
-                {elmementItems}
-            </div><Col sm={6} md={4} xl={3}>
-                <Modal isOpen={modal_large} toggle={tog_large} size="lg">
-                    <ModalBody>
-                        <Properties Type={elementType}></Properties>
-                    </ModalBody>
-                    {/*<ModalFooter>*/}
-                    {/*    <Button color="secondary" onClick={tog_large}>*/}
-                    {/*        Close*/}
-                    {/*    </Button>{' '}*/}
-                    {/*    <Button color="primary" onClick={saveProperties}>*/}
-                    {/*        Save*/}
-                    {/*    </Button>*/}
-                    {/*</ModalFooter>*/}
-                </Modal>
-            </Col>
+            <div style={{ width: "200px", float: 'left' }}>
+                <div>
+                    {elmementItems}
+                </div>
+                <Col sm={6} md={4} xl={3}>
+                    <Modal isOpen={modal_large} toggle={tog_large} size="lg">
+                        <ModalHeader className="mt-0" toggle={tog_large}>Properties</ModalHeader>
+                        <ModalBody>
+                            <Properties Type={elementType} Id={elementId}></Properties>
+                        </ModalBody>
+                    </Modal>
+                </Col>
+            </div><div style={{ margin: '10px 0 10px 215px' }}>
+                {content}
+            </div>
         </>
+
     );
 }
 

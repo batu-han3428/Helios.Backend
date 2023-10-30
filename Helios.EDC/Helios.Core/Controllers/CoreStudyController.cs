@@ -25,92 +25,6 @@ namespace Helios.Core.Controllers
             _context = context;
         }
 
-        #region Module
-        [HttpPost]
-        public async Task<bool> AddModule(ModuleModel model)
-        {
-            _context.Modules.Add(new Module
-            {
-                AddedById = model.UserId,
-                Name = model.Name,
-                CreatedAt = DateTimeOffset.Now,
-                IsActive = true
-            });
-
-            var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
-
-            return result;
-        }
-
-        [HttpPost]
-        public async Task<bool> UpdateModule(ModuleModel model)
-        {
-            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (module == null)
-            {
-                return false;
-            }
-
-            module.Name = model.Name;
-            module.UpdatedAt = DateTimeOffset.Now;
-            module.UpdatedById = model.UserId;
-
-            _context.Modules.Update(module);
-
-            return true;
-        }
-
-        [HttpPost]
-        public async Task<bool> DeleteModule(ModuleModel model)
-        {
-            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (module == null)
-            {
-                return false;
-            }
-
-            module.UpdatedAt = DateTimeOffset.Now;
-            module.UpdatedById = model.UserId;
-            module.IsActive = false;
-            module.IsDeleted = true;
-
-            _context.Modules.Update(module);
-
-            return true;
-        }
-
-        [HttpGet]
-        public async Task<ModuleModel> GetModule(Guid id)
-        {
-            var model = new ModuleModel();
-
-            var module = await _context.Modules.FirstOrDefaultAsync(x => x.Id == id && x.IsActive && !x.IsDeleted);
-
-            if (module != null)
-            {
-                model.Id = module.Id;
-                model.Name = module.Name;
-            }
-
-            return model;
-        }
-
-        [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList()
-        {
-            var result = await _context.Modules.Where(x => x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
-            {
-                Id = x.Id,
-                Name = x.Name
-            }).ToListAsync();
-
-            return result;
-        }
-
-        #endregion
-
         #region Study
         [HttpGet]
         public async Task<List<StudyDTO>> GetStudyList()
@@ -232,7 +146,7 @@ namespace Helios.Core.Controllers
                 };
                 _context.Studies.Add(activeResearch);
                 _context.Studies.Add(demoResearch);               
-                var tenantResult = await _context.SaveAuthenticationContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                var tenantResult = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
                 if (tenantResult)
                 {
                     demoResearch.EquivalentStudyId = activeResearch.Id;
@@ -240,7 +154,7 @@ namespace Helios.Core.Controllers
                     _context.Studies.Update(activeResearch);
                     _context.Studies.Update(demoResearch);
 
-                    var result = await _context.SaveAuthenticationContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                    var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
 
                     return new ApiResponse<dynamic>
                     {
@@ -398,7 +312,7 @@ namespace Helios.Core.Controllers
                     TenantId = siteModel.TenantId,
                 });
 
-                var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
                 if (result)
                 {
                     //to do addNewSiteToUsersThatSelectedAllSitesBefore
@@ -442,7 +356,7 @@ namespace Helios.Core.Controllers
 
                     _context.Sites.Update(oldEntity);
 
-                    var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+                    var result = await _context.SaveCoreContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
 
                     if (result)
                     {
@@ -478,7 +392,7 @@ namespace Helios.Core.Controllers
                 
             _context.Sites.Remove(oldEntity);
 
-            var result = await _context.SaveAuthenticationContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {

@@ -20,7 +20,7 @@ namespace Helios.Core.Contexts
             base.OnModelCreating(modelBuilder);
         }
 
-        public async Task<int> SaveAuthenticationContextAsync(Guid userId, DateTimeOffset saveDate)
+        public async Task<int> SaveCoreContextAsync(Guid userId, DateTimeOffset saveDate)
         {
             var transId = -1;
             if (this.ChangeTracker.HasChanges())

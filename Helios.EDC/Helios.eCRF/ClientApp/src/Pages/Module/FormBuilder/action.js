@@ -2,21 +2,17 @@ import React, { useState, useEffect, ListItem } from 'react';
 import { Button, Card, CardBody, Col, Container, Form, FormGroup, Input, InputGroup, Label, Row } from "reactstrap";
 import Select from "react-select";
 
-const conditionList = [
+const actionList = [
     {
-        label: "Dependency condition",
+        label: "Dependency action",
         options: [
-            { label: "Less", value: 1 },
+            { label: "Show", value: 1 },
             { label: "More", value: 2 },
-            { label: "Equal", value: 2 },
-            { label: "More and equal", value: 2 },
-            { label: "Less and equal", value: 2 },
-            { label: "Not equal", value: 2 },
         ]
     }
 ];
 
-const Conditions = props => {
+const Actions = props => {
     const [selectedGroup, setselectedGroup] = useState(null);
 
     const handleSelectGroup = (selectedGroup)=> {
@@ -26,13 +22,13 @@ const Conditions = props => {
     return (
         <>
             <div className="mb-3">
-                <Label>Dependency condition</Label>
+                <Label>Dependency action</Label>
                 <Select
                     value={selectedGroup}
                     onChange={() => {
                         handleSelectGroup();
                     }}
-                    options={conditionList}
+                    options={actionList}
                     classNamePrefix="select2-selection"
                 />
             </div>
@@ -40,4 +36,4 @@ const Conditions = props => {
     )
 }
 
-export default Conditions;
+export default Actions;
