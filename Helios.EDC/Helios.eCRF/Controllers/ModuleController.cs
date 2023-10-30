@@ -1,4 +1,5 @@
-﻿using Helios.eCRF.Models;
+﻿using Helios.Common.DTO;
+using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -117,10 +118,26 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async void SaveModuleContent(ElementModel model)
+        public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
             var result = await _moduleService.SaveModuleContent(model);
-            //return result;
+            return result;
+        }
+    
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> CopyElement(string id)
+        {
+            var elmId = Guid.Parse(id);
+            var result = await _moduleService.CopyElement(elmId,new Guid());
+            return result;
+        }
+    
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteElement(string id)
+        {
+            var elmId = Guid.Parse(id);
+            var result = await _moduleService.DeleteElement(elmId,new Guid());
+            return result;
         }
     }
 }

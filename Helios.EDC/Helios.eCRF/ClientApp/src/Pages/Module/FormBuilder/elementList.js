@@ -16,6 +16,7 @@ import Properties from './properties.js';
 import './formBuilder.css';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
+import Swal from 'sweetalert2'
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-ad' },
@@ -63,7 +64,41 @@ function ElementList(props) {
     };
 
     const copyElement = (e, id) => {
+        fetch(baseUrl + '/Module/CopyElement?id=' + id, {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccess) {
+                    dispatch(endloading());
+                    Swal.fire(data.message, '', 'success');
+                } else {
+                    dispatch(endloading());
+                    Swal.fire(data.message, '', 'error');
+                }
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
+    };
 
+    const deleteElement = (e, id) => {
+        fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccess) {
+                    dispatch(endloading());
+                    Swal.fire(data.message, '', 'success');
+                } else {
+                    dispatch(endloading());
+                    Swal.fire(data.message, '', 'error');
+                }
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
     };
 
     const elmementItems = elements.map((l) =>
@@ -84,14 +119,14 @@ function ElementList(props) {
     }
 
     const content = moduleElementList.map((item) =>
-        <Row className="mb-3" key={item.id }>
+        <Row className="mb-3" key={item.id}>
             <div>
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
                 </label>
                 <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id)}><i className="far fa-edit"></i></Button>
-                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e,item.id)}></i></Button>
-                <Button className="actionBtn"><i className="fas fa-trash-alt"></i></Button>
+                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
+                <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
             <div className="col-md-10">
                 <input

@@ -24,6 +24,7 @@ import TextElementProperties from '../Elements/textElementProperties.js'
 import NumericElementProperties from '../Elements/numericElementProperties.js'
 import Conditions from "./conditions.js";
 import Actions from "./action.js";
+import Swal from 'sweetalert2'
 
 const baseUrl = "https://localhost:7196";
 
@@ -338,10 +339,13 @@ class Properties extends React.Component {
                 })
             }).then(res => res.json())
                 .then(data => {
-                    debugger;
+                    if (data.isSuccess) {
+                        Swal.fire(data.message, '', 'success');
+                    } else {
+                        Swal.fire(data.message, '', 'error');
+                    };
                 })
                 .catch(error => {
-                    debugger;
                     //console.error('Error:', error);
                 });
         }

@@ -5,16 +5,16 @@ namespace Helios.eCRF.Models
     public class ElementModel
     {
         public string Id { get; set; }
-        public string ModuleId { get; set; }
-        public string UserId { get; set; }
-        public string ElementDetailId { get; set; }
-        public ElementType ElementType { get; set; }
-        public string ElementName { get; set; }
-        public string Title { get; set; }
+        public string ModuleId { get; set; } = "";
+        public string UserId { get; set; } = "";
+        public string ElementDetailId { get; set; } = "";
+        public ElementType ElementType { get; set; } = 0;
+        public string ElementName { get; set; } = "";
+        public string Title { get; set; } = "";
         public bool IsTitleHidden { get; set; }
-        public int Order { get; set; }
-        public string Description { get; set; }
-        public GridLayout Width { get; set; }
+        public int Order { get; set; } = 0;
+        public string Description { get; set; } = "";
+        public GridLayout Width { get; set; } = 0;
         public bool IsHidden { get; set; }
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
@@ -34,9 +34,9 @@ namespace Helios.eCRF.Models
         //public int EProPageNumber { get; set; }
         //public string ButtonText { get; set; }
         //public string DefaultValue { get; set; }
-        public string Unit { get; set; }
-        public string LowerLimit { get; set; }
-        public string UpperLimit { get; set; }
+        public string Unit { get; set; } = "";
+        public string LowerLimit { get; set; } = "";
+        public string UpperLimit { get; set; } = "";
         //public string Extension { get; set; } //numeric description
         //public string Mask { get; set; }
         //public int StartDay { get; set; }
@@ -58,10 +58,10 @@ namespace Helios.eCRF.Models
         //public string RightText { get; set; }
 
         ////dependent
-        public string DependentSourceFieldId { get; set; }
-        public string DependentTargetFieldId { get; set; }
-        public int DependentCondition { get; set; }
-        public int DependentAction { get; set; }
-        public string DependentFieldValue { get; set; }
+        public string DependentSourceFieldId { get; set; } = "";
+        public string DependentTargetFieldId { get; set; } = "";
+        public int DependentCondition { get; set; } = 0;
+        public int DependentAction { get; set; } = 0;
+        public string DependentFieldValue { get; set; } = "";
     }
 }

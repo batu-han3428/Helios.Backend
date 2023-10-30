@@ -108,17 +108,51 @@ namespace Helios.eCRF.Services
             return element;
         }
 
-        public async Task<bool> SaveModuleContent(ElementModel model)
+        public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
+            var response = new ApiResponse<dynamic>();
+
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreModule/SaveModuleContent", Method.Post);
                 req.AddJsonBody(model);
-                var result = await client.ExecuteAsync(req);
-                return result.IsSuccessful;
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
             }
+        }
 
-            return false;
+        public async Task<ApiResponse<dynamic>> CopyElement(Guid id, Guid userId)
+        {
+            var model = new ElementModel()
+            {
+                Id = id.ToString(),
+                UserId = userId.ToString(),
+            };
+
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreModule/CopyElement", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+    
+        public async Task<ApiResponse<dynamic>> DeleteElement(Guid id, Guid userId)
+        {
+            var model = new ElementModel()
+            {
+                Id = id.ToString(),
+                UserId = userId.ToString(),
+            };
+
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreModule/DeleteElement", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
         }
     }
 }

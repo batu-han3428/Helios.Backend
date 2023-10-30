@@ -1,4 +1,5 @@
-﻿using Helios.Core.Contexts;
+﻿using Helios.Common.DTO;
+using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
 using Helios.Core.Enums;
 using Helios.Core.Models;
@@ -147,8 +148,9 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> SaveModuleContent(ElementModel model)
+        public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
+            var result = new ApiResponse<dynamic>();
             var id = new Guid();
             var userId = model.UserId != "" ? Guid.Parse(model.UserId) : new Guid();
             var moduleId = Guid.Parse(model.ModuleId);
@@ -160,7 +162,17 @@ namespace Helios.Core.Controllers
 
             if (element == null)
             {
-                var moduleElementMaxOrder = _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted).Select(x => x.Order).Max();
+                var moduleElements = _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
+
+                if (moduleElements.FirstOrDefault(x => x.ElementName == model.ElementName) != null)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Duplicate element name";
+
+                    return result;
+                }
+
+                var moduleElementMaxOrder = moduleElements.Select(x => x.Order).Max();
 
                 var elm = new Element()
                 {
@@ -182,9 +194,9 @@ namespace Helios.Core.Controllers
                 };
 
                 _context.Elements.Add(elm);
-                var result = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
 
-                if (result)
+                if (result.IsSuccess)
                 {
                     var elementDetail = new ElementDetail()
                     {
@@ -198,7 +210,12 @@ namespace Helios.Core.Controllers
                     };
 
                     _context.ElementDetails.Add(elementDetail);
-                    result = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                    result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
+                }
+                else
+                {
+                    result.Message = "Error";
                 }
             }
             else
@@ -229,17 +246,76 @@ namespace Helios.Core.Controllers
                 element.UpdatedById = userId;
 
                 _context.Update(elementDetail);
-                var result = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
             }
 
-            //module.Name = model.Name;
-            //module.UpdatedAt = DateTimeOffset.Now;
-            //module.UpdatedById = model.UserId;
-
-            //_context.Modules.Update(module);
-
-            return true;
+            return result;
         }
-                
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> CopyElement(ElementModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            var elmId = Guid.Parse(model.Id);
+            var userId = Guid.Parse(model.UserId);
+
+            var element = await _context.Elements.Where(x => x.Id == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (element != null)
+            {
+                element.Id = Guid.NewGuid();
+                element.ElementName = element.ElementName + "_1";
+                element.Order = element.Order++;
+
+                _context.Add(element);
+
+                var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var item in moduleElements)
+                {
+                    item.Order = item.Order++;
+                    _context.Update(item);
+                }
+
+                result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                result.Message = result.IsSuccess ? "Successful" : "Error";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Error";
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteElement(ElementModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            var elmId = Guid.Parse(model.Id);
+            var userId = Guid.Parse(model.UserId);
+
+            var element = await _context.Elements.Where(x => x.Id == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (element != null)
+            {
+                element.IsDeleted = true;
+                element.IsActive = false;
+
+                _context.Update(element);
+
+                result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                result.Message = result.IsSuccess ? "Successful" : "Error";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Error";
+            }
+
+            return result;
+        }
+
     }
 }
