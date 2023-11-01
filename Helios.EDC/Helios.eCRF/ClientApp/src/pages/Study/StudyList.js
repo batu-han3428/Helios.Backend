@@ -39,8 +39,7 @@ const StudyList = props => {
     });
 
     const goToStudy = (id, equivalentStudyId) => {
-        setSkip(false);
-        setStudyId(id);
+        navigate(`/visits/${id}`);
     };
 
     useEffect(() => {

@@ -46,7 +46,7 @@ export const SiteLaboratoriesApi = createApi({
 });
 
 
-export const { useSiteListGetQuery } = SiteLaboratoriesApi;
+export const { useLazySiteListGetQuery } = SiteLaboratoriesApi;
 
 export const { useSiteGetQuery } = SiteLaboratoriesApi;
 

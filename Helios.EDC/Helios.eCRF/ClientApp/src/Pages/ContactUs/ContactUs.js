@@ -56,7 +56,7 @@ const ContactUs = () => {
         onSubmit: async (values) => {
             dispatch(startloading());
             const response = await contactUsPost(values);
-            console.log(response)
+
             if (response.data.isSuccess) {
                 setMessage(response.data.message)
                 setStateToast(true);

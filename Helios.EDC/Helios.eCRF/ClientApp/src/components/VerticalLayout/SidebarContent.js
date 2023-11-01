@@ -14,39 +14,20 @@ import { withTranslation } from "react-i18next";
 
 //menü içeriði
 import menuItems from "./SidebarContentItems";
-import { useSelector, useDispatch } from "react-redux";
-import { addStudy } from "../../store/study/actions";
-import { startloading } from "../../store/loader/actions";
-import { useStudyGetQuery } from "../../store/services/Study";
+import { useSelector } from "react-redux";
 
 
 const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
 
     const navigate = useNavigate();
 
-    const dispatch = useDispatch();
-
     const studyInformation = useSelector(state => state.rootReducer.Study);
 
-    const [studyId, setStudyId] = useState(null);
-    const [skip, setSkip] = useState(true);
-
-    const { data: data1, isLoading1, isError1 } = useStudyGetQuery(studyId, {
-        skip, refetchOnMountOrArgChange: true
-    });
-
-  
-    useEffect(() => {
-        if (data1 && !isLoading1 && !isError1) {
-            dispatch(addStudy(data1));
-            navigate("/visits");
-        }
-    }, [data1, isLoading1, isError1]);
+    const dynamicPath = pageType !== "study" ? item.to : item.to === "/" || item.to === "/invalid" ? item.to : `${item.to}/${studyInformation.studyId}`;
 
     const handleMenuItemClick = (event, item) => {
         event.preventDefault();
-        setSkip(false);
-        setStudyId(studyInformation.equivalentStudyId);
+        navigate(`/visits/${studyInformation.equivalentStudyId}`);
     };
 
     const hasIsDemoProperty = "isDemo" in item;
@@ -59,7 +40,7 @@ const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
                     <span>{t(item.label)}</span>
                 </Link>
             ) : (
-                <Link onClick={hasIsDemoProperty && isDemoStudy !== null && item.isDemo !== isDemoStudy ? (e) => handleMenuItemClick(e, item) : null} to={item.to} className="waves-effect">
+                <Link onClick={hasIsDemoProperty && isDemoStudy !== null && item.isDemo !== isDemoStudy ? (e) => handleMenuItemClick(e, item) : null} to={dynamicPath} className="waves-effect">
                     {item.icon && <i className={item.icon}></i>}
                     <span>{t(item.label)}</span>
                 </Link>
@@ -68,7 +49,7 @@ const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
             {item.subMenu && item.subMenu.length > 0 && (
                 <ul className="sub-menu" aria-expanded="false">
                     {item.subMenu.map((subItem, index) => (
-                        <MenuItem key={index} item={subItem} t={t} />
+                        <MenuItem key={index} item={subItem} t={t} pageType={pageType} />
                     ))}
                 </ul>
             )}
@@ -101,11 +82,11 @@ const SidebarContent = props => {
         const parent = item.parentElement;
         const parent2El = parent.childNodes[1];
 
-    if (parent2El && parent2El.id !== "side-menu") {
-      parent2El.classList.add("mm-show");
-    }
+        if (parent2El && parent2El.id !== "side-menu") {
+          parent2El.classList.add("mm-show");
+        }
 
-    if (parent) {
+        if (parent) {
       parent.classList.add("mm-active");
       const parent2 = parent.parentElement;
 
@@ -130,70 +111,71 @@ const SidebarContent = props => {
       scrollElement(item);
       return false;
     }
-    scrollElement(item);
-    return false;
-  }, []);
+        scrollElement(item);
+        return false;
+    }, []);
 
     const removeActivation = (items) => {
-    for (var i = 0; i < items.length; ++i) {
-      var item = items[i];
-      const parent = items[i].parentElement;
+        for (var i = 0; i < items.length; ++i) {
+            var item = items[i];
+            const parent = items[i].parentElement;
 
-      if (item && item.classList.contains("active")) {
-        item.classList.remove("active");
-      }
-      if (parent) {
-        const parent2El =
-          parent.childNodes && parent.childNodes.lenght && parent.childNodes[1]
-            ? parent.childNodes[1]
-            : null;
-        if (parent2El && parent2El.id !== "side-menu") {
-          parent2El.classList.remove("mm-show");
-        }
-
-        parent.classList.remove("mm-active");
-        const parent2 = parent.parentElement;
-
-        if (parent2) {
-          parent2.classList.remove("mm-show");
-
-          const parent3 = parent2.parentElement;
-          if (parent3) {
-            parent3.classList.remove("mm-active"); // li
-            parent3.childNodes[0].classList.remove("mm-active");
-
-            const parent4 = parent3.parentElement; // ul
-            if (parent4) {
-              parent4.classList.remove("mm-show"); // ul
-              const parent5 = parent4.parentElement;
-              if (parent5) {
-                parent5.classList.remove("mm-show"); // li
-                parent5.childNodes[0].classList.remove("mm-active"); // a tag
-              }
+            if (item && item.classList.contains("active")) {
+                item.classList.remove("active");
             }
-          }
+            if (parent) {
+                const parent2El = parent.childNodes && parent.childNodes.lenght && parent.childNodes[1] ? parent.childNodes[1] : null;
+                if (parent2El && parent2El.id !== "side-menu") {
+                  parent2El.classList.remove("mm-show");
+                }
+
+                parent.classList.remove("mm-active");
+                const parent2 = parent.parentElement;
+
+                if (parent2) {
+                    parent2.classList.remove("mm-show");
+
+                    const parent3 = parent2.parentElement;
+                    if (parent3) {
+                        parent3.classList.remove("mm-active"); // li
+                        parent3.childNodes[0].classList.remove("mm-active");
+
+                        const parent4 = parent3.parentElement; // ul
+                        if (parent4) {
+                            parent4.classList.remove("mm-show"); // ul
+                            const parent5 = parent4.parentElement;
+                            if (parent5) {
+                                parent5.classList.remove("mm-show"); // li
+                                parent5.childNodes[0].classList.remove("mm-active"); // a tag
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
-    }
-  };
+    };
 
     const activeMenu = useCallback(() => {
-    const pathName = location.pathname;
-    const fullPath = pathName;
-    let matchingMenuItem = null;
-    const ul = document.getElementById("side-menu");
-    const items = ul.getElementsByTagName("a");
-    removeActivation(items);
+        let pathName = location.pathname;
+        let matchingMenuItem = null;
+        const ul = document.getElementById("side-menu");
+        const items = ul.getElementsByTagName("a");
+        removeActivation(items);
         for (let i = 0; i < items.length; ++i) {
-            if (fullPath === items[i].pathname) {
+            let itemPath = items[i].pathname;
+            if (props.pageType === "study") {
+                pathName = "/" + pathName.split("/")[1] + "/";
+                itemPath = "/" + itemPath.split("/")[1] + "/";
+            }
+            if (pathName === itemPath) {
                 matchingMenuItem = items[i];
                 break;
             }
         }
-    if (matchingMenuItem) {
-      activateParentDropdown(matchingMenuItem);
-    }
-  }, [path, activateParentDropdown]);
+        if (matchingMenuItem) {
+          activateParentDropdown(matchingMenuItem);
+        }
+    }, [path, activateParentDropdown]);
 
     useEffect(() => {  
         closeActiveDropdowns();
@@ -226,7 +208,7 @@ const SidebarContent = props => {
         }
     }
 
-  return (
+    return (
     <React.Fragment>
       <SimpleBar style={{ maxHeight: "100%" }} ref={ref}>
         <div id="sidebar-menu">

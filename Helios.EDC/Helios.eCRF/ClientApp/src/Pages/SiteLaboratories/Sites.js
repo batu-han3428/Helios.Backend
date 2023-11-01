@@ -5,7 +5,7 @@ import { MDBDataTable } from "mdbreact";
 import {
     Row, Col, Card, CardBody, Button, Label, Input, Form, FormFeedback, Alert
 } from "reactstrap";
-import { useSiteListGetQuery, useSiteSaveOrUpdateMutation, useSiteGetQuery, useSiteDeleteMutation } from '../../store/services/SiteLaboratories';
+import { useLazySiteListGetQuery, useSiteSaveOrUpdateMutation, useSiteGetQuery, useSiteDeleteMutation } from '../../store/services/SiteLaboratories';
 import { useDispatch, useSelector } from "react-redux";
 import { startloading, endloading } from '../../store/loader/actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -168,7 +168,14 @@ const Sites = props => {
         rows: tableData
     }
 
-    const { data: siteData, error, isLoading } = useSiteListGetQuery(studyInformation.studyId);
+    const [triggerSites, resultSites, lastPromiseInfoSites] = useLazySiteListGetQuery();
+    const { data: siteData, error, isLoading } = resultSites;
+
+    useEffect(() => {
+        if (studyInformation.studyId) {
+            triggerSites(studyInformation.studyId);
+        }
+    }, [studyInformation.studyId])
 
     useEffect(() => {
         dispatch(startloading());

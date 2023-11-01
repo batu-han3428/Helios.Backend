@@ -59,4 +59,4 @@ export const { useSetPermissionMutation } = PermissionsApi;
 
 export const { useRoleDeleteMutation } = PermissionsApi;
 
-export const { useRoleListGetQuery } = PermissionsApi;
+export const { useLazyRoleListGetQuery } = PermissionsApi;

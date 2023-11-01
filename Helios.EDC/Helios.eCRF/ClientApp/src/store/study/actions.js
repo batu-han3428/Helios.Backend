@@ -1,6 +1,7 @@
 ﻿import {
     ADD_STUDY,
-    GET_STUDY
+    GET_STUDY,
+    RESET_STUDY
 } from "./actionTypes"
 
 export const addStudy = (study) => {
@@ -15,3 +16,9 @@ export const getStudy = (study) => {
         type: GET_STUDY
     }
 }
+
+export const resetStudy = () => {
+    return {
+        type: RESET_STUDY,
+    };
+};
