@@ -116,16 +116,16 @@ const userRoutes = [
     //study
     { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin" },
-    { path: "/visits", component: <Study />, menuType: "study" },
+    { path: "/visits/:studyId", component: <Study />, menuType: "study" },
 
     //site & laboratories
-    { path: "/sitelaboratories-sites-site", component: <Sites />, menuType: "study" },
+    { path: "/sitelaboratories-sites-site/:studyId", component: <Sites />, menuType: "study" },
 
     //permissions
-    { path: "/permissions", component: <Permission />, menuType: "study" },
+    { path: "/permissions/:studyId", component: <Permission />, menuType: "study" },
 
     //users
-    { path: "/users", component: <User />, menuType: "study" },
+    { path: "/users/:studyId", component: <User />, menuType: "study" },
 
     { path: "/dashboard", component: <Dashboard />, menuType: "admin" },
 
@@ -144,11 +144,11 @@ const userRoutes = [
 
   // Icons
     { path: "/icons-dripicons", component: <IconDripicons />, menuType: "admin" },
-    { path: "/icons-materialdesign", component: <IconMaterialdesign />, menuType: "study" },
-    { path: "/icons-fontawesome", component: <IconFontawesome />, menuType: "study" },
-    { path: "/icons-ion", component: <IconIon />, menuType: "study" },
-    { path: "/icons-themify", component: <ThemifyIcon />, menuType: "study" },
-    { path: "/icons-typicons", component: <TypiconsIcon />, menuType: "study" },
+    { path: "/icons-materialdesign/:studyId", component: <IconMaterialdesign />, menuType: "study" },
+    { path: "/icons-fontawesome/:studyId", component: <IconFontawesome />, menuType: "study" },
+    { path: "/icons-ion/:studyId", component: <IconIon />, menuType: "study" },
+    { path: "/icons-themify/:studyId", component: <ThemifyIcon />, menuType: "study" },
+    { path: "/icons-typicons/:studyId", component: <TypiconsIcon />, menuType: "study" },
 
   // Tables
     { path: "/tables-basic", component: <BasicTables />, menuType: "admin" },

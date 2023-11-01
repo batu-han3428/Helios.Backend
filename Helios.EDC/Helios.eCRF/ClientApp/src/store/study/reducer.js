@@ -1,6 +1,7 @@
 ﻿import {
     ADD_STUDY,
-    GET_STUDY
+    GET_STUDY,
+    RESET_STUDY
 } from "./actionTypes"
 
 const study = {
@@ -39,6 +40,8 @@ const studyReducer = (state = study, action) => {
             }
         case GET_STUDY:
             return state;
+        case RESET_STUDY:
+            return study;
         default:
             return state;
     }

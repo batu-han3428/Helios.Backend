@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ModalComp from '../../components/Common/ModalComp/ModalComp';
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useUserListGetQuery, useUserGetQuery, useUserSetMutation, useUserActivePassiveMutation, useUserDeleteMutation, useUserResetPasswordMutation } from '../../store/services/Users';
+import { useLazyUserListGetQuery, useUserGetQuery, useUserSetMutation, useUserActivePassiveMutation, useUserDeleteMutation, useUserResetPasswordMutation } from '../../store/services/Users';
 import { useSelector, useDispatch } from 'react-redux';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { startloading, endloading } from '../../store/loader/actions';
@@ -16,8 +16,8 @@ import Swal from 'sweetalert2'
 import { formatDate } from "../../helpers/format_date";
 import { MDBDataTable } from "mdbreact";
 import Select from "react-select";
-import { useRoleListGetQuery } from '../../store/services/Permissions';
-import { useSiteListGetQuery } from '../../store/services/SiteLaboratories';
+import { useLazyRoleListGetQuery } from '../../store/services/Permissions';
+import { useLazySiteListGetQuery } from '../../store/services/SiteLaboratories';
 import makeAnimated from "react-select/animated";
 import "./user.css";
 import { arraysHaveSameItems } from '../../helpers/General/index';
@@ -177,7 +177,22 @@ const User = props => {
         return siteDropdown;
     }
    
-    const { data: usersData, error, isLoading } = useUserListGetQuery(studyInformation.studyId);
+    const [trigger, result, lastPromiseInfo] = useLazyUserListGetQuery();
+    const { data: usersData, error, isLoading } = result;
+
+    const [triggerRoles, resultRoles, lastPromiseInfoRoles] = useLazyRoleListGetQuery();
+    const { data: rolesData, isLoadingRoles, isErrorRoles } = resultRoles;
+
+    const [triggerSites, resultSites, lastPromiseInfoSites] = useLazySiteListGetQuery();
+    const { data: sitesData, isLoadingSites, isErrorSites } = resultSites;
+
+    useEffect(() => {
+        if (studyInformation.studyId) {
+            trigger(studyInformation.studyId);
+            triggerRoles(studyInformation.studyId);
+            triggerSites(studyInformation.studyId);
+        }
+    }, [studyInformation.studyId])
 
     useEffect(() => {
         dispatch(startloading());
@@ -204,7 +219,6 @@ const User = props => {
         }
     }, [usersData, error, isLoading, props.t, dropdownOpen]);
 
-    const { data: rolesData, isLoadingRoles, isErrorRoles } = useRoleListGetQuery(studyInformation.studyId);
 
     useEffect(() => {
         if (rolesData && !isLoadingRoles && !isErrorRoles) {
@@ -223,7 +237,6 @@ const User = props => {
         }
     }, [rolesData, isErrorRoles, isLoadingRoles]);
 
-    const { data: sitesData, isLoadingSites, isErrorSites } = useSiteListGetQuery(studyInformation.studyId);
 
     useEffect(() => {
         if (sitesData && !isLoadingSites && !isErrorSites) {

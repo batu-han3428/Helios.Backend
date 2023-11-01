@@ -1,12 +1,14 @@
-import React, { useEffect, useCallback } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useEffect, useCallback, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import VerticalLayout from "../../components/VerticalLayout";
 import { getLocalStorage, removeLocalStorage } from '../../helpers/local-storage/localStorageProcess';
-import { loginuser } from "../../store/actions";
+import { addStudy, loginuser, resetStudy } from "../../store/actions";
 import { layoutTypes } from "../../constants/layout";
 import { onLogin } from "../../helpers/Auth/useAuth";
 import { userRoutes } from "../allRoutes";
+import { endloading, startloading } from "../../store/loader/actions";
+
 
 const AuthMiddleware = (props) => {
     const dispatch = useDispatch();
@@ -15,8 +17,40 @@ const AuthMiddleware = (props) => {
     const { path: Path, element: Element, roles } = props;
     let matchedRoute = null;
     const Layout = layoutType === layoutTypes.VERTICAL ? VerticalLayout : VerticalLayout;
-
     const pageType = userRoutes.find(route => route.path === Path)?.menuType ?? 'common';
+    const { studyId } = useParams();
+    const [error, setError] = useState(false);
+
+    const fetchData = async (token) => {
+        
+        const apiUrl = `https://localhost:7196/Study/GetStudy/${studyId}`;
+
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            dispatch(addStudy(data));
+        })
+        .catch(error => {
+            setError(true);
+        });
+    };
+
+    useEffect(() => {
+        if (pageType !== "study") {
+            dispatch(resetStudy());
+        }
+    }, [pageType])
 
     var result = null;
 
@@ -47,6 +81,14 @@ const AuthMiddleware = (props) => {
                 const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)));
                 if (matchedRoute1) {
                     matchedRoute = matchedRoute1;
+                }
+            }
+            if (pageType === "study") {
+                fetchData(result.token);
+                if (error) {
+                    return (
+                        <Navigate to={{ pathname: "/AccessDenied", state: { from: props.location } }} />
+                    );
                 }
             }
         }
