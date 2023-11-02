@@ -96,16 +96,15 @@ namespace Helios.eCRF.Services
             return false;
         }
 
-        public async Task<bool> UpdateUser(UserDTO model)
+        public async Task<ApiResponse<dynamic>> UpdateUser(AspNetUserDTO model)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/UpdateUser", Method.Post);
                 req.AddJsonBody(model);
-                var result = await client.ExecuteAsync(req);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
             }
-
-            return false;
         }
 
         public async Task<bool> AddRole(UserDTO model)
@@ -406,6 +405,76 @@ namespace Helios.eCRF.Services
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
+        }
+
+        private async Task<List<Guid>> GetStudyUserIds(Guid studyId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetStudyUserIds", Method.Get);
+                req.AddParameter("studyId", studyId);
+                var result = await client.ExecuteAsync<List<Guid>>(req);
+                return result.Data;
+            }
+        }
+        #endregion
+
+        #region Tenant user
+
+        private async Task<List<TenantUserDTO>> GetTenantUsers(Guid tenantId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetTenantUsers", Method.Get);
+                req.AddParameter("tenantId", tenantId);
+                var result = await client.ExecuteAsync<List<TenantUserDTO>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<TenantUserDTO>> GetTenantUserList(Guid tenantId)
+        {
+            List<TenantUserDTO> tenantUsers = await GetTenantUsers(tenantId);
+
+            if (tenantUsers.Count > 0)
+            {
+                List<AspNetUserDTO> aspNetUserDTOs = await GetUserList(tenantUsers.Select(x => x.AuthUserId).ToList());
+
+                if (aspNetUserDTOs.Count > 0)
+                {
+                    return aspNetUserDTOs.Join(tenantUsers, aspNetUser => aspNetUser.Id, tenantUser => tenantUser.AuthUserId, (aspNetUser, tenantUser) =>
+                                    new TenantUserDTO
+                                    {
+                                        StudyUserId = tenantUser.StudyUserId,
+                                        AuthUserId = aspNetUser.Id,
+                                        StudyId = tenantUser.StudyId,
+                                        Name = aspNetUser.Name,
+                                        LastName = aspNetUser.LastName,
+                                        IsActive = tenantUser.IsActive,
+                                        Email = aspNetUser.Email,
+                                        StudyName = tenantUser.StudyName,
+                                        StudyDemoLive = tenantUser.StudyDemoLive,
+                                        CreatedOn = tenantUser.CreatedOn,
+                                        LastUpdatedOn = tenantUser.LastUpdatedOn
+                                    }).ToList();
+                }
+            }
+
+            return new List<TenantUserDTO>();
+        }
+
+        public async Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel studyUserModel)
+        {
+            var studyUserIds = await GetStudyUserIds(studyUserModel.StudyId);
+
+            return await UpdateUser(new AspNetUserDTO
+            {
+                Id = studyUserModel.AuthUserId,
+                Email = studyUserModel.Email,
+                Name = studyUserModel.Name,
+                LastName = studyUserModel.LastName,
+                studyUserIds = studyUserIds
+            });
         }
         #endregion
     }

@@ -15,7 +15,7 @@ namespace Helios.eCRF.Services.Interfaces
         Task<UserDTO> GetUserByEmail(string mail);
         Task<dynamic> AddUser(UserDTO model);
         Task<bool> PassiveOrActiveUser(UserDTO model);
-        Task<bool> UpdateUser(UserDTO model);
+        Task<ApiResponse<dynamic>> UpdateUser(AspNetUserDTO model);
         Task<bool> AddRole(UserDTO model);
         Task<List<TenantModel>> GetTenantList();
         Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission);
@@ -29,5 +29,7 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> UserResetPassword(StudyUserModel model);
         Task<ApiResponse<StudyUserDTO>> GetStudyUser(string email, Guid studyId);
         Task<List<UserPermissionDTO>> GetRoleList(Guid studyId);
+        Task<List<TenantUserDTO>> GetTenantUserList(Guid tenantId);
+        Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel studyUserModel);
     }
 }

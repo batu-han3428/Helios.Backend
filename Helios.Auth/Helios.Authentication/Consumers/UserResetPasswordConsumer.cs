@@ -23,18 +23,26 @@ namespace Helios.Authentication.Consumers
             string tempPath = "";
             string mailSubject = "";
 
-            if (model.ResearchLanguage == 2)
+            if (model.ResearchName != null)
             {
-                tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/SendNewPasswordMail_Tr.html");
-                mailSubject = "e-CRF hesap şifresi yenileme";
+                if (model.ResearchLanguage == 2)
+                {
+                    tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/SendNewPasswordMail_Tr.html");
+                    mailSubject = "e-CRF hesap şifresi yenileme";
+                }
+                else
+                {
+                    tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/SendNewPasswordMail.html");
+                    mailSubject = "e-CRF reset password";
+                }
             }
             else
             {
-                tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/SendNewPasswordMail.html");
+                tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/ForgotPasswordMail.html");
                 mailSubject = "e-CRF reset password";
             }
 
-
+           
             string mailContent = "";
 
             var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.jpg");

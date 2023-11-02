@@ -201,6 +201,10 @@
                 },
             ]
         },
+        {
+            label: "Users",
+            to: "/tenantusers"
+        }
     ],
     study: [
         {

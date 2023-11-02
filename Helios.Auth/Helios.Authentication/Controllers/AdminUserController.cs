@@ -303,20 +303,64 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> UpdateUser(UserDTO model)
+        public async Task<ApiResponse<dynamic>> UpdateUser(AspNetUserDTO model)
         {
-            var result = false;
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == model.UserId);
-            if (user != null)
+            try
             {
-                user.Name = model.FirstName;
-                user.LastName = model.LastName;
-                user.Email = model.Email;
+                var users = await _userManager.Users.Where(x => model.studyUserIds.Contains(x.Id) && x.IsActive).ToListAsync();
 
-                await _userManager.UpdateAsync(user);
-                result = true;
+                if (users.Any(x => x.Email == model.Email))
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "The e-mail address you entered is registered. Please try again."
+                    };
+                }
+
+                var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == model.Id);
+                if (user != null)
+                {
+                    string? oldEmail = user.Email;
+                    user.Name = model.Name;
+                    user.LastName = model.LastName;
+                    user.Email = model.Email;
+
+                    await _userManager.UpdateAsync(user);
+
+                    if (oldEmail != model.Email)
+                    {
+                        await _emailService.UserResetPasswordMail(new StudyUserModel
+                        {
+                            Name = user.Name,
+                            LastName = user.LastName,
+                            Email = user.Email
+                        });
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
             }
-            return result;
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }  
         }
 
         [HttpPost]

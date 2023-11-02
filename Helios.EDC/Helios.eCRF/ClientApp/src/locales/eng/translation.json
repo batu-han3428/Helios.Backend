@@ -243,5 +243,9 @@
   "Please activate the account first and then try this process again.": "Please activate the account first and then try this process again.",
   "No changes were made. Please make changes to save.": "No changes were made. Please make changes to save.",
   "This user is already registered in the system.": "This user is already registered in the system.",
-  "Update user": "Update user"
+  "Update user": "Update user",
+  "Invalid email format": "Invalid email format",
+  "Demo studies": "Demo studies",
+  "Live studies": "Live studies",
+  "The e-mail address you entered is registered. Please try again.": "The e-mail address you entered is registered. Please try again."
 }
