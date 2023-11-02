@@ -88,5 +88,9 @@
   "Please activate the account first and then try this process again.": "Lütfen hesabı önce aktife alıp daha sonra bu işlemi tekrar deneyiniz.",
   "No changes were made. Please make changes to save.": "Herhangi bir değişiklik yapılmadı. Kaydetmek için lütfen değişiklik yapınız.",
   "This user is already registered in the system.": "Bu kullanıcı sistemde zaten kayıtlıdır.",
-  "Update user": "Kullanıcıyı güncelle"
+  "Update user": "Kullanıcıyı güncelle",
+  "Invalid email format": "Geçersiz e-posta formatı",
+  "Demo studies": "Demo çalışmalar",
+  "Live studies": "Canlı çalışmalar",
+  "The e-mail address you entered is registered. Please try again.": "Girmiş olduğunuz e-posta adresi kayıtlıdır. Lütfen tekrar deneyiniz."
 }

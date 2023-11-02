@@ -104,6 +104,9 @@ import Permission from "../Pages/Permissions/Permission";
 //Users
 import User from "../Pages/Users/User";
 
+//Admin Users
+import TenantUsers from "../Pages/TenantUsers/TenantUsers";
+
 const userRoutes = [
     //tenant
     { path: "/Tenant", component: <TenantList />, menuType: "admin" },
@@ -127,9 +130,12 @@ const userRoutes = [
     //users
     { path: "/users/:studyId", component: <User />, menuType: "study" },
 
+    //admin users
+    { path: "/tenantusers", component: <TenantUsers />, menuType: "admin" },
+
     { path: "/dashboard", component: <Dashboard />, menuType: "admin" },
 
-  // //profile
+   //profile
     { path: "/profile", component: <UserProfile />, menuType: "admin" },
 
   //Email

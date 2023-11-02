@@ -53,8 +53,8 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<IActionResult> UserProfileResetPassword(UserDTO model)
         {
-            var result = await userService.UpdateUser(model);
-            return Ok(result);
+            //var result = await userService.UpdateUser(model);
+            return Ok(/*result*/);
         }
 
         /// <summary>

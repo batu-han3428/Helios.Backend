@@ -63,12 +63,6 @@ const StudyList = props => {
     const data = {
         columns: [
             {
-                label: "",
-                field: "id",
-                sort: "asc",
-                width: 150
-            },
-            {
                 label: props.t("Study name"),
                 field: "studyName",
                 sort: "asc",

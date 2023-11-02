@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types'
 import React from "react"
+import "./assets/css/icons.css"
 import "./components/Common/ModalComp/ModalComp.css"
+/*import 'mdb-react-ui-kit/dist/css/mdb.min.css';*/
 
 // Import scss
 import "./assets/scss/new-theme.scss"
@@ -20,7 +22,7 @@ import NonAuthLayout from "./components/NonAuthLayout"
 // Import Firebase Configuration file
 // import { initFirebaseBackend } from "./helpers/firebase_helper"
 
-import fakeBackend from "./helpers/AuthType/fakeBackend"
+/*import fakeBackend from "./helpers/AuthType/fakeBackend"*/
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown } from '@fortawesome/free-solid-svg-icons'
@@ -31,7 +33,7 @@ import ContactUs from './Pages/ContactUs/ContactUs'
 library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown)
 
 // Activating fake backend
-fakeBackend();
+/*fakeBackend();*/
 
 // const firebaseConfig = {
 //   apiKey: process.env.REACT_APP_APIKEY,

@@ -296,7 +296,13 @@ namespace Helios.Core.Controllers
         public async Task<bool> GetCheckStudyUser(Guid authUserId, Guid studyId)
         {
             return await _context.StudyUsers.AnyAsync(x => x.StudyId == studyId && x.AuthUserId == authUserId && !x.IsDeleted);
-        }      
+        }
+
+        [HttpGet]
+        public async Task<List<Guid>> GetStudyUserIds(Guid studyId)
+        {
+            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Select(x=>x.AuthUserId).ToListAsync();
+        }
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetStudyUser(StudyUserModel studyUserModel)
@@ -498,6 +504,24 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
+        }
+        #endregion
+
+        #region Tenant User
+        [HttpGet]
+        public async Task<List<TenantUserDTO>> GetTenantUsers(Guid tenantId)
+        {
+            return await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x=>x.Study).AsNoTracking().Select(x => new TenantUserDTO
+            {
+                StudyUserId = x.Id,
+                AuthUserId = x.AuthUserId,
+                StudyId = x.StudyId,
+                IsActive = x.IsActive,
+                StudyName = x.Study.StudyName,
+                StudyDemoLive = x.Study.IsDemo,
+                CreatedOn = x.CreatedAt,
+                LastUpdatedOn = x.UpdatedAt
+            }).ToListAsync();
         }
         #endregion
     }

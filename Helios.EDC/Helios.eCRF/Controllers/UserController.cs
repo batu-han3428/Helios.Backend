@@ -102,8 +102,8 @@ namespace Helios.eCRF.Controllers
             }
             else
             {
-                var result = await _userService.UpdateUser(model);
-                return Ok(result);
+                //var result = await _userService.UpdateUser(model);
+                return Ok(/*result*/);
             }
         }
 
@@ -265,6 +265,32 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> UserResetPassword(StudyUserModel studyUserModel)
         {
             var result = await _userService.UserResetPassword(studyUserModel);
+            return Ok(result);
+        }
+        #endregion
+
+        #region Tenant User
+        /// <summary>
+        /// tenantın kullanıcılarını listeler
+        /// </summary>
+        /// <param name="tenantId">tenant id</param>
+        /// <returns>kullanıcılar</returns>
+        [HttpGet("{tenantId}")]
+        public async Task<IActionResult> GetTenantUserList(Guid tenantId)
+        {
+            var result = await _userService.GetTenantUserList(tenantId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// tenant kullanıcısını günceller
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetTenantUser(TenantUserModel tenantUserModel)
+        {
+            var result = await _userService.SetTenantUser(tenantUserModel);
             return Ok(result);
         }
         #endregion

@@ -117,12 +117,6 @@ const Sites = props => {
     const data = {
         columns: [
             {
-                label: "",
-                field: "id",
-                sort: "asc",
-                width: 150
-            },
-            {
                 label: "Site Name",
                 field: "siteFullName",
                 sort: "asc",

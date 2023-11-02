@@ -41,6 +41,7 @@
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
+    "mdb-react-ui-kit": "^6.3.0",
     "mdbreact": "^5.2.0",
     "metismenujs": "^1.4.0",
     "mkdirp": "^3.0.1",

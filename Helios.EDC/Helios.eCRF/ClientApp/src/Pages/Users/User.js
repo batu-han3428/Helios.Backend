@@ -87,12 +87,6 @@ const User = props => {
     const data = {
         columns: [
             {
-                label: "",
-                field: "studyUserId",
-                sort: "asc",
-                width: 150
-            },
-            {
                 label: props.t("First name"),
                 field: "name",
                 sort: "asc",
@@ -291,7 +285,7 @@ const User = props => {
             return Yup.object().shape({
                 name: isRequired ? Yup.string().required(props.t("This field is required")) : Yup.string(),
                 lastname: isRequired ? Yup.string().required(props.t("This field is required")) : Yup.string(),
-                email: Yup.string().required(props.t("This field is required")).email("Geçerli bir email girin"),
+                email: Yup.string().required(props.t("This field is required")).email(props.t("Invalid email format")),
             });
         },
         onSubmit: async (values) => {
