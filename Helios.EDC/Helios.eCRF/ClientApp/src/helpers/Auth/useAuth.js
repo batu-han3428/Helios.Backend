@@ -34,6 +34,13 @@ export const onLogin = () => {
 };
 
 export const onLogout = (navigate) => {
+    let result = onLogin();
+    let n = "";
+    if (result.roles.includes("StudyUser")) {
+        n = "/SSO-login";
+    } else {
+        n = "/login"
+    }
     removeLocalStorage("accessToken");
-    navigate("/login");
+    navigate(n);
 };

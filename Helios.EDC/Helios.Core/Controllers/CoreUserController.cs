@@ -524,5 +524,21 @@ namespace Helios.Core.Controllers
             }).ToListAsync();
         }
         #endregion
+
+        #region SSO
+        [HttpGet]
+        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId)
+        {
+            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId && x.TenantId == tenantId).Include(x => x.Study).Include(x => x.StudyRole).Select(x => new SSOUserStudyModel
+            {
+                UserId = userId,
+                TenantId = tenantId,
+                StudyId = x.StudyId,
+                StudyName = x.Study.StudyName,
+                UserRoleName = x.StudyRole.Name,
+                Statu = x.Study.IsDemo ? "1" : "0"
+            }).ToListAsync();
+        }
+        #endregion
     }
 }

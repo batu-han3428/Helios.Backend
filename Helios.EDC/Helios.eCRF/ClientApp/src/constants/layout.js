@@ -1,6 +1,7 @@
 const layoutTypes = {
   HORIZONTAL: "horizontal",
   VERTICAL: "vertical",
+  SSO: "sso"
 };
 
 const layoutWidth = {

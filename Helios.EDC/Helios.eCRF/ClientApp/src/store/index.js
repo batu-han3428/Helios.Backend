@@ -8,6 +8,7 @@ import { ContactUsApi } from './services/ContactUs'
 import { PermissionsApi } from './services/Permissions'
 import { UsersApi } from './services/Users'
 import { TenantUsersApi } from './services/TenantUsers'
+import { SSOApi } from './services/SSO/SSO_Api'
 
 export const store = configureStore({
     reducer: {
@@ -19,9 +20,19 @@ export const store = configureStore({
         [PermissionsApi.reducerPath]: PermissionsApi.reducer,
         [UsersApi.reducerPath]: UsersApi.reducer,
         [TenantUsersApi.reducerPath]: TenantUsersApi.reducer,
+        [SSOApi.reducerPath]: SSOApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(LoginApi.middleware).concat(StudyApi.middleware).concat(SiteLaboratoriesApi.middleware).concat(ContactUsApi.middleware).concat(PermissionsApi.middleware).concat(UsersApi.middleware).concat(TenantUsersApi.middleware)
+        getDefaultMiddleware().concat(
+            LoginApi.middleware,
+            StudyApi.middleware,
+            SiteLaboratoriesApi.middleware,
+            ContactUsApi.middleware,
+            PermissionsApi.middleware,
+            UsersApi.middleware,
+            TenantUsersApi.middleware,
+            SSOApi.middleware
+        )
 })
 
 setupListeners(store.dispatch);
