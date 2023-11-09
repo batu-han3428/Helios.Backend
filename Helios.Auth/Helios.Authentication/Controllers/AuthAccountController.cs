@@ -21,6 +21,7 @@ using System.Text.Encodings.Web;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Xml.Linq;
 using System.Net.Mime;
+using Helios.Common.Model;
 
 namespace Helios.Authentication.Controllers
 {
@@ -265,6 +266,12 @@ namespace Helios.Authentication.Controllers
                             //{
                             //    return new { isSuccess = true, message = "4. sayfa" };
                             //}
+                             return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "2. sayfa",
+                                    Values = new { accessToken = token.AccessToken }
+                                };
                             default:
                                 break;
                         }
@@ -589,5 +596,24 @@ namespace Helios.Authentication.Controllers
 
             return new { isSuccess = true, messsage = "İşlem başarılı." };
         }
+
+        #region SSO
+        [HttpGet]
+        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        {
+            if (userId != Guid.Empty)
+            {
+                return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new TenantUserModel
+                {
+                    TenantId = x.Tenant.Id,
+                    Name = x.Tenant.Name
+                }).ToListAsync();
+            }
+            else
+            {
+                return new List<TenantUserModel>();
+            }
+        }
+        #endregion
     }
 }

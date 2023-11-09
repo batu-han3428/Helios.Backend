@@ -247,5 +247,11 @@
   "Invalid email format": "Invalid email format",
   "Demo studies": "Demo studies",
   "Live studies": "Live studies",
-  "The e-mail address you entered is registered. Please try again.": "The e-mail address you entered is registered. Please try again."
+  "The e-mail address you entered is registered. Please try again.": "The e-mail address you entered is registered. Please try again.",
+  "Please select the tenant you want to login": "Please select the tenant you want to login",
+  "Please select the study you want to login": "Please select the study you want to login",
+  "Locked studies": "Locked studies",
+  "You do not have an active study, if you think there is an error, please contact the system administrator.": "You do not have an active study, if you think there is an error, please contact the system administrator.",
+  "Contact us": "Contact us",
+  "You do not have an active tenant, if you think there is an error, please contact the system administrator.": "You do not have an active tenant, if you think there is an error, please contact the system administrator."
 }

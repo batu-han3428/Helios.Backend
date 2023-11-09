@@ -2,7 +2,9 @@
 using Helios.Common.Model;
 using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
+using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Helios.eCRF.Controllers
@@ -292,6 +294,35 @@ namespace Helios.eCRF.Controllers
         {
             var result = await _userService.SetTenantUser(tenantUserModel);
             return Ok(result);
+        }
+        #endregion
+
+        #region SSO
+
+
+        /// <summary>
+        /// kullanıcının bulunduğu tenantları listeler
+        /// </summary>
+        /// <param name="userId">kullanıcı id</param>
+        /// <returns>tenant listesi</returns>
+        [HttpGet("{userId}")]
+        [Authorize(Roles = "StudyUser")]
+        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        {
+            return await _userService.GetUserTenantList(userId);
+        }
+
+
+        /// <summary>
+        /// kullanıcının bulunduğu tenantları listeler
+        /// </summary>
+        /// <param name="userId">kullanıcı id</param>
+        /// <returns>tenant listesi</returns>
+        [HttpGet("{tenantId}/{userId}")]
+        [Authorize(Roles = "StudyUser")]
+        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId)
+        {
+            return await _userService.GetUserStudiesList(tenantId, userId);
         }
         #endregion
     }

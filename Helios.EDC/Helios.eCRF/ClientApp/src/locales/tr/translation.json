@@ -92,5 +92,11 @@
   "Invalid email format": "Geçersiz e-posta formatı",
   "Demo studies": "Demo çalışmalar",
   "Live studies": "Canlı çalışmalar",
-  "The e-mail address you entered is registered. Please try again.": "Girmiş olduğunuz e-posta adresi kayıtlıdır. Lütfen tekrar deneyiniz."
+  "The e-mail address you entered is registered. Please try again.": "Girmiş olduğunuz e-posta adresi kayıtlıdır. Lütfen tekrar deneyiniz.",
+  "Please select the tenant you want to login": "Lütfen giriş yapmak istediğiniz aboneliği seçiniz",
+  "Please select the study you want to login": "Lütfen giriş yapmak istediğiniz çalışmayı seçiniz",
+  "Locked studies": "Kilitli çalışmalar",
+  "You do not have an active study, if you think there is an error, please contact the system administrator.": "Aktif çalışmanız yoktur, eğer hata olduğunu düşünüyorsanız lütfen sistem yöneticisi ile iletişime geçiniz.",
+  "Contact us": "Bize Ulaşın",
+  "You do not have an active tenant, if you think there is an error, please contact the system administrator.": "Aktif aboneliğiniz yoktur, eğer hata olduğunu düşünüyorsanız lütfen sistem yöneticisi ile iletişime geçiniz."
 }

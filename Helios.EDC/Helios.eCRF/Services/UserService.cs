@@ -463,18 +463,40 @@ namespace Helios.eCRF.Services
             return new List<TenantUserDTO>();
         }
 
-        public async Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel studyUserModel)
+        public async Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel tenantUserModel)
         {
-            var studyUserIds = await GetStudyUserIds(studyUserModel.StudyId);
-
             return await UpdateUser(new AspNetUserDTO
             {
-                Id = studyUserModel.AuthUserId,
-                Email = studyUserModel.Email,
-                Name = studyUserModel.Name,
-                LastName = studyUserModel.LastName,
-                studyUserIds = studyUserIds
+                Id = tenantUserModel.AuthUserId,
+                Email = tenantUserModel.Email,
+                Name = tenantUserModel.Name,
+                LastName = tenantUserModel.LastName
             });
+        }
+        #endregion
+
+        #region SSO
+        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/GetUserTenantList", Method.Get);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync<List<TenantUserModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetUserStudiesList", Method.Get);
+                req.AddParameter("tenantId", tenantId);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync<List<SSOUserStudyModel>>(req);
+                return result.Data;
+            }
         }
         #endregion
     }

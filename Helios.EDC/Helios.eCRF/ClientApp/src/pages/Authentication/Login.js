@@ -18,14 +18,28 @@ import logoSm from "../../assets/images/logo-sm.png";
 
 import { useLoginPostMutation } from '../../store/services/Login';
 import { onLogin } from '../../helpers/Auth/useAuth';
-import { setLocalStorage } from '../../helpers/local-storage/localStorageProcess';
+import { setLocalStorage, getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
+import { useEffect } from 'react';
 
 const Login = props => {
+
+    const [loading, setLoading] = useState(true);
+        
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const storedUser = getLocalStorage("accessToken");
+        if (storedUser) {
+            navigate("/");
+        }
+        setLoading(false);
+    }, [navigate])
+    
     const dispatch = useDispatch();
     const [loginPost, { isLoading }] = useLoginPostMutation();
     const [formData, setFormData] = useState({ Email: '', Password: '' });
     const [login, setLogin] = useState(false);
-    const navigate = useNavigate();
+    
     const handleSubmit = async (e) => {
         try {
             dispatch(startloading());
@@ -49,13 +63,14 @@ const Login = props => {
             }
         } catch (error) {
             dispatch(endloading());
-            console.error('Error:', error);
         }
     };
 
-  document.title = "Login | Veltrix - React Admin & Dashboard Template";
+    document.title = "Login | Veltrix - React Admin & Dashboard Template";
     return (
-        <>        
+        loading 
+        ||
+        <>
             <div className="home-btn d-none d-sm-block">
                 <Link to="/" className="text-dark">
                     <i className="fas fa-home h2" />
@@ -155,7 +170,7 @@ const Login = props => {
                     </Row>
                 </Container>
             </div>
-        </>
+        </>       
   );
 };
 

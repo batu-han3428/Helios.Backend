@@ -1,23 +1,22 @@
-import React, { useEffect, useCallback, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import VerticalLayout from "../../components/VerticalLayout";
+import SSOLayout from "../../components/SSOLayout";
 import { getLocalStorage, removeLocalStorage } from '../../helpers/local-storage/localStorageProcess';
 import { addStudy, loginuser, resetStudy } from "../../store/actions";
 import { layoutTypes } from "../../constants/layout";
 import { onLogin } from "../../helpers/Auth/useAuth";
 import { userRoutes } from "../allRoutes";
-import { endloading, startloading } from "../../store/loader/actions";
 
 
 const AuthMiddleware = (props) => {
     const dispatch = useDispatch();
-    const layoutType = useSelector(state => state.rootReducer.Layout.layoutType);
     const user = getLocalStorage("accessToken");
     const { path: Path, element: Element, roles } = props;
     let matchedRoute = null;
-    const Layout = layoutType === layoutTypes.VERTICAL ? VerticalLayout : VerticalLayout;
-    const pageType = userRoutes.find(route => route.path === Path)?.menuType ?? 'common';
+    let pageType = null;
+    let Layout = null;
     const { studyId } = useParams();
     const [error, setError] = useState(false);
 
@@ -66,21 +65,24 @@ const AuthMiddleware = (props) => {
     }
     else {
         result = onLogin();
+
         if (result === false) {
             removeLocalStorage("accessToken");
             return (
                 <Navigate to={{ pathname: "/login", state: { from: props.location } }} />
             );
         } else {
+            pageType = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)) && route.path === Path)?.menuType ?? 'common';
+            Layout = pageType === layoutTypes.SSO ? SSOLayout : VerticalLayout;
             if (Path !== "/" && roles && !roles.some(role => result.roles.includes(role))) {
                 return (
                     <Navigate to={{ pathname: "/AccessDenied", state: { from: props.location } }} />
                 );
             }
             if (Path === "/") {
-                const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)));
+                const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)) && route.path === "/");
                 if (matchedRoute1) {
-                    matchedRoute = matchedRoute1;
+                    matchedRoute = matchedRoute1.redirect;
                 }
             }
             if (pageType === "study") {
@@ -97,7 +99,7 @@ const AuthMiddleware = (props) => {
 
     return (
         <Layout pageType={pageType}>
-            {Path !== "/" ? Element : <Navigate to={matchedRoute?.path || '/dashboard'} />}
+            {Path !== "/" ? Element : <Navigate to={matchedRoute || '/ContactUs'} />}
         </Layout>
     );
 };

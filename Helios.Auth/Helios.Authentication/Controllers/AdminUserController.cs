@@ -307,9 +307,7 @@ namespace Helios.Authentication.Controllers
         {
             try
             {
-                var users = await _userManager.Users.Where(x => model.studyUserIds.Contains(x.Id) && x.IsActive).ToListAsync();
-
-                if (users.Any(x => x.Email == model.Email))
+                if (_userManager.Users.Any(x => x.Id != model.Id && x.IsActive && x.Email == model.Email))
                 {
                     return new ApiResponse<dynamic>
                     {
@@ -325,7 +323,7 @@ namespace Helios.Authentication.Controllers
                     user.Name = model.Name;
                     user.LastName = model.LastName;
                     user.Email = model.Email;
-
+                   
                     await _userManager.UpdateAsync(user);
 
                     if (oldEmail != model.Email)

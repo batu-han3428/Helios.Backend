@@ -845,4 +845,13 @@ body[data-sidebar="colored"] {
     .menu-title {
         color: $sidebar-colored-menu-item-icon-color !important;
     }
-} 
+}
+
+.sso-main-content {
+    overflow: hidden;
+
+    .content {
+        padding: 0 15px 10px 15px;
+        margin-top: $header-height;
+    }
+}

@@ -107,119 +107,132 @@ import User from "../Pages/Users/User";
 //Admin Users
 import TenantUsers from "../Pages/TenantUsers/TenantUsers";
 
+//SSO
+import SSO_Login from "../Pages/SSO/SSO_Login";
+import SSO_Studies from "../Pages/SSO/SSO_Studies";
+import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
+
 const userRoutes = [
     //tenant
-    { path: "/Tenant", component: <TenantList />, menuType: "admin" },
-    { path: "/addTenant", component: <TenantAddOrUpdate />, menuType: "admin" },
+    { path: "/Tenant", component: <TenantList />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/addTenant", component: <TenantAddOrUpdate />, menuType: "admin", roles: ['TenantAdmin'] },
 
-    { path: "/moduleList", component: <Module />, menuType: "admin" },
-    { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin" },
-    { path: "/formBuilder", component: <FormBuilder />, menuType: "admin" },
+    { path: "/moduleList", component: <Module />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/formBuilder", component: <FormBuilder />, menuType: "admin", roles: ['TenantAdmin'] },
 
     //study
     { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },
-    { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin" },
-    { path: "/visits/:studyId", component: <Study />, menuType: "study" },
+    { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/visits/:studyId", component: <Study />, menuType: "study", roles: ['TenantAdmin'] },
 
     //site & laboratories
-    { path: "/sitelaboratories-sites-site/:studyId", component: <Sites />, menuType: "study" },
+    { path: "/sitelaboratories-sites-site/:studyId", component: <Sites />, menuType: "study", roles: ['TenantAdmin'] },
 
     //permissions
-    { path: "/permissions/:studyId", component: <Permission />, menuType: "study" },
+    { path: "/permissions/:studyId", component: <Permission />, menuType: "study", roles: ['TenantAdmin'] },
 
     //users
-    { path: "/users/:studyId", component: <User />, menuType: "study" },
+    { path: "/users/:studyId", component: <User />, menuType: "study", roles: ['TenantAdmin'] },
 
     //admin users
-    { path: "/tenantusers", component: <TenantUsers />, menuType: "admin" },
+    { path: "/tenantusers", component: <TenantUsers />, menuType: "admin", roles: ['TenantAdmin'] },
 
-    { path: "/dashboard", component: <Dashboard />, menuType: "admin" },
+    //SSO
+    { path: "/SSO-tenants", component: <SSO_Tenants />, menuType: "sso", roles: ['StudyUser'] },
+    { path: "/SSO-studies/:tenantId", component: <SSO_Studies />, menuType: "sso", roles: ['StudyUser'] },
+
+    { path: "/dashboard", component: <Dashboard />, menuType: "admin", roles: ['TenantAdmin'] },
 
    //profile
-    { path: "/profile", component: <UserProfile />, menuType: "admin" },
+    { path: "/profile", component: <UserProfile />, menuType: "admin", roles: ['TenantAdmin'] },
 
   //Email
-    { path: "/email-inbox", component: <EmailInbox />, menuType: "admin" },
-    { path: "/email-read", component: <EmailRead />, menuType: "admin" },
-    { path: "/email-compose", component: <EmailCompose />, menuType: "admin" },
+    { path: "/email-inbox", component: <EmailInbox />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/email-read", component: <EmailRead />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/email-compose", component: <EmailCompose />, menuType: "admin", roles: ['TenantAdmin'] },
 
   // Email Template
-    { path: "/email-template-alert", component: <Emailtemplatealert />, menuType: "admin" },
-    { path: "/email-template-basic", component: <Emailtemplatebasic />, menuType: "admin" },
-    { path: "/email-template-billing", component: <Emailtemplatebilling />, menuType: "admin" },
+    { path: "/email-template-alert", component: <Emailtemplatealert />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/email-template-basic", component: <Emailtemplatebasic />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/email-template-billing", component: <Emailtemplatebilling />, menuType: "admin", roles: ['TenantAdmin'] },
 
   // Icons
-    { path: "/icons-dripicons", component: <IconDripicons />, menuType: "admin" },
-    { path: "/icons-materialdesign/:studyId", component: <IconMaterialdesign />, menuType: "study" },
-    { path: "/icons-fontawesome/:studyId", component: <IconFontawesome />, menuType: "study" },
-    { path: "/icons-ion/:studyId", component: <IconIon />, menuType: "study" },
-    { path: "/icons-themify/:studyId", component: <ThemifyIcon />, menuType: "study" },
-    { path: "/icons-typicons/:studyId", component: <TypiconsIcon />, menuType: "study" },
+    { path: "/icons-dripicons", component: <IconDripicons />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/icons-materialdesign/:studyId", component: <IconMaterialdesign />, menuType: "study", roles: ['TenantAdmin'] },
+    { path: "/icons-fontawesome/:studyId", component: <IconFontawesome />, menuType: "study", roles: ['TenantAdmin'] },
+    { path: "/icons-ion/:studyId", component: <IconIon />, menuType: "study, roles: ['TenantAdmin']" },
+    { path: "/icons-themify/:studyId", component: <ThemifyIcon />, menuType: "study", roles: ['TenantAdmin'] },
+    { path: "/icons-typicons/:studyId", component: <TypiconsIcon />, menuType: "study", roles: ['TenantAdmin'] },
 
   // Tables
-    { path: "/tables-basic", component: <BasicTables />, menuType: "admin" },
-    { path: "/tables-datatable", component: <DatatableTables />, menuType: "admin" },
-    { path: "/tables-responsive", component: <ResponsiveTables />, menuType: "admin" },
+    { path: "/tables-basic", component: <BasicTables />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/tables-datatable", component: <DatatableTables />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/tables-responsive", component: <ResponsiveTables />, menuType: "admin", roles: ['TenantAdmin'] },
 
 
   // Forms
-    { path: "/form-elements", component: <FormElements />, menuType: "admin" },
-    { path: "/form-advanced", component: <FormAdvanced />, menuType: "admin" },
-    { path: "/form-editors", component: <FormEditors />, menuType: "admin" },
-    { path: "/form-mask", component: <FormMask />, menuType: "admin" },
-    { path: "/form-repeater", component: <FormRepeater />, menuType: "admin" },
-    { path: "/form-uploads", component: <FormUpload />, menuType: "admin" },
-    { path: "/form-wizard", component: <FormWizard />, menuType: "admin" },
-    { path: "/form-validation", component: <FormValidations />, menuType: "admin" },
-    { path: "/form-xeditable", component: <FormXeditable />, menuType: "admin" },
+    { path: "/form-elements", component: <FormElements />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-advanced", component: <FormAdvanced />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-editors", component: <FormEditors />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-mask", component: <FormMask />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-repeater", component: <FormRepeater />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-uploads", component: <FormUpload />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-wizard", component: <FormWizard />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-validation", component: <FormValidations />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/form-xeditable", component: <FormXeditable />, menuType: "admin", roles: ['TenantAdmin'] },
 
   // Ui
-    { path: "/ui-alerts", component: <UiAlert />, menuType: "admin" },
-    { path: "/ui-buttons", component: <UiButtons />, menuType: "admin" },
-    { path: "/ui-cards", component: <UiCards />, menuType: "admin" },
-    { path: "/ui-carousel", component: <UiCarousel />, menuType: "admin" },
-    { path: "/ui-colors", component: <UiColors />, menuType: "admin" },
-    { path: "/ui-dropdowns", component: <UiDropdown />, menuType: "admin" },
-    { path: "/ui-general", component: <UiGeneral />, menuType: "admin" },
-    { path: "/ui-grid", component: <UiGrid />, menuType: "admin" },
-    { path: "/ui-images", component: <UiImages />, menuType: "admin" },
-    { path: "/ui-modals", component: <UiModal />, menuType: "admin" },
-    { path: "/ui-progressbars", component: <UiProgressbar />, menuType: "admin" },
-    { path: "/ui-tabs-accordions", component: <UiTabsAccordions />, menuType: "admin" },
-    { path: "/ui-typography", component: <UiTypography />, menuType: "admin" },
-    { path: "/ui-video", component: <UiVideo />, menuType: "admin" },
-    { path: "/ui-session-timeout", component: <UiSessionTimeout />, menuType: "admin" },
-    { path: "/ui-offcanvas", component: <UiOffcanvas />, menuType: "admin" },
+    { path: "/ui-alerts", component: <UiAlert />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-buttons", component: <UiButtons />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-cards", component: <UiCards />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-carousel", component: <UiCarousel />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-colors", component: <UiColors />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-dropdowns", component: <UiDropdown />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-general", component: <UiGeneral />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-grid", component: <UiGrid />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-images", component: <UiImages />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-modals", component: <UiModal />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-progressbars", component: <UiProgressbar />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-tabs-accordions", component: <UiTabsAccordions />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-typography", component: <UiTypography />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-video", component: <UiVideo />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-session-timeout", component: <UiSessionTimeout />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/ui-offcanvas", component: <UiOffcanvas />, menuType: "admin", roles: ['TenantAdmin'] },
 
 
     // this route should be at the end of all other routes
-    { path: "/", roles: ["TenantAdmin"], component: <StudyList />, menuType: "admin" }, 
-    { path: "/", component: <Dashboard />, menuType: "admin" },
+    { path: "/", roles: ["TenantAdmin"], redirect: "/studylist", menuType: "admin" },
+    { path: "/", roles: ["StudyUser"], redirect: "/SSO-tenants", menuType: "sso" },
 ];
 
 const authRoutes = [
-  { path: "/logout", component: <Logout /> },
-  { path: "/login", component: <Login /> },
-  { path: "/forgot-password", component: <ForgetPwd /> },
-  { path: "/register", component: <Register /> },
+    //admin
+    { path: "/logout", component: <Logout /> },
+    { path: "/login", component: <Login /> },
+    { path: "/forgot-password", component: <ForgetPwd /> },
+    { path: "/register", component: <Register /> },
 
 
-  // Authentication Inner
-  { path: "/Pages-login", component: <Login1 /> },
-  { path: "/Pages-login-2", component: <Login2 /> },
-  { path: "/Pages-register", component: <Register1 /> },
-  { path: "/Pages-register-2", component: <Register2 /> },
-  { path: "/page-recoverpw", component: <Recoverpw /> },
-  { path: "/page-recoverpw-2", component: <Recoverpw2 /> },
-  { path: "/Pages-forgot-pwd", component: <ForgetPwd1 /> },
-  { path: "/auth-lock-screen", component: <LockScreen /> },
-  { path: "/auth-lock-screen-2", component: <LockScreen2 /> },
-  { path: "/page-confirm-mail", component: <ConfirmMail /> },
-  { path: "/page-confirm-mail-2", component: <ConfirmMail2 /> },
-  { path: "/auth-email-verification", component: <EmailVerification /> },
-  { path: "/auth-email-verification-2", component: <EmailVerification2 /> },
-  { path: "/auth-two-step-verification", component: <TwostepVerification /> },
-  { path: "/auth-two-step-verification-2", component: <TwostepVerification2 /> },
+    //Sso
+    { path: "/SSO-login", component: <SSO_Login />},
+
+    // Authentication Inner
+    { path: "/Pages-login", component: <Login1 /> },
+    { path: "/Pages-login-2", component: <Login2 /> },
+    { path: "/Pages-register", component: <Register1 /> },
+    { path: "/Pages-register-2", component: <Register2 /> },
+    { path: "/page-recoverpw", component: <Recoverpw /> },
+    { path: "/page-recoverpw-2", component: <Recoverpw2 /> },
+    { path: "/Pages-forgot-pwd", component: <ForgetPwd1 /> },
+    { path: "/auth-lock-screen", component: <LockScreen /> },
+    { path: "/auth-lock-screen-2", component: <LockScreen2 /> },
+    { path: "/page-confirm-mail", component: <ConfirmMail /> },
+    { path: "/page-confirm-mail-2", component: <ConfirmMail2 /> },
+    { path: "/auth-email-verification", component: <EmailVerification /> },
+    { path: "/auth-email-verification-2", component: <EmailVerification2 /> },
+    { path: "/auth-two-step-verification", component: <TwostepVerification /> },
+    { path: "/auth-two-step-verification-2", component: <TwostepVerification2 /> },
 ];
 
 export { userRoutes, authRoutes };
