@@ -2,9 +2,7 @@
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
-using Newtonsoft.Json;
 using RestSharp;
-using System.Net.Mail;
 
 namespace Helios.eCRF.Services
 {
@@ -60,17 +58,17 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<dynamic> SaveForgotPassword(string Mail)
+        public async Task<ApiResponse<dynamic>> SaveForgotPassword(string Mail, string Language)
         {
             using (var client = AuthServiceClient)
             {
-                var req = new RestRequest($"AuthAccount/SaveForgotPassword?Mail={Mail}", Method.Post);
-                var result = await client.ExecuteAsync<dynamic>(req);
+                var req = new RestRequest($"AuthAccount/SaveForgotPassword?Mail={Mail}&Language={Language}", Method.Post);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
         }
 
-        public async Task<dynamic> ResetPasswordGet(string code, string username, bool firstPassword)
+        public async Task<ApiResponse<dynamic>> ResetPasswordGet(string code, string username, bool firstPassword)
         {
             using (var client = AuthServiceClient)
             {
@@ -78,18 +76,18 @@ namespace Helios.eCRF.Services
                 req.AddParameter("code", code);
                 req.AddParameter("username", username);
                 req.AddParameter("firstPassword", firstPassword);
-                var result = await client.ExecuteAsync<dynamic>(req);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
         }
 
-        public async Task<dynamic> ResetPasswordPost(ResetPasswordViewModel model)
+        public async Task<ApiResponse<dynamic>> ResetPasswordPost(ResetPasswordDTO model)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AuthAccount/ResetPasswordPost", Method.Post);
                 req.AddJsonBody(model);
-                var result = await client.ExecuteAsync<dynamic>(req);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
         }

@@ -1,4 +1,5 @@
-﻿using Helios.Common.Model;
+﻿using Helios.Common.DTO;
+using Helios.Common.Model;
 
 namespace Helios.Authentication.Services.Interfaces
 {
@@ -6,5 +7,6 @@ namespace Helios.Authentication.Services.Interfaces
     {
         Task AddStudyUserMail(StudyUserModel studyUserModel);
         Task UserResetPasswordMail(StudyUserModel studyUserModel);
+        Task ForgotPasswordMail(ForgotPasswordDTO forgotPasswordDTO);
     }
 }

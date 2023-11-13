@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types';
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
-import { Row, Col, CardBody, Card, Container, Label, Form, Input } from "reactstrap";
+import { Row, Col, CardBody, Card, Container, Label, Form, Input, Alert } from "reactstrap";
 
 // Redux
 import { connect, useDispatch } from "react-redux";
-import { Link } from 'react-router-dom';
 import withRouter from '../../components/Common/withRouter';
 
 // actions
@@ -20,8 +19,18 @@ import { useLoginPostMutation } from '../../store/services/Login';
 import { onLogin } from '../../helpers/Auth/useAuth';
 import { setLocalStorage, getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
 import { useEffect } from 'react';
+import ModalComp from '../../components/Common/ModalComp/ModalComp';
+import ForgotPassword from './ForgotPassword';
+import ToastComp from '../../components/Common/ToastComp/ToastComp';
+import LanguageDropdown from '../../components/CommonForBoth/TopbarDropdown/LanguageDropdown';
+import { withTranslation } from "react-i18next";
+
 
 const Login = props => {
+
+    const modalRef = useRef();
+
+    const ssoRef = useRef();
 
     const [loading, setLoading] = useState(true);
         
@@ -34,11 +43,32 @@ const Login = props => {
         }
         setLoading(false);
     }, [navigate])
-    
+
+    const [alertMessage, setAlertMessage] = useState("");
+
+    const location = useLocation();
+    const { state } = location;
+
+    useEffect(() => {
+        if (state && state.email) {
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                Email: state.email
+            }));
+        }
+
+        if (state && state.message) {
+            setAlertMessage(state.message);
+        }
+    }, [state]);
+
     const dispatch = useDispatch();
     const [loginPost, { isLoading }] = useLoginPostMutation();
-    const [formData, setFormData] = useState({ Email: '', Password: '' });
-    const [login, setLogin] = useState(false);
+    const [formData, setFormData] = useState({ Email: '', Password: '', Language: props.i18n.language });
+
+    const [showToast, setShowToast] = useState(false);
+    const [message, setMessage] = useState("");
+    const [stateToast, setStateToast] = useState(true);
     
     const handleSubmit = async (e) => {
         try {
@@ -48,33 +78,54 @@ const Login = props => {
 
             if (response.data.isSuccess) {
                 setLocalStorage("accessToken", response.data.values.accessToken);
-                let result = onLogin();   
+                let result = onLogin();
 
                 dispatch(endloading()) 
                 if (result === false) {
-                    setLogin(false);
+                    setMessage(props.t("An unexpected error occurred."))
+                    setStateToast(false);
+                    setShowToast(true);
                 } else {
                     dispatch(loginuser(result));
-                    setLogin(true);
                     navigate("/");
                 }
             } else {
-
+                dispatch(endloading());
+                if (response.data.values !== null) {
+                    if (response.data.values.hasOwnProperty("redirect")) {
+                        navigate(response.data.values.redirect);
+                    } else if (response.data.values.hasOwnProperty("change")) {
+                        setMessage(props.t(response.data.message).replace(/@Change/g, response.data.values.change));
+                    } else {
+                        setMessage(props.t(response.data.message));
+                    }
+                    setStateToast(false);
+                    setShowToast(true);
+                }
             }
         } catch (error) {
             dispatch(endloading());
         }
     };
 
+    const forgotPassword = (e) => {
+        e.preventDefault();
+        modalRef.current.tog_backdrop();
+    };
+
+    const forgotPasswordToast = (message, state) => {
+        setMessage(message);
+        setStateToast(state);
+        setShowToast(true);
+    }
+
     document.title = "Login | Veltrix - React Admin & Dashboard Template";
     return (
         loading 
         ||
         <>
-            <div className="home-btn d-none d-sm-block">
-                <Link to="/" className="text-dark">
-                    <i className="fas fa-home h2" />
-                </Link>
+            <div className="home-btn">
+                <LanguageDropdown />
             </div>
             <div className="account-pages my-5 pt-sm-5">
                 <Container>
@@ -97,6 +148,13 @@ const Login = props => {
 
                                 <CardBody className="p-4">
                                     <div className="p-3">
+                                        {alertMessage !== "" ?
+                                            <Alert color="warning" className="mt-4">
+                                                {props.t(alertMessage)}
+                                            </Alert>
+                                            :
+                                            null
+                                        }
                                         <Form className="mt-4"
                                             onSubmit={(e) => {
                                                 e.preventDefault();
@@ -114,16 +172,17 @@ const Login = props => {
                                                     type="email"
                                                     id="username"
                                                     onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
+                                                    value={formData.Email}
                                                 />
                                             </div>
 
                                             <div className="mb-3">
-                                                <Label className="form-label" htmlFor="userpassword">Password</Label>
+                                                <Label className="form-label" htmlFor="userpassword">{props.t("Password")}</Label>
                                                 <Input
                                                     name="password"
                                                     type="password"
                                                     className="form-control"
-                                                    placeholder="Enter Password"
+                                                    placeholder={props.t("Enter Password")}
                                                     onChange={(e) => setFormData({ ...formData, Password: e.target.value })}
                                                 />
                                             </div>
@@ -132,17 +191,17 @@ const Login = props => {
                                                 <div className="col-sm-6">
                                                     <div className="form-check">
                                                         <input type="checkbox" className="form-check-input" id="customControlInline" />
-                                                        <label className="form-check-label" htmlFor="customControlInline">Remember me</label>
+                                                        <label className="form-check-label" htmlFor="customControlInline">{props.t("Remember me")}</label>
                                                     </div>
                                                 </div>
                                                 <div className="col-sm-6 text-end">
-                                                    <button className="btn btn-primary w-md waves-effect waves-light" type="submit">Log In</button>
+                                                    <button className="btn btn-primary w-md waves-effect waves-light" type="submit">{props.t("Log In")}</button>
                                                 </div>
                                             </div>
 
                                             <div className="mt-2 mb-0 row">
                                                 <div className="col-12 mt-4">
-                                                    <Link to="/forgot-password"><i className="mdi mdi-lock"></i> Forgot your password?</Link>
+                                                    <Link to="/forgot-password" onClick={forgotPassword}><i className="mdi mdi-lock"></i> {props.t("Forgot your password?")}</Link>
                                                 </div>
                                             </div>
 
@@ -170,6 +229,20 @@ const Login = props => {
                     </Row>
                 </Container>
             </div>
+            <ModalComp
+                refs={modalRef}
+                title={props.t("Forgot your password?")}
+                body={<ForgotPassword refs={ssoRef} toast={forgotPasswordToast} />}
+                buttonText={props.t("Send new password")}
+                size="md"
+            />
+            <ToastComp
+                title="İşlem bilgisi"
+                message={message}
+                showToast={showToast}
+                setShowToast={setShowToast}
+                stateToast={stateToast}
+            />
         </>       
   );
 };
@@ -179,12 +252,13 @@ const mapStateToProps = state => {
   return { error };
 };
 
-export default withRouter(
+export default withTranslation()(withRouter(
   connect(mapStateToProps, { loginuser, apiError })(Login)
-);
+));
 
 Login.propTypes = {
   error: PropTypes.any,
   history: PropTypes.object,
   loginuser: PropTypes.func,
+  t: PropTypes.any
 };

@@ -13,8 +13,8 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> SendNewPasswordForUser(Guid userId);
         Task<bool> UserProfileResetPassword(UserDTO model);
         Task<ApiResponse<dynamic>> ContactUsMailAsync(ContactUsModel contactUsDTO);
-        Task<dynamic> SaveForgotPassword(string Mail);
-        Task<dynamic> ResetPasswordGet(string code, string username, bool firstPassword);
-        Task<dynamic> ResetPasswordPost(ResetPasswordViewModel model);
+        Task<ApiResponse<dynamic>> SaveForgotPassword(string Mail, string Language);
+        Task<ApiResponse<dynamic>> ResetPasswordGet(string code, string username, bool firstPassword);
+        Task<ApiResponse<dynamic>> ResetPasswordPost(ResetPasswordDTO model);
     }
 }

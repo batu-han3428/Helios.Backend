@@ -16,6 +16,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import Rightbar from "../CommonForBoth/Rightbar";
+import UiSessionTimeoutComp from '../Common/UiSessionTimeoutComp/UiSessionTimeoutComp';
 
 class Layout extends Component {
   constructor(props) {
@@ -76,24 +77,25 @@ class Layout extends Component {
     }
   };
 
-  render() {
-    return (
-        <React.Fragment>
-            <div id="layout-wrapper">
-          <Header toggleMenuCallback={this.toggleMenuCallback} />
-          <Sidebar
-            theme={this.props.leftSideBarTheme}
-            type={this.props.leftSideBarType}
-            isMobile={this.state.isMobile}
-            pageType={this.props.pageType}
-          />
-          <div className="main-content">{this.props.children}</div>
-          <Footer />
-        </div>
-        {this.props.showRightSidebar ? <Rightbar /> : null}
-      </React.Fragment>
-    );
-  }
+    render() {
+        return (
+            <React.Fragment>
+                <div id="layout-wrapper">
+                    <Header toggleMenuCallback={this.toggleMenuCallback} />
+                    <Sidebar
+                    theme={this.props.leftSideBarTheme}
+                    type={this.props.leftSideBarType}
+                    isMobile={this.state.isMobile}
+                    pageType={this.props.pageType}
+                    />
+                    <div className="main-content">{this.props.children}</div>
+                    <Footer />
+                </div>
+                <UiSessionTimeoutComp />
+                {this.props.showRightSidebar ? <Rightbar /> : null}
+            </React.Fragment>
+        );
+    }
 }
 
 Layout.propTypes = {

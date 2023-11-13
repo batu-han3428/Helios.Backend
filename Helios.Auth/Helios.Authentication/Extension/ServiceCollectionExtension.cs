@@ -167,6 +167,8 @@ namespace Helios.Authentication.Extension
 
                 var rabbitMQueueName_UserResetPassword = qPrefix + Configuration["AppConfig:RabbitMQueueName_UserResetPassword"];
 
+                var rabbitMQueueName_ForgotPassword = qPrefix + Configuration["AppConfig:RabbitMQueueName_ForgotPassword"];
+                
                 var rabbitMQueueName_TmfRequest = qPrefix + Configuration["AppConfig:RabbitMQueueName_TmfRequest"];
 
                 var rabbitMQueueName_TmfShareMail = qPrefix + Configuration["AppConfig:RabbitMQueueName_TmfShareMail"];
@@ -196,65 +198,14 @@ namespace Helios.Authentication.Extension
 
                 services.AddScoped<AddStudyUserConsumer>();
                 services.AddScoped<UserResetPasswordConsumer>();
+                services.AddScoped<ForgotPasswordConsumer>();
                 
-                //services.AddScoped<DoubleEntryUserResearchStatusConsumer>();
-                //services.AddScoped<ImportQueryMessagesConsumer>();
-                //services.AddScoped<ImportDoubleEntryQueryMessagesConsumer>();
-                //services.AddScoped<EProLinkMailConsumer>();
-                //services.AddScoped<IwrsMailConsumer>();
-
-                //services.AddScoped<TermOfUseSignedConsumer>();
-                //services.AddScoped<AdversEventPdfMailConsumer>();
-                //services.AddScoped<UserResearchMailConsumer>();
-                //services.AddScoped<MultiCycleMailConsumer>();
-                //services.AddScoped<CycleMailConsumer>();
-                //services.AddScoped<ModuleDataStatusConsumerOverride>();
-                //services.AddScoped<UserInputMailConsumer>();
-                //services.AddScoped<TmfMailConsumer>();
-                //services.AddScoped<TmfRequestConsumer>();
-                //services.AddScoped<TmfShareConsumer>();
-                //services.AddScoped<IwrsSiteAlertConsumer>();
-                //services.AddScoped<MonitoringMailConsumer>();
-                //services.AddScoped<OpenQueryMailConsumer>();
-                //services.AddScoped<VisitMriFileConsumer>();
-                //services.AddScoped<ArchivedMailConsumer>();
-                //services.AddScoped<MultiCycleAnnotatedPdfMailConsumer>();
-                //services.AddScoped<EProCompletedMailConsumer>();
-                //services.AddScoped<SettingMailConsumer>();
-                //services.AddScoped<ReportMailConsumer>();
-                //services.AddScoped<RelationInputAuditConsumer>();
-
                 services.AddMassTransit(c =>
                 {
                     c.AddConsumer<AddStudyUserConsumer>();
                     c.AddConsumer<UserResetPasswordConsumer>();
+                    c.AddConsumer<ForgotPasswordConsumer>();
                     
-                    //c.AddConsumer<DoubleEntryUserResearchStatusConsumer>();
-                    //c.AddConsumer<ImportQueryMessagesConsumer>();
-                    //c.AddConsumer<ImportDoubleEntryQueryMessagesConsumer>();
-                    //c.AddConsumer<EProLinkMailConsumer>();
-                    //c.AddConsumer<TermOfUseSignedConsumer>();
-                    //c.AddConsumer<AdversEventPdfMailConsumer>();
-                    //c.AddConsumer<ModuleDataStatusConsumerOverride>();
-                    //c.AddConsumer<UserResearchMailConsumer>();
-                    //c.AddConsumer<MultiCycleMailConsumer>();
-                    //c.AddConsumer<CycleMailConsumer>();
-                    //c.AddConsumer<UserInputMailConsumer>();
-                    //c.AddConsumer<TmfMailConsumer>();
-                    //c.AddConsumer<TmfRequestConsumer>();
-                    //c.AddConsumer<TmfShareConsumer>();
-                    //c.AddConsumer<IwrsSiteAlertConsumer>();
-                    //c.AddConsumer<MonitoringMailConsumer>();
-                    //c.AddConsumer<OpenQueryMailConsumer>();
-                    //c.AddConsumer<VisitMriFileConsumer>();
-                    //c.AddConsumer<ArchivedMailConsumer>();
-                    //c.AddConsumer<MultiCycleAnnotatedPdfMailConsumer>();
-                    //c.AddConsumer<ReportMailConsumer>();
-                    //c.AddConsumer<IwrsMailConsumer>();
-                    //c.AddConsumer<EProCompletedMailConsumer>();
-                    //c.AddConsumer<SettingMailConsumer>();
-                    //c.AddConsumer<RelationInputAuditConsumer>();
-
                     c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                     {
                         cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
@@ -272,6 +223,13 @@ namespace Helios.Authentication.Extension
                             ep.PrefetchCount = 16;
                             ep.UseMessageRetry(r => r.Interval(2, 100));
                             ep.ConfigureConsumer<UserResetPasswordConsumer>(provider);
+                        });
+
+                        cfg.ReceiveEndpoint(rabbitMQueueName_ForgotPassword, ep =>
+                        {
+                            ep.PrefetchCount = 16;
+                            ep.UseMessageRetry(r => r.Interval(2, 100));
+                            ep.ConfigureConsumer<ForgotPasswordConsumer>(provider);
                         });
                     }));
                 });

@@ -22,6 +22,9 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Xml.Linq;
 using System.Net.Mime;
 using Helios.Common.Model;
+using System.Web;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Numerics;
 
 namespace Helios.Authentication.Controllers
 {
@@ -37,7 +40,8 @@ namespace Helios.Authentication.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
         private readonly IConfiguration _configuration;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration)
+        private readonly IEmailService _emailService;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
@@ -47,6 +51,7 @@ namespace Helios.Authentication.Controllers
             _signInManager = signInManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -150,48 +155,72 @@ namespace Helios.Authentication.Controllers
 
                     var checkPassword = await _userManager.CheckPasswordAsync(user, model.Password);
 
-                    //if (!checkPassword)
-                    //{
-                    //    user.AccessFailedCount++;
-                    //    var remainAttemp = 5 - user.AccessFailedCount;
-                    //    var failMsg = user.AccessFailedCount == 4 ? "Eğer şifrenizi yanlış girerseniz hesabınız bloke olacaktır, lütfen sistem yöneticisi ile iletişime geçiniz." : "Şifrenizin kullanım geçerliliği için @Number deneme hakkınız kalmıştır.".Replace("@Number", remainAttemp.ToString());
-                    //    var updateResult = await _userManager.UpdateAsync(user);
+                    if (!checkPassword)
+                    {
+                        user.AccessFailedCount++;
+                        var remainAttemp = 5 - user.AccessFailedCount;
+                        var failMsg = user.AccessFailedCount == 4 ? "If you enter your password incorrectly, your account will be blocked, please contact the system administrator." : "You have @Change attempts left for the validity of your password.";
+                        var updateResult = await _userManager.UpdateAsync(user);
 
-                    //    return new ApiResponse<dynamic>
-                    //    {
-                    //        IsSuccess = false,
-                    //        Message = failMsg
-                    //    };
-                    //}
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = failMsg,
+                            Values = user.AccessFailedCount == 4 ? null : new { Change = remainAttemp.ToString() }
+                        };
+                    }
 
-                    //var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
-                    //var now = DateTime.UtcNow;
-                    //var returnMessage = "";
-                    //bool firstLogin = true;
-                    ////if (user.LastChangePasswordDate >= passUpdateDate)
-                    //if (now >= passUpdateDate)
-                    //{
-                    //    firstLogin = false;
-                    //    user.ChangePassword = false;
-                    //    returnMessage = "Sayın @UserFullName,\r\n\r\nŞifrenizin kullanım süresi dolmuştur.\r\nYeni şifrenizi oluşturmak için aşağıda bulunan \"Yeni şifre gönder\" butonuna tıklayınız.".Replace("@UserFullName", user.Email);
-                    //}
+                    var passUpdateDate = user.LastChangePasswordDate.AddMonths(6);
+                    var now = DateTime.UtcNow;
+                    var returnMessage = "";
 
-                    //if (!user.ChangePassword)
-                    //{
-                    //    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    //    var username = user.Email;
-                    //    //return RedirectToAction("ResetPassword", "Account", new { firstlogin = firstLogin, code = code, username = username, firstPassword = true, shortName, returnMessage = returnMessage });
-                    //    return new ApiResponse<dynamic>
-                    //    {
-                    //        IsSuccess = false,
-                    //        Message = "ResetPassword git",
-                    //        Values = new { code = code, username = username, firstPassword = true }
-                    //    };
-                    //}
+                    if (now >= passUpdateDate)
+                    {
 
-                    //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                        user.ChangePassword = false;
+                        returnMessage = "Dear @Change. Your password has expired. Password reset e-mail has been sent to your e-mail address, please follow the steps to renew your password.";
+                    }
 
-                    if (/*result.Succeeded*/true)
+                    if (!user.ChangePassword)
+                    {
+                        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var username = user.Email;
+
+                        if (string.IsNullOrEmpty(returnMessage))
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = returnMessage,
+                                Values = new { redirect = $"/reset-password/code={HttpUtility.UrlEncode(code)}/username={username}" }
+                            };
+                        }
+                        else
+                        {
+                            if (!user.IsResetPasswordMailSent)
+                            {
+                                await _emailService.ForgotPasswordMail(new ForgotPasswordDTO
+                                {
+                                    Name = user.Name,
+                                    LastName = user.LastName,
+                                    Mail = user.Email,
+                                    Code = code,
+                                    Language = model.Language
+                                });
+                            }
+
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = returnMessage,
+                                Values = new { Change = user.Email }
+                            };
+                        }
+                    }
+
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
                     {
                         var userRoles = await _userManager.GetRolesAsync(user);
                         var enumList = userRoles.Select(x => Enum.Parse<Roles>(x))
@@ -299,7 +328,7 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<dynamic> SaveForgotPassword(string Mail)
+        public async Task<dynamic> SaveForgotPassword(string Mail, string Language)
         {
             try
             {
@@ -307,60 +336,35 @@ namespace Helios.Authentication.Controllers
 
                 if (user == null)
                 {
-                    return new { isSuccess = false, message = "Kullanıcı kayıtlı değil" };
+                    return new ApiResponse<dynamic> { IsSuccess = false, Message = "User not registered!" };
                 }
 
                 if (!user.IsActive)
                 {
-                    return new { isSuccess = false, message = "Kullanıcı aktif değil" };
+                    return new ApiResponse<dynamic> { IsSuccess = false, Message = "User is inactive!" };
                 }
 
                 if (user.AccessFailedCount > 4)
                 {
-                    return new { isSuccess = false, message = "5 defa hatalı giriş yaptığınız için hesabınız kitlenmiş" };
+                    return new ApiResponse<dynamic> { IsSuccess = false, Message = "Your account has been deactivated because you have logged in incorrectly 5 times. Please contact the system administrator." };
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-
-                //şimdilik localhost yazdım
-                string callbackUrl = $"https://localhost:44458/Account/ResetPassword?code={code}&username={user.Email}";
-
-                //string? callbackUrl = Url.Action(
-                //    action: "ResetPassword",
-                //    controller: "Account",
-                //    values: new { user.Id, code, user.Email },
-                //    protocol: Request.Scheme,
-                //    host: "https://localhost:44458/"
-                //);
-
-                string tempPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailTemplates/AdminForgotPasswordMail.html");
-                string mailContent = "";
-
-                var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
-                byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
-                string base64ImageRepresentation = Convert.ToBase64String(imageArray);
-
-                var mailSubject = "e-CRF reset password";
-
-                using (StreamReader reader = System.IO.File.OpenText(tempPath))
+                await _emailService.ForgotPasswordMail(new ForgotPasswordDTO
                 {
-                    mailContent = reader.ReadToEnd()
-                    .Replace("@FullName", user.Name + " " + user.LastName)
-                    .Replace("@ContactLink", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value) + "/Account/ContactUs")
-                    .Replace("@PasswordLink", HtmlEncoder.Default.Encode(callbackUrl))
-                    .Replace("@imgbase64", base64ImageRepresentation)
-                    .Replace("@dynamicdomain", string.Format("{0}://{1}", _contextAccessor.HttpContext.Request.Scheme, _contextAccessor.HttpContext.Request.Host.Value));
-                }
+                    Name = user.Name,
+                    LastName = user.LastName,
+                    Mail = user.Email,
+                    Code = code,
+                    Language = Language
+                });
 
-                await _baseService.SendMail(user.Email, mailSubject, mailContent);
-
-                return new { isSuccess = true, message = "Mail gönderildi" };
+                return new ApiResponse<dynamic> { IsSuccess = true, Message = "Successful" };
             }
             catch (Exception e)
             {
-
-                throw;
+                return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
             }
 
         }
@@ -413,73 +417,68 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpGet]
-        public async Task<dynamic> ResetPasswordGet(string code, string username, bool firstPassword)
+        public async Task<ApiResponse<dynamic>> ResetPasswordGet(string code, string username, bool firstPassword)
         {
             var user = await _userManager.FindByEmailAsync(username);
             if (user == null)
             {
-                return new { isSuccess = false, messsage = "Kullanıcı bulunamadı!" };
+                return new ApiResponse<dynamic> { IsSuccess = false, Message = "User not found!" };
             }
             else
             {
                 var tokenProvider = _userManager.Options.Tokens.PasswordResetTokenProvider;
+                code = HttpUtility.UrlDecode(code);
                 code = code.Replace(' ', '+');
                 var tokenIsValid = await _userManager.VerifyUserTokenAsync(user, tokenProvider, "ResetPassword", code);
                 if (!tokenIsValid)
                 {
-                    var msg = $"Bu bağlantıyı daha önce kullandığınız için işlem zaman aşımına uğramıştır. <br><br> Aşağıdaki linke tıklayarak yeni şifre talebinde bulunmanız gerekmektedir.";
-                    //return RedirectToAction("Login", "Account", new { Area = "Crf.Web.AdminUI", customMessage = msg });
-                    return new { isSuccess = false, messsage = msg };
+                    var msg = $"The operation has timed out because you have used this link before.";
+                    return new ApiResponse<dynamic> { IsSuccess = false, Message = msg };
                 }
             }
-            //var model = new ResetPasswordViewModel { Code = code, Username = username, IsFirstPassword = firstPassword };
 
-            //return View("/Areas/Crf.Web.AdminUI/Views/Account/ResetPassword.cshtml", model);
-
-            return new { isSuccess = true, message = "Başarılı", values = new { Code = code, Username = username, IsFirstPassword = firstPassword } };
+            return new ApiResponse<dynamic> { IsSuccess = true, Message = "Successful", Values = new { Code = code, Username = username, IsFirstPassword = firstPassword } };
         }
 
         [HttpPost]
-        public async Task<dynamic> ResetPasswordPost(ResetPasswordViewModel model)
+        public async Task<ApiResponse<dynamic>> ResetPasswordPost(ResetPasswordDTO model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Username);
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
             {
-                return new { isSuccess = false, messsage = "Access Denied" };
+                return new ApiResponse<dynamic> { IsSuccess = false, Message = "User not found!" };
             }
             var passwordValidator = new PasswordValidator<ApplicationUser>();
             var validPassword = await passwordValidator.ValidateAsync(_userManager, user, model.Password);
             if (!validPassword.Succeeded)
             {
-                return new { isSuccess = false, messsage = "Invalid Password" };
+                return new ApiResponse<dynamic> { IsSuccess = false, Message = "Invalid password!" };
             }
+
+            var chknewPassHashWthOldPass = await _userManager.CheckPasswordAsync(user, model.Password);
+
+            if (chknewPassHashWthOldPass)
+            {
+                return new ApiResponse<dynamic> { IsSuccess = false, Message = "The new password cannot be the same as the old password." };
+            }
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
 
             if (result.Succeeded)
             {
                 user.ChangePassword = true;
+                user.LastChangePasswordDate = DateTime.UtcNow;
+                user.EmailConfirmed = true;
+                user.IsResetPasswordMailSent = false;
                 var passwordResult = await _userManager.UpdateAsync(user);
                 if (passwordResult.Succeeded)
                 {
-                    return new { isSuccess = true, messsage = "Invalid Reset Password", values = new { Username = user.UserName, Password = model.Password, RememberMe = false } };
+                    return new ApiResponse<dynamic> { IsSuccess = true, Message = "Successful" };
                 };
             }
 
-            //foreach (var error in result.Errors)
-            //{
-            //    if (error.Description == "Invalid token.")
-            //    {
-            //        var msg = $"{HeliosResource.OperationTimedOut} <br><br> {HeliosResource.RequestPassword}";
-            //        return RedirectToAction("Login", "Account", new { Area = "Crf.Web.AdminUI", customMessage = msg });
-            //    }
-            //    else
-            //    {
-            //        ModelState.AddModelError("", error.Description);
-            //    }
-
-            //}
-            return new { isSuccess = false, messsage = "Invalid Reset Password" };
+            return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
         }
 
 
@@ -545,7 +544,7 @@ namespace Helios.Authentication.Controllers
 
             }
 
-            if (!String.IsNullOrEmpty(profileViewModel.Password))
+            if (!string.IsNullOrEmpty(profileViewModel.Password))
             {
                 var user = await _userManager.FindByEmailAsync(profileViewModel.Email);
 

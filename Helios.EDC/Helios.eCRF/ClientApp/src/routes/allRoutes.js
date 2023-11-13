@@ -17,6 +17,7 @@ import Login from "../Pages/Authentication/Login";
 import Logout from "../Pages/Authentication/Logout";
 import Register from "../Pages/Template/Authentication/Register";
 import ForgetPwd from "../Pages/Template/Authentication/ForgetPassword";
+import ResetPassword from "../Pages/Authentication/ResetPassword";
 
 //  // Inner Authentication
 import Login1 from "../Pages/Template/AuthenticationInner/Login";
@@ -108,9 +109,9 @@ import User from "../Pages/Users/User";
 import TenantUsers from "../Pages/TenantUsers/TenantUsers";
 
 //SSO
-import SSO_Login from "../Pages/SSO/SSO_Login";
 import SSO_Studies from "../Pages/SSO/SSO_Studies";
 import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
+
 
 const userRoutes = [
     //tenant
@@ -213,9 +214,7 @@ const authRoutes = [
     { path: "/forgot-password", component: <ForgetPwd /> },
     { path: "/register", component: <Register /> },
 
-
-    //Sso
-    { path: "/SSO-login", component: <SSO_Login />},
+    { path: "/reset-password/:code/:username", component: <ResetPassword />},
 
     // Authentication Inner
     { path: "/Pages-login", component: <Login1 /> },
