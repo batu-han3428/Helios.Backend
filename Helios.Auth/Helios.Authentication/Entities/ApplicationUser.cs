@@ -20,7 +20,7 @@ namespace Helios.Authentication.Entities
 
         public string? RefreshToken { get; set; }
         public DateTime? RefrestTokenEndDate { get; set; }
-
+        public bool IsResetPasswordMailSent { get; set; }
         //public string FullName => Name + " " + LastName;
 
         //public bool IsSso { get; set; } = false;

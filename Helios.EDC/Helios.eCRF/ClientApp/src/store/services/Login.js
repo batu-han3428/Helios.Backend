@@ -11,8 +11,33 @@ export const LoginApi = createApi({
                 body: data,
             }),
         }),
+        forgotPasswordPost: builder.mutation({
+            query: (data) => ({
+                url: `/Account/SaveForgotPassword?email=${data.email}&language=${data.language}`,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+        }),
+        resetPasswordGet: builder.query({
+            query: (data) => `/Account/ResetPassword/${encodeURIComponent(data.code)}/${data.username}`,
+        }),
+        resetPasswordPost: builder.mutation({
+            query: (data) => ({
+                url: '/Account/ResetPassword',
+                method: 'POST',
+                body: data
+            }),
+        }),
     }),
 });
 
 
 export const { useLoginPostMutation } = LoginApi;
+
+export const { useForgotPasswordPostMutation } = LoginApi;
+
+export const { useLazyResetPasswordGetQuery } = LoginApi;
+
+export const { useResetPasswordPostMutation } = LoginApi;

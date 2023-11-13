@@ -3,6 +3,7 @@ using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Helios.Common.DTO;
 
 namespace Helios.eCRF.Controllers
 {
@@ -73,17 +74,17 @@ namespace Helios.eCRF.Controllers
         /// <summary>
         /// şifresini unutan kullanıcı için şifre sıfırlama maili gönderilir
         /// </summary>
-        /// <param name="Mail">kullanıcının mail adresi</param>
+        /// <param name="email">kullanıcının mail adresi</param>
         /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
-        public async Task<IActionResult> SaveForgotPassword([FromBody] string Mail)
+        public async Task<IActionResult> SaveForgotPassword(string email, string language)
         {   
-            if (string.IsNullOrEmpty(Mail))
+            if (string.IsNullOrEmpty(email))
             {
-                return NotFound(new { isSuccess= false, message = "Mail alanı boş bırakılamaz" });
+                return NotFound(new ApiResponse<dynamic> { IsSuccess= false, Message = "Mail alanı boş bırakılamaz" });
             }
 
-            var result = await authService.SaveForgotPassword(Mail);
+            var result = await authService.SaveForgotPassword(email, language);
 
             return Ok(result);
         }
@@ -96,7 +97,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="username">kullanıcı adı</param>
         /// <param name="firstPassword"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("{code}/{username}")]
         public async Task<IActionResult> ResetPassword(string code = null, string username = null, bool firstPassword = false)
         {
             if (code == null || username == null)
@@ -116,7 +117,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="model">kullancıının bilgileri</param>
         /// <returns>başarılı başarısız döner</returns>
         [HttpPost]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO model)
         {
             if (!ModelState.IsValid)
             {

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using MassTransit;
 using Helios.Authentication.Consumers.ConsumerModels;
 using Helios.Common.Model;
+using Helios.Common.DTO;
 
 namespace Helios.Authentication.Services
 {
@@ -56,6 +57,11 @@ namespace Helios.Authentication.Services
                 ResearchName = studyUserModel.ResearchName,
                 ResearchLanguage = studyUserModel.ResearchLanguage
             });
+        }
+
+        public async Task ForgotPasswordMail(ForgotPasswordDTO forgotPasswordDTO)
+        {
+            await _backgorundWorker.Publish(forgotPasswordDTO);
         }
     }
 }

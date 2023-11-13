@@ -9,6 +9,7 @@ import {
     changeTopbarTheme,
     changeLayoutWidth,
 } from "../../store/actions";
+import UiSessionTimeoutComp from '../Common/UiSessionTimeoutComp/UiSessionTimeoutComp';
 import Header from "./Header";
 
 
@@ -50,6 +51,7 @@ class Layout extends Component {
                     <Header />
                     <div className="sso-main-content">{this.props.children}</div>
                 </div>
+                <UiSessionTimeoutComp />
             </React.Fragment>
         );
     }

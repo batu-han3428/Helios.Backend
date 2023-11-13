@@ -33,14 +33,11 @@ export const onLogin = () => {
     return false;
 };
 
-export const onLogout = (navigate) => {
-    let result = onLogin();
-    let n = "";
-    if (result.roles.includes("StudyUser")) {
-        n = "/SSO-login";
-    } else {
-        n = "/login"
-    }
+export const onLogout = (navigate, isSessionMessage = false) => {
     removeLocalStorage("accessToken");
-    navigate(n);
+    if (isSessionMessage) {
+        navigate("/login", { state: { message: "Session expired, please login again." }});
+    } else {
+        navigate("/login");
+    }
 };
