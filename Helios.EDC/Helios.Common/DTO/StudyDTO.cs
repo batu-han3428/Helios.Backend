@@ -11,6 +11,7 @@ namespace Helios.Common.DTO
     {
         public Guid Id { get; set; }
         public Guid? EquivalentStudyId { get; set; }
+        public Guid UserId { get; set; }
         public string StudyName { get; set; }
         public string? ProtocolCode { get; set; }
         public bool AskSubjectInitial { get; set; }
@@ -24,5 +25,6 @@ namespace Helios.Common.DTO
         public bool DoubleDataEntry { get; set; }
         public bool ReasonForChange { get; set; }
         public bool IsDemo { get; set; }
+        public bool IsLock { get; set; }
     }
 }

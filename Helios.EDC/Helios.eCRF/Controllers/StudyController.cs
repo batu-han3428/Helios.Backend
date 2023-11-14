@@ -25,11 +25,11 @@ namespace Helios.eCRF.Controllers
         /// çalışma listesini döner
         /// </summary>
         /// <returns>çalışmalar</returns>
-        [HttpGet]
+        [HttpGet("{isLock}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<List<StudyDTO>> GetStudyList()
+        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
         {
-            var result = await _studyService.GetStudyList();
+            var result = await _studyService.GetStudyList(isLock);
 
             return result;
         }
@@ -60,6 +60,21 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> StudySave(StudyModel studyModel)
         {
             var result = await _studyService.StudySave(studyModel);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// çalışmayı kitler ya da kilidini açar
+        /// </summary>
+        /// <param name="studyLockDTO">çalışma bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> StudyLockOrUnlock(StudyLockDTO studyLockDTO)
+        {
+            var result = await _studyService.StudyLockOrUnlock(studyLockDTO);
 
             return Ok(result);
         }

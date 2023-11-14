@@ -12,7 +12,17 @@
     admin: [
         {
             label: "Studies",
-            to: "/studylist",
+            /* to: "/studylist",*/
+            subMenu: [
+                {
+                    label: "Active",
+                    to: "/studylist",
+                },
+                {
+                    label: "Locked",
+                    to: "/lockedlist",
+                }
+            ],
         },
         {
             label: "Tenant",

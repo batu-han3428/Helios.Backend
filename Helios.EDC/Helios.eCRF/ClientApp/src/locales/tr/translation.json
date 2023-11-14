@@ -117,5 +117,13 @@
   "Log In": "Giriş yap",
   "Forgot your password?": "Parolanızı mı unuttunuz?",
   "Send new password": "Yeni şifre gönder",
-  "Session expired, please login again.": "Oturumun süresi doldu, lütfen tekrar giriş yapınız."
+  "Session expired, please login again.": "Oturumun süresi doldu, lütfen tekrar giriş yapınız.",
+  "Unlock": "Kilidini aç",
+  "Do you confirm you want to lock study?": "Çalışmayı kilitlemek istediğinizi onaylıyor musunuz?",
+  "Do you confirm you want to unlock study?": "Çalışmanın kilidini açmak istediğinizi onaylıyor musunuz?",
+  "Locked": "Kilitli",
+  "Excel Download": "Excel'i İndir",
+  "Site list": "Merkez listesi",
+  "Passive all users": "Tüm kullanıcıları pasife al",
+  "All users are passive.": "Tüm kullanıcılar pasiftir."
 }

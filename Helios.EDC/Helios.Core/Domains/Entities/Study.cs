@@ -20,6 +20,7 @@ namespace Helios.Core.Domains.Entities
         public string? CompanyLogoPath { get; set; }
         public int StudyLanguage { get; set; }
         public string StudyName { get; set; }
+        public bool IsLock { get; set; }
         public Study EquivalentStudy { get; set; }
         public ICollection<Site> Sites { get; set; }
         public ICollection<StudyVisit> StudyVisits { get; set; }

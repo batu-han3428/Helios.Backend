@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ModalComp from '../../components/Common/ModalComp/ModalComp';
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useLazyUserListGetQuery, useUserGetQuery, useUserSetMutation, useUserActivePassiveMutation, useUserDeleteMutation, useUserResetPasswordMutation } from '../../store/services/Users';
+import { useLazyUserListGetQuery, useUserGetQuery, useUserSetMutation, useUserActivePassiveMutation, useUsersActivePassiveMutation, useUserDeleteMutation, useUserResetPasswordMutation } from '../../store/services/Users';
 import { useSelector, useDispatch } from 'react-redux';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { startloading, endloading } from '../../store/loader/actions';
@@ -21,6 +21,7 @@ import { useLazySiteListGetQuery } from '../../store/services/SiteLaboratories';
 import makeAnimated from "react-select/animated";
 import "./user.css";
 import { arraysHaveSameItems } from '../../helpers/General/index';
+import { exportToExcel } from '../../helpers/ExcelDownload';
 
 const User = props => {
 
@@ -42,9 +43,14 @@ const User = props => {
     const [skip, setSkip] = useState(true);
     const [isRequired, setIsRequired] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState({});
-
+    const [menu, setMenu] = useState(false);
+    const [excelData, setExcelData] = useState([]);
 
     const animatedComponents = makeAnimated();
+
+    const toggleActions = () => {
+        setMenu(!menu);
+    };
 
     const toggle = (userId) => {
         setDropdownOpen(prevState => {
@@ -186,7 +192,7 @@ const User = props => {
             triggerRoles(studyInformation.studyId);
             triggerSites(studyInformation.studyId);
         }
-    }, [studyInformation.studyId])
+    }, [studyInformation.studyId]) 
 
     useEffect(() => {
         dispatch(startloading());
@@ -203,6 +209,23 @@ const User = props => {
             });
             setTableData(updatedUsersData);
 
+            const data = updatedUsersData.map(updatedUser => {
+                const matchingUser = usersData.find(user => user.studyUserId === updatedUser.studyUserId);
+
+                return [
+                    updatedUser.name,
+                    updatedUser.lastName,
+                    updatedUser.email,
+                    updatedUser.roleName,
+                    (matchingUser && matchingUser.sites.map(site => site.siteFullName)).join(', ') || "",
+                    updatedUser.createdOn,
+                    updatedUser.lastUpdatedOn,
+                    updatedUser.isActive,
+                ];
+            });
+
+            setExcelData(data);
+        
             const timer = setTimeout(() => {
                 generateInfoLabel();
             }, 10)
@@ -413,6 +436,69 @@ const User = props => {
                     Swal.fire({
                         title: "",
                         text: props.t("An error occurred while processing your request."),
+                        icon: "error",
+                        confirmButtonText: props.t("OK"),
+                    });
+                }
+            }
+        });
+    }
+
+    const [usersActivePassive] = useUsersActivePassiveMutation();
+
+    const activePassiveUsers = () => {
+        Swal.fire({
+            title: props.t("User active/passive status will be changed."),
+            text: props.t("Do you confirm?"),
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3bbfad",
+            confirmButtonText: props.t("Yes"),
+            cancelButtonText: props.t("Cancel"),
+            closeOnConfirm: false
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    dispatch(startloading());
+                    var activePassiveData = {
+                        studyUserId: "00000000-0000-0000-0000-000000000000",
+                        authUserId: "00000000-0000-0000-0000-000000000000",
+                        studyId: studyInformation.studyId,
+                        userId: userInformation.userId,
+                        name: "",
+                        lastName: "",
+                        isActive: true,
+                        email: "",
+                        roleId: "00000000-0000-0000-0000-000000000000",
+                        siteIds: [],
+                        password: "",
+                        researchName: studyInformation.studyName,
+                        researchLanguage: studyInformation.studyLanguage,
+                        firstAddition: false
+                    };
+                    const response = await usersActivePassive(activePassiveData);
+                    if (response.data.isSuccess) {
+                        dispatch(endloading());
+                        Swal.fire({
+                            title: "",
+                            text: props.t(response.data.message),
+                            icon: "success",
+                            confirmButtonText: props.t("Ok"),
+                        });
+                    } else {
+                        dispatch(endloading());
+                        Swal.fire({
+                            title: "",
+                            text: response.data.message,
+                            icon: "error",
+                            confirmButtonText: props.t("Ok"),
+                        });
+                    }
+                } catch (error) {
+                    dispatch(endloading());
+                    Swal.fire({
+                        title: "",
+                        text: props.t("An unexpected error occurred."),
                         icon: "error",
                         confirmButtonText: props.t("OK"),
                     });
@@ -742,7 +828,7 @@ const User = props => {
                                 <h6 className="page-title">{props.t("User list")}</h6>
                             </Col>
                             <Col md="4">
-                                <div className="float-end d-none d-md-block">
+                                <div className="float-end d-none d-md-block" style={{marginLeft: "10px"}}>
                                     <Button
                                         color="success"
                                         className="btn btn-success waves-effect waves-light"
@@ -751,6 +837,36 @@ const User = props => {
                                     >
                                         <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add a user")}
                                     </Button>
+                                </div>
+                                <div className="float-end d-none d-md-block">
+                                    <Dropdown isOpen={menu} toggle={toggleActions}>
+                                        <DropdownToggle color="primary" className="btn btn-primary dropdown-toggle waves-effect waves-light">
+                                            {props.t("Actions")}&nbsp;<FontAwesomeIcon icon="fa-solid fa-caret-down" />
+                                        </DropdownToggle>
+                                        <DropdownMenu>
+                                            <DropdownItem onClick={() => exportToExcel({
+                                                headers: [
+                                                    props.t("First name"),
+                                                    props.t("Last name"),
+                                                    "Email",
+                                                    props.t("Study role name"),
+                                                    props.t("Site name"),
+                                                    props.t("Created on"),
+                                                    props.t("Last updated on"),
+                                                    props.t("State"),
+                                                ],
+                                                rows: excelData
+                                            },
+                                            studyInformation.studyName + " - " + props.t("User list"),
+                                            studyInformation.studyName + " - " + props.t("User list")
+                                            )}>
+                                                <FontAwesomeIcon style={{ marginRight: "10px" }} icon="fa-solid fa-download" />
+                                                <span>{props.t("Excel Download")}</span>
+                                            </DropdownItem>
+                                            <DropdownItem divider />
+                                            <DropdownItem onClick={activePassiveUsers}>{props.t("Passive all users")}</DropdownItem>
+                                        </DropdownMenu>
+                                    </Dropdown>
                                 </div>
                             </Col>
                         </Row>

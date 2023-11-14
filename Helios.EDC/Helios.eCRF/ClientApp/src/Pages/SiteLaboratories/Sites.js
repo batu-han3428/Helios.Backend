@@ -15,6 +15,7 @@ import * as Yup from "yup";
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { formatDate } from "../../helpers/format_date";
 import Swal from 'sweetalert2'
+import { exportToExcel } from '../../helpers/ExcelDownload';
 
 const Sites = props => {
 
@@ -253,7 +254,36 @@ const Sites = props => {
                                         color="success"
                                         className="btn btn-success waves-effect waves-light"
                                         type="button"
+                                        onClick={() => exportToExcel({
+                                            headers: [
+                                                props.t("Site Name"),
+                                                props.t("Site No"),
+                                                "Country Code",
+                                                props.t("Country"),
+                                                props.t("Number of subjects that can be added to the center"),
+                                                props.t("Last Updated On"),
+                                            ],
+                                            rows: tableData.map(item => [
+                                                item.siteFullName,
+                                                item.code,
+                                                item.countryCode,
+                                                item.countryName,
+                                                item.maxEnrolmentCount,
+                                                item.updatedAt,
+                                            ])
+                                        },
+                                        studyInformation.studyName + " - " + props.t("Site list"),
+                                        studyInformation.studyName + " - " + props.t("Site list")
+                                        )}
+                                    >
+                                        <FontAwesomeIcon icon="fa-solid fa-download" /> {props.t("Excel Download")}
+                                    </Button>
+                                    <Button
+                                        color="success"
+                                        className="btn btn-success waves-effect waves-light"
+                                        type="button"
                                         onClick={() => modalRef.current.tog_backdrop()}
+                                        style={{marginLeft:"10px"} }
                                     >
                                         <FontAwesomeIcon icon="fa-solid fa-plus" /> Add a site
                                     </Button>

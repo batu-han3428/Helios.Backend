@@ -25,12 +25,12 @@ import NonAuthLayout from "./components/NonAuthLayout"
 /*import fakeBackend from "./helpers/AuthType/fakeBackend"*/
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons'
+import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload } from '@fortawesome/free-solid-svg-icons'
 import NotFound from './Pages/NotFound/NotFound'
 import AccessDeniend from './Pages/AccessDenied/AccessDenied'
 import ContactUs from './Pages/ContactUs/ContactUs'
 
-library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye)
+library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload)
 
 // Activating fake backend
 /*fakeBackend();*/
