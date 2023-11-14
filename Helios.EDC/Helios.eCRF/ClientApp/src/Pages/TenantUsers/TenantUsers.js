@@ -1,7 +1,7 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect, useRef } from "react";
 import {
-    Row, Col, Card, CardBody, FormFeedback, Label, Input, Form
+    Row, Col, Card, CardBody, FormFeedback, Label, Input, Form, Button
 } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import {
@@ -21,6 +21,8 @@ import ModalComp from '../../components/Common/ModalComp/ModalComp';
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
+import { exportToExcel } from '../../helpers/ExcelDownload';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 const TenantUsers = props => {
@@ -37,6 +39,7 @@ const TenantUsers = props => {
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
     const [basicActive, setBasicActive] = useState('tab1');
+    const [excelData, setExcelData] = useState([]);
 
     const handleBasicClick = (value) => {
         if (value === basicActive) {
@@ -215,6 +218,20 @@ const TenantUsers = props => {
             setDemoTableData(demoTable);
             setLiveTableData(liveTable);
 
+            const data = updatedTenantUsersData.map(updatedUser => {
+                return [
+                    updatedUser.name,
+                    updatedUser.lastName,
+                    updatedUser.email,
+                    updatedUser.studyName,
+                    updatedUser.createdOn,
+                    updatedUser.lastUpdatedOn,
+                    updatedUser.isActive,
+                ];
+            });
+
+            setExcelData(data);
+
             const timer = setTimeout(() => {
                 generateInfoLabel();
             }, 10)
@@ -299,6 +316,32 @@ const TenantUsers = props => {
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black", paddingBottom: "5px" }}>
                             <Col md={8}>
                                 <h6 className="page-title">{props.t("User list")}</h6>
+                            </Col>
+                            <Col md="4">
+                                <div className="float-end d-none d-md-block">
+                                    <Button
+                                        color="success"
+                                        className="btn btn-success waves-effect waves-light"
+                                        type="button"
+                                        onClick={() => exportToExcel({
+                                            headers: [
+                                                props.t("First name"),
+                                                props.t("Last name"),
+                                                "Email",
+                                                props.t("Study name"),
+                                                props.t("Created on"),
+                                                props.t("Last updated on"),
+                                                props.t("State")
+                                            ],
+                                            rows: excelData
+                                        },
+                                        props.t("User list"),
+                                        props.t("User list")
+                                        )}
+                                    >
+                                        <FontAwesomeIcon icon="fa-solid fa-download" /> {props.t("Excel Download")}
+                                    </Button>
+                                </div>
                             </Col>
                         </Row>
                     </div>
