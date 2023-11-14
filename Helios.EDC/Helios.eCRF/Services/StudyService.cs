@@ -17,11 +17,12 @@ namespace Helios.eCRF.Services
         }
 
         #region Study
-        public async Task<List<StudyDTO>> GetStudyList()
+        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetStudyList", Method.Get);
+                req.AddParameter("isLock", isLock);
                 var result = await client.ExecuteAsync<List<StudyDTO>>(req);
                 return result.Data;
             }
@@ -44,6 +45,17 @@ namespace Helios.eCRF.Services
             {
                 var req = new RestRequest("CoreStudy/StudySave", Method.Post);
                 req.AddJsonBody(studyModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/StudyLockOrUnlock", Method.Post);
+                req.AddJsonBody(studyLockDTO);
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }

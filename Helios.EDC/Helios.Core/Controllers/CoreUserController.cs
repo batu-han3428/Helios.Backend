@@ -465,6 +465,63 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<dynamic>> ActivePassiveStudyUsers(StudyUserModel studyUserModel)
+        {
+            if (studyUserModel.StudyId != Guid.Empty)
+            {
+                var users = await _context.StudyUsers.Where(x => x.StudyId == studyUserModel.StudyId && !x.IsDeleted).Include(x => x.StudyUserSites).ToListAsync();
+
+                if (users.Count > 0)
+                {
+                    users.ForEach(x =>
+                    {
+                        foreach (var site in x.StudyUserSites.Where(x => !studyUserModel.IsActive ? !x.IsActive && !x.IsDeleted : x.IsActive && !x.IsDeleted))
+                        {
+                            site.IsActive = !studyUserModel.IsActive;
+                        }
+
+                        x.IsActive = !studyUserModel.IsActive;
+                    });
+                }
+
+                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else if(result == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "All users are passive."
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteStudyUser(StudyUserModel studyUserModel)
         {
             if (studyUserModel.StudyUserId != Guid.Empty)

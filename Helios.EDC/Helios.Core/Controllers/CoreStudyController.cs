@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations.Schema;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -27,9 +28,9 @@ namespace Helios.Core.Controllers
 
         #region Study
         [HttpGet]
-        public async Task<List<StudyDTO>> GetStudyList()
+        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
         {
-            var result = await _context.Studies.Where(x => !x.IsDemo && x.IsActive && !x.IsDeleted).Select(x => new StudyDTO()
+            var result = await _context.Studies.Where(x => !x.IsDemo && x.IsActive && !x.IsDeleted && x.IsLock == isLock).Select(x => new StudyDTO()
             {
                 Id = x.Id,
                 EquivalentStudyId = x.EquivalentStudyId,
@@ -37,7 +38,8 @@ namespace Helios.Core.Controllers
                 ProtocolCode = x.ProtocolCode,
                 AskSubjectInitial = x.AskSubjectInitial,
                 StudyLink = x.StudyLink,
-                UpdatedAt = x.UpdatedAt
+                UpdatedAt = x.UpdatedAt,
+                IsLock = x.IsLock
             }).ToListAsync();
 
             return result;
@@ -242,6 +244,47 @@ namespace Helios.Core.Controllers
                     throw;
                 }
 
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO)
+        {
+            var study = await _context.Studies.Where(x => x.Id == studyLockDTO.Id).Include(x => x.EquivalentStudy).FirstOrDefaultAsync();
+            
+            if(study != null)
+            {
+                study.IsLock = !studyLockDTO.IsLock;
+                study.EquivalentStudy.IsLock= !studyLockDTO.IsLock;
+
+                _context.Studies.Update(study);
+
+                var result = await _context.SaveCoreContextAsync(studyLockDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
             }
         }
         #endregion

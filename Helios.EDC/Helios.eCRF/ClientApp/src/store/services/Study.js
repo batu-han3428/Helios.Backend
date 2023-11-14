@@ -20,7 +20,7 @@ export const StudyApi = createApi({
     }),
     endpoints: (builder) => ({
         studyListGet: builder.query({
-            query: () => '/Study/GetStudyList',
+            query: (isLock) => `/Study/GetStudyList/${isLock}`,
             providesTags: ['Study'],
         }),
         studyGet: builder.query({
@@ -41,6 +41,14 @@ export const StudyApi = createApi({
             }),
             invalidatesTags: ['Study'],
         }),
+        studyLockOrUnlock: builder.mutation({
+            query: (data) => ({
+                url: '/Study/StudyLockOrUnlock',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['Study'],
+        }),
     }),
 });
 
@@ -50,3 +58,5 @@ export const { useStudyListGetQuery } = StudyApi;
 export const { useStudyGetQuery, usePrefetch } = StudyApi;
 
 export const { useStudySaveMutation } = StudyApi;
+
+export const { useStudyLockOrUnlockMutation } = StudyApi;

@@ -63,7 +63,6 @@
   "Create Task": ",Create Task",
   "Contacts": "Contacts",
   "User Grid": "User Grid",
-  "User List": "User List",
   "Profile": "Profile",
   "Authentication": "Authentication",
   "Login": "Login",
@@ -272,5 +271,13 @@
   "Log In": "Log In",
   "Forgot your password?": "Forgot your password?",
   "Send new password": "Send new password",
-  "Session expired, please login again.": "Session expired, please login again."
+  "Session expired, please login again.": "Session expired, please login again.",
+  "Unlock": "Unlock",
+  "Do you confirm you want to lock study?": "Do you confirm you want to lock study?",
+  "Do you confirm you want to unlock study?": "Do you confirm you want to unlock study?",
+  "Locked": "Locked",
+  "Excel Download": "Excel Download",
+  "Site list": "Site list",
+  "Passive all users": "Passive all users",
+  "All users are passive.": "All users are passive."
 }

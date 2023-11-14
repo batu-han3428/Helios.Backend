@@ -246,6 +246,18 @@ namespace Helios.eCRF.Controllers
 
 
         /// <summary>
+        /// seçili kullanıcıları aktif veya pasif hale getirir
+        /// </summary>
+        /// <param name="studyUserModel">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> ActivePassiveStudyUsers(StudyUserModel studyUserModel)
+        {
+            var result = await _userService.ActivePassiveStudyUsers(studyUserModel);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Seçili kullanıcıyı siler
         /// </summary>
         /// <param name="studyUserModel">kullanıcı bilgileri</param>

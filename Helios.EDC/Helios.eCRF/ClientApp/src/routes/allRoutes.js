@@ -93,6 +93,7 @@ import AddOrUpdateModule from "../Pages/Module/addOrUpdateModule.js";
 
 //Study
 import StudyList from "../Pages/Study/StudyList";
+import LockedList from "../Pages/Study/LockedList";
 import AddOrUpdateStudy from "../Pages/Study/AddOrUpdateStudy";
 import Study from "../Pages/Study/Study";
 
@@ -124,6 +125,7 @@ const userRoutes = [
 
     //study
     { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/lockedlist", component: <LockedList />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/visits/:studyId", component: <Study />, menuType: "study", roles: ['TenantAdmin'] },
 

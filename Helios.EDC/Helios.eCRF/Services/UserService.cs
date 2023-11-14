@@ -385,6 +385,17 @@ namespace Helios.eCRF.Services
             }
         }
 
+        public async Task<ApiResponse<dynamic>> ActivePassiveStudyUsers(StudyUserModel studyUserModel)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/ActivePassiveStudyUsers", Method.Post);
+                req.AddJsonBody(studyUserModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
         public async Task<ApiResponse<dynamic>> DeleteStudyUser(StudyUserModel studyUserModel)
         {
             using (var client = CoreServiceClient)

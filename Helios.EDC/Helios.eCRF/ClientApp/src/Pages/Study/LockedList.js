@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Swal from 'sweetalert2';
 
 
-const StudyList = props => {
+const LockedList = props => {
 
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -40,9 +40,9 @@ const StudyList = props => {
 
     const [studyLockOrUnlock] = useStudyLockOrUnlockMutation();
 
-    const studyLock = async (id, isLock) => {
+    const studyUnLock = async (id, isLock) => {
         Swal.fire({
-            title: props.t("Do you confirm you want to lock study?"),
+            title: props.t("Do you confirm you want to unlock study?"),
             text: props.t("Do you confirm?"),
             icon: "warning",
             showCancelButton: true,
@@ -73,16 +73,16 @@ const StudyList = props => {
                             title: "",
                             text: response.data.message,
                             icon: "error",
-                            confirmButtonText: props.t("Ok"),
+                            confirmButtonText: props.t("OK"),
                         });
                     }
                 } catch (error) {
                     dispatch(endloading());
                     Swal.fire({
                         title: "",
-                        text: props.t("An unexpected error occurred."),
+                        text: props.t("An error occurred while processing your request."),
                         icon: "error",
-                        confirmButtonText: props.t("Ok"),
+                        confirmButtonText: props.t("OK"),
                     });
                 }
             }
@@ -94,9 +94,9 @@ const StudyList = props => {
             <div className="icon-container">
                 <div title={props.t("Update")} className="icon icon-update" onClick={() => { studyUpdate(id) }}></div>
                 <div title={props.t("Go to demo study")} className="icon icon-demo" onClick={() => { goToStudy(equivalentStudyId, id) }}></div>
-                <div title={props.t("Lock")} className="icon icon-lock" onClick={() => { studyLock(id, isLock) }}></div>
+                <div title={props.t("Unlock")} className="icon icon-unlock" onClick={() => { studyUnLock(id, isLock) }}></div>
                 <div title={props.t("Go to active study")} className="icon icon-live" onClick={() => { goToStudy(id, equivalentStudyId) }}></div>
-            </div>); 
+            </div>);
         return actions;
     };
 
@@ -142,7 +142,7 @@ const StudyList = props => {
         rows: tableData
     }
 
-    const { data: studyData, error, isLoading } = useStudyListGetQuery(false);
+    const { data: studyData, error, isLoading } = useStudyListGetQuery(true);
 
     useEffect(() => {
         dispatch(startloading());
@@ -159,7 +159,7 @@ const StudyList = props => {
             const timer = setTimeout(() => {
                 generateInfoLabel();
             }, 10)
-            
+
             dispatch(endloading());
 
             return () => clearTimeout(timer);
@@ -228,22 +228,22 @@ const StudyList = props => {
                         </Row>
                     </div>
                     <Row>
-                <Col className="col-12">
-                    <Card>
-                        <CardBody>
-                            <MDBDataTable 
-                                paginationLabel={[props.t("Previous"), props.t("Next")]}
-                                entriesLabel={props.t("Show entries")}
-                                searchLabel={props.t("Search")}
-                                hover
-                                responsive
-                                striped
-                                bordered
-                                data={data}
-                             />
-                        </CardBody>
-                    </Card>
-                </Col>
+                        <Col className="col-12">
+                            <Card>
+                                <CardBody>
+                                    <MDBDataTable
+                                        paginationLabel={[props.t("Previous"), props.t("Next")]}
+                                        entriesLabel={props.t("Show entries")}
+                                        searchLabel={props.t("Search")}
+                                        hover
+                                        responsive
+                                        striped
+                                        bordered
+                                        data={data}
+                                    />
+                                </CardBody>
+                            </Card>
+                        </Col>
                     </Row>
                 </div>
             </div>
@@ -251,8 +251,8 @@ const StudyList = props => {
     );
 };
 
-StudyList.propTypes = {
+LockedList.propTypes = {
     t: PropTypes.any
 };
 
-export default withTranslation()(StudyList);
+export default withTranslation()(LockedList);

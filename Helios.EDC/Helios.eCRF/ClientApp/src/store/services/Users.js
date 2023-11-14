@@ -41,6 +41,14 @@ export const UsersApi = createApi({
             }),
             invalidatesTags: ['User'],
         }),
+        usersActivePassive: builder.mutation({
+            query: (data) => ({
+                url: '/User/ActivePassiveStudyUsers',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['User'],
+        }),
         userDelete: builder.mutation({
             query: (data) => ({
                 url: '/User/DeleteStudyUser',
@@ -68,6 +76,8 @@ export const { useUserGetQuery } = UsersApi;
 export const { useUserSetMutation } = UsersApi;
 
 export const { useUserActivePassiveMutation } = UsersApi;
+
+export const { useUsersActivePassiveMutation } = UsersApi;
 
 export const { useUserDeleteMutation } = UsersApi;
 
