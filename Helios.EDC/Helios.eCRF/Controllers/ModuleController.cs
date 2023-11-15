@@ -120,23 +120,39 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
-            var result = await _moduleService.SaveModuleContent(model);
+            var result = new ApiResponse<dynamic>();
+
+            if (model.IsDependent
+                && model.DependentSourceFieldId == null
+                || model.DependentTargetFieldId == null
+                || model.DependentCondition == 0
+                || model.DependentAction == 0
+                || model.DependentFieldValue == "")
+            {
+                result.IsSuccess = false;
+                result.Message = "Dependent Error";
+            }
+            else
+            {
+                result = await _moduleService.SaveModuleContent(model);
+            }
+         
             return result;
         }
-    
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> CopyElement(string id)
         {
             var elmId = Guid.Parse(id);
-            var result = await _moduleService.CopyElement(elmId,new Guid());
+            var result = await _moduleService.CopyElement(elmId, new Guid());
             return result;
         }
-    
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteElement(string id)
         {
             var elmId = Guid.Parse(id);
-            var result = await _moduleService.DeleteElement(elmId,new Guid());
+            var result = await _moduleService.DeleteElement(elmId, new Guid());
             return result;
         }
     }

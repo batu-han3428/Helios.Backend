@@ -15,24 +15,22 @@ const actionList = [
 const Actions = props => {
     const [selectedGroup, setselectedGroup] = useState(null);
 
-    const handleSelectGroup = (selectedGroup)=> {
+    const handleSelectGroup = (selectedGroup) => {
         setselectedGroup(selectedGroup);
     };
 
     return (
-        <>
-            <div className="mb-3">
-                <Label>Dependency action</Label>
-                <Select
-                    value={selectedGroup}
-                    onChange={() => {
-                        handleSelectGroup();
-                    }}
-                    options={actionList}
-                    classNamePrefix="select2-selection"
-                />
-            </div>
-        </>
+        <div className="mb-3">
+            <Label>Dependency action</Label>
+            <Select
+                value={selectedGroup}
+                onChange={() => {
+                    handleSelectGroup();
+                }}
+                options={actionList}
+                classNamePrefix="select2-selection"
+            />
+        </div>
     )
 }
 

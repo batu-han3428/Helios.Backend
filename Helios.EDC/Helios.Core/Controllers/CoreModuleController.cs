@@ -139,10 +139,27 @@ namespace Helios.Core.Controllers
                     IsRequired = x.IsRequired,
                     IsHidden = x.IsHidden,
                     CanMissing = x.CanMissing,
+                    Width = x.Width,
                     Unit = x.ElementDetail.Unit,
+                    Mask = x.ElementDetail.Mask,
                     LowerLimit = x.ElementDetail.LowerLimit,
-                    UpperLimit = x.ElementDetail.UpperLimit
+                    UpperLimit = x.ElementDetail.UpperLimit,
+                    IsDependent = x.IsDependent
                 }).FirstOrDefaultAsync();
+
+            if (result.IsDependent)
+            {
+                var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted);
+
+                if (dep != null)
+                {
+                    result.DependentSourceFieldId = dep.SourceElementId.ToString();
+                    result.DependentTargetFieldId = dep.TargetElementId.ToString();
+                    result.DependentCondition = (int)dep.ValueCondition;
+                    result.DependentAction = (int)dep.ActionType;
+                    result.DependentFieldValue = dep.ActionValue;
+                }
+            }
 
             return result;
         }
@@ -189,8 +206,8 @@ namespace Helios.Core.Controllers
                     IsRequired = model.IsRequired,
                     ModuleId = moduleId,
                     Order = moduleElementMaxOrder + 1,
-                    CreatedAt = DateTimeOffset.Now,
-                    AddedById = userId,
+                    //CreatedAt = DateTimeOffset.Now,
+                    //AddedById = userId,
                 };
 
                 _context.Elements.Add(elm);
@@ -202,14 +219,35 @@ namespace Helios.Core.Controllers
                     {
                         ElementId = elm.Id,
                         Unit = model.Unit,
+                        Mask = model.Mask,
                         LowerLimit = model.LowerLimit,
                         UpperLimit = model.UpperLimit,
-                        CreatedAt = DateTimeOffset.Now,
-                        AddedById = userId,
+                        //TargetElementId = Guid.Parse(model.DependentTargetFieldId),
+                        //CreatedAt = DateTimeOffset.Now,
+                        //AddedById = userId,
                         //ButtonText = model.buttonText
                     };
 
                     _context.ElementDetails.Add(elementDetail);
+                    result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+                    
+                    elm.ElementDetailId = elementDetail.Id;
+                    _context.Elements.Update(elm);
+
+                    if (model.IsDependent)
+                    {
+                        var elementEvent = new ModuleElementEvent()
+                        {
+                            SourceElementId = Guid.Parse(model.DependentTargetFieldId),
+                            TargetElementId = elm.Id,
+                            ValueCondition = (ActionCondition)model.DependentCondition,
+                            ActionType = (ActionType)model.DependentAction,
+                            ActionValue = model.DependentFieldValue,
+                        };
+
+                        _context.ModuleElementEvents.Add(elementEvent);
+                    }
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
                     result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
@@ -240,12 +278,45 @@ namespace Helios.Core.Controllers
                 var elementDetail = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == element.Id && x.IsActive && !x.IsDeleted);
 
                 elementDetail.Unit = model.Unit;
+                elementDetail.Mask = model.Mask;
                 elementDetail.LowerLimit = model.LowerLimit;
                 elementDetail.UpperLimit = model.UpperLimit;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = userId;
 
                 _context.Update(elementDetail);
+
+                if (model.IsDependent)
+                {
+                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted);
+
+                    if (dep == null)
+                    {
+                        var elementEvent = new ModuleElementEvent()
+                        {
+                            SourceElementId = Guid.Parse(model.DependentSourceFieldId),
+                            TargetElementId = element.Id,
+                            ValueCondition = (ActionCondition)model.DependentCondition,
+                            ActionType = (ActionType)model.DependentAction,
+                            ActionValue = model.DependentFieldValue,
+                            ModuleId = element.ModuleId
+                        };
+
+                        _context.ModuleElementEvents.Add(elementEvent);
+                    }
+                    else
+                    {
+                        dep.SourceElementId = Guid.Parse(model.DependentSourceFieldId);
+                        dep.TargetElementId = element.Id;
+                        dep.ValueCondition = (ActionCondition)model.DependentCondition;
+                        dep.ActionType = (ActionType)model.DependentAction;
+                        dep.ActionValue = model.DependentFieldValue;
+                        dep.ModuleId = element.ModuleId;
+
+                        _context.ModuleElementEvents.Update(dep);
+                    }
+                }
+
                 result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
             }
 
@@ -267,14 +338,25 @@ namespace Helios.Core.Controllers
                 element.ElementName = element.ElementName + "_1";
                 element.Order = element.Order++;
 
+                var elementDetail = await _context.ElementDetails.Where(x=>x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+                elementDetail.Id = Guid.NewGuid();
+                elementDetail.ElementId = element.Id;
+
+                element.ElementDetailId = elementDetail.Id;
+
                 _context.Add(element);
+                _context.Add(elementDetail);
 
                 var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 foreach (var item in moduleElements)
                 {
-                    item.Order = item.Order++;
-                    _context.Update(item);
+                    if (item.Order >= element.Order)
+                    {
+                        item.Order = item.Order++;
+                        _context.Update(item);
+                    }
                 }
 
                 result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
@@ -297,13 +379,17 @@ namespace Helios.Core.Controllers
             var userId = Guid.Parse(model.UserId);
 
             var element = await _context.Elements.Where(x => x.Id == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (element != null)
             {
                 element.IsDeleted = true;
                 element.IsActive = false;
+                elementDetail.IsDeleted = true;
+                elementDetail.IsActive = false;
 
                 _context.Update(element);
+                _context.Update(elementDetail);
 
                 result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
                 result.Message = result.IsSuccess ? "Successful" : "Error";

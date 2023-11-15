@@ -35,10 +35,10 @@ namespace Helios.eCRF.Models
         //public string ButtonText { get; set; }
         //public string DefaultValue { get; set; }
         public string Unit { get; set; } = "";
+        public string Mask { get; set; } = "";
         public string LowerLimit { get; set; } = "";
         public string UpperLimit { get; set; } = "";
         //public string Extension { get; set; } //numeric description
-        //public string Mask { get; set; }
         //public int StartDay { get; set; }
         //public int EndDay { get; set; }
         //public int StartMonth { get; set; }

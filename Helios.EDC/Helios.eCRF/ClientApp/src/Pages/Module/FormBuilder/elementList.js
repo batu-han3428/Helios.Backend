@@ -17,6 +17,7 @@ import './formBuilder.css';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2'
+import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-ad' },
@@ -45,6 +46,9 @@ function ElementList(props) {
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [message, setMessage] = useState("");
+    const [stateToast, setStateToast] = useState(true);
     const dispatch = useDispatch();
 
     const removeBodyCss = () => {
@@ -70,11 +74,15 @@ function ElementList(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.isSuccess) {
+                    setMessage(data.message)
+                    setStateToast(true);
+                    setShowToast(true);
                     dispatch(endloading());
-                    Swal.fire(data.message, '', 'success');
                 } else {
+                    setMessage(data.message)
+                    setStateToast(false);
+                    setShowToast(true);
                     dispatch(endloading());
-                    Swal.fire(data.message, '', 'error');
                 }
             })
             .catch(error => {
@@ -83,23 +91,43 @@ function ElementList(props) {
     };
 
     const deleteElement = (e, id) => {
-        fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
-            method: 'POST',
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.isSuccess) {
+        Swal.fire({
+            title: "You will not be able to recover this element!",
+            text: "Do you confirm?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3bbfad",
+            confirmButtonText: "Yes",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    dispatch(startloading());
+
+                    fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
+                        method: 'POST',
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.isSuccess) {
+                                dispatch(endloading());
+                                Swal.fire(data.message, '', 'success');
+                            } else {
+                                dispatch(endloading());
+                                Swal.fire(data.message, '', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            //console.error('Error:', error);
+                        });
+                } catch (error) {
                     dispatch(endloading());
-                    Swal.fire(data.message, '', 'success');
-                } else {
-                    dispatch(endloading());
-                    Swal.fire(data.message, '', 'error');
+                    Swal.fire('An error occurred', '', 'error');
                 }
-            })
-            .catch(error => {
-                //console.error('Error:', error);
-            });
-    };
+            }
+        })
+    }
 
     const elmementItems = elements.map((l) =>
         <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '')}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
@@ -144,7 +172,7 @@ function ElementList(props) {
     });
 
     return (
-        <>
+        <div>
             <div style={{ width: "200px", float: 'left' }}>
                 <div>
                     {elmementItems}
@@ -157,10 +185,18 @@ function ElementList(props) {
                         </ModalBody>
                     </Modal>
                 </Col>
-            </div><div style={{ margin: '10px 0 10px 215px' }}>
+            </div>
+            <div style={{ margin: '10px 0 10px 215px' }}>
                 {content}
             </div>
-        </>
+            <ToastComp
+                title="Toast"
+                message={message}
+                showToast={showToast}
+                setShowToast={setShowToast}
+                stateToast={stateToast}
+            />
+        </div>
 
     );
 }
