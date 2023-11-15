@@ -22,12 +22,17 @@ class NumericElementProperties extends Component {
         super(props);
 
         this.handleUnitChange = this.handleUnitChange.bind(this);
+        this.handleMaskChange = this.handleMaskChange.bind(this);
         this.handleLowerLimitChange = this.handleLowerLimitChange.bind(this);
         this.handleUpperLimitChange = this.handleUpperLimitChange.bind(this);
     }
 
     handleUnitChange(e) {
         this.props.changeUnit(e.target.value);
+    };
+
+    handleMaskChange(e) {
+        this.props.changeMask(e.target.value);
     };
 
     handleLowerLimitChange(e) {
@@ -40,7 +45,7 @@ class NumericElementProperties extends Component {
 
     render() {
         return (
-            <>
+            <div>
                 <Row className="mb-3">
                     <label
                         htmlFor="example-text-input"
@@ -48,13 +53,27 @@ class NumericElementProperties extends Component {
                     >
                         Unit
                     </label>
-                    <div className="col-md-10">
+                    <div className="col-md-4">
                         <input
                             value={this.props.Unit}
                             onChange={this.handleUnitChange}
                             className="form-control"
                             type="text"
                             placeholder="Unit" />
+                    </div>
+                    <label
+                        htmlFor="example-text-input"
+                        className="col-md-2 col-form-label"
+                    >
+                        Mask type
+                    </label>
+                    <div className="col-md-4">
+                        <input
+                            value={this.props.Mask}
+                            onChange={this.handleMaskChange}
+                            className="form-control"
+                            type="text"
+                            placeholder="Mask type" />
                     </div>
                 </Row>
                 <Row className="mb-3">
@@ -87,7 +106,7 @@ class NumericElementProperties extends Component {
                             placeholder="Upper limit" />
                     </div>
                 </Row>
-            </>
+            </div>
         );
     }
 }

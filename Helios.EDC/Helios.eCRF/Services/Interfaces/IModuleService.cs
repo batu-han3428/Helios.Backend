@@ -16,6 +16,8 @@ namespace Helios.eCRF.Services.Interfaces
         Task<List<ModuleModel>> GetModuleList();
         Task<List<ElementModel>> GetModuleElements(Guid id);
         Task<ElementModel> GetElementData(Guid id);
-        Task<bool> SaveModuleContent(ElementModel model);
+        Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model);
+        Task<ApiResponse<dynamic>> CopyElement(Guid id, Guid userId);
+        Task<ApiResponse<dynamic>> DeleteElement(Guid id, Guid userId);
     }
 }

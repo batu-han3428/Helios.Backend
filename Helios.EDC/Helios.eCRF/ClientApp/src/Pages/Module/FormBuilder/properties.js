@@ -12,6 +12,7 @@ import {
     NavLink,
     Row,
     TabContent,
+    Table,
     TabPane,
     Input,
     Button,
@@ -22,8 +23,10 @@ import Select from "react-select";
 import classnames from "classnames";
 import TextElementProperties from '../Elements/textElementProperties.js'
 import NumericElementProperties from '../Elements/numericElementProperties.js'
-import Conditions from "./conditions.js";
-import Actions from "./action.js";
+import ToastComp from '../../../components/Common/ToastComp/ToastComp';
+import Swal from 'sweetalert2'
+import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
+import TagInput from '../../../components/Common/TagComp/TagInput.js';
 
 const baseUrl = "https://localhost:7196";
 
@@ -32,22 +35,6 @@ class Properties extends React.Component {
         super(props);
         this.state = {
             activeTab: "1",
-            activeTab1: "5",
-            activeTab2: "9",
-            activeTab3: "13",
-            verticalActiveTab: "1",
-            customActiveTab: "1",
-            activeTabJustify: "1",
-            col1: true,
-            col2: false,
-            col3: false,
-            col5: true,
-            col6: true,
-            col7: true,
-            col8: true,
-            col9: true,
-            col10: false,
-            col11: false,
 
             // General properties
             Id: props.Id,
@@ -59,12 +46,28 @@ class Properties extends React.Component {
             IsTitleHidden: true,
             Order: 0,
             Description: '',
-            Width: 12,
+            FieldWidths: 0,
             IsHidden: false,
             IsRequired: false,
             IsDependent: false,
             IsReadonly: false,
             CanMissing: false,
+
+            widthOptionGroup: [
+                { label: "col-md-1", value: 1 },
+                { label: "col-md-2", value: 2 },
+                { label: "col-md-3", value: 3 },
+                { label: "col-md-4", value: 4 },
+                { label: "col-md-5", value: 5 },
+                { label: "col-md-6", value: 6 },
+                { label: "col-md-7", value: 7 },
+                { label: "col-md-8", value: 8 },
+                { label: "col-md-9", value: 9 },
+                { label: "col-md-10", value: 10 },
+                { label: "col-md-11", value: 11 },
+                { label: "col-md-12", value: 12 },
+            ],
+            widthSelectedGroup: null,
 
             // Dependency properties
             DependentSourceFieldId: '',
@@ -73,25 +76,58 @@ class Properties extends React.Component {
             DependentAction: 0,
             DependentFieldValue: '',
 
+            // Relation
+            RelationFieldId: '',
+            RelationVariableName: '',
+
             // Elements properties
             Unit: '',
+            Mask: '',
             LowerLimit: '',
             UpperLimit: '',
 
             // Validation
             RequiredError: 'This value is required',
             ElementNameInputClass: 'form-control',
+            DepFldInputClass: '',
+            DepConInputClass: '',
+            DepActInputClass: '',
+            DepFldVlInputClass: 'form-control',
 
-            // Other
-            optionGroup: [],
-            isOpen: false,
-            isOpenClass: "mdi mdi-chevron-up"
+            // Toast
+            showToast: false,
+            toastMessage: "",
+            stateToast: true,
+
+            // dependent
+            dependentFieldOptionGroup: [],
+            dependentFieldsSelectedGroup: 0,
+            conditionOptionGroup: [
+                { label: "Less", value: 1 },
+                { label: "More", value: 2 },
+                { label: "Equal", value: 3 },
+                { label: "More and equal", value: 4 },
+                { label: "Less and equal", value: 5 },
+                { label: "Not equal", value: 6 },
+            ],
+            conditionSelectedGroup: null,
+            actionOptionGroup: [
+                { label: "Show", value: 1 },
+                { label: "Hide", value: 2 },
+            ],
+            actionSelectedGroup: 0,
+            dependentEnabled: true,
+
+            //relation
+            relationFieldOptionGroup: [],
+            relationFieldsSelectedGroup: 0
         };
 
         this.toggle = this.toggle.bind(this);
-        this.toggleAccordion = this.toggleAccordion.bind(this);
-        this.saveProperties = this.saveProperties.bind(this);
+        this.setShowToast.bind(this);
+        this.handleSaveModuleContent = this.handleSaveModuleContent.bind(this);
         this.getElementData = this.getElementData.bind(this);
+        this.fillDependentFieldList = this.fillDependentFieldList.bind(this);
         this.fillElementProperties = this.fillElementProperties.bind(this);
 
         this.handleIdChange = this.handleIdChange.bind(this);
@@ -108,43 +144,25 @@ class Properties extends React.Component {
         this.handleIsDependentChange = this.handleIsDependentChange.bind(this);
         this.handleIsReadonlyChange = this.handleIsReadonlyChange.bind(this);
         this.handleCanMissingChange = this.handleCanMissingChange.bind(this);
-        this.handleDependentSourceFieldIdChange = this.handleDependentSourceFieldIdChange.bind(this);
-        this.handleDependentTargetFieldIdChange = this.handleDependentTargetFieldIdChange.bind(this);
+        this.handleDependentFieldChange = this.handleDependentFieldChange.bind(this);
         this.handleDependentConditionChange = this.handleDependentConditionChange.bind(this);
         this.handleDependentActionChange = this.handleDependentActionChange.bind(this);
+        this.handleDependentFieldValueChange = this.handleDependentFieldValueChange.bind(this);
+        this.handleDataReceived = this.handleDataReceived.bind(this);
+        this.handleRelationFieldChange = this.handleRelationFieldChange.bind(this);
 
+        //this.changeFieldWidth.bind(this);
         this.changeUnit.bind(this);
+        this.changeMask.bind(this);
         this.changeLowerLimit.bind(this);
         this.changeUpperLimit.bind(this);
-        //this.handleSaveModuleContent = this.handleSaveModuleContent.bind(this);
-        //this.setState({ selectedGroup: null });
-        //this.setState({
-        //    optionGroup: [
-        //        {
-        //            label: "Picnic",
-        //            options: [
-        //                { label: "Mustard", value: "Mustard" },
-        //                { label: "Ketchup", value: "Ketchup" },
-        //                { label: "Relish", value: "Relish" }
-        //            ]
-        //        }
-        //    ]
-        //});
 
+        this.fillDependentFieldList();
         this.getElementData();
     }
 
-    toggleAccordion() {
-        debugger;
-        this.state.isOpen = !(this.state.isOpen);
-        this.state.isOpenClass = this.state.isOpen ? "mdi mdi-chevron-up" : "mdi mdi-chevron-down";
-    }
-
-    getToggleClass() {
-        if (this.isOpen)
-            return "mdi mdi-chevron-up";
-        else
-            return "mdi mdi-chevron-down";
+    setShowToast() {
+        this.state.showToast = false;
     }
 
     toggle(tab) {
@@ -155,19 +173,16 @@ class Properties extends React.Component {
         }
     }
 
-    //handleSelectGroup(selectedGroup) {
-    //    this.state.selectedGroup = selectedGroup;
-    //}
-
     renderElementPropertiesSwitch(param) {
         switch (param) {
             case 2:
-                return <TextElementProperties changeUnit={this.changeUnit} />;
+                return <TextElementProperties changeUnit={this.changeUnit} Unit={this.state.Unit} />;
             case 4:
                 return <NumericElementProperties
-                    changeUnit={this.changeUnit}
-                    changeLowerLimit={this.changeLowerLimit}
-                    changeUpperLimit={this.changeUpperLimit}
+                    changeUnit={this.changeUnit} Unit={this.state.Unit}
+                    changeMask={this.changeMask} Mask={this.state.Mask}
+                    changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
+                    changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
                 />;
             default:
                 return <TextElementProperties changeUnit={this.changeUnit} />;
@@ -207,7 +222,8 @@ class Properties extends React.Component {
     };
 
     handleWidthChange(e) {
-        this.setState({ Width: e.target.value });
+        this.setState({ FieldWidths: e.value });
+        this.state.widthSelectedGroup = e;
     };
 
     handleIsHiddenChange(e) {
@@ -218,10 +234,6 @@ class Properties extends React.Component {
         this.setState({ IsRequired: e.target.value });
     };
 
-    handleIsDependentChange(e) {
-        this.setState({ IsDependent: e.target.value });
-    };
-
     handleIsReadonlyChange(e) {
         this.setState({ IsReadonly: e.target.value });
     };
@@ -230,28 +242,107 @@ class Properties extends React.Component {
         this.setState({ CanMissing: e.target.value });
     };
 
-    handleDependentSourceFieldIdChange(e) {
-        this.setState({ DependentSourceFieldId: e.target.value });
+    // #region dependent
+    fillDependentFieldList() {
+        var depFldOptionGroup = [];
+
+        fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                data.map(item => {
+                    if (item.id != this.state.Id) {
+                        var itm = { label: item.title, value: item.id };
+                        depFldOptionGroup.push(itm);
+                    }
+                });
+
+                this.state.dependentFieldOptionGroup = depFldOptionGroup;
+                this.state.relationFieldOptionGroup = depFldOptionGroup;
+
+                if (this.state.Id != "") {
+                    var t = this.state.DependentSourceFieldId;
+
+                    var f = this.state.dependentFieldOptionGroup.filter(function (e) {
+                        if (e.value == t)
+                            return e;
+                    });
+
+                    this.state.dependentFieldsSelectedGroup = f;
+                }
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
+    }
+
+    handleDependentFieldChange(e) {
+        this.setState({ DependentSourceFieldId: e.value });
+        this.setState({ DependentTargetFieldId: this.state.Id });
+        this.state.dependentFieldsSelectedGroup = e;
+        this.state.DepFldInputClass = '';
     };
 
-    handleDependentTargetFieldIdChange(e) {
-        this.setState({ DependentTargetFieldId: e.target.value });
-    };
-
-    handleDependentConditionChange(e) {
-        this.setState({ DependentCondition: e.target.value });
+    handleDependentConditionChange = selectedOption => {
+        this.setState({ DependentCondition: selectedOption.value });
+        this.state.conditionSelectedGroup = selectedOption;
+        this.state.DepConInputClass = '';
     };
 
     handleDependentActionChange(e) {
-        this.setState({ DependentAction: e.target.value });
+        this.setState({ DependentAction: e.value });
+        this.state.actionSelectedGroup = e;
+        this.state.DepActInputClass = '';
     };
 
     handleDependentFieldValueChange(e) {
         this.setState({ DependentFieldValue: e.target.value });
+        /*this.state.DepFldVlInputClass = 'form-control';*/
     };
+
+    handleDependentFieldSelectGroup = (selectedGroup) => {
+        this.state.dependentFieldsSelectedGroup = selectedGroup;
+    };
+
+    handleIsDependentChange = (e) => {
+        this.state.IsDependent = e.target.value == "1" ? true : false;
+
+        if (e.target.value == "1") {
+            this.setState({ dependentEnabled: false });
+        }
+        else {
+            this.setState({ dependentEnabled: true });
+            this.setState({ dependentFieldsSelectedGroup: 0 });
+            this.setState({ conditionSelectedGroup: 0 });
+            this.setState({ actionSelectedGroup: 0 });
+            this.setState({ DependentFieldValue: '' });
+        }
+    }
+
+    handleDataReceived = (data) => {
+        //this.setState({ DependentFieldValue: JSON.stringify({ data }) });
+        this.state.DependentFieldValue = JSON.stringify({ data });
+    };
+    // #end region dependent
+
+    handleRelationFieldChange(e) {
+        //this.setState({ DependentSourceFieldId: e.value });
+        //this.setState({ DependentTargetFieldId: this.state.Id });
+        //this.state.dependentFieldsSelectedGroup = e;
+        //this.state.DepFldInputClass = '';
+    };
+
+    //changeFieldWidth = (newValue) => {
+    //    this.setState({ FieldWidths: newValue });
+    //};
 
     changeUnit = (newValue) => {
         this.setState({ Unit: newValue });
+    };
+
+    changeMask = (newValue) => {
+        this.setState({ Mask: newValue });
     };
 
     changeLowerLimit = (newValue) => {
@@ -269,13 +360,15 @@ class Properties extends React.Component {
             })
                 .then(response => response.json())
                 .then(data => {
-
                     this.fillElementProperties(data);
                 })
                 .catch(error => {
                     //console.error('Error:', error);
                 });
         }
+        //else {
+        //    this.fillDependentFieldList();
+        //}
     }
 
     fillElementProperties(data) {
@@ -283,21 +376,76 @@ class Properties extends React.Component {
         this.state.ElementName = data.elementName;
         this.state.Description = data.description;
         this.state.ElementType = data.elementType;
+        this.state.FieldWidths = data.width;
         this.state.Unit = data.unit != null ? data.unit : "";
+        this.state.Mask = data.mask != null ? data.mask : "";
         this.state.LowerLimit = data.lowerLimit != null ? data.lowerLimit : "";
         this.state.UpperLimit = data.upperLimit != null ? data.upperLimit : "";
         this.state.IsRequired = data.isRequired;
         this.state.IsHidden = data.isHidden;
         this.state.CanMissing = data.canMissing;
+        this.state.IsDependent = data.isDependent;
+        this.state.DependentSourceFieldId = data.dependentSourceFieldId;
+        this.state.DependentTargetFieldId = data.dependentTargetFieldId;
+        this.state.DependentCondition = data.dependentCondition;
+        this.state.DependentAction = data.dependentAction;
+        this.state.DependentFieldValue = data.dependentFieldValue;
+
+        var w = this.state.widthOptionGroup.filter(function (e) {
+            if (e.value == data.width)
+                return e;
+        });
+
+        this.state.widthSelectedGroup = w;
+
+        var cn = this.state.conditionOptionGroup.filter(function (e) {
+            if (e.value == data.dependentCondition)
+                return e;
+        });
+
+        this.state.conditionSelectedGroup = cn;
+
+        var ac = this.state.actionOptionGroup.filter(function (e) {
+            if (e.value == data.dependentAction)
+                return e;
+        });
+
+        this.state.actionSelectedGroup = ac;
+
+        if (data.isDependent) {
+            this.setState({ dependentEnabled: false });
+        }
     }
 
-    saveProperties(e) {
+    handleSaveModuleContent(e) {
+        var isValid = true;
+
         if (this.state.ElementName == "") {
             this.setState({ ElementNameInputClass: "is-invalid form-control" });
-            e.preventDefault();
+            isValid = false;
         }
-        else {
-            debugger;
+
+        if (this.state.IsDependent && this.state.DependentSourceFieldId == '' || this.state.DependentTargetFieldId == '') {
+            this.setState({ DepFldInputClass: "form-control is-invalid" });
+            isValid = false;
+        }
+
+        if (this.state.IsDependent && this.state.DependentCondition == 0) {
+            this.setState({ DepConInputClass: "form-control is-invalid" });
+            isValid = false;
+        }
+
+        if (this.state.IsDependent && this.state.DependentAction == 0) {
+            this.setState({ DepActInputClass: "form-control is-invalid" });
+            isValid = false;
+        }
+
+        //if (this.state.IsDependent && this.state.DependentFieldValue == '') {
+        //    this.setState({ DepFldVlInputClass: "form-control is-invalid" });
+        //    isValid = false;
+        //}
+
+        if (isValid) {
             fetch(baseUrl + '/Module/SaveModuleContent', {
                 method: 'POST',
                 headers: {
@@ -315,10 +463,10 @@ class Properties extends React.Component {
                     IsTitleHidden: this.state.IsTitleHidden,
                     Order: this.state.Order,
                     Description: this.state.Description,
-                    Width: this.state.Width,
+                    Width: this.state.FieldWidths,
                     IsHidden: this.state.IsHidden == 'on' ? true : false,
                     IsRequired: this.state.IsRequired == 'on' ? true : false,
-                    IsDependent: this.state.IsDependent == 'on' ? true : false,
+                    IsDependent: this.state.IsDependent,
                     IsReadonly: this.state.IsReadonly,
                     CanMissing: this.state.CanMissing == 'on' ? true : false,
 
@@ -331,6 +479,7 @@ class Properties extends React.Component {
 
                     // Elements properties
                     Unit: this.state.Unit,
+                    //Mask: this.state.Mask,
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
 
@@ -338,20 +487,45 @@ class Properties extends React.Component {
                 })
             }).then(res => res.json())
                 .then(data => {
-                    debugger;
+                    if (data.isSuccess) {
+                        Swal.fire(data.message, '', 'success');
+                    } else {
+                        Swal.fire(data.message, '', 'error');
+                        console.log(data.message);
+                    };
+                    //if (data.isSuccess) {
+                    //    this.state.toastMessage = data.message;
+                    //    this.state.stateToast = true;
+                    //    this.state.showToast = true;
+                    //} else {
+                    //    this.state.toastMessage = data.message;
+                    //    this.state.stateToast = false;
+                    //    this.state.showToast = true;
+                    //}
                 })
                 .catch(error => {
-                    debugger;
                     //console.error('Error:', error);
                 });
         }
+        else {
+            e.preventDefault();
+        }
+    }
+
+    componentDidMount() {
+        // Add an event listener for keydown on the form element
+        document.getElementById('formBuilder').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent Enter key from submitting the form
+            }
+        });
     }
 
     render() {
         return (
-            <>
+            <div>
                 {/*<ElementBase>*/}
-                <form onSubmit={this.saveProperties}>
+                <form id="formBuilder" onSubmit={this.handleSaveModuleContent}>
                     <Col lg={12}>
                         <Card>
                             <CardBody>
@@ -468,26 +642,44 @@ class Properties extends React.Component {
                                                             />
                                                         </div>
                                                     </Row>
-                                                    {/*<i onClick={this.toggleAccordion} className={this.state.isOpenClass} style={{ fontSize: "12px", marginRight: "5px", cursor: "pointer" }}></i><Label style={{ borderBottom: "1px solid black" }} className="form-label">Advanced options</Label>*/}
-                                                    {/*<Collapse isOpen={this.state.isOpen}>*/}
-                                                    {this.renderElementPropertiesSwitch(this.state.ElementType)}
-                                                    <Row className="mb-3">
-                                                        <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
-                                                            <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                    <AccordionComp title="Advanced options" body={
+                                                        <div>
+                                                            {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
+                                                            <Row className="mb-3">
+                                                                <label
+                                                                    htmlFor="example-text-input"
+                                                                    className="col-md-2 col-form-label"
+                                                                >
+                                                                    Field width
+                                                                </label>
+                                                                <div className="col-md-10">
+                                                                    <Select
+                                                                        value={this.state.widthSelectedGroup}
+                                                                        onChange={this.handleWidthChange}
+                                                                        options={this.state.widthOptionGroup}
+                                                                        classNamePrefix="select2-selection"
+                                                                    />
+                                                                </div>
+                                                            </Row>
+                                                            {this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                            <Row className="mb-3 ml-0">
+                                                                <div className="form-check col-md-6">
+                                                                    <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
+                                                                    <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                                </div>
+                                                                <div className="form-check col-md-6">
+                                                                    <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
+                                                                    <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
+                                                                </div>
+                                                            </Row>
+                                                            <Row className="mb-3 ml-0">
+                                                                <div className="form-check col-md-6">
+                                                                    <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
+                                                                    <label className="form-check-label" htmlFor="canMissing">Can missing</label>
+                                                                </div>
+                                                            </Row>
                                                         </div>
-                                                        <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
-                                                            <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
-                                                        </div>
-                                                    </Row>
-                                                    <Row className="mb-3">
-                                                        <div className="form-check col-md-6">
-                                                            <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
-                                                            <label className="form-check-label" htmlFor="canMissing">Can missing</label>
-                                                        </div>
-                                                    </Row>
-                                                    {/*</Collapse>*/}
+                                                    } />
                                                 </CardText>
                                             </Col>
                                         </Row>
@@ -500,12 +692,13 @@ class Properties extends React.Component {
                                                     <div className="form-check form-check-inline">
                                                         <Input
                                                             type="radio"
-                                                            id="dependentRadioInline"
-                                                            name="dependentRadioInline"
+                                                            value="1"
                                                             className="form-check-input"
+                                                            checked={this.state.IsDependent === true}
+                                                            onChange={this.handleIsDependentChange}
                                                         />
                                                         <Label
-                                                            className="form-check-label" htmlFor="dependentRadioInline"
+                                                            className="form-check-label"
                                                         >
                                                             Yes
                                                         </Label>
@@ -513,12 +706,13 @@ class Properties extends React.Component {
                                                     <div className="form-check form-check-inline">
                                                         <Input
                                                             type="radio"
-                                                            id="customRadioInline2"
-                                                            name="dependentRadioInline"
+                                                            value="0"
                                                             className="form-check-input"
+                                                            checked={this.state.IsDependent === false}
+                                                            onChange={this.handleIsDependentChange}
                                                         />
                                                         <Label
-                                                            className="form-check-label" htmlFor="customRadioInline2"
+                                                            className="form-check-label"
                                                         >
                                                             No
                                                         </Label>
@@ -531,22 +725,42 @@ class Properties extends React.Component {
                                                 <div className="mb-3">
                                                     <Label>Dependent field</Label>
                                                     <Select
-                                                        value={this.selectedGroup}
-                                                        onChange={() => {
-                                                            this.handleSelectGroup();
-                                                        }}
-                                                        options={this.state.optionGroup}
+                                                        value={this.state.dependentFieldsSelectedGroup}
+                                                        onChange={this.handleDependentFieldChange}
+                                                        options={this.state.dependentFieldOptionGroup}
                                                         classNamePrefix="select2-selection"
+                                                        className={this.state.DepFldInputClass}
+                                                        isDisabled={this.state.dependentEnabled}
                                                     />
                                                 </div>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col sm="4">
-                                                <Conditions></Conditions>
+                                                <div className="mb-3">
+                                                    <Label>Dependency condition</Label>
+                                                    <Select
+                                                        value={this.state.conditionSelectedGroup}
+                                                        onChange={this.handleDependentConditionChange}
+                                                        options={this.state.conditionOptionGroup}
+                                                        classNamePrefix="select2-selection"
+                                                        className={this.state.DepConInputClass}
+                                                        isDisabled={this.state.dependentEnabled}
+                                                    />
+                                                </div>
                                             </Col>
                                             <Col sm="4">
-                                                <Actions></Actions>
+                                                <div className="mb-3">
+                                                    <Label>Dependency action</Label>
+                                                    <Select
+                                                        value={this.state.actionSelectedGroup}
+                                                        onChange={this.handleDependentActionChange}
+                                                        options={this.state.actionOptionGroup}
+                                                        classNamePrefix="select2-selection"
+                                                        className={this.state.DepActInputClass}
+                                                        isDisabled={this.state.dependentEnabled}
+                                                    />
+                                                </div>
                                             </Col>
                                             <Col sm="4">
                                                 <label
@@ -555,15 +769,19 @@ class Properties extends React.Component {
                                                 >
                                                     Dependent filed value
                                                 </label>
-                                                <input
-                                                    value={this.state.DependentFieldValue}
-                                                    onChange={this.handleDependentFieldValueChange}
-                                                    className="form-control"
-                                                    type="text"
-                                                    placeholder="Title"
-                                                />
+                                                {/*<input*/}
+                                                {/*    value={this.state.DependentFieldValue}*/}
+                                                {/*    onChange={this.handleDependentFieldValueChange}*/}
+                                                {/*    className={this.state.DepFldVlInputClass}*/}
+                                                {/*    type="text"*/}
+                                                {/*    placeholder="Dependent filed value"*/}
+                                                {/*    disabled={this.state.dependentEnabled ? 'disabled' : ''}*/}
+                                                {/*/>*/}
+                                                <TagInput onDataReceived={this.handleDataReceived}></TagInput>
                                             </Col>
                                         </Row>
+                                        {/*<AccordionComp title="Advanced options" body={*/}
+                                        {/*    <div>*/}
                                         <Row>
                                             <div className="mb-3">
                                                 <Label className="form-label mb-3 d-flex">Is related</Label>
@@ -595,6 +813,37 @@ class Properties extends React.Component {
                                                 </div>
                                             </div>
                                         </Row>
+                                        <Row>
+                                            <div className="table-responsive">
+                                                <Table className="table table-hover mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Input name</th>
+                                                            <th>Variable name</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <Select
+                                                                    value={this.state.relationFieldsSelectedGroup}
+                                                                    onChange={this.handleRelationFieldChange}
+                                                                    options={this.state.relationFieldOptionGroup}
+                                                                    classNamePrefix="select2-selection"
+                                                                    className={this.state.DepFldInputClass}
+                                                                    isDisabled={this.state.dependentEnabled}
+                                                                />
+                                                            </td>
+                                                            <td>Otto</td>
+                                                            <td>@mdo</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </Table>
+                                            </div>
+                                        </Row>
+                                        {/*    </div>*/}
+                                        {/*} />*/}
                                     </TabPane>
                                     <TabPane tabId="3">
                                         <Row>
@@ -644,8 +893,15 @@ class Properties extends React.Component {
                         </div>
                     </Col>
                 </form>
+                <ToastComp
+                    title="Toast"
+                    message={this.state.toastMessage}
+                    showToast={this.state.showToast}
+                    setShowToast={this.setShowToast}
+                    stateToast={this.state.stateToast}
+                />
                 {/*</ElementBase>*/}
-            </>
+            </div>
 
         );
     }

@@ -19,24 +19,22 @@ const conditionList = [
 const Conditions = props => {
     const [selectedGroup, setselectedGroup] = useState(null);
 
-    const handleSelectGroup = (selectedGroup)=> {
+    const handleSelectGroup = (selectedGroup) => {
         setselectedGroup(selectedGroup);
     };
 
     return (
-        <>
-            <div className="mb-3">
-                <Label>Dependency condition</Label>
-                <Select
-                    value={selectedGroup}
-                    onChange={() => {
-                        handleSelectGroup();
-                    }}
-                    options={conditionList}
-                    classNamePrefix="select2-selection"
-                />
-            </div>
-        </>
+        <div className="mb-3">
+            <Label>Dependency condition</Label>
+            <Select
+                value={selectedGroup}
+                onChange={() => {
+                    handleSelectGroup();
+                }}
+                options={conditionList}
+                classNamePrefix="select2-selection"
+            />
+        </div>
     )
 }
 

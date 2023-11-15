@@ -16,7 +16,6 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
-import Properties from '../FormBuilder/properties.js';
 
 //function TextElementProperties(props) {
 //    //const [Unit, setUnit] = useState('');

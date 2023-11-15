@@ -16,6 +16,8 @@ import Properties from './properties.js';
 import './formBuilder.css';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
+import Swal from 'sweetalert2'
+import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-ad' },
@@ -44,6 +46,9 @@ function ElementList(props) {
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [message, setMessage] = useState("");
+    const [stateToast, setStateToast] = useState(true);
     const dispatch = useDispatch();
 
     const removeBodyCss = () => {
@@ -63,8 +68,66 @@ function ElementList(props) {
     };
 
     const copyElement = (e, id) => {
-
+        fetch(baseUrl + '/Module/CopyElement?id=' + id, {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccess) {
+                    setMessage(data.message)
+                    setStateToast(true);
+                    setShowToast(true);
+                    dispatch(endloading());
+                } else {
+                    setMessage(data.message)
+                    setStateToast(false);
+                    setShowToast(true);
+                    dispatch(endloading());
+                }
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
     };
+
+    const deleteElement = (e, id) => {
+        Swal.fire({
+            title: "You will not be able to recover this element!",
+            text: "Do you confirm?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3bbfad",
+            confirmButtonText: "Yes",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    dispatch(startloading());
+
+                    fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
+                        method: 'POST',
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.isSuccess) {
+                                dispatch(endloading());
+                                Swal.fire(data.message, '', 'success');
+                            } else {
+                                dispatch(endloading());
+                                Swal.fire(data.message, '', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            //console.error('Error:', error);
+                        });
+                } catch (error) {
+                    dispatch(endloading());
+                    Swal.fire('An error occurred', '', 'error');
+                }
+            }
+        })
+    }
 
     const elmementItems = elements.map((l) =>
         <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '')}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
@@ -84,14 +147,14 @@ function ElementList(props) {
     }
 
     const content = moduleElementList.map((item) =>
-        <Row className="mb-3" key={item.id }>
+        <Row className="mb-3" key={item.id}>
             <div>
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
                 </label>
                 <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id)}><i className="far fa-edit"></i></Button>
-                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e,item.id)}></i></Button>
-                <Button className="actionBtn"><i className="fas fa-trash-alt"></i></Button>
+                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
+                <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
             <div className="col-md-10">
                 <input
@@ -109,7 +172,7 @@ function ElementList(props) {
     });
 
     return (
-        <>
+        <div>
             <div style={{ width: "200px", float: 'left' }}>
                 <div>
                     {elmementItems}
@@ -122,10 +185,18 @@ function ElementList(props) {
                         </ModalBody>
                     </Modal>
                 </Col>
-            </div><div style={{ margin: '10px 0 10px 215px' }}>
+            </div>
+            <div style={{ margin: '10px 0 10px 215px' }}>
                 {content}
             </div>
-        </>
+            <ToastComp
+                title="Toast"
+                message={message}
+                showToast={showToast}
+                setShowToast={setShowToast}
+                stateToast={stateToast}
+            />
+        </div>
 
     );
 }
