@@ -147,7 +147,8 @@
     cursor: default;
     font-size: 10px;
     text-transform: uppercase;
-    color: $sidebar-menu-item-icon-color !important;
+ /*   color: $sidebar-menu-item-icon-color !important;*/
+    color: white !important;
     font-weight: $font-weight-medium;
 }
 

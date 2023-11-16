@@ -13,26 +13,29 @@
         {
             label: "Studies",
             /* to: "/studylist",*/
+            icon: "fa-solid fa-folder-tree",
             subMenu: [
                 {
                     label: "Active",
                     to: "/studylist",
+                    icon: "fa-solid fa-lock-open"
                 },
                 {
                     label: "Locked",
                     to: "/lockedlist",
+                    icon: "fa-solid fa-lock"
                 }
             ],
         },
         {
             label: "Tenant",
             to: "/tenant",
-/*            icon: "ti-home",*/
+            icon: "fa-solid fa-list-ul"
         },
         {
             label: "Module",
             to: "/moduleList",
-/*            icon: "ti-home",*/
+            icon: "fa-solid fa-puzzle-piece"
         },
 //        {
 //            label: "Form Builder",
@@ -213,76 +216,93 @@
         },
         {
             label: "Users",
-            to: "/tenantusers"
+            to: "/tenantusers",
+            icon: "fa-solid fa-user-plus"
         }
     ],
     study: [
         {
             label: "Admin page",
-            to: "/"
+            to: "/",
+            icon: "fa-solid fa-house"
         },
         {
             label: "Go to active study",
             to: "/invalid",
-            isDemo: false
+            isDemo: false,
+            icon: "fa-solid fa-toggle-off"
         },
         {
             label: "Go to demo study",
             to: "/invalid",
-            isDemo: true
+            isDemo: true,
+            icon: "fa-solid fa-toggle-on"
         },
         {
             label: "Visits",
             to: "/visits",
+            icon: "fa-regular fa-rectangle-list",
         },
         {
             label: "Site & Laboratories",
+            icon: "fa-solid fa-folder-open",
             subMenu: [
                 {
                     label: "Sites",
                     to: "/sitelaboratories-sites-site",
+                    icon: "fa-solid fa-location-dot"
                 },
                 {
                     label: "Laboratories",
                     to: "/sitelaboratories-laboratories",
+                    icon: "fa-solid fa-flask"
                 },
             ]
         },
         {
             label: "Randomization",
             to: "/randomization",
+            icon: "fa-solid fa-shuffle"
         },
         {
             label: "Study documents",
             to: "/studydocuments",
+            icon: "fa-regular fa-paste"
         },
         {
-            label: "E-mail templates",
+            label: "e-Mail templates",
             to: "/emailtemplates",
+            icon: "fa-solid fa-envelope"
         },
         {
             label: "System audit trail",
             to: "/systemaudittrail",
+            icon: "fa-solid fa-clock-rotate-left"
         },
         {
-            label: "E-consent",
+            label: "e-Consent",
             to: "/econsent",
+            icon: "fa-regular fa-file-lines"
         },
         {
             label: "TMF template list",
             to: "/tmftemplatelist",
+            icon: "fa-solid fa-table-cells-large"
         },
         {
             label: "TMF e-mail template",
             to: "/tmfemailtemplate",
+            icon: "fa-solid fa-envelope"
         },
         {
             label: "Permissions",
             to: "/permissions",
+            icon: "fa-solid fa-user-gear"
         },
         {
             label: "Users",
             to: "/users",
+            icon: "fa-solid fa-user-plus"
         },
     ],
 };

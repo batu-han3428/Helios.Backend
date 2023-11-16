@@ -14,9 +14,10 @@ import { useContactUsPostMutation } from "../../store/services/ContactUs";
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { useDispatch } from "react-redux";
 import { startloading, endloading } from "../../store/loader/actions";
+import { withTranslation } from "react-i18next";
 
 
-const ContactUs = () => {
+const ContactUs = (props) => {
     document.title = "Contact Us Page | Veltrix - React Admin & Dashboard Template";
 
     const [showToast, setShowToast] = useState(false);
@@ -38,19 +39,19 @@ const ContactUs = () => {
         },
         validationSchema: Yup.object().shape({
             namesurname: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
             email: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
             institutionname: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
             studycode: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
             yourmessage: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
         }),
         onSubmit: async (values) => {
@@ -58,12 +59,12 @@ const ContactUs = () => {
             const response = await contactUsPost(values);
 
             if (response.data.isSuccess) {
-                setMessage(response.data.message)
+                setMessage(props.t(response.data.message))
                 setStateToast(true);
                 setShowToast(true);
                 dispatch(endloading());
             } else {
-                setMessage(response.data.message)
+                setMessage(props.t(response.data.message))
                 setStateToast(false);
                 setShowToast(true);
                 dispatch(endloading());
@@ -88,9 +89,8 @@ const ContactUs = () => {
                                     color: "#ffc600",
                                     fontSize: "30pt",
                                     fontWeight: "bold"
-                                }}>Contact us</h3>
-                                <span style={{ 
-                                    fontSize: "12px", color: "#6D6E70" } }>Please complete the form below to contact us.</span>
+                                }}>{props.t("Contact us")}</h3>
+                                <span style={{ fontSize: "12px", color: "#6D6E70" }}>{props.t("Please complete the form below to contact us.")}</span>
                             </Col>
                         </Row>
                     </div>
@@ -103,10 +103,10 @@ const ContactUs = () => {
                                     return false;
                                 }}>
                                 <div className="mb-3">
-                                    <Label className="form-label">Name / Surname</Label>
+                                    <Label className="form-label">{props.t("Name / Surname")}</Label>
                                     <Input
                                         name="namesurname"
-                                        placeholder="Name Surname"
+                                        placeholder=""
                                         type="text"
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
@@ -122,10 +122,10 @@ const ContactUs = () => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3">
-                                    <Label className="form-label">Your email address</Label>
+                                    <Label className="form-label">{props.t("Your e-mail address")}</Label>
                                     <Input
                                         name="email"
-                                        placeholder="abc@example.com"
+                                        placeholder="abc@xyz.com"
                                         type="text"
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
@@ -141,11 +141,11 @@ const ContactUs = () => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3">
-                                    <Label>Institution name</Label>
+                                    <Label>{props.t("Institution name")}</Label>
                                     <Input
                                         name="institutionname"
                                         type="text"
-                                        placeholder="Institution name"
+                                        placeholder=""
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
                                             validationType.handleBlur(e);
@@ -160,11 +160,11 @@ const ContactUs = () => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3">
-                                    <Label className="form-label">Study code</Label>
+                                    <Label className="form-label">{props.t("Study code")}</Label>
                                     <Input
                                         name="studycode"
                                         type="text"
-                                        placeholder="Study code"
+                                        placeholder=""
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
                                             validationType.handleBlur(e);
@@ -179,7 +179,7 @@ const ContactUs = () => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3">
-                                    <Label className="form-label">Your message</Label>
+                                    <Label className="form-label">{props.t("Your message")}</Label>
                                     <Input
                                         name="yourmessage"
                                         type="textarea"
@@ -191,7 +191,7 @@ const ContactUs = () => {
                                         }}
                                         value={validationType.values.yourmessage || ""}
                                         rows="3"
-                                        placeholder="Your message"
+                                        placeholder=""
                                         invalid={
                                             validationType.touched.yourmessage && validationType.errors.yourmessage ? true : false
                                         }
@@ -202,7 +202,7 @@ const ContactUs = () => {
                                 </div>
                                 <div>
                                     <Button style={{ float:"right" }} color="success" type="submit">
-                                        Send
+                                        {props.t("Send")}
                                     </Button>
                                 </div>
                             </Form>
@@ -217,15 +217,15 @@ const ContactUs = () => {
                             <p style={{ margin: "0", padding: "0" } }><span  style={{
                                 color: "black",
                                 fontWeight: "bold", fontSize:"12px", fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif"
-                            }}>Send us an email: </span><a href="mailto:contact@helios-crf.com"> contact@helios-crf.com </a></p>
+                            }}>{props.t("Send us an e-mail")} : </span><a href="mailto:contact@helios-crf.com"> contact@helios-crf.com </a></p>
                             <p style={{ margin: "0", padding: "0" }}><span  style={{
                                 color: "black",
                                 fontWeight: "bold", fontSize: "12px", fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif"
-                            }}> Call us :</span><a href="tel://+902122341260"> +90 212 234 12 60 </a></p>
+                            }}>{props.t("Call us")} :</span><a href="tel://+902122341260"> +90 212 234 12 60 </a></p>
                             <p style={{ margin: "0", padding: "0" }}> <span  style={{
                                 color: "black",
                                 fontWeight: "bold", fontSize: "12px", fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif"
-                            }}>Address</span><a target="_blank" href="https://goo.gl/maps/pXPMkwYwHpJUPJjv9"> Cumhuriyet District Haciahmet Silahsor Street Yeniyol Street No: 2/58 Now, 34440 Sisli/Istanbul, Turkey </a></p>
+                            }}>{props.t("Address")} :</span><a target="_blank" href="https://goo.gl/maps/pXPMkwYwHpJUPJjv9"> Cumhuriyet District Haciahmet Silahsor Street Yeniyol Street No: 2/58 Now, 34440 Sisli/Istanbul, Turkey </a></p>
                         </Col>
                     </Row>
                 </div>
@@ -241,4 +241,4 @@ const ContactUs = () => {
     );
 };
 
-export default ContactUs;
+export default withTranslation()(ContactUs);

@@ -1,24 +1,26 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect, useRef } from "react";
 import {
-    Row, Col, Button, Label, Input, Form, FormFeedback
+    Row, Col, Button
 } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import permissionItems from './PermissionItems';
 import "./Permission.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ModalComp from '../../components/Common/ModalComp/ModalComp';
-import * as Yup from "yup";
-import { useFormik } from "formik";
-import { useRoleSaveMutation, useRolePermissionListGetQuery, useSetPermissionMutation, useRoleDeleteMutation } from '../../store/services/Permissions';
+import { useLazyRolePermissionListGetQuery, useSetPermissionMutation, useRoleDeleteMutation } from '../../store/services/Permissions';
 import { useSelector, useDispatch } from 'react-redux';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { startloading, endloading } from '../../store/loader/actions';
 import Swal from 'sweetalert2'
+import PermissionAddOrUpdateRole from './PermissionAddOrUpdateRole';
+import PermissionShowUsersRole from './PermissionShowUsersRole';
 
 const Permission = props => {
 
     const modalRef = useRef();
+
+    const modalContentRef = useRef();
 
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -27,12 +29,20 @@ const Permission = props => {
     const dispatch = useDispatch();
 
     const [openSections, setOpenSections] = useState({});
-    const [roleId, setRoleId] = useState('00000000-0000-0000-0000-000000000000');
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
     const [roles, setRoles] = useState([]);
-    const [selectedRole, setSelectedRole] = useState(null);
+    const [modalContent, setModalContent] = useState(null);
+    const [modalButton, setModalButton] = useState(true);
+    const [modalTitle, setModalTitle] = useState("");
+    const [modalButtonText, setModalButtonText] = useState("");
+
+    const modalToast = (message, state) => {
+        setMessage(message);
+        setStateToast(state);
+        setShowToast(true);
+    }
 
     const toggleAccordion = (key) => {
         setOpenSections(prevOpenSections => ({
@@ -41,22 +51,29 @@ const Permission = props => {
         }));
     };
 
-    const resetValue = () => {
-        validationType.validateForm().then(errors => {
-            validationType.setErrors({});
-            validationType.resetForm();
-        });
-        setRoleId('00000000-0000-0000-0000-000000000000');
-        setSelectedRole(null);
-    };
-
-    const { data: roleData, error, isLoading } = useRolePermissionListGetQuery(studyInformation.studyId);
+    const [trigger, { data: resultData, isLoading, isError }] = useLazyRolePermissionListGetQuery();
 
     useEffect(() => {
-        if (!isLoading && !error && roleData) {
-            setRoles(roleData);
+        dispatch(startloading());
+        if (studyInformation.studyId) {
+            trigger(studyInformation.studyId);
         }
-    }, [roleData, error, isLoading]);
+    }, [studyInformation.studyId]) 
+
+    useEffect(() => {
+        if (!isLoading && !isError && resultData) {
+            setRoles(resultData);
+            dispatch(endloading());
+        } else if (isError && !isLoading) {
+            dispatch(endloading());
+            Swal.fire({
+                title: "",
+                text: props.t("An unexpected error occurred."),
+                icon: "error",
+                confirmButtonText: props.t("OK"),
+            });
+        }
+    }, [resultData, isError, isLoading]);
 
     const [setPermission] = useSetPermissionMutation();
 
@@ -83,24 +100,27 @@ const Permission = props => {
     }
 
     const updateRole = (id, name) => {
-        dispatch(startloading());
-        setRoleId(id);
-        setSelectedRole(name);
+        setModalButton(true);
+        setModalContent(<PermissionAddOrUpdateRole toast={modalToast} refs={modalContentRef} studyId={studyInformation.studyId} tenantId={userInformation.tenantId} userId={userInformation.userId} roleId={id} selectedRole={name} />);
+        setModalTitle(props.t("Update role"));
+        setModalButtonText(props.t("Update"));
+        modalRef.current.tog_backdrop();
     };
 
-    useEffect(() => {
-        if (roleId !== '00000000-0000-0000-0000-000000000000' && selectedRole !== null) {
-            validationType.setValues({
-                id: roleId,
-                userid: userInformation.userId,
-                tenantid: userInformation.tenantId,
-                studyId: studyInformation.studyId,
-                name: selectedRole,
-            });
-            modalRef.current.tog_backdrop();
-            dispatch(endloading());
-        }
-    }, [roleId, selectedRole]);
+    const addRole = () => {
+        setModalButton(true);
+        setModalContent(<PermissionAddOrUpdateRole toast={modalToast} refs={modalContentRef} studyId={studyInformation.studyId} tenantId={userInformation.tenantId} userId={userInformation.userId} />);
+        setModalTitle(props.t("Add a role"));
+        setModalButtonText(props.t("Save"));
+        modalRef.current.tog_backdrop();
+    };
+
+    const showUsersRole = (id) => {
+        setModalButton(false);
+        setModalTitle(props.t("Users"));
+        setModalContent(<PermissionShowUsersRole toast={modalToast} refs={modalContentRef} id={id} />);
+        modalRef.current.tog_backdrop();
+    };
 
     const [roleDelete] = useRoleDeleteMutation();
 
@@ -138,7 +158,7 @@ const Permission = props => {
                         dispatch(endloading());
                         Swal.fire({
                             title: "",
-                            text: response.data.message,
+                            text: props.t(response.data.message),
                             icon: "error",
                             confirmButtonText: props.t("OK"),
                         });
@@ -156,40 +176,6 @@ const Permission = props => {
         });
     };
 
-    const [roleSave] = useRoleSaveMutation();
-
-    const validationType = useFormik({
-        enableReinitialize: true,
-        initialValues: {
-            id: roleId,
-            userid: userInformation.userId,
-            tenantid: userInformation.tenantId,
-            studyId: studyInformation.studyId,
-            rolename: selectedRole || "",
-        },
-        validationSchema: Yup.object().shape({
-            rolename: Yup.string().required(
-                props.t("This field is required")
-            ),
-        }),
-        onSubmit: async (values) => {
-            dispatch(startloading());
-            const response = await roleSave(values);
-            if (response.data.isSuccess) {
-                setMessage(response.data.message)
-                setStateToast(true);
-                setShowToast(true);
-                modalRef.current.tog_backdrop();
-                dispatch(endloading());
-            } else {
-                setMessage(response.data.message)
-                setStateToast(false);
-                setShowToast(true);
-                dispatch(endloading());
-            }
-        }
-    });
-
     return (      
         <React.Fragment>
             <div className="page-content">
@@ -205,7 +191,7 @@ const Permission = props => {
                                         color="success"
                                         className="btn btn-success waves-effect waves-light"
                                         type="button"
-                                        onClick={() => modalRef.current.tog_backdrop()}
+                                        onClick={addRole}
                                     >
                                     <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add a role")}
                                     </Button>
@@ -232,13 +218,13 @@ const Permission = props => {
                                                     <div>
                                                         <div className="span2">
                                                             <span>
-                                                                <label className={item.roleName.length > 35 ? "lbl-permision tooltip2" : "lbl-permision"} title={item.RoleName}>
+                                                                <label className={item.roleName.length > 35 ? "lbl-permision tooltip2" : "lbl-permision"} title={item.roleName}>
                                                                     {item.roleName}
                                                                 </label>
                                                                 <a title={props.t("Page permissions") } className="tooltip2 btn-permision" >
                                                                     <FontAwesomeIcon icon="fa-solid fa-file-pen" style={{ fontSize: "16px", verticalAlign: "middle" }} />
                                                                 </a>
-                                                                <a style={{ margin: "5px" }} title={ props.t("Show users") } className="tooltip2 btn-permision">
+                                                                <a onClick={() => { showUsersRole(item.id) }} style={{ margin: "5px" }} title={ props.t("Show users") } className="tooltip2 btn-permision">
                                                                     <FontAwesomeIcon icon="fa-solid fa-person" style={{ fontSize: "16px", verticalAlign: "middle" }} />
                                                                 </a>
                                                                 <a onClick={() => { updateRole(item.id, item.roleName) }} style={{ margin: "5px" }} className="tooltip2 btn-permision" title={ props.t("Update") }>
@@ -262,7 +248,7 @@ const Permission = props => {
                                                 <tbody>
                                                     <tr>
                                                         <td className="rowgroup" style={{ width: "300px" }} >
-                                                            <label className="ttlLi floatl hd-tgl" onClick={() => toggleAccordion(key)} data-id="0"><i className={`fa ${openSections[key] ? 'fa-minus sign-hd' : 'fa-plus sign-hd'}`} ></i>{key}</label>
+                                                            <label className="ttlLi floatl hd-tgl" onClick={() => toggleAccordion(key)} data-id="0"><i className={`fa ${openSections[key] ? 'fa-minus sign-hd' : 'fa-plus sign-hd'}`} ></i> {props.t(key)}</label>
                                                             <input type="checkbox" data-toggle="toggle" /><span className="floatr">
                                                                 <a data-name="@HeliosResource.js_Tmf" data-lock="false" /*onclick="lock(this)"*/ style={{ color: "#6D6E70" }}>
                                                                     <i className=" icon-locked "></i>
@@ -279,7 +265,7 @@ const Permission = props => {
                                                         {permissionItems[key].map(item => {
                                                             return (
                                                                 <tr key={`${key}_${item.name}`}>
-                                                                    <td className="tdname">{item.label}</td>
+                                                                    <td className="tdname">{props.t(item.label)}</td>
                                                                     {roles.map((role, index) => { 
                                                                         const isPermissionEnabled = role[item.name];
                                                                             return (
@@ -305,42 +291,10 @@ const Permission = props => {
             </div>
             <ModalComp
                 refs={modalRef}
-                resetValue={resetValue}
-                title={roleId === '00000000-0000-0000-0000-000000000000' ? props.t("Add a role") : props.t("Update role")}
-                body={
-                    <>
-                        <Form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                validationType.handleSubmit();
-                                return false;
-                            }}>
-                            <div className="row">
-                                <div className="mb-3 col-md-12">
-                                    <Label className="form-label">{props.t("Role name")}</Label>
-                                    <Input
-                                        name="rolename"
-                                        placeholder={props.t("Role name")}
-                                        type="text"
-                                        onChange={validationType.handleChange}
-                                        onBlur={(e) => {
-                                            validationType.handleBlur(e);
-                                        }}
-                                        value={validationType.values.rolename || ""}
-                                        invalid={
-                                            validationType.touched.rolename && validationType.errors.rolename ? true : false
-                                        }
-                                    />
-                                    {validationType.touched.rolename && validationType.errors.rolename ? (
-                                        <FormFeedback type="invalid">{validationType.errors.rolename}</FormFeedback>
-                                    ) : null}
-                                </div>
-                            </div>
-                        </Form>
-                    </>
-                }
-                handle={() => validationType.handleSubmit()}
-                buttonText={roleId === '00000000-0000-0000-0000-000000000000' ? props.t("Save") : props.t("Update")}
+                title={modalTitle}
+                body={modalContent}
+                buttonText={modalButtonText}
+                isButton={modalButton}
             />
             <ToastComp
                 title="İşlem bilgisi"

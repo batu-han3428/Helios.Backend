@@ -368,6 +368,7 @@ const TenantUsers = props => {
                                                 paginationLabel={[props.t("Previous"), props.t("Next")]}
                                                 entriesLabel={props.t("Show entries")}
                                                 searchLabel={props.t("Search")}
+                                                noRecordsFoundLabel={props.t("No matching records found")}
                                                 hover
                                                 responsive
                                                 striped
@@ -380,6 +381,7 @@ const TenantUsers = props => {
                                                 paginationLabel={[props.t("Previous"), props.t("Next")]}
                                                 entriesLabel={props.t("Show entries")}
                                                 searchLabel={props.t("Search")}
+                                                noRecordsFoundLabel={props.t("No matching records found")}
                                                 hover
                                                 responsive
                                                 striped
@@ -445,7 +447,7 @@ const TenantUsers = props => {
                                     ) : null}
                             </div>
                             <div className="mb-3 col-md-6">
-                                <Label className="form-label">E-mail</Label>
+                                <Label className="form-label">{props.t("e-Mail")}</Label>
                                 <Input
                                     name="email"
                                     placeholder="abc@hotmail.com"

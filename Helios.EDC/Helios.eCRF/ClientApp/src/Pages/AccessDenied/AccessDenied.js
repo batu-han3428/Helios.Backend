@@ -4,8 +4,10 @@ import { Container, Row, Col, Card, CardBody } from "reactstrap";
 
 //Import Images
 import errorImg from "../../assets/images/error.png";
+import { withTranslation } from "react-i18next";
 
-const AccessDeniend = () => {
+
+const AccessDeniend = (props) => {
     document.title = "500 Error Page | Veltrix - React Admin & Dashboard Template";
 
     return (
@@ -20,9 +22,9 @@ const AccessDeniend = () => {
                                         <Row className="align-items-center">
                                             <Col lg={4} className="ms-auto">
                                                 <div className="ex-page-content">
-                                                    <h4 className="mb-4">HELIOS ECRF SYSTEM</h4>
-                                                    <p className="mb-5">You do not have access to this resource. Please contact the system administrator regarding your privileges.</p>
-                                                    <Link className="btn btn-primary mb-5 waves-effect waves-light" to="/"><i className="mdi mdi-home"></i> Back to home page</Link>
+                                                    <h4 className="mb-4">{props.t("HELIOS E-CRF SYSTEM")}</h4>
+                                                    <p className="mb-5">{props.t("You do not have access to this resource. Please contact the system administrator regarding your privileges.")}</p>
+                                                    <Link className="btn btn-primary mb-5 waves-effect waves-light" to="/"><i className="mdi mdi-home"></i> {props.t("Back to home page")}</Link>
                                                 </div>
 
                                             </Col>
@@ -43,4 +45,4 @@ const AccessDeniend = () => {
     );
 };
 
-export default AccessDeniend;
+export default withTranslation()(AccessDeniend);
