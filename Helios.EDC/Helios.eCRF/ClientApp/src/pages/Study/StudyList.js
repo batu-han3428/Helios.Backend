@@ -235,6 +235,7 @@ const StudyList = props => {
                                 paginationLabel={[props.t("Previous"), props.t("Next")]}
                                 entriesLabel={props.t("Show entries")}
                                 searchLabel={props.t("Search")}
+                                noRecordsFoundLabel={props.t("No matching records found")}
                                 hover
                                 responsive
                                 striped

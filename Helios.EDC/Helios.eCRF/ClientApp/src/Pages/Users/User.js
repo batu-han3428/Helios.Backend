@@ -105,7 +105,7 @@ const User = props => {
                 width: 150
             },
             {
-                label: "Email",
+                label: props.t("e-Mail"),
                 field: "email",
                 sort: "asc",
                 width: 150
@@ -240,7 +240,7 @@ const User = props => {
     useEffect(() => {
         if (rolesData && !isLoadingRoles && !isErrorRoles) {
             let option = [{
-                label: props.t("Roles"),
+                label: "",
                 options: []
             }]
             const roles = rolesData.map(item => {
@@ -325,13 +325,13 @@ const User = props => {
                         firstAddition: false
                     });
                     if (response.data.isSuccess) {
-                        setMessage(response.data.message)
+                        setMessage(props.t(response.data.message))
                         setStateToast(true);
                         setShowToast(true);
                         modalRef.current.tog_backdrop();
                         dispatch(endloading());
                     } else {
-                        setMessage(response.data.message)
+                        setMessage(props.t(response.data.message))
                         setStateToast(false);
                         setShowToast(true);
                         dispatch(endloading());
@@ -671,10 +671,10 @@ const User = props => {
                                 }}>
                                 <div className="row">
                                     <div className="mb-3 col-md-12">
-                                        <Label className="form-label">E-mail</Label>
+                                        <Label className="form-label">{props.t("e-Mail")}</Label>
                                         <Input
                                             name="email"
-                                            placeholder="abc@hotmail.com"
+                                            placeholder="abc@xyz.com"
                                             type="text"
                                             onChange={validationType.handleChange}
                                             onBlur={(e) => {
@@ -734,10 +734,10 @@ const User = props => {
                                         />
                                     </div>
                                     <div className="mb-3 col-md-6">
-                                        <Label className="form-label">E-mail</Label>
+                                        <Label className="form-label">{props.t("e-Mail")}</Label>
                                         <Input
                                             name="email"
-                                            placeholder="abc@hotmail.com"
+                                            placeholder="abc@xyz.com"
                                             type="text"
                                             onChange={validationType.handleChange}
                                             onBlur={(e) => {
@@ -864,7 +864,10 @@ const User = props => {
                                                 <span>{props.t("Excel Download")}</span>
                                             </DropdownItem>
                                             <DropdownItem divider />
-                                            <DropdownItem onClick={activePassiveUsers}>{props.t("Passive all users")}</DropdownItem>
+                                            <DropdownItem onClick={activePassiveUsers}>
+                                                <FontAwesomeIcon style={{ marginRight: "10px" }} icon="fa-solid fa-lock" />
+                                                {props.t("Passive all users")}
+                                            </DropdownItem>
                                         </DropdownMenu>
                                     </Dropdown>
                                 </div>
@@ -879,6 +882,7 @@ const User = props => {
                                         paginationLabel={[props.t("Previous"), props.t("Next")]}
                                         entriesLabel={props.t("Show entries")}
                                         searchLabel={props.t("Search")}
+                                        noRecordsFoundLabel={props.t("No matching records found")}
                                         hover
                                         responsive
                                         striped

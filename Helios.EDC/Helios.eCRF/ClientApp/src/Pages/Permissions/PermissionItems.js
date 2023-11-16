@@ -37,7 +37,7 @@
             name: "eConsentView"
         },
         {
-            label: "Export patient form",
+            label: "Export subject form",
             name: "exportPatientForm"
         },
         {
@@ -87,13 +87,13 @@
             name: "inputAuditTrail"
         },
         {
-            label: "Mark as null",
+            label: "Missing data",
             name: "markAsNull"
         },
     ],
     Form: [
         {
-            label: "Add Multi-Form",
+            label: "Add multi-form",
             name: "addMultiVisit"
         },
         {
@@ -105,19 +105,19 @@
             name: "removeMultiVisit"
         },
         {
-            label: "Add Adverse Event",
+            label: "Add adverse event",
             name: "addAdverseEvent"
         },
         {
-            label: "Archive Adverse Event",
+            label: "Archive adverse event",
             name: "aeArchive"
         },
         {
-            label: "Remove Adverse Event",
+            label: "Remove adverse event",
             name: "aeRemove"
         },
     ],
-    FileUpload: [
+    "File upload": [
         {
             label: "View",
             name: "canFileView"
@@ -135,7 +135,7 @@
             name: "canFileDeleted"
         },
     ],
-    StudyDocument: [
+    "Study document": [
         {
             label: "View",
             name: "studyFoldersView"
@@ -167,13 +167,13 @@
             name: "randomizationtotalsubjectnumberbycountrysite"
         },
     ],											
-    DataExport:[
+    "Data export":[
         {
             label: "Full study report",
             name: "fullstudyreport"
         },
         {
-            label: "Study reports",
+            label: "Study report",
             name: "studyreports"
         },
         {
@@ -201,11 +201,11 @@
             name: "missingdatareport"
         },
         {
-            label: "Adverse Event detail report",
+            label: "Adverse event detail report",
             name: "adverseeventdetailreport"
         },
         {
-            label: "Serious Adverse Event detail report",
+            label: "Serious adverse event detail report",
             name: "seriousadverseeventdetailreport"
         },
         {
@@ -221,7 +221,7 @@
             name: "mrifilereport"
         },
         {
-            label: "Missing data summary",
+            label: "Missing data summary report",
             name: "missingdatasummary"
         },
         {
@@ -237,7 +237,7 @@
             name: "customcodingreport"
         },
         {
-            label: "File Attachment Detail Report",
+            label: "File attachment detail report",
             name: "fileattachmentdetailreport"
         },
         {
@@ -249,10 +249,10 @@
             name: "locallabreport"
         },
         {
-            label: "Lock/ Freeze status report",
+            label: "Lock/Freeze status report",
             name: "lockfreezestatusreport"
         },
-    ],																																											
+    ],																					
     IWRS:[
         {
             label: "Transfer",
@@ -263,7 +263,7 @@
             name: "iwrsMarkAsRecieved"
         },
     ],											
-    MedicalCoding:[
+    "Medical coding":[
         {
             label: "Code",
             name: "canCode"
@@ -301,11 +301,11 @@
             name: "addupload"
         },
         {
-            label: "Add place holder",
+            label: "Add placeholder",
             name: "addplaceholder"
         },
         {
-            label: "View Audit Trail",
+            label: "View audit trail",
             name: "viewaudittrail"
         },
         {

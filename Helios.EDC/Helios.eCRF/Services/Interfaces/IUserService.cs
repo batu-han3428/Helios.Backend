@@ -34,5 +34,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel studyUserModel);
         Task<List<TenantUserModel>> GetUserTenantList(Guid userId);
         Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId);
+        Task<List<UserPermissionRoleModel>> GetRoleUsers(Guid roleId);
     }
 }

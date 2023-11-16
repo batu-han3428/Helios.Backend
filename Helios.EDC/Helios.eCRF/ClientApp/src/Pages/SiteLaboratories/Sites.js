@@ -109,8 +109,8 @@ const Sites = props => {
     const getActions = (id) => {
         const actions = (
             <div className="icon-container">
-                <div className="icon icon-update" onClick={() => { siteUpdate(id) }}></div>
-                <div className="icon icon-delete" onClick={() => { siteDeleteHandle(id) } }></div>
+                <div title={props.t("Update")} className="icon icon-update" onClick={() => { siteUpdate(id) }}></div>
+                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { siteDeleteHandle(id) } }></div>
             </div>);
         return actions;
     };
@@ -118,43 +118,43 @@ const Sites = props => {
     const data = {
         columns: [
             {
-                label: "Site Name",
+                label: props.t("Site Name"),
                 field: "siteFullName",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Site No",
+                label: props.t("Site no"),
                 field: "code",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Country Code",
+                label: props.t("Country code"),
                 field: "countryCode",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Country",
+                label: props.t("Country"),
                 field: "countryName",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Number of subjects that can be added to the center",
+                label: props.t("Number of subjects that can be added to the center"),
                 field: "maxEnrolmentCount",
                 sort: "asc",
                 width: 150
             },
             {
-                label: "Last Updated On",
+                label: props.t("Last updated on"),
                 field: "updatedAt",
                 sort: "asc",
                 width: 150
             },
             {
-                label: 'Actions',
+                label: props.t('Actions'),
                 field: 'actions',
                 sort: 'disabled',
                 width: 100,
@@ -224,13 +224,13 @@ const Sites = props => {
             dispatch(startloading());
             const response = await siteSaveOrUpdate(values);
             if (response.data.isSuccess) {
-                setMessage(response.data.message)
+                setMessage(props.t(response.data.message))
                 setStateToast(true);
                 setShowToast(true);
                 modalRef.current.tog_backdrop();
                 dispatch(endloading());
             } else {
-                setMessage(response.data.message)
+                setMessage(props.t(response.data.message))
                 setStateToast(false);
                 setShowToast(true);
                 dispatch(endloading());
@@ -245,7 +245,7 @@ const Sites = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center">
                             <Col md={8}>
-                                <h6 className="page-title">Site list</h6>
+                                <h6 className="page-title">{props.t("Site list")}</h6>
                             </Col>
 
                             <Col md="4">
@@ -285,7 +285,7 @@ const Sites = props => {
                                         onClick={() => modalRef.current.tog_backdrop()}
                                         style={{marginLeft:"10px"} }
                                     >
-                                        <FontAwesomeIcon icon="fa-solid fa-plus" /> Add a site
+                                        <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add a site")}
                                     </Button>
                                 </div>
                             </Col>
@@ -295,7 +295,12 @@ const Sites = props => {
                         <Col className="col-12">
                             <Card>
                                 <CardBody>
-                                    <MDBDataTable hover responsive striped bordered data={data} />
+                                    <MDBDataTable
+                                        paginationLabel={[props.t("Previous"), props.t("Next")]}
+                                        entriesLabel={props.t("Show entries")}
+                                        searchLabel={props.t("Search")}
+                                        noRecordsFoundLabel={props.t("No matching records found")}
+                                        hover responsive striped bordered data={data} />
                                 </CardBody>
                             </Card>
                         </Col>
@@ -304,11 +309,11 @@ const Sites = props => {
             </div>
             <ModalComp
                 refs={modalRef}
-                title={siteId === '00000000-0000-0000-0000-000000000000' ? "Add a site" : "Update site"}
+                title={siteId === '00000000-0000-0000-0000-000000000000' ? props.t("Add a site") : props.t("Update site")}
                 body={
                     <>
                         <Alert color="warning">
-                            If there is no specific subject limit for the site, please enter zero for the subject number. If you have a certain patient limit for the center, please enter numerically.
+                            {props.t("If there is no specific subject limit for the site, please enter zero for the subject number. If you have a certain patient limit for the center, please enter numerically.")}
                         </Alert>
                         <Form
                             onSubmit={(e) => {
@@ -318,10 +323,10 @@ const Sites = props => {
                             }}>
                             <div className="row">
                                 <div className="mb-3 col-md-3">
-                                    <Label className="form-label">Site No</Label>
+                                    <Label className="form-label">{props.t("Site no")}</Label>
                                     <Input
                                         name="code"
-                                        placeholder="Site no"
+                                        placeholder=""
                                         type="text"
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
@@ -337,10 +342,10 @@ const Sites = props => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3 col-md-9">
-                                    <Label className="form-label">Site name</Label>
+                                    <Label className="form-label">{props.t("Site name")}</Label>
                                     <Input
                                         name="name"
-                                        placeholder="Site name"
+                                        placeholder=""
                                         type="text"
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
@@ -358,11 +363,11 @@ const Sites = props => {
                             </div>
                             <div className="row">
                                 <div className="mb-3 col-md-3">
-                                    <Label>Country code</Label>
+                                    <Label>{props.t("Country code")}</Label>
                                     <Input
                                         name="countrycode"
                                         type="text"
-                                        placeholder="Country code"
+                                        placeholder=""
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
                                             validationType.handleBlur(e);
@@ -371,11 +376,11 @@ const Sites = props => {
                                     />
                                 </div>
                                 <div className="mb-3 col-md-9">
-                                    <Label>Country name</Label>
+                                    <Label>{props.t("Country")}</Label>
                                     <Input
                                         name="countryname"
                                         type="text"
-                                        placeholder="Country name"
+                                        placeholder=""
                                         onChange={validationType.handleChange}
                                         onBlur={(e) => {
                                             validationType.handleBlur(e);
@@ -385,11 +390,11 @@ const Sites = props => {
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <Label>Number of subjects that can be added to the center</Label>
+                                <Label>{props.t("Number of subjects that can be added to the center")}</Label>
                                 <Input
                                     name="maxenrolmentcount"
                                     label="Digits"
-                                    placeholder="Number of subjects that can be added to the center"
+                                    placeholder=""
                                     type="number"
                                     onChange={validationType.handleChange}
                                     onBlur={validationType.handleBlur}
@@ -407,7 +412,7 @@ const Sites = props => {
                 }
                 resetValue={resetValue}
                 handle={() => validationType.handleSubmit()}
-                buttonText={siteId === '00000000-0000-0000-0000-000000000000' ? "Save" : "Update" }
+                buttonText={siteId === '00000000-0000-0000-0000-000000000000' ? props.t("Save") : props.t("Update") }
             />
             <ToastComp
                 title="İşlem bilgisi"

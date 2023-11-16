@@ -15,6 +15,7 @@ import { withTranslation } from "react-i18next";
 //menü içeriði
 import menuItems from "./SidebarContentItems";
 import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
@@ -36,12 +37,12 @@ const MenuItem = ({ item, t, isDemoStudy, pageType }) => {
         <li>
             {item.subMenu ? (
                 <Link to="/#" className="has-arrow waves-effect">
-                    {item.icon && <i className={item.icon}></i>}
+                    {item.icon && <FontAwesomeIcon style={{marginRight:"10px"}} icon={item.icon} />}
                     <span>{t(item.label)}</span>
                 </Link>
             ) : (
                 <Link onClick={hasIsDemoProperty && isDemoStudy !== null && item.isDemo !== isDemoStudy ? (e) => handleMenuItemClick(e, item) : null} to={dynamicPath} className="waves-effect">
-                    {item.icon && <i className={item.icon}></i>}
+                    {item.icon && <FontAwesomeIcon style={{marginRight:"10px"}} icon={item.icon} />}
                     <span>{t(item.label)}</span>
                 </Link>
             )}
@@ -64,7 +65,7 @@ const SidebarContent = props => {
 
     const [metisMenuInstance, setMetisMenuInstance] = useState(null);
     const items = menuItems[props.pageType] || menuItems.common;
-    const isDemoStudy = useSelector(state => state.rootReducer.Study.isDemo);
+    const studyInformation = useSelector(state => state.rootReducer.Study);
 
     const closeActiveDropdowns = () => {
         const activeDropdowns = document.querySelectorAll(".mm-active");
@@ -213,27 +214,27 @@ const SidebarContent = props => {
       <SimpleBar style={{ maxHeight: "100%" }} ref={ref}>
         <div id="sidebar-menu">
           <ul className="metismenu list-unstyled" id="side-menu">
-            <li className="menu-title">{props.t("Main")} </li>
-                {items.map((item, index) => {
-                    const hasIsDemoProperty = "isDemo" in item;
+            {props.pageType === 'study' && <li className="menu-title" style={{backgroundColor:"#6d6e70", color: "white !important", fontSize:"13px"}} ><FontAwesomeIcon style={{marginRight:"10px"}} icon="fa-solid fa-microscope" /> {studyInformation.studyName}</li> }
+            {items.map((item, index) => {
+                const hasIsDemoProperty = "isDemo" in item;
 
-                    if (hasIsDemoProperty && (isDemoStudy === null || isDemoStudy === undefined)) {
-                        return;
-                    }
-                    if (hasIsDemoProperty && isDemoStudy !== null && item.isDemo === isDemoStudy) {
-                        return;
-                    }
+                if (hasIsDemoProperty && (studyInformation.isDemo === null || studyInformation.isDemo === undefined)) {
+                    return;
+                }
+                if (hasIsDemoProperty && studyInformation.isDemo !== null && item.isDemo === studyInformation.isDemo) {
+                    return;
+                }
 
-                    return (
-                        <MenuItem
-                            pageType={props.pageType}
-                            isDemoStudy={props.pageType === "study" ? isDemoStudy : null}
-                            key={index}
-                            item={item}
-                            t={props.t}
-                        />
-                    );
-                })}
+                return (
+                    <MenuItem
+                        pageType={props.pageType}
+                        isDemoStudy={props.pageType === "study" ? studyInformation.isDemo : null}
+                        key={index}
+                        item={item}
+                        t={props.t}
+                    />
+                );
+            })}
           </ul>
         </div>
       </SimpleBar>

@@ -126,15 +126,22 @@ namespace Helios.eCRF.Controllers
 
 
         /// <summary>
-        /// çalışmanın rol ve yetkilerini döner
+        /// çalışmanın rol ve yetkilerini getirir
         /// </summary>
         /// <param name="studyId">çalışma id</param>
         /// <returns>rol ve yetkiler</returns>
         [HttpGet("{studyId}")]
         public async Task<IActionResult> GetPermissionRoleList(Guid studyId)
         {
-            var result = await _userService.GetPermissionRoleList(studyId);
-            return Ok(result);
+            try
+            {
+                var result = await _userService.GetPermissionRoleList(studyId);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
 
 
@@ -147,6 +154,19 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> GetRoleList(Guid studyId)
         {
             var result = await _userService.GetRoleList(studyId);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// rolün kullanıcılarını getirir
+        /// </summary>
+        /// <param name="roleId">rol id</param>
+        /// <returns>rolün kullanıcıları</returns>
+        [HttpGet("{roleId}")]
+        public async Task<IActionResult> GetRoleUsers(Guid roleId)
+        {
+            var result = await _userService.GetRoleUsers(roleId);
             return Ok(result);
         }
 

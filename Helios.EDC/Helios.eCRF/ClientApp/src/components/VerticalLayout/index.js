@@ -81,7 +81,7 @@ class Layout extends Component {
         return (
             <React.Fragment>
                 <div id="layout-wrapper">
-                    <Header toggleMenuCallback={this.toggleMenuCallback} />
+                    <Header pageType={this.props.pageType} toggleMenuCallback={this.toggleMenuCallback} />
                     <Sidebar
                     theme={this.props.leftSideBarTheme}
                     type={this.props.leftSideBarType}

@@ -156,6 +156,35 @@ namespace Helios.eCRF.Services
             }
         }
 
+        private async Task<UserPermissionRoleDTO> GetUserIdsRole(Guid roleId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetUserIdsRole", Method.Get);
+                req.AddParameter("roleId", roleId);
+                var result = await client.ExecuteAsync<UserPermissionRoleDTO>(req);
+                return result.Data;
+            }
+        }
+        
+        public async Task<List<UserPermissionRoleModel>> GetRoleUsers(Guid roleId)
+        {
+            var userIdsRole = await GetUserIdsRole(roleId);
+
+            if (userIdsRole != null && userIdsRole.UserIds.Count > 0)
+            {
+                var result = await GetUserList(userIdsRole.UserIds);
+
+                return result.Select(x => new UserPermissionRoleModel
+                {
+                    Role = userIdsRole.Role,
+                    Name = x.Name + " " + x.LastName
+                }).ToList();
+            }
+
+            return new List<UserPermissionRoleModel>();
+        }
+
         public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
         {
             using (var client = CoreServiceClient)
@@ -414,17 +443,6 @@ namespace Helios.eCRF.Services
                 var req = new RestRequest("AdminUser/UserResetPassword", Method.Post);
                 req.AddJsonBody(model);
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
-                return result.Data;
-            }
-        }
-
-        private async Task<List<Guid>> GetStudyUserIds(Guid studyId)
-        {
-            using (var client = CoreServiceClient)
-            {
-                var req = new RestRequest("CoreUser/GetStudyUserIds", Method.Get);
-                req.AddParameter("studyId", studyId);
-                var result = await client.ExecuteAsync<List<Guid>>(req);
                 return result.Data;
             }
         }

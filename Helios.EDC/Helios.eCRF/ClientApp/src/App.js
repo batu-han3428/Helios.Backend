@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from "react"
 import "./assets/css/icons.css"
 import "./components/Common/ModalComp/ModalComp.css"
-/*import 'mdb-react-ui-kit/dist/css/mdb.min.css';*/
 
 // Import scss
 import "./assets/scss/new-theme.scss"
@@ -19,35 +18,16 @@ import Authmiddleware from "./routes/middleware/Authmiddleware"
 // layouts Format
 import NonAuthLayout from "./components/NonAuthLayout"
 
-// Import Firebase Configuration file
-// import { initFirebaseBackend } from "./helpers/firebase_helper"
-
-/*import fakeBackend from "./helpers/AuthType/fakeBackend"*/
-
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload } from '@fortawesome/free-solid-svg-icons'
 import NotFound from './Pages/NotFound/NotFound'
 import AccessDeniend from './Pages/AccessDenied/AccessDenied'
 import ContactUs from './Pages/ContactUs/ContactUs'
 
-library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload)
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faLocationDot, faUserPlus, faUserGear, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl } from '@fortawesome/free-solid-svg-icons'
+import { faRectangleList, faPaste, faFileLines } from '@fortawesome/free-regular-svg-icons';
 
-// Activating fake backend
-/*fakeBackend();*/
 
-// const firebaseConfig = {
-//   apiKey: process.env.REACT_APP_APIKEY,
-//   authDomain: process.env.REACT_APP_AUTHDOMAIN,
-//   databaseURL: process.env.REACT_APP_DATABASEURL,
-//   projectId: process.env.REACT_APP_PROJECTID,
-//   storageBucket: process.env.REACT_APP_STORAGEBUCKET,
-//   messagingSenderId: process.env.REACT_APP_MESSAGINGSENDERID,
-//   appId: process.env.REACT_APP_APPID,
-//   measurementId: process.env.REACT_APP_MEASUREMENTID,
-// }
-
-// init firebase backend
-// initFirebaseBackend(firebaseConfig)
+library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faRectangleList, faLocationDot, faUserPlus, faUserGear, faPaste, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFileLines, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl)
 
 const App = () => {
   return (

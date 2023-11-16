@@ -24,6 +24,8 @@ import ForgotPassword from './ForgotPassword';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import LanguageDropdown from '../../components/CommonForBoth/TopbarDropdown/LanguageDropdown';
 import { withTranslation } from "react-i18next";
+import logoheliossmImg from "../../assets/images/helios-sm-logo.png";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 const Login = props => {
@@ -135,13 +137,10 @@ const Login = props => {
                                 <div className="bg-primary">
                                     <div className="text-primary text-center p-4">
                                         <h5 className="text-white font-size-20">
-                                            Welcome Back !
+                                            HELIOS
                                         </h5>
-                                        <p className="text-white-50">
-                                            Sign in to continue to Veltrix.
-                                        </p>
                                         <Link to="/" className="logo logo-admin">
-                                            <img src={logoSm} height="24" alt="logo" />
+                                            <img src={logoheliossmImg} height="24" alt="logo" />
                                         </Link>
                                     </div>
                                 </div>
@@ -164,11 +163,11 @@ const Login = props => {
                                             action="#">
 
                                             <div className="mb-3">
-                                                <Label className="form-label" htmlFor="username">Username</Label>
+                                                <Label className="form-label" htmlFor="username">{props.t("e-Mail")}</Label>
                                                 <Input
                                                     name="email"
                                                     className="form-control"
-                                                    placeholder="Enter Username"
+                                                    placeholder=""
                                                     type="email"
                                                     id="username"
                                                     onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
@@ -182,7 +181,7 @@ const Login = props => {
                                                     name="password"
                                                     type="password"
                                                     className="form-control"
-                                                    placeholder={props.t("Enter Password")}
+                                                    placeholder=""
                                                     onChange={(e) => setFormData({ ...formData, Password: e.target.value })}
                                                 />
                                             </div>
@@ -203,6 +202,9 @@ const Login = props => {
                                                 <div className="col-12 mt-4">
                                                     <Link to="/forgot-password" onClick={forgotPassword}><i className="mdi mdi-lock"></i> {props.t("Forgot your password?")}</Link>
                                                 </div>
+                                                <div className="col-12 mt-1">
+                                                    <Link to="/ContactUs"><FontAwesomeIcon icon="fa-solid fa-envelope" /> {props.t("Contact us")}</Link>
+                                                </div>
                                             </div>
 
                                         </Form>
@@ -211,18 +213,7 @@ const Login = props => {
                             </Card>
                             <div className="mt-5 text-center">
                                 <p>
-                                    Don&#39;t have an account ?{" "}
-                                    <Link
-                                        to="/register"
-                                        className="fw-medium text-primary"
-                                    >
-                                        {" "}
-                                        Signup now{" "}
-                                    </Link>{" "}
-                                </p>
-                                <p>
-                                    © {new Date().getFullYear()} Veltrix. Crafted with{" "}
-                                    <i className="mdi mdi-heart text-danger" /> by Themesbrand
+                                    {props.t("© 2017 Helios - V3.0 prepared by MedCase")}
                                 </p>
                             </div>
                         </Col>

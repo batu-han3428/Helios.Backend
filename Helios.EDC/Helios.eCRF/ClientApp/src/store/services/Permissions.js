@@ -47,11 +47,14 @@ export const PermissionsApi = createApi({
         roleListGet: builder.query({
             query: (studyId) => `/User/GetRoleList/${studyId}`,
         }),
+        roleUsersListGet: builder.query({
+            query: (roleId) => `/User/GetRoleUsers/${roleId}`,
+        }),
     }),
 });
 
 
-export const { useRolePermissionListGetQuery } = PermissionsApi;
+export const { useLazyRolePermissionListGetQuery } = PermissionsApi;
 
 export const { useRoleSaveMutation } = PermissionsApi;
 
@@ -60,3 +63,5 @@ export const { useSetPermissionMutation } = PermissionsApi;
 export const { useRoleDeleteMutation } = PermissionsApi;
 
 export const { useLazyRoleListGetQuery } = PermissionsApi;
+
+export const { useLazyRoleUsersListGetQuery } = PermissionsApi;
