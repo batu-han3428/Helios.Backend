@@ -321,6 +321,7 @@ namespace Helios.eCRF.Services
                                         RoleName = studyUser.RoleName,
                                         RoleId = studyUser.RoleId,
                                         Sites = studyUser.Sites,
+                                        ResponsiblePerson = studyUser.ResponsiblePerson,
                                         CreatedOn = studyUser.CreatedOn,
                                         LastUpdatedOn = studyUser.LastUpdatedOn
                                     }).ToList();

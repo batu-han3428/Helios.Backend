@@ -36,6 +36,7 @@ const User = props => {
     const [updateItem, setUpdateItem] = useState({});
     const [optionGroupRoles, setOptionGroupRoles] = useState([]);
     const [optionGroupSites, setOptionGroupSites] = useState([]);
+    const [optionGroupResponsiblePerson, setOptionGroupResponsiblePerson] = useState([]);
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
@@ -225,6 +226,25 @@ const User = props => {
             });
 
             setExcelData(data);
+
+            let option = [{
+                label: props.t("Responsible person for this user"),
+                options: []
+            }]
+            const responsiblePersons = usersData.map(item => {
+                return {
+                    label: item.name + " " + item.lastName,
+                    value: item.authUserId
+                };
+            });
+            const allResponsiblePersonIds = usersData.map(item => item.authUserId);
+            const selectAllOption = {
+                label: "Select All",
+                value: ["All", allResponsiblePersonIds]
+            };
+            responsiblePersons.unshift(selectAllOption);
+            option[0].options.push(...responsiblePersons);
+            setOptionGroupResponsiblePerson(option);
         
             const timer = setTimeout(() => {
                 generateInfoLabel();
@@ -235,7 +255,6 @@ const User = props => {
             return () => clearTimeout(timer);
         }
     }, [usersData, error, isLoading, props.t, dropdownOpen]);
-
 
     useEffect(() => {
         if (rolesData && !isLoadingRoles && !isErrorRoles) {
@@ -253,7 +272,6 @@ const User = props => {
             setOptionGroupRoles(option);
         }
     }, [rolesData, isErrorRoles, isLoadingRoles]);
-
 
     useEffect(() => {
         if (sitesData && !isLoadingSites && !isErrorSites) {
@@ -283,6 +301,7 @@ const User = props => {
             validationType.setErrors({});
             validationType.resetForm();
         });
+        setUpdateItem({});
         setUserControl(true);
         setIsRequired(false);
         setStudyUserId('00000000-0000-0000-0000-000000000000');
@@ -302,7 +321,8 @@ const User = props => {
             lastname: "",
             email: "",
             roleid: "00000000-0000-0000-0000-000000000000",
-            siteIds: []
+            siteIds: [],
+            responsiblePersonIds: []
         },
         validationSchema: (values) => {
             return Yup.object().shape({
@@ -319,6 +339,7 @@ const User = props => {
                     const response = await userSet({
                         ...values,
                         siteIds: values.siteIds[0] === "All" ? values.siteIds[1][1] : values.siteIds,
+                        responsiblePersonIds: values.responsiblePersonIds[0] === "All" ? values.responsiblePersonIds[1][1] : values.responsiblePersonIds,
                         password: "",
                         researchName: studyInformation.studyName,
                         researchLanguage: studyInformation.studyLanguage,
@@ -364,6 +385,18 @@ const User = props => {
                 sites = updateItem.sites.map(site => site.id);
             }
 
+            let responsiblePersonData = usersData.map(user => user.authUserId).filter(id => id !== updateItem.authUserId);
+
+            const haveSameItemsResponsiblePerson = arraysHaveSameItems(responsiblePersonData, updateItem.responsiblePerson.map(user => user));
+
+            let responsiblePerson = null;
+
+            if (haveSameItemsResponsiblePerson) {
+                responsiblePerson = ["All", ["All", updateItem.responsiblePerson.map(user => user)]];
+            } else {
+                responsiblePerson = updateItem.responsiblePerson.map(user => user);
+            }
+
             validationType.setValues({
                 studyUserId: studyUserId,
                 authUserId: updateItem.authUserId,
@@ -374,7 +407,8 @@ const User = props => {
                 lastname: updateItem.lastName,
                 email: updateItem.email,
                 roleid: updateItem.roleId,
-                siteIds: sites
+                siteIds: sites,
+                responsiblePersonIds: responsiblePerson
             });
             modalRef.current.tog_backdrop();
             dispatch(endloading());
@@ -732,6 +766,9 @@ const User = props => {
                                             }
                                             disabled={validationType.values.authUserId !== "00000000-0000-0000-0000-000000000000" ? true : false}
                                         />
+                                        {validationType.touched.lastname && validationType.errors.lastname ? (
+                                            <FormFeedback type="invalid">{validationType.errors.lastname}</FormFeedback>
+                                        ) : null}
                                     </div>
                                     <div className="mb-3 col-md-6">
                                         <Label className="form-label">{props.t("e-Mail")}</Label>
@@ -801,6 +838,52 @@ const User = props => {
                                                         return [];
                                                     } else {
                                                         return optionGroupSites[0].options;
+                                                    }
+                                                }
+                                            })()}
+                                            classNamePrefix="select2-selection"
+                                            placeholder={props.t("Select")}
+                                            isMulti={true}
+                                            closeMenuOnSelect={false}
+                                            components={animatedComponents}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="mb-3 col-md-6">
+                                        <Label className="form-label">{props.t("Responsible person for this user")}</Label>
+                                        <Select
+                                            value={validationType.values.responsiblePersonIds[0] === "All" ? { label: "Select All", value: validationType.values.responsiblePersonIds[1] } : optionGroupResponsiblePerson[0].options.filter(option => validationType.values.responsiblePersonIds.includes(option.value))}
+                                            name="responsiblePersonIds"
+                                            onChange={(selectedOptions) => {
+                                                const selectedValues = selectedOptions.map(option => option.value);
+                                                const selectAll = selectedValues.find(value => Array.isArray(value));
+                                                if (selectAll !== undefined) {
+                                                    validationType.setFieldValue('responsiblePersonIds', ["All", selectAll]);
+                                                } else {
+                                                    validationType.setFieldValue('responsiblePersonIds', selectedValues);
+                                                }
+                                            }}
+                                            options={(function () {
+                                                if (validationType.values.responsiblePersonIds.includes("All")) {
+                                                    return [];
+                                                } else {
+                                                    const allOptions = optionGroupResponsiblePerson[0].options;
+                                                    const selectedOptions = [];
+                                                    for (const option of allOptions) {  
+                                                        if (option.label !== "Select All" && updateItem.authUserId !== option.value) {
+                                                            selectedOptions.push(option.value);
+                                                        }
+                                                    }
+                                                    let result = arraysHaveSameItems(selectedOptions, validationType.values.responsiblePersonIds);
+                                                    if (result) {
+                                                        return [];
+                                                    } else {
+                                                        let index = allOptions[0].value[1].indexOf(updateItem.authUserId);
+                                                        if (index !== -1) {
+                                                            allOptions[0].value[1].splice(index, 1);
+                                                        }
+                                                        return allOptions.filter(option => option.value !== updateItem.authUserId);
                                                     }
                                                 }
                                             })()}
