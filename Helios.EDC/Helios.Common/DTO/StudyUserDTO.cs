@@ -19,6 +19,7 @@ namespace Helios.Common.DTO
         public string Password { get; set; }
         public Guid? RoleId { get; set; }
         public List<SiteDTO> Sites { get; set; }
+        public List<Guid> ResponsiblePerson { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset CreatedOn { get; set; }
         [Column(TypeName = "datetime")]

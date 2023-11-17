@@ -238,5 +238,6 @@
   "Unblinded": "Körlüğü kaldır",
   "Share": "Paylaş",
   "Name": "İsim",
-  "Role": "Rol"
+  "Role": "Rol",
+  "Responsible person for this user": "Bu kullanıcıdan sorumlu kişi"
 }

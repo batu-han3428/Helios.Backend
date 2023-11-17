@@ -5,6 +5,7 @@ using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using RestSharp;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
@@ -297,6 +298,7 @@ namespace Helios.Core.Controllers
                 RoleName = x.StudyRole.Name,
                 RoleId = x.StudyRoleId,
                 Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, SiteFullName = s.Site.FullName }).ToList(),
+                ResponsiblePerson = x.SuperUserIdList != "" ? JsonConvert.DeserializeObject<List<Guid>>(x.SuperUserIdList) : new List<Guid>(),
                 CreatedOn = x.CreatedAt,
                 LastUpdatedOn = x.UpdatedAt
             }).ToListAsync();
@@ -324,7 +326,7 @@ namespace Helios.Core.Controllers
                     Id = Guid.NewGuid(),
                     StudyId = studyUserModel.StudyId,
                     AuthUserId = studyUserModel.AuthUserId,
-                    SuperUserIdList = "",
+                    SuperUserIdList = studyUserModel.ResponsiblePersonIds.Count > 0 ? JsonConvert.SerializeObject(studyUserModel.ResponsiblePersonIds) : "",
                     TenantId = studyUserModel.TenantId,
                     StudyRoleId = studyUserModel.RoleId != Guid.Empty && studyUserModel.RoleId != null? studyUserModel.RoleId : null
                 };
@@ -366,13 +368,19 @@ namespace Helios.Core.Controllers
 
                 if (user != null)
                 {
+
+                    if (JsonConvert.SerializeObject(studyUserModel.ResponsiblePersonIds) != user.SuperUserIdList)
+                    {
+                        user.SuperUserIdList = studyUserModel.ResponsiblePersonIds.Count > 0 ? JsonConvert.SerializeObject(studyUserModel.ResponsiblePersonIds) : "";
+                    }
+                   
                     if (user.StudyRoleId != studyUserModel.RoleId)
                     {
                         user.StudyRoleId = studyUserModel.RoleId != Guid.Empty && studyUserModel.RoleId != null ? studyUserModel.RoleId : null;
                         _context.StudyUsers.Update(user);
                     }
                    
-                    var currentSiteIds = user.StudyUserSites.Select(s => s.SiteId).ToList();
+                    var currentSiteIds = user.StudyUserSites.Where(x=>x.IsActive && !x.IsDeleted).Select(s => s.SiteId).ToList();
                     var newSiteIds = studyUserModel.SiteIds.ToList();
 
                     if (!currentSiteIds.SequenceEqual(newSiteIds))

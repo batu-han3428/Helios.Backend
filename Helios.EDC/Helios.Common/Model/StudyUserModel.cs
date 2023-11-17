@@ -22,5 +22,6 @@ namespace Helios.Common.Model
         public string Email { get; set; }
         public Guid? RoleId { get; set; }
         public List<Guid> SiteIds { get; set; }
+        public List<Guid> ResponsiblePersonIds { get; set; }
     }
 }
