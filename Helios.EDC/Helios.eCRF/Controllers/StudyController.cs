@@ -1,6 +1,5 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
