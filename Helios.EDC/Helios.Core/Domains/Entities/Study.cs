@@ -25,7 +25,6 @@ namespace Helios.Core.Domains.Entities
         public ICollection<Site> Sites { get; set; }
         public ICollection<StudyVisit> StudyVisits { get; set; }
         public ICollection<StudyRole> StudyRoles { get; set; }
-        public ICollection<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
         public ICollection<StudyUser> StudyUsers { get; set; }
         public ICollection<Subject> Subjects { get; set; }
 

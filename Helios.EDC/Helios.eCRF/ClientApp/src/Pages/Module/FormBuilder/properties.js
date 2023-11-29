@@ -23,6 +23,7 @@ import Select from "react-select";
 import classnames from "classnames";
 import TextElementProperties from '../Elements/textElementProperties.js'
 import NumericElementProperties from '../Elements/numericElementProperties.js'
+import ListElementProperties from '../Elements/listElementProperties.js'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
@@ -35,6 +36,7 @@ class Properties extends React.Component {
         super(props);
         this.state = {
             activeTab: "1",
+            showWhereElementPropeties: 0,
 
             // General properties
             Id: props.Id,
@@ -74,7 +76,9 @@ class Properties extends React.Component {
             DependentTargetFieldId: '',
             DependentCondition: 0,
             DependentAction: 0,
-            DependentFieldValue: '',
+            DependentFieldValue: [],
+            DependentFieldValueTags: [],
+            wth: 10,
 
             // Relation
             RelationFieldId: '',
@@ -85,6 +89,8 @@ class Properties extends React.Component {
             Mask: '',
             LowerLimit: '',
             UpperLimit: '',
+            Layout: 0,
+            SavedTagList: [],
 
             // Validation
             RequiredError: 'This value is required',
@@ -92,7 +98,7 @@ class Properties extends React.Component {
             DepFldInputClass: '',
             DepConInputClass: '',
             DepActInputClass: '',
-            DepFldVlInputClass: 'form-control',
+            DepFldVlInputClass: 'form-control input-tag',
 
             // Toast
             showToast: false,
@@ -120,8 +126,11 @@ class Properties extends React.Component {
 
             //relation
             relationFieldOptionGroup: [],
-            relationFieldsSelectedGroup: 0
+            relationFieldsSelectedGroup: 0,
         };
+
+        this.fillDependentFieldList();
+        this.getElementData();
 
         this.toggle = this.toggle.bind(this);
         this.setShowToast.bind(this);
@@ -147,18 +156,18 @@ class Properties extends React.Component {
         this.handleDependentFieldChange = this.handleDependentFieldChange.bind(this);
         this.handleDependentConditionChange = this.handleDependentConditionChange.bind(this);
         this.handleDependentActionChange = this.handleDependentActionChange.bind(this);
-        this.handleDependentFieldValueChange = this.handleDependentFieldValueChange.bind(this);
-        this.handleDataReceived = this.handleDataReceived.bind(this);
+        //this.handleDependentFieldValueChange = this.handleDependentFieldValueChange.bind(this);
+        //this.handleDataReceived = this.handleDataReceived.bind(this);
         this.handleRelationFieldChange = this.handleRelationFieldChange.bind(this);
 
         //this.changeFieldWidth.bind(this);
+        //this.changeDependentFieldValue.bind(this);
         this.changeUnit.bind(this);
         this.changeMask.bind(this);
         this.changeLowerLimit.bind(this);
         this.changeUpperLimit.bind(this);
-
-        this.fillDependentFieldList();
-        this.getElementData();
+        this.changeLayout.bind(this);
+        this.changeSavedTagList.bind(this);
     }
 
     setShowToast() {
@@ -176,14 +185,27 @@ class Properties extends React.Component {
     renderElementPropertiesSwitch(param) {
         switch (param) {
             case 2:
+                this.state.showWhereElementPropeties = 0;
                 return <TextElementProperties changeUnit={this.changeUnit} Unit={this.state.Unit} />;
+                break;
             case 4:
+                this.state.showWhereElementPropeties = 0;
                 return <NumericElementProperties
                     changeUnit={this.changeUnit} Unit={this.state.Unit}
                     changeMask={this.changeMask} Mask={this.state.Mask}
                     changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
                 />;
+                break;
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+                this.state.showWhereElementPropeties = 1;
+                return <ListElementProperties
+                    changeLayout={this.changeLayout} Layout={this.state.Layout} SavedTagList={this.state.SavedTagList}
+                />;
+                break;
             default:
                 return <TextElementProperties changeUnit={this.changeUnit} />;
         }
@@ -296,11 +318,6 @@ class Properties extends React.Component {
         this.state.DepActInputClass = '';
     };
 
-    handleDependentFieldValueChange(e) {
-        this.setState({ DependentFieldValue: e.target.value });
-        /*this.state.DepFldVlInputClass = 'form-control';*/
-    };
-
     handleDependentFieldSelectGroup = (selectedGroup) => {
         this.state.dependentFieldsSelectedGroup = selectedGroup;
     };
@@ -316,14 +333,10 @@ class Properties extends React.Component {
             this.setState({ dependentFieldsSelectedGroup: 0 });
             this.setState({ conditionSelectedGroup: 0 });
             this.setState({ actionSelectedGroup: 0 });
-            this.setState({ DependentFieldValue: '' });
+            //this.setState({ DependentFieldValue: '' });
         }
     }
 
-    handleDataReceived = (data) => {
-        //this.setState({ DependentFieldValue: JSON.stringify({ data }) });
-        this.state.DependentFieldValue = JSON.stringify({ data });
-    };
     // #end region dependent
 
     handleRelationFieldChange(e) {
@@ -353,6 +366,38 @@ class Properties extends React.Component {
         this.setState({ UpperLimit: newValue });
     };
 
+    changeLayout = (newValue) => {
+        this.setState({ Layout: newValue });
+    };
+
+    changeSavedTagList = (newValue) => {
+        this.setState({ SavedTagList: newValue });
+    };
+
+    removeDependentFieldValueTag = (i) => {
+        const newTags = [...this.state.DependentFieldValue];
+        newTags.splice(i, 1);
+        this.setState({ DependentFieldValue: newTags });
+    }
+
+    dependentFieldValueInputKeyDown = (e) => {
+        const val = e.target.value;
+        this.state.wth = this.state.wth + 10;
+
+        if (e.key === 'Enter' && val) {
+            if (this.state.DependentFieldValue.find(tag => tag.toLowerCase() === val.toLowerCase())) {
+                return;
+            }
+
+            this.setState({ DependentFieldValue: [...this.state.DependentFieldValue, val] });
+            this.tagInput.value = null;
+            this.state.wth = 10;
+            this.state.DepFldVlInputClass = "form-control input-tag";
+        } else if (e.key === 'Backspace' && !val) {
+            this.removeDependentFieldValueTag(this.state.DependentFieldValue.length - 1);
+        }
+    }
+
     getElementData() {
         if (this.state.Id != "") {
             fetch(baseUrl + '/Module/GetElementData?id=' + this.state.Id, {
@@ -372,6 +417,7 @@ class Properties extends React.Component {
     }
 
     fillElementProperties(data) {
+        debugger;
         this.state.Title = data.title;
         this.state.ElementName = data.elementName;
         this.state.Description = data.description;
@@ -381,15 +427,17 @@ class Properties extends React.Component {
         this.state.Mask = data.mask != null ? data.mask : "";
         this.state.LowerLimit = data.lowerLimit != null ? data.lowerLimit : "";
         this.state.UpperLimit = data.upperLimit != null ? data.upperLimit : "";
+        this.state.Layout = data.layout;
         this.state.IsRequired = data.isRequired;
         this.state.IsHidden = data.isHidden;
         this.state.CanMissing = data.canMissing;
+        this.state.SavedTagList = data.elementOptions;
         this.state.IsDependent = data.isDependent;
         this.state.DependentSourceFieldId = data.dependentSourceFieldId;
         this.state.DependentTargetFieldId = data.dependentTargetFieldId;
         this.state.DependentCondition = data.dependentCondition;
         this.state.DependentAction = data.dependentAction;
-        this.state.DependentFieldValue = data.dependentFieldValue;
+        this.state.DependentFieldValue = data.dependentFieldValue == null ? [] : JSON.parse(data.dependentFieldValue);
 
         var w = this.state.widthOptionGroup.filter(function (e) {
             if (e.value == data.width)
@@ -425,7 +473,7 @@ class Properties extends React.Component {
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentSourceFieldId == '' || this.state.DependentTargetFieldId == '') {
+        if (this.state.IsDependent && (this.state.DependentSourceFieldId == '' || this.state.DependentTargetFieldId == '')) {
             this.setState({ DepFldInputClass: "form-control is-invalid" });
             isValid = false;
         }
@@ -440,10 +488,10 @@ class Properties extends React.Component {
             isValid = false;
         }
 
-        //if (this.state.IsDependent && this.state.DependentFieldValue == '') {
-        //    this.setState({ DepFldVlInputClass: "form-control is-invalid" });
-        //    isValid = false;
-        //}
+        if (this.state.IsDependent && this.state.DependentFieldValue == '') {
+            this.setState({ DepFldVlInputClass: "form-control input-tag is-invalid" });
+            isValid = false;
+        }
 
         if (isValid) {
             fetch(baseUrl + '/Module/SaveModuleContent', {
@@ -471,18 +519,18 @@ class Properties extends React.Component {
                     CanMissing: this.state.CanMissing == 'on' ? true : false,
 
                     // Dependency properties
-                    DependentSourceFieldId: this.state.DependentSourceFieldId,
-                    DependentTargetFieldId: this.state.DependentTargetFieldId,
+                    DependentSourceFieldId: this.state.DependentSourceFieldId == null ? "" : this.state.DependentSourceFieldId,
+                    DependentTargetFieldId: this.state.DependentTargetFieldId == null ? "" : this.state.DependentTargetFieldId,
                     DependentCondition: this.state.DependentCondition,
                     DependentAction: this.state.DependentAction,
-                    DependentFieldValue: this.state.DependentFieldValue,
+                    DependentFieldValue: JSON.stringify(this.state.DependentFieldValue),
 
                     // Elements properties
                     Unit: this.state.Unit,
                     //Mask: this.state.Mask,
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
-
+                    Layout: this.state.Layout,
 
                 })
             }).then(res => res.json())
@@ -588,99 +636,100 @@ class Properties extends React.Component {
                                     <TabPane tabId="1">
                                         <Row>
                                             <Col sm="12">
-                                                <CardText className="mb-0">
-                                                    <Row className="mb-3">
-                                                        <label
-                                                            htmlFor="example-text-input"
-                                                            className="col-md-2 col-form-label"
-                                                        >
-                                                            Title
-                                                        </label>
-                                                        <div className="col-md-10">
-                                                            <input
-                                                                value={this.state.Title}
-                                                                onChange={this.handleTitleChange}
-                                                                className="form-control"
-                                                                type="text"
-                                                                placeholder="Title"
+                                                <Row className="mb-3">
+                                                    <label
+                                                        htmlFor="example-text-input"
+                                                        className="col-md-2 col-form-label"
+                                                    >
+                                                        Title
+                                                    </label>
+                                                    <div className="col-md-10">
+                                                        <input
+                                                            value={this.state.Title}
+                                                            onChange={this.handleTitleChange}
+                                                            className="form-control"
+                                                            type="text"
+                                                            placeholder="Title"
 
-                                                            />
-                                                        </div>
-                                                    </Row>
-                                                    <Row className="mb-3">
-                                                        <label
-                                                            htmlFor="example-text-input"
-                                                            className="col-md-2 col-form-label"
-                                                        >
-                                                            Input name
-                                                        </label>
-                                                        <div className="col-md-10">
-                                                            <input
-                                                                value={this.state.ElementName}
-                                                                onChange={this.handleElementNameChange}
-                                                                className={this.state.ElementNameInputClass}
-                                                                type="text"
-                                                                placeholder="Input name"
-                                                            />
-                                                            <div type="invalid" className="invalid-feedback">{this.state.RequiredError}</div>
-                                                        </div>
-                                                    </Row>
-                                                    <Row className="mb-3">
-                                                        <label
-                                                            htmlFor="example-text-input"
-                                                            className="col-md-2 col-form-label"
-                                                        >
-                                                            Description
-                                                        </label>
-                                                        <div className="col-md-10">
-                                                            <input
-                                                                value={this.state.Description}
-                                                                onChange={this.handleDescriptionChange}
-                                                                className="form-control"
-                                                                type="text"
-                                                                placeholder="Description"
-                                                            />
-                                                        </div>
-                                                    </Row>
-                                                    <AccordionComp title="Advanced options" body={
-                                                        <div>
-                                                            {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
-                                                            <Row className="mb-3">
-                                                                <label
-                                                                    htmlFor="example-text-input"
-                                                                    className="col-md-2 col-form-label"
-                                                                >
-                                                                    Field width
-                                                                </label>
-                                                                <div className="col-md-10">
-                                                                    <Select
-                                                                        value={this.state.widthSelectedGroup}
-                                                                        onChange={this.handleWidthChange}
-                                                                        options={this.state.widthOptionGroup}
-                                                                        classNamePrefix="select2-selection"
-                                                                    />
-                                                                </div>
-                                                            </Row>
-                                                            {this.renderElementPropertiesSwitch(this.state.ElementType)}
-                                                            <Row className="mb-3 ml-0">
-                                                                <div className="form-check col-md-6">
-                                                                    <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
-                                                                    <label className="form-check-label" htmlFor="isRequired">Is required</label>
-                                                                </div>
-                                                                <div className="form-check col-md-6">
-                                                                    <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
-                                                                    <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
-                                                                </div>
-                                                            </Row>
-                                                            <Row className="mb-3 ml-0">
-                                                                <div className="form-check col-md-6">
-                                                                    <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
-                                                                    <label className="form-check-label" htmlFor="canMissing">Can missing</label>
-                                                                </div>
-                                                            </Row>
-                                                        </div>
-                                                    } />
-                                                </CardText>
+                                                        />
+                                                    </div>
+                                                </Row>
+                                                <Row className="mb-3">
+                                                    <label
+                                                        htmlFor="example-text-input"
+                                                        className="col-md-2 col-form-label"
+                                                    >
+                                                        Input name
+                                                    </label>
+                                                    <div className="col-md-10">
+                                                        <input
+                                                            value={this.state.ElementName}
+                                                            onChange={this.handleElementNameChange}
+                                                            className={this.state.ElementNameInputClass}
+                                                            type="text"
+                                                            placeholder="Input name"
+                                                        />
+                                                        <div type="invalid" className="invalid-feedback">{this.state.RequiredError}</div>
+                                                    </div>
+                                                </Row>
+                                                <Row className="mb-3">
+                                                    <label
+                                                        htmlFor="example-text-input"
+                                                        className="col-md-2 col-form-label"
+                                                    >
+                                                        Description
+                                                    </label>
+                                                    <div className="col-md-10">
+                                                        <input
+                                                            value={this.state.Description}
+                                                            onChange={this.handleDescriptionChange}
+                                                            className="form-control"
+                                                            type="text"
+                                                            placeholder="Description"
+                                                        />
+                                                    </div>
+                                                </Row>
+                                                <AccordionComp title="Advanced options" body={
+                                                    <div>
+                                                        {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
+                                                        <Row className="mb-3">
+                                                            <label
+                                                                htmlFor="example-text-input"
+                                                                className="col-md-2 col-form-label"
+                                                            >
+                                                                Field width
+                                                            </label>
+                                                            <div className="col-md-10">
+                                                                <Select
+                                                                    value={this.state.widthSelectedGroup}
+                                                                    onChange={this.handleWidthChange}
+                                                                    options={this.state.widthOptionGroup}
+                                                                    classNamePrefix="select2-selection"
+                                                                />
+                                                            </div>
+                                                        </Row>
+                                                        {this.state.showWhereElementPropeties == 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                        <Row className="mb-3 ml-0">
+                                                            <div className="form-check col-md-6">
+                                                                <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
+                                                                <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                            </div>
+                                                            <div className="form-check col-md-6">
+                                                                <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
+                                                                <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
+                                                            </div>
+                                                        </Row>
+                                                        <Row className="mb-3 ml-0">
+                                                            <div className="form-check col-md-6">
+                                                                <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
+                                                                <label className="form-check-label" htmlFor="canMissing">Can missing</label>
+                                                            </div>
+                                                        </Row>
+                                                    </div>
+                                                } />
+                                                <div>
+                                                    {this.state.showWhereElementPropeties == 1 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                </div>
                                             </Col>
                                         </Row>
                                     </TabPane>
@@ -769,15 +818,17 @@ class Properties extends React.Component {
                                                 >
                                                     Dependent filed value
                                                 </label>
-                                                {/*<input*/}
-                                                {/*    value={this.state.DependentFieldValue}*/}
-                                                {/*    onChange={this.handleDependentFieldValueChange}*/}
-                                                {/*    className={this.state.DepFldVlInputClass}*/}
-                                                {/*    type="text"*/}
-                                                {/*    placeholder="Dependent filed value"*/}
-                                                {/*    disabled={this.state.dependentEnabled ? 'disabled' : ''}*/}
-                                                {/*/>*/}
-                                                <TagInput onDataReceived={this.handleDataReceived}></TagInput>
+                                                <div className={this.state.DepFldVlInputClass} >
+                                                    <div className="input-tag__tags" >
+                                                        {this.state.DependentFieldValue.map((tag, i) => (
+                                                            <p key={tag}>
+                                                                {tag}
+                                                                <button type="button" style={{ background: 'none' }} onClick={() => { this.removeDependentFieldValueTag(i); }}>+</button>
+                                                            </p>
+                                                        ))}
+                                                        <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.dependentFieldValueInputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; }} /></p>
+                                                    </div>
+                                                </div>
                                             </Col>
                                         </Row>
                                         {/*<AccordionComp title="Advanced options" body={*/}

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Helios.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class _230921 : Migration
+    public partial class MyFirstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,24 +29,22 @@ namespace Helios.Core.Migrations
                     CanComment = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanDataEntry = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ParentElementEProPageNumber = table.Column<int>(type: "int", nullable: false),
-                    MetaDataTags = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    MetaDataTags = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EProPageNumber = table.Column<int>(type: "int", nullable: false),
-                    ButtonText = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    ButtonText = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DefaultValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    DefaultValue = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Unit = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    Unit = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LowerLimit = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    LowerLimit = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UpperLimit = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    UpperLimit = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Extension = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    Extension = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Mask = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PlaceholderValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    Mask = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Layout = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     StartDay = table.Column<int>(type: "int", nullable: false),
@@ -56,12 +54,12 @@ namespace Helios.Core.Migrations
                     EndYear = table.Column<int>(type: "int", nullable: false),
                     StartYear = table.Column<int>(type: "int", nullable: false),
                     AddTodayDate = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ElementOptions = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    ElementOptions = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    LeftText = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    LeftText = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    RightText = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    RightText = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -101,6 +99,32 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
+                name: "MultipleChoiceTag",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Key = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Value = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MultipleChoiceTag", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
                 name: "Studies",
                 columns: table => new
                 {
@@ -108,25 +132,28 @@ namespace Helios.Core.Migrations
                     ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     EquivalentStudyId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    StudyState = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    StudyState = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StudyType = table.Column<int>(type: "int", nullable: false),
-                    AskInitial = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AskSubjectInitial = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDemo = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Code = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    ReasonForChange = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ProtocolCode = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ShortName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    StudyLink = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SubDescription = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    SubDescription = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StudyLogoPath = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    StudyLogoPath = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CompanyLogoPath = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    CompanyLogoPath = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Language = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    StudyLanguage = table.Column<int>(type: "int", nullable: false),
+                    StudyName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -184,7 +211,7 @@ namespace Helios.Core.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementDetailId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ElementDetailId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     ElementType = table.Column<int>(type: "int", nullable: false),
                     ElementName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -215,8 +242,7 @@ namespace Helios.Core.Migrations
                         name: "FK_Elements_ElementDetails_ElementDetailId",
                         column: x => x.ElementDetailId,
                         principalTable: "ElementDetails",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Elements_Modules_ModuleId",
                         column: x => x.ModuleId,
@@ -297,48 +323,77 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
-                name: "StudyRoleModulePermissions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Read = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Write = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    SDV = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StudyRoleModulePermissions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StudyRoleModulePermissions_Studies_StudyId",
-                        column: x => x.StudyId,
-                        principalTable: "Studies",
-                        principalColumn: "Id");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
-
-            migrationBuilder.CreateTable(
-                name: "StudyUsers",
+                name: "StudyRoles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AuthUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SuperUserIdList = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Add = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    View = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Edit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ArchivePatient = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PatientStateChange = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Randomize = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ViewRandomization = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Sdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Sign = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    MarkAsNull = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    QueryView = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AutoQueryClosed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanFileView = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanFileUpload = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanFileDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanFileDownload = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StudyFoldersView = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExportData = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DashboardView = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    InputAuditTrail = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AERemove = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IwrsMarkAsRecieved = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IwrsTransfer = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ApproveSourceDocuments = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Monitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ApproveAudit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Audit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeeCycleAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeeCycleMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeePatientAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeePatientMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeeSiteAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanSeeSiteMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    UploadAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    UploadMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RemoteSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    HasPageFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    HasPageUnFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    HasPageUnLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SeePageActionAudit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CanCode = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RemovePatient = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AEArchive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ArchiveMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    RemoveMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataCompare = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataEntry = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataReport = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataViewAll = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataDelete = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DoubleDataAnswerQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DashboardBuilderAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DashboardBuilderPivotExport = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DashboardBuilderSourceExport = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TmfAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TmfSiteUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TmfUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    MriPage = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    EConsentView = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ExportPatientForm = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AddAdverseEvent = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    AddMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -349,9 +404,9 @@ namespace Helios.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudyUsers", x => x.Id);
+                    table.PrimaryKey("PK_StudyRoles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyUsers_Studies_StudyId",
+                        name: "FK_StudyRoles_Studies_StudyId",
                         column: x => x.StudyId,
                         principalTable: "Studies",
                         principalColumn: "Id",
@@ -450,78 +505,18 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
-                name: "StudyRoles",
+                name: "StudyRoleModulePermissions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleModulePermissionId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Add = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    View = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Edit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ArchivePatient = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    PatientStateChange = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Randomize = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ViewRandomization = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Sdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Sign = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Read = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Write = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SDV = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MarkAsNull = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    QueryView = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    AutoQueryClosed = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanFileView = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanFileUpload = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanFileDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanFileDownload = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    StudyFoldersView = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExportData = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DashboardView = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    InputAuditTrail = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    AERemove = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IwrsMarkAsRecieved = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IwrsTransfer = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ApproveSourceDocuments = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Monitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ApproveAudit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Audit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeeCycleAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeeCycleMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeePatientAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeePatientMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeeSiteAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanSeeSiteMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    UploadAuditing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    UploadMonitoring = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RemoteSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    HasPageFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    HasPageUnFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    HasPageUnLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    SeePageActionAudit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CanCode = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RemovePatient = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    AEArchive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ArchiveMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    RemoveMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataCompare = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataEntry = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataReport = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataViewAll = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataDelete = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DoubleDataAnswerQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DashboardBuilderAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DashboardBuilderPivotExport = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DashboardBuilderSourceExport = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TmfAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TmfSiteUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TmfUser = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MriPage = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    EConsentView = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    ExportPatientForm = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    AddAdverseEvent = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    AddMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -532,17 +527,11 @@ namespace Helios.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudyRoles", x => x.Id);
+                    table.PrimaryKey("PK_StudyRoleModulePermissions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyRoles_Studies_StudyId",
-                        column: x => x.StudyId,
-                        principalTable: "Studies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_StudyRoles_StudyRoleModulePermissions_StudyRoleModulePermiss~",
-                        column: x => x.StudyRoleModulePermissionId,
-                        principalTable: "StudyRoleModulePermissions",
+                        name: "FK_StudyRoleModulePermissions_StudyRoles_StudyRoleId",
+                        column: x => x.StudyRoleId,
+                        principalTable: "StudyRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -550,12 +539,15 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
-                name: "StudyUserSites",
+                name: "StudyUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AuthUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SuperUserIdList = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -566,19 +558,18 @@ namespace Helios.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudyUserSites", x => x.Id);
+                    table.PrimaryKey("PK_StudyUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyUserSites_Sites_SiteId",
-                        column: x => x.SiteId,
-                        principalTable: "Sites",
+                        name: "FK_StudyUsers_Studies_StudyId",
+                        column: x => x.StudyId,
+                        principalTable: "Studies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StudyUserSites_StudyUsers_StudyUserId",
-                        column: x => x.StudyUserId,
-                        principalTable: "StudyUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_StudyUsers_StudyRoles_StudyRoleId",
+                        column: x => x.StudyRoleId,
+                        principalTable: "StudyRoles",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
@@ -672,12 +663,12 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
-                name: "StudyUserRoles",
+                name: "StudyUserSites",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     StudyUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -688,15 +679,15 @@ namespace Helios.Core.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudyUserRoles", x => x.Id);
+                    table.PrimaryKey("PK_StudyUserSites", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyUserRoles_StudyRoles_StudyRoleId",
-                        column: x => x.StudyRoleId,
-                        principalTable: "StudyRoles",
+                        name: "FK_StudyUserSites_Sites_SiteId",
+                        column: x => x.SiteId,
+                        principalTable: "Sites",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StudyUserRoles_StudyUsers_StudyUserId",
+                        name: "FK_StudyUserSites_StudyUsers_StudyUserId",
                         column: x => x.StudyUserId,
                         principalTable: "StudyUsers",
                         principalColumn: "Id",
@@ -920,6 +911,39 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
+                name: "StudyVisitPageModuleElementEvents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ActionType = table.Column<int>(type: "int", nullable: false),
+                    SourceElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ValueCondition = table.Column<int>(type: "int", nullable: false),
+                    ActionValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudyVisitPageModuleElementEvents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudyVisitPageModuleElementEvents_StudyVisitPageModuleElemen~",
+                        column: x => x.StudyVisitPageModuleElementId,
+                        principalTable: "StudyVisitPageModuleElements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
                 name: "SubjectVisitPageModuleElements",
                 columns: table => new
                 {
@@ -962,7 +986,8 @@ namespace Helios.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Elements_ElementDetailId",
                 table: "Elements",
-                column: "ElementDetailId");
+                column: "ElementDetailId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Elements_ModuleId",
@@ -985,9 +1010,10 @@ namespace Helios.Core.Migrations
                 column: "EquivalentStudyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudyRoleModulePermissions_StudyId",
+                name: "IX_StudyRoleModulePermissions_StudyRoleId",
                 table: "StudyRoleModulePermissions",
-                column: "StudyId");
+                column: "StudyRoleId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudyRoles_StudyId",
@@ -995,24 +1021,14 @@ namespace Helios.Core.Migrations
                 column: "StudyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudyRoles_StudyRoleModulePermissionId",
-                table: "StudyRoles",
-                column: "StudyRoleModulePermissionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudyUserRoles_StudyRoleId",
-                table: "StudyUserRoles",
-                column: "StudyRoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudyUserRoles_StudyUserId",
-                table: "StudyUserRoles",
-                column: "StudyUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StudyUsers_StudyId",
                 table: "StudyUsers",
                 column: "StudyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudyUsers_StudyRoleId",
+                table: "StudyUsers",
+                column: "StudyRoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudyUserSites_SiteId",
@@ -1027,6 +1043,11 @@ namespace Helios.Core.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_StudyVisitPageModuleElementDetails_StudyVisitPageModuleEleme~",
                 table: "StudyVisitPageModuleElementDetails",
+                column: "StudyVisitPageModuleElementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudyVisitPageModuleElementEvents_StudyVisitPageModuleElemen~",
+                table: "StudyVisitPageModuleElementEvents",
                 column: "StudyVisitPageModuleElementId");
 
             migrationBuilder.CreateIndex(
@@ -1116,13 +1137,16 @@ namespace Helios.Core.Migrations
                 name: "ModuleElementEvents");
 
             migrationBuilder.DropTable(
-                name: "StudyUserRoles");
+                name: "MultipleChoiceTag");
 
             migrationBuilder.DropTable(
                 name: "StudyUserSites");
 
             migrationBuilder.DropTable(
                 name: "StudyVisitPageModuleElementDetails");
+
+            migrationBuilder.DropTable(
+                name: "StudyVisitPageModuleElementEvents");
 
             migrationBuilder.DropTable(
                 name: "SubjectVisitPageModuleElements");
@@ -1135,9 +1159,6 @@ namespace Helios.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "Modules");
-
-            migrationBuilder.DropTable(
-                name: "StudyRoles");
 
             migrationBuilder.DropTable(
                 name: "StudyUsers");
@@ -1162,6 +1183,9 @@ namespace Helios.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "SubjectVisits");
+
+            migrationBuilder.DropTable(
+                name: "StudyRoles");
 
             migrationBuilder.DropTable(
                 name: "StudyVisits");

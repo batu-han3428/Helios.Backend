@@ -126,12 +126,6 @@ function ModuleList() {
     const data = {
         columns: [
             {
-                label: "",
-                field: "id",
-                sort: "asc",
-                width: 150
-            },
-            {
                 label: "Module Name",
                 field: "name",
                 sort: "asc",

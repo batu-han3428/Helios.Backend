@@ -1,4 +1,5 @@
-﻿using Helios.Core.Enums;
+﻿using Helios.Core.enums;
+using Helios.Core.Enums;
 
 namespace Helios.eCRF.Models
 {
@@ -38,6 +39,8 @@ namespace Helios.eCRF.Models
         public string Mask { get; set; } = "";
         public string LowerLimit { get; set; } = "";
         public string UpperLimit { get; set; } = "";
+        public AlignLayout Layout { get; set; }
+
         //public string Extension { get; set; } //numeric description
         //public int StartDay { get; set; }
         //public int EndDay { get; set; }
@@ -48,7 +51,7 @@ namespace Helios.eCRF.Models
         //public bool AddTodayDate { get; set; }
 
         ////chkbox, radio, ddown vs
-        //public string ElementOptions { get; set; } //json text value
+        public string ElementOptions { get; set; } //json text value
 
         ////hidden
         //public string TargetElementId { get; set; }

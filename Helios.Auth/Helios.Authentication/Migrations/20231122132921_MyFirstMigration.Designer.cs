@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helios.Authentication.Migrations
 {
     [DbContext(typeof(AuthenticationContext))]
-    [Migration("20230911092011_FirstMigrationInNewDb")]
-    partial class FirstMigrationInNewDb
+    [Migration("20231122132921_MyFirstMigration")]
+    partial class MyFirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,6 +75,9 @@ namespace Helios.Authentication.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IsResetPasswordMailSent")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTime>("LastChangePasswordDate")
                         .HasColumnType("datetime(6)");
 
@@ -113,6 +116,12 @@ namespace Helios.Authentication.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RefrestTokenEndDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
@@ -141,6 +150,9 @@ namespace Helios.Authentication.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("RoleId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("StudyId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("TenantId")

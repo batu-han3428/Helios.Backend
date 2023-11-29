@@ -144,7 +144,9 @@ namespace Helios.Core.Controllers
                     Mask = x.ElementDetail.Mask,
                     LowerLimit = x.ElementDetail.LowerLimit,
                     UpperLimit = x.ElementDetail.UpperLimit,
-                    IsDependent = x.IsDependent
+                    Layout = x.ElementDetail.Layout,
+                    IsDependent = x.IsDependent,
+                    ElementOptions = x.ElementDetail.ElementOptions
                 }).FirstOrDefaultAsync();
 
             if (result.IsDependent)
@@ -222,6 +224,7 @@ namespace Helios.Core.Controllers
                         Mask = model.Mask,
                         LowerLimit = model.LowerLimit,
                         UpperLimit = model.UpperLimit,
+                        Layout = model.Layout
                         //TargetElementId = Guid.Parse(model.DependentTargetFieldId),
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
@@ -230,7 +233,7 @@ namespace Helios.Core.Controllers
 
                     _context.ElementDetails.Add(elementDetail);
                     result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
-                    
+
                     elm.ElementDetailId = elementDetail.Id;
                     _context.Elements.Update(elm);
 
@@ -281,6 +284,7 @@ namespace Helios.Core.Controllers
                 elementDetail.Mask = model.Mask;
                 elementDetail.LowerLimit = model.LowerLimit;
                 elementDetail.UpperLimit = model.UpperLimit;
+                elementDetail.Layout = model.Layout;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = userId;
 
@@ -338,7 +342,7 @@ namespace Helios.Core.Controllers
                 element.ElementName = element.ElementName + "_1";
                 element.Order = element.Order++;
 
-                var elementDetail = await _context.ElementDetails.Where(x=>x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
                 elementDetail.Id = Guid.NewGuid();
                 elementDetail.ElementId = element.Id;
@@ -402,6 +406,55 @@ namespace Helios.Core.Controllers
 
             return result;
         }
+
+        [HttpGet]
+        public async Task<List<TagModel>> GetMultipleTagList(Guid id)
+        {
+            var result = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TagModel()
+            {
+                Id = x.Id,
+                TagKey = x.Key,
+                TagName = x.Name,
+                TagValue = x.Value,
+            }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
+        {
+            var result = new ApiResponse<dynamic>();
+            Guid userId = new Guid();
+            var dbTags = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).ToListAsync();
+
+            foreach (var item in tags)
+            {
+                var tg = dbTags.FirstOrDefault(x => x.Key == item.TagKey);
+
+                if (tg == null)
+                {
+                    var tag = new MultipleChoiceTag()
+                    {
+                        Key = item.TagKey,
+                        Name = item.TagName,
+                        Value = item.TagValue
+                    };
+
+                    _context.MultipleChoiceTag.Add(tag);
+                }
+                else
+                {
+                    result.IsSuccess = false;
+                    result.Message = "duplicate name";
+                }
+            }
+
+            result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+            result.Message = result.IsSuccess ? "Successful" : "Error";
+            return result;
+        }
+
 
     }
 }
