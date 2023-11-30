@@ -85,7 +85,7 @@ class NumericElementProperties extends Component {
                     </label>
                     <div className="col-md-4">
                         <input
-                            value={this.LowerLimit}
+                            value={this.props.LowerLimit}
                             onChange={this.handleLowerLimitChange}
                             className="form-control"
                             type="text"
@@ -99,7 +99,7 @@ class NumericElementProperties extends Component {
                     </label>
                     <div className="col-md-4">
                         <input
-                            value={this.UpperLimit}
+                            value={this.props.UpperLimit}
                             onChange={this.handleUpperLimitChange}
                             className="form-control"
                             type="text"

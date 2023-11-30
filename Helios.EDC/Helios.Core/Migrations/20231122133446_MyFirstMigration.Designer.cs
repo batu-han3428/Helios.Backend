@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helios.Core.Migrations
 {
     [DbContext(typeof(CoreContext))]
-    [Migration("20230921135531_230921")]
-    partial class _230921
+    [Migration("20231122133446_MyFirstMigration")]
+    partial class MyFirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +44,7 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("ElementDetailId")
+                    b.Property<Guid?>("ElementDetailId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ElementName")
@@ -99,7 +99,8 @@ namespace Helios.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ElementDetailId");
+                    b.HasIndex("ElementDetailId")
+                        .IsUnique();
 
                     b.HasIndex("ModuleId");
 
@@ -119,7 +120,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ButtonText")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool>("CanComment")
@@ -144,7 +144,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<string>("DefaultValue")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("EProPageNumber")
@@ -154,7 +153,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ElementOptions")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("EndDay")
@@ -167,7 +165,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Extension")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool>("IsActive")
@@ -180,19 +177,15 @@ namespace Helios.Core.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("LeftText")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("LowerLimit")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Mask")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("MetaDataTags")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("ParentElementEProPageNumber")
@@ -201,12 +194,7 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("ParentId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("PlaceholderValue")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("RightText")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("RowIndex")
@@ -228,7 +216,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Unit")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
@@ -238,7 +225,6 @@ namespace Helios.Core.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("UpperLimit")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -335,6 +321,50 @@ namespace Helios.Core.Migrations
                     b.ToTable("ModuleElementEvents");
                 });
 
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MultipleChoiceTag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("AddedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MultipleChoiceTag");
+                });
+
             modelBuilder.Entity("Helios.Core.Domains.Entities.Site", b =>
                 {
                     b.Property<Guid>("Id")
@@ -400,22 +430,16 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("AddedById")
                         .HasColumnType("char(36)");
 
-                    b.Property<bool>("AskInitial")
+                    b.Property<bool>("AskSubjectInitial")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("CompanyLogoPath")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<Guid?>("EquivalentStudyId")
@@ -430,30 +454,39 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDemo")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Language")
-                        .IsRequired()
+                    b.Property<bool>("IsLock")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ProtocolCode")
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("ReasonForChange")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid>("ReferenceKey")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("ShortName")
+                    b.Property<int>("StudyLanguage")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudyLink")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("StudyLogoPath")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StudyName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("StudyState")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("StudyType")
                         .HasColumnType("int");
 
                     b.Property<string>("SubDescription")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<Guid>("TenantId")
@@ -671,9 +704,6 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("StudyId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("StudyRoleModulePermissionId")
-                        .HasColumnType("char(36)");
-
                     b.Property<Guid>("TenantId")
                         .HasColumnType("char(36)");
 
@@ -707,8 +737,6 @@ namespace Helios.Core.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StudyId");
-
-                    b.HasIndex("StudyRoleModulePermissionId");
 
                     b.ToTable("StudyRoles");
                 });
@@ -746,9 +774,6 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("SDV")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid?>("StudyId")
-                        .HasColumnType("char(36)");
-
                     b.Property<Guid>("StudyRoleId")
                         .HasColumnType("char(36)");
 
@@ -769,7 +794,8 @@ namespace Helios.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudyId");
+                    b.HasIndex("StudyRoleId")
+                        .IsUnique();
 
                     b.ToTable("StudyRoleModulePermissions");
                 });
@@ -798,6 +824,9 @@ namespace Helios.Core.Migrations
                     b.Property<Guid>("StudyId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("StudyRoleId")
+                        .HasColumnType("char(36)");
+
                     b.Property<string>("SuperUserIdList")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -815,49 +844,9 @@ namespace Helios.Core.Migrations
 
                     b.HasIndex("StudyId");
 
-                    b.ToTable("StudyUsers");
-                });
-
-            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUserRole", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<Guid>("StudyRoleId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("StudyUserId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("StudyRoleId");
 
-                    b.HasIndex("StudyUserId");
-
-                    b.ToTable("StudyUserRoles");
+                    b.ToTable("StudyUsers");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUserSite", b =>
@@ -1292,6 +1281,59 @@ namespace Helios.Core.Migrations
                     b.ToTable("StudyVisitPageModuleElementDetails");
                 });
 
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModuleElementEvents", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActionValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("AddedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid>("SourceElementId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("StudyVisitPageModuleElementId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("TargetElementId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("ValueCondition")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudyVisitPageModuleElementId");
+
+                    b.ToTable("StudyVisitPageModuleElementEvents");
+                });
+
             modelBuilder.Entity("Helios.Core.Domains.Entities.Subject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1679,10 +1721,8 @@ namespace Helios.Core.Migrations
             modelBuilder.Entity("Helios.Core.Domains.Entities.Element", b =>
                 {
                     b.HasOne("Helios.Core.Domains.Entities.ElementDetail", "ElementDetail")
-                        .WithMany()
-                        .HasForeignKey("ElementDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithOne("Element")
+                        .HasForeignKey("Helios.Core.Domains.Entities.Element", "ElementDetailId");
 
                     b.HasOne("Helios.Core.Domains.Entities.Module", "Module")
                         .WithMany()
@@ -1734,22 +1774,18 @@ namespace Helios.Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Helios.Core.Domains.Entities.StudyRoleModulePermission", "StudyRoleModulePermission")
-                        .WithMany()
-                        .HasForeignKey("StudyRoleModulePermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Study");
-
-                    b.Navigation("StudyRoleModulePermission");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
                 {
-                    b.HasOne("Helios.Core.Domains.Entities.Study", null)
-                        .WithMany("StudyRoleModulePermissions")
-                        .HasForeignKey("StudyId");
+                    b.HasOne("Helios.Core.Domains.Entities.StudyRole", "StudyRole")
+                        .WithOne("StudyRoleModulePermission")
+                        .HasForeignKey("Helios.Core.Domains.Entities.StudyRoleModulePermission", "StudyRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StudyRole");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUser", b =>
@@ -1760,26 +1796,13 @@ namespace Helios.Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Study");
-                });
-
-            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUserRole", b =>
-                {
                     b.HasOne("Helios.Core.Domains.Entities.StudyRole", "StudyRole")
-                        .WithMany()
-                        .HasForeignKey("StudyRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("StudyUsers")
+                        .HasForeignKey("StudyRoleId");
 
-                    b.HasOne("Helios.Core.Domains.Entities.StudyUser", "StudyUser")
-                        .WithMany()
-                        .HasForeignKey("StudyUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Study");
 
                     b.Navigation("StudyRole");
-
-                    b.Navigation("StudyUser");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUserSite", b =>
@@ -1791,7 +1814,7 @@ namespace Helios.Core.Migrations
                         .IsRequired();
 
                     b.HasOne("Helios.Core.Domains.Entities.StudyUser", "StudyUser")
-                        .WithMany()
+                        .WithMany("StudyUserSites")
                         .HasForeignKey("StudyUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1857,6 +1880,17 @@ namespace Helios.Core.Migrations
                 {
                     b.HasOne("Helios.Core.Domains.Entities.StudyVisitPageModuleElement", "StudyVisitPageModuleElement")
                         .WithMany("StudyVisitPageModuleElementDetails")
+                        .HasForeignKey("StudyVisitPageModuleElementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StudyVisitPageModuleElement");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModuleElementEvents", b =>
+                {
+                    b.HasOne("Helios.Core.Domains.Entities.StudyVisitPageModuleElement", "StudyVisitPageModuleElement")
+                        .WithMany()
                         .HasForeignKey("StudyVisitPageModuleElementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1955,11 +1989,15 @@ namespace Helios.Core.Migrations
                     b.Navigation("SubjectVisitModule");
                 });
 
+            modelBuilder.Entity("Helios.Core.Domains.Entities.ElementDetail", b =>
+                {
+                    b.Navigation("Element")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Helios.Core.Domains.Entities.Study", b =>
                 {
                     b.Navigation("Sites");
-
-                    b.Navigation("StudyRoleModulePermissions");
 
                     b.Navigation("StudyRoles");
 
@@ -1970,10 +2008,23 @@ namespace Helios.Core.Migrations
                     b.Navigation("Subjects");
                 });
 
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRole", b =>
+                {
+                    b.Navigation("StudyRoleModulePermission")
+                        .IsRequired();
+
+                    b.Navigation("StudyUsers");
+                });
+
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
                 {
                     b.Navigation("StudyVisitPageModule")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUser", b =>
+                {
+                    b.Navigation("StudyUserSites");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisit", b =>

@@ -154,5 +154,31 @@ namespace Helios.eCRF.Services
                 return result.Data;
             }
         }
+
+        public async Task<List<TagModel>> GetMultipleTagList(Guid id)
+        {
+            var tagList = new List<TagModel>();
+
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreModule/GetMultipleTagList", Method.Get);
+                req.AddParameter("id", id);
+                var result = await client.ExecuteAsync(req);
+                tagList = JsonConvert.DeserializeObject<List<TagModel>>(result.Content);
+            }
+
+            return tagList;
+        }
+
+        public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreModule/AddNewTag", Method.Post);
+                req.AddJsonBody(tags);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
     }
 }

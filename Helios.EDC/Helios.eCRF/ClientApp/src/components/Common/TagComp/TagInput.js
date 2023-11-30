@@ -3,13 +3,19 @@ import './TagInput.css';
 
 class TagInput extends React.Component {
     constructor(props) {
-        super();
+        super(props);
 
         this.state = {
             tags: [],
-            wth:10
+            taglst: '',
+            //aa:props.Tags,
+            wth: 10
         };
     }
+
+    handleTagsChange(e) {
+        this.props.changeDependentFieldValue(e.target.value);
+    };
 
     removeTag = (i) => {
         const newTags = [...this.state.tags];
@@ -29,25 +35,24 @@ class TagInput extends React.Component {
             this.setState({ tags: [...this.state.tags, val] });
             this.tagInput.value = null;
             this.state.wth = 10;
+            this.props.changeDependentFieldValue(this.state.tags);
         } else if (e.key === 'Backspace' && !val) {
             this.removeTag(this.state.tags.length - 1);
         }
     }
 
     inputKeyUp = (e) => {
-        this.props.onDataReceived(this.state.tags);
+        //this.props.onDataReceived(this.state.tags);
     }
 
     render() {
-        const { tags } = this.state;
-
         return (
             <div className="input-tag">
                 <div className="input-tag__tags">
-                    {tags.map((tag, i) => (
+                    {this.state.tags.map((tag, i) => (
                         <p key={tag}>
                             {tag}
-                            <button type="button" style={{ background:'none' }} onClick={() => { this.removeTag(i); }}>+</button>
+                            <button type="button" style={{ background: 'none' }} onClick={() => { this.removeTag(i); }}>+</button>
                         </p>
                     ))}
                     <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.inputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; }} /></p>

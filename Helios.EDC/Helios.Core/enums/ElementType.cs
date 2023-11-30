@@ -10,71 +10,49 @@ namespace Helios.Core.Enums
         [Description("Text")]
         Text = 2,
 
-        [Description("Integer")]
-        Integer = 3,
+        [Description("Hidden")]
+        Hidden = 3,
 
-        [Description("Decimal")]
-        Decimal = 4,
+        [Description("Numeric")]
+        Numeric = 4,
 
-        [Description("Table")]
-        Table = 6,
+        [Description("Textarea")]
+        Textarea = 5,
+
+        [Description("Date")]
+        DateOption = 6,
+
+        [Description("Calculation")]
+        Calculated = 7,
 
         [Description("Radiobutton")]
-        RadioList = 7,
+        RadioList = 8,
 
         [Description("CheckList")]
-        CheckList = 8,
+        CheckList = 9,
 
         [Description("Drop-Down")]
-        DropDown = 9,
+        DropDown = 10,
 
         [Description("Drop-Down checklist")]
-        DropDownMulti = 10,
-
-        [Description("Panel")]
-        Panel = 11,
+        DropDownMulti = 11,
 
         [Description("File attachment")]
         File = 12,
 
-        [Description("Datagrid")]
-        DataGrid = 13,
-
-        [Description("Date")]
-        DateOption = 14,
-
-        [Description("Calculation")]
-        Calculated = 15,
-
-        [Description("Hidden")]
-        Hidden = 16,
-
-        [Description("Textarea")]
-        Textarea = 17,
-
-        [Description("Randomization")]
-        RandomizeButton = 18,
-
         [Description("Range slider")]
-        RangeSlider = 19,
-
-        [Description("Signature")]
-        Signature = 20,
-
-        [Description("Numeric")]
-        Numeric = 21,
-
-        [Description("Adverse event")]
-        AdversEventElement = 22,
-
-        [Description("Source document")]
-        SourceDocument = 23,
+        RangeSlider = 13,
 
         [Description("Concomitant medication")]
-        ConcomitantMedication = 24,
+        ConcomitantMedication = 14,
 
-        [Description("Local Laboratory  ")]
-        Labs = 25,
-        //Coding = 26,
+        [Description("Table")]
+        Table = 15,
+
+        [Description("Datagrid")]
+        DataGrid = 16,
+
+        [Description("Adverse event")]
+        AdversEventElement = 17,
     }
 }

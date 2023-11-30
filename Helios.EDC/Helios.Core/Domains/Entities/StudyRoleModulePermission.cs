@@ -14,6 +14,7 @@ namespace Helios.Core.Domains.Entities
         public bool Query { get; set; }
         public bool Freeze { get; set; }
         public bool Lock { get; set; }
+        public StudyRole StudyRole { get; set; }
         public StudyVisitPageModule StudyVisitPageModule { get; set; }
     }
 }

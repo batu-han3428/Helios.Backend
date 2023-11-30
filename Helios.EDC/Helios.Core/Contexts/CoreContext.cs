@@ -92,6 +92,7 @@ namespace Helios.Core.Contexts
         public DbSet<ElementDetail> ElementDetails { get; set; }
         public DbSet<Element> Elements { get; set; }
         public DbSet<ModuleElementEvent> ModuleElementEvents { get; set; }
+        public DbSet<MultipleChoiceTag> MultipleChoiceTag { get; set; }
         public DbSet<Module> Modules { get; set; }
         public DbSet<Site> Sites { get; set; }
         public DbSet<Study> Studies { get; set; }
@@ -101,6 +102,7 @@ namespace Helios.Core.Contexts
         public DbSet<StudyUserSite> StudyUserSites { get; set; }
         public DbSet<StudyVisit> StudyVisits { get; set; }
         public DbSet<StudyVisitPageModuleElementDetail> StudyVisitPageModuleElementDetails { get; set; }
+        public DbSet<StudyVisitPageModuleElementEvents> StudyVisitPageModuleElementEvents { get; set; }
         public DbSet<StudyVisitPageModuleElement> StudyVisitPageModuleElements { get; set; }
         public DbSet<StudyVisitPageModule> StudyVisitPageModules { get; set; }
         public DbSet<StudyVisitPage> StudyVisitPages { get; set; }

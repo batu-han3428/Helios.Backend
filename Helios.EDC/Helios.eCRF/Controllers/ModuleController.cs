@@ -123,11 +123,11 @@ namespace Helios.eCRF.Controllers
             var result = new ApiResponse<dynamic>();
 
             if (model.IsDependent
-                && model.DependentSourceFieldId == null
+                && (model.DependentSourceFieldId == null
                 || model.DependentTargetFieldId == null
                 || model.DependentCondition == 0
                 || model.DependentAction == 0
-                || model.DependentFieldValue == "")
+                || model.DependentFieldValue == ""))
             {
                 result.IsSuccess = false;
                 result.Message = "Dependent Error";
@@ -136,7 +136,7 @@ namespace Helios.eCRF.Controllers
             {
                 result = await _moduleService.SaveModuleContent(model);
             }
-         
+
             return result;
         }
 
@@ -155,5 +155,23 @@ namespace Helios.eCRF.Controllers
             var result = await _moduleService.DeleteElement(elmId, new Guid());
             return result;
         }
+
+        [HttpGet]
+        public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(string id)
+        {
+            var elementId = Guid.Parse(id);
+            var result = _moduleService.GetMultipleTagList(elementId).Result.GroupBy(x => x.Tagkey).ToList();
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
+        {
+            var result = await _moduleService.AddNewTag(tags);
+            return result;
+        }
+
+
     }
 }
