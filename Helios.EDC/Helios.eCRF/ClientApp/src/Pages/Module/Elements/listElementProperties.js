@@ -75,6 +75,7 @@ class ListElementProperties extends Component {
         this.setShowToast.bind(this);
         this.state.layoutSelectedGroup = l;
         this.handleLayoutChange = this.handleLayoutChange.bind(this);
+        this.updateSavedList = this.updateSavedList.bind(this);
         this.handleTagListChange = this.handleTagListChange.bind(this);
         this.toggleNewTagModal = this.toggleNewTagModal.bind(this);
         this.handleTagKeyChange = this.handleTagKeyChange.bind(this);
@@ -128,6 +129,12 @@ class ListElementProperties extends Component {
         this.props.Layout = selectedOption;
     };
 
+    updateSavedList = () => {
+        const { savedTagList, SavedTagList } = this.props;
+
+        //updateSavedTagListProp([...SavedTagList, ...this.state.savedTagList]);
+    };
+
     handleTagListChange = selectedOption => {
         var tgs = [];
 
@@ -138,6 +145,8 @@ class ListElementProperties extends Component {
                 }
             });
         });
+
+        this.props.changeSavedTagList(tgs);
 
         this.setState(prevState => ({
             savedTagList: [...prevState.savedTagList, ...tgs],
@@ -267,8 +276,7 @@ class ListElementProperties extends Component {
                 var index = 0;
                 var ei = this.state.editIndex;
                 var rws = this.state.rows;
-                var tgk = '';
-                
+
                 this.state.savedTagList.filter(function (e) {
                     var t = {
                         id: e.id,
@@ -283,7 +291,6 @@ class ListElementProperties extends Component {
                         t.tagValue = rws[0].tagValue;
                     }
 
-                    tgk = e.tagkey;
                     index++;
                     newtgs.push(t);
                 });
@@ -292,8 +299,10 @@ class ListElementProperties extends Component {
 
                 this.setState(prevState => ({
                     savedTagList: [...prevState.savedTagList, ...newtgs],
+                }, () => {
                 }));
 
+                this.props.changeSavedTagList(newtgs);
                 this.toggleNewTagModal();
                 this.state.toastMessage = "Successful";
                 this.state.stateToast = true;
@@ -342,6 +351,8 @@ class ListElementProperties extends Component {
             const newRows = [...prevState.savedTagList];
             newRows.splice(index, 1);
             return { savedTagList: newRows };
+        }, () => {
+            this.props.changeSavedTagList(this.state.savedTagList);
         });
     }
 
@@ -390,7 +401,7 @@ class ListElementProperties extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {this.state.savedTagList.map((row, index) => (
+                                {this.props.SavedTagList.map((row, index) => (
                                     <tr key={index}>
                                         <td>
                                             {row.tagName}

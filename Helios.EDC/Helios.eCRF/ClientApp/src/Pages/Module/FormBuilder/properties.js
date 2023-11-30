@@ -203,7 +203,8 @@ class Properties extends React.Component {
             case 11:
                 this.state.showWhereElementPropeties = 1;
                 return <ListElementProperties
-                    changeLayout={this.changeLayout} Layout={this.state.Layout} SavedTagList={this.state.SavedTagList}
+                    changeLayout={this.changeLayout} Layout={this.state.Layout}
+                    changeSavedTagList={this.changeSavedTagList} SavedTagList={this.state.SavedTagList}
                 />;
                 break;
             default:
@@ -431,7 +432,7 @@ class Properties extends React.Component {
         this.state.IsRequired = data.isRequired;
         this.state.IsHidden = data.isHidden;
         this.state.CanMissing = data.canMissing;
-        this.state.SavedTagList = data.elementOptions;
+        this.state.SavedTagList = data.elementOptions == null ? [] : JSON.parse(data.elementOptions);
         this.state.IsDependent = data.isDependent;
         this.state.DependentSourceFieldId = data.dependentSourceFieldId;
         this.state.DependentTargetFieldId = data.dependentTargetFieldId;
@@ -467,6 +468,7 @@ class Properties extends React.Component {
 
     handleSaveModuleContent(e) {
         var isValid = true;
+        debugger;
 
         if (this.state.ElementName == "") {
             this.setState({ ElementNameInputClass: "is-invalid form-control" });
@@ -531,7 +533,7 @@ class Properties extends React.Component {
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
                     Layout: this.state.Layout,
-
+                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList): ""
                 })
             }).then(res => res.json())
                 .then(data => {

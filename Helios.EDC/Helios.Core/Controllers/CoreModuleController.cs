@@ -224,7 +224,8 @@ namespace Helios.Core.Controllers
                         Mask = model.Mask,
                         LowerLimit = model.LowerLimit,
                         UpperLimit = model.UpperLimit,
-                        Layout = model.Layout
+                        Layout = model.Layout,
+                        ElementOptions = model.ElementOptions
                         //TargetElementId = Guid.Parse(model.DependentTargetFieldId),
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
@@ -285,6 +286,7 @@ namespace Helios.Core.Controllers
                 elementDetail.LowerLimit = model.LowerLimit;
                 elementDetail.UpperLimit = model.UpperLimit;
                 elementDetail.Layout = model.Layout;
+                elementDetail.ElementOptions = model.ElementOptions;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = userId;
 
