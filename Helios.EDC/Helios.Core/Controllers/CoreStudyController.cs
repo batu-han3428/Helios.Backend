@@ -10,6 +10,7 @@ using MassTransit.JobService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -452,6 +453,324 @@ namespace Helios.Core.Controllers
                     IsSuccess = false,
                     Message = "Unsuccessful"
                 };
+            }
+        }
+        #endregion
+
+        #region Mail Template
+        [HttpGet]
+        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId)
+        {
+            var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Select(x => new EmailTemplateModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                TemplateType= x.TemplateType,
+                CreatedAt= x.CreatedAt,
+                UpdatedAt= x.UpdatedAt
+            }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteEmailTemplate(BaseDTO emailTemplateDTO)
+        {
+            if (emailTemplateDTO.UserId != Guid.Empty && emailTemplateDTO.Id != Guid.Empty)
+            {
+                var data = await _context.MailTemplates.FirstOrDefaultAsync(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.Id == emailTemplateDTO.Id);
+
+                if (data != null)
+                {
+                    _context.MailTemplates.Remove(data);
+
+                    var result = await _context.SaveCoreContextAsync(emailTemplateDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
+
+        }
+
+        [HttpGet]
+        public async Task<EmailTemplateModel> GetEmailTemplate(Guid templateId)
+        {
+            var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.Id == templateId).Include(x=>x.MailTemplatesRoles).Select(x => new EmailTemplateModel()
+            {
+                Id = x.Id,
+                TenantId = x.TenantId,
+                StudyId = x.StudyId,
+                TemplateBody = x.TemplateBody,
+                ExternalMails = x.ExternalMails != "" ? JsonConvert.DeserializeObject<List<string>>(x.ExternalMails) : new List<string>(),
+                Name = x.Name,
+                TemplateType = x.TemplateType,
+                Roles = x.MailTemplatesRoles.Where(x=>x.IsActive && !x.IsDeleted).Select(a=>a.RoleId).ToList(),
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            }).FirstOrDefaultAsync();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        {
+            var result = await _context.MailTemplateTags.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == tenantId && x.TemplateType == templateType).Select(x => new EmailTemplateTagModel()
+            {
+                Id = x.Id,
+                Tag = x.Tag
+            }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            if (emailTemplateTagDTO.UserId != Guid.Empty && emailTemplateTagDTO.TenantId != Guid.Empty)
+            {
+                if(_context.MailTemplateTags.Any(x=>x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.TemplateType == emailTemplateTagDTO.TemplateType && x.Tag == emailTemplateTagDTO.Tag.Trim())){
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Zaten bu template type da bu tag kayıtlı"
+                    };
+                }
+
+                await _context.MailTemplateTags.AddAsync(new MailTemplateTags
+                {
+                    TenantId = emailTemplateTagDTO.TenantId,
+                    Tag = emailTemplateTagDTO.Tag.Trim(),
+                    TemplateType = emailTemplateTagDTO.TemplateType.Value
+                });
+
+                var result = await _context.SaveCoreContextAsync(emailTemplateTagDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            if (emailTemplateTagDTO.UserId != Guid.Empty && emailTemplateTagDTO.Id != Guid.Empty)
+            {
+                var data = await _context.MailTemplateTags.FirstOrDefaultAsync(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.Id == emailTemplateTagDTO.Id);
+
+                if (data != null)
+                {
+                    _context.MailTemplateTags.Remove(data);
+
+                    var result = await _context.SaveCoreContextAsync(emailTemplateTagDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                }
+            }
+            
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
+          
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO)
+        {
+            if (emailTemplateDTO.Id == Guid.Empty)
+            {
+                if (_context.MailTemplates.Any(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Name == emailTemplateDTO.Name.Trim()))
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Template adı kayıtlı"
+                    };
+                }
+
+                var mailTemplate = new MailTemplates()
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = emailTemplateDTO.TenantId,
+                    TemplateType = emailTemplateDTO.TemplateType,
+                    StudyId = emailTemplateDTO.StudyId,
+                    Name = emailTemplateDTO.Name.Trim(),
+                    TemplateBody = emailTemplateDTO.Editor,
+                    ExternalMails = emailTemplateDTO.ExternalMails.Count > 0 ? JsonConvert.SerializeObject(emailTemplateDTO.ExternalMails) : "",
+                };
+
+                var roles = emailTemplateDTO.Roles.Select(x => new MailTemplatesRoles
+                {
+                    RoleId = x,
+                    TenantId = emailTemplateDTO.TenantId,
+                    MailTemplateId = mailTemplate.Id
+                }).ToList();
+
+                mailTemplate.MailTemplatesRoles.AddRange(roles);
+     
+                await _context.MailTemplates.AddAsync(mailTemplate);
+
+                var result = await _context.SaveCoreContextAsync(emailTemplateDTO.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else if (result == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "No changes were made. Please make changes to save."
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                var data = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Id == emailTemplateDTO.Id).Include(x=>x.MailTemplatesRoles).FirstOrDefaultAsync();
+
+                if (data == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+               
+                if (_context.MailTemplates.Any(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Id != emailTemplateDTO.Id && x.Name == emailTemplateDTO.Name.Trim()))
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Template adı kayıtlı"
+                    };
+                }
+
+
+                data.TemplateType = emailTemplateDTO.TemplateType;
+                data.Name = emailTemplateDTO.Name;
+                data.TemplateBody = emailTemplateDTO.Editor;
+                data.ExternalMails = emailTemplateDTO.ExternalMails.Count > 0 ? JsonConvert.SerializeObject(emailTemplateDTO.ExternalMails) : "";
+
+
+                var currentRoleIds = data.MailTemplatesRoles.Where(x => x.IsActive && !x.IsDeleted).Select(s => s.RoleId).ToList();
+                var newRoleIds = emailTemplateDTO.Roles.ToList();
+
+                if (!currentRoleIds.SequenceEqual(newRoleIds))
+                {
+                    _context.MailTemplatesRoles.RemoveRange(data.MailTemplatesRoles);
+
+                    foreach (var roleId in newRoleIds)
+                    {
+                        var newUserSite = new MailTemplatesRoles
+                        {
+                            TenantId = data.TenantId,
+                            RoleId = roleId,
+                            MailTemplateId = data.Id
+                        };
+                        await _context.MailTemplatesRoles.AddAsync(newUserSite);
+                    }
+                }
+
+                var result = await _context.SaveCoreContextAsync(emailTemplateDTO.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else if (result == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "No changes were made. Please make changes to save."
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
             }
         }
         #endregion

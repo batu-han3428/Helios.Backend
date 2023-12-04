@@ -5,6 +5,7 @@ using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
 using MassTransit.Internals.GraphValidation;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -102,6 +103,86 @@ namespace Helios.eCRF.Services
             {
                 var req = new RestRequest("CoreStudy/SiteDelete", Method.Post);
                 req.AddJsonBody(siteModel);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+        #endregion
+
+        #region Mail Template
+        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/GetEmailTemplateList", Method.Get);
+                req.AddParameter("studyId", studyId);
+                var result = await client.ExecuteAsync<List<EmailTemplateModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> DeleteEmailTemplate(BaseDTO emailTemplateDTO)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/DeleteEmailTemplate", Method.Post);
+                req.AddJsonBody(emailTemplateDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<EmailTemplateModel> GetEmailTemplate(Guid templateId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/GetEmailTemplate", Method.Get);
+                req.AddParameter("templateId", templateId);
+                var result = await client.ExecuteAsync<EmailTemplateModel>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/GetEmailTemplateTagList", Method.Get);
+                req.AddParameter("tenantId", tenantId);
+                req.AddParameter("templateType", templateType);
+                var result = await client.ExecuteAsync<List<EmailTemplateTagModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/AddEmailTemplateTag", Method.Post);
+                req.AddJsonBody(emailTemplateTagDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/DeleteEmailTemplateTag", Method.Post);
+                req.AddJsonBody(emailTemplateTagDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreStudy/SetEmailTemplate", Method.Post);
+                req.AddJsonBody(emailTemplateDTO);
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }

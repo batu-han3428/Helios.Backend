@@ -35,5 +35,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<List<TenantUserModel>> GetUserTenantList(Guid userId);
         Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId);
         Task<List<UserPermissionRoleModel>> GetRoleUsers(Guid roleId);
+        Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Guid studyId);
     }
 }

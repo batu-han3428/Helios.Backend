@@ -271,7 +271,7 @@
         },
         {
             label: "e-Mail templates",
-            to: "/emailtemplates",
+            to: "/email-templates",
             icon: "fa-solid fa-envelope"
         },
         {

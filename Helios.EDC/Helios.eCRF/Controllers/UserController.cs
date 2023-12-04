@@ -172,6 +172,27 @@ namespace Helios.eCRF.Controllers
 
 
         /// <summary>
+        /// çalışmadaki kullanıcıları ve rollerini listeler
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>çalışmada ki kullanıcılar ve rolleri</returns>
+        [HttpGet("{studyId}")]
+        public async Task<IActionResult> GetStudyRoleUsers(Guid studyId)
+        {
+            try
+            {
+                var result = await _userService.GetStudyRoleUsers(studyId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
         /// yetki günceller
         /// </summary>
         /// <param name="setPermissionModel">yetki bilgileri</param>

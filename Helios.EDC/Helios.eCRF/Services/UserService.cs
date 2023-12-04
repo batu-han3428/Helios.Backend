@@ -185,6 +185,36 @@ namespace Helios.eCRF.Services
             return new List<UserPermissionRoleModel>();
         }
 
+        private async Task<List<StudyUsersRolesDTO>> GetStudyUserIdsRole(Guid studyId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetStudyUserIdsRole", Method.Get);
+                req.AddParameter("studyId", studyId);
+                var result = await client.ExecuteAsync<List<StudyUsersRolesDTO>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Guid studyId)
+        {
+            var userIdsRole = await GetStudyUserIdsRole(studyId);
+
+            if (userIdsRole.Count > 0)
+            {
+                var result = await GetUserList(userIdsRole.Select(x=>x.Id).ToList());
+
+                return result.Join(userIdsRole, aspNetUser => aspNetUser.Id, studyUser => studyUser.Id, (aspNetUser, studyUser) =>
+                                    new UserPermissionRoleModel
+                                    {
+                                        Role = studyUser.RoleName,
+                                        Name = aspNetUser.Name + " " + aspNetUser.LastName
+                                    }).ToList();
+            }
+
+            return new List<UserPermissionRoleModel>();
+        }
+
         public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
         {
             using (var client = CoreServiceClient)

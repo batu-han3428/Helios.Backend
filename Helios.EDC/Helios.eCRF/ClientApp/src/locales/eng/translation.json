@@ -393,5 +393,12 @@
   "Share": "Share",
   "Name": "Name",
   "Role": "Role",
-  "Responsible person for this user": "Responsible person for this user"
+  "Responsible person for this user": "Responsible person for this user",
+  "Template header": "Template header",
+  "Template type": "Template type",
+  "Add a template": "Add a template",
+  "Template list": "Template list",
+  "Template Tag list": "Template Tag list",
+  "External e-mails": "External e-mails",
+  "Clear All": "Clear All"
 }
