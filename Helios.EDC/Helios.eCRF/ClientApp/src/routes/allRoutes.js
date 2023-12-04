@@ -113,6 +113,10 @@ import TenantUsers from "../Pages/TenantUsers/TenantUsers";
 import SSO_Studies from "../Pages/SSO/SSO_Studies";
 import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
 
+//E-mail template
+import EmailTemplateList from "../Pages/EmailTemplate/EmailTemplateList";
+import AddOrUpdateEmailTemplate from "../Pages/EmailTemplate/AddOrUpdateEmailTemplate";
+
 
 const userRoutes = [
     //tenant
@@ -145,6 +149,14 @@ const userRoutes = [
     { path: "/SSO-tenants", component: <SSO_Tenants />, menuType: "sso", roles: ['StudyUser'] },
     { path: "/SSO-studies/:tenantId", component: <SSO_Studies />, menuType: "sso", roles: ['StudyUser'] },
 
+    //E-mail template
+    { path: "/email-templates/:studyId", component: <EmailTemplateList />, menuType: "study", roles: ['TenantAdmin'] },
+    { path: "/set-email-templates/:studyId/:templateId?", component: <AddOrUpdateEmailTemplate />, menuType: "study", roles: ['TenantAdmin'] },
+
+
+
+
+    //dashborad
     { path: "/dashboard", component: <Dashboard />, menuType: "admin", roles: ['TenantAdmin'] },
 
    //profile

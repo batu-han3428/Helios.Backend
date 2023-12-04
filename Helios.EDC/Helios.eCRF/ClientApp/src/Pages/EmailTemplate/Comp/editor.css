@@ -1,0 +1,8 @@
+﻿.custom-toolbar-class {
+    flex-direction: row-reverse !important;
+    justify-content: flex-end !important;
+}
+
+.custom-editor-class{
+    height:200px !important;
+}

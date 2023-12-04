@@ -1,5 +1,6 @@
 ﻿import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
+import { PermissionsApi } from './Permissions';
 
 export const UsersApi = createApi({
     reducerPath: 'usersApi',
@@ -32,6 +33,10 @@ export const UsersApi = createApi({
                 body: data,
             }),
             invalidatesTags: ['User'],
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                await queryFulfilled;
+                dispatch(PermissionsApi.endpoints.studyRoleUsersListGet.initiate("ea4a8241-6e05-4d31-a116-3ba907a00b97"));
+            },
         }),
         userActivePassive: builder.mutation({
             query: (data) => ({

@@ -1,6 +1,8 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
+using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
+using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -138,6 +140,135 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> SiteDelete(SiteModel siteModel)
         {
             var result = await _studyService.SiteDelete(siteModel);
+
+            return Ok(result);
+        }
+        #endregion
+
+        #region Mail Template
+
+        /// <summary>
+        /// Çalışmanın mail templatelerini listeler
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>mail templateler</returns>
+        [HttpGet("{studyId}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> GetEmailTemplateList(Guid studyId)
+        {
+            try
+            {
+                var result = await _studyService.GetEmailTemplateList(studyId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
+        /// email template siler
+        /// </summary>
+        /// <param name="emailTemplateDTO">template bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> DeleteEmailTemplate(BaseDTO emailTemplateDTO)
+        {
+            var result = await _studyService.DeleteEmailTemplate(emailTemplateDTO);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// seçili mail template getirir
+        /// </summary>
+        /// <param name="templateId">template id</param>
+        /// <returns>mail template</returns>
+        [HttpGet("{templateId}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> GetEmailTemplate(Guid templateId)
+        {
+            try
+            {
+                var result = await _studyService.GetEmailTemplate(templateId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
+        /// email template tagları listeler
+        /// </summary>
+        /// <param name="tenantId">tenant id</param>
+        /// <param name="templateType">template type</param>
+        /// <returns>tag listesi</returns>
+        [HttpGet("{tenantId}/{templateType}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        {
+            try
+            {
+                var result = await _studyService.GetEmailTemplateTagList(tenantId, templateType);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
+        /// email template tag ekler
+        /// </summary>
+        /// <param name="emailTemplateTagDTO">tag bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            var result = await _studyService.AddEmailTemplateTag(emailTemplateTagDTO);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// email template tag siler
+        /// </summary>
+        /// <param name="emailTemplateTagDTO">tag bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
+        {
+            var result = await _studyService.DeleteEmailTemplateTag(emailTemplateTagDTO);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// email template ekler ya da günceller
+        /// </summary>
+        /// <param name="emailTemplateDTO">email template bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO)
+        {
+            var result = await _studyService.SetEmailTemplate(emailTemplateDTO);
 
             return Ok(result);
         }

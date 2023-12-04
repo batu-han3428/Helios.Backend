@@ -239,5 +239,12 @@
   "Share": "Paylaş",
   "Name": "İsim",
   "Role": "Rol",
-  "Responsible person for this user": "Bu kullanıcıdan sorumlu kişi"
+  "Responsible person for this user": "Bu kullanıcıdan sorumlu kişi",
+  "Template header": "Şablon başlığı",
+  "Template type": "Şablon tipi",
+  "Add a template": "Şablon ekle",
+  "Template list": "Şablon listesi",
+  "Template Tag list": "Şablon etiket listesi",
+  "External e-mails": "Harici e-postalar",
+  "Clear All": "Hepsini temizle"
 }

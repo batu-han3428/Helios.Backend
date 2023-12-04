@@ -129,6 +129,16 @@ namespace Helios.Core.Controllers
             }).FirstOrDefaultAsync();
         }
 
+        [HttpGet]
+        public async Task<List<StudyUsersRolesDTO>> GetStudyUserIdsRole(Guid studyId)
+        {
+            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
+            {
+                Id = x.AuthUserId,
+                RoleName = x.StudyRole.Name
+            }).ToListAsync();
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
         {

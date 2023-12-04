@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
+﻿import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';

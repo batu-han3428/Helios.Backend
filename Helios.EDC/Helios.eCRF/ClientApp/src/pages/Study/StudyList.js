@@ -146,7 +146,7 @@ const StudyList = props => {
 
     useEffect(() => {
         dispatch(startloading());
-        if (!isLoading && !error) {
+        if (!isLoading && !error && studyData) {
             const updatedStudyData = studyData.map(item => {
                 return {
                     ...item,

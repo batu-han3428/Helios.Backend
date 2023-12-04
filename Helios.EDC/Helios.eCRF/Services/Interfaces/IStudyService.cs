@@ -17,5 +17,12 @@ namespace Helios.eCRF.Services.Interfaces
         Task<StudyDTO> GetStudy(Guid studyId);
         Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel);
         Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO);
+        Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId);
+        Task<ApiResponse<dynamic>> DeleteEmailTemplate(BaseDTO emailTemplateDTO);
+        Task<EmailTemplateModel> GetEmailTemplate(Guid templateId);
+        Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType);
+        Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
+        Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
+        Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO);
     }
 }
