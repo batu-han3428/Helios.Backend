@@ -8,8 +8,22 @@ const ModalComp = ({ title, body, resetValue = null, handle, buttonText, t, refs
     const [modal_backdrop, setmodal_backdrop] = useState(false);
 
     useEffect(() => {
-        if (!modal_backdrop)
+        if (!modal_backdrop) {
             if (resetValue !== null) resetValue();
+        }
+        else{
+            const observer = new MutationObserver(() => {
+                const modalElement = document.querySelector('.modal');
+                if (modalElement) {
+                    const firstParentDiv = modalElement.parentNode;
+                    const secondParentDiv = firstParentDiv.parentNode;
+                    secondParentDiv.style.zIndex = '999999';
+                    observer.disconnect();
+                }
+            });
+
+            observer.observe(document.body, { subtree: true, childList: true });
+        }
     }, [modal_backdrop]);
 
     const removeBodyCss = () => {

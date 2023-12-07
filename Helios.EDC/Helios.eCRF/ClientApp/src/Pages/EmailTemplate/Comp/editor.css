@@ -6,3 +6,8 @@
 .custom-editor-class{
     height:200px !important;
 }
+
+.rdw-image-modal {
+    overflow-y: auto;
+    height: 300px;
+}

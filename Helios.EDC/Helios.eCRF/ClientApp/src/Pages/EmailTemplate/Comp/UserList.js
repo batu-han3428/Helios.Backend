@@ -1,13 +1,12 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect, useRef } from "react";
-import {
-    Row, Col, Card, CardBody, CardHeader, FormFeedback, Label, Input, Form, Button, CardTitle, CardText, ListGroup, ListGroupItem
-} from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Card, CardBody, CardHeader, CardTitle} from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { MDBDataTable } from "mdbreact";
 import { useLazyStudyRoleUsersListGetQuery } from '../../../store/services/Permissions';
 import { startloading, endloading } from '../../../store/loader/actions';
 import { useDispatch } from 'react-redux';
+
 
 const UserList = props => {
 
@@ -18,24 +17,17 @@ const UserList = props => {
     const [trigger, { data: usersData, isLoading, isError }] = useLazyStudyRoleUsersListGetQuery();
 
     useEffect(() => {
-        console.log('userList', props.studyId)
         if (props.studyId) {
+            dispatch(startloading());
             trigger(props.studyId);
         }
     }, [props.studyId])
 
     useEffect(() => {
-        dispatch(startloading());
-        console.log('dataa', usersData)
         if (usersData && !isLoading && !isError) {
-
             setTable(usersData);
-
             dispatch(endloading());
-
         } else if (isError && !isLoading) {
-            dispatch(endloading());
-        } else {
             dispatch(endloading());
         }
     }, [usersData, isError, isLoading]);
