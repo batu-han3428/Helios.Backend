@@ -1,6 +1,51 @@
 version: '3.4'
 
 services:
+  # helios.authentication:
+  #   image: ${DOCKER_REGISTRY-}heliosauthentication
+  #   build:
+  #     context: .
+  #     dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
+  #   ports:
+  #    - 5200:80
+  #    - 5201:443
+  #   networks:
+  #       v3network:
+  #           ipv4_address: 10.7.0.5
+
+  # helios.core:
+  #   image: ${DOCKER_REGISTRY-}helioscore
+  #   build:
+  #     context: .
+  #     dockerfile: Helios.EDC/Helios.Core/Dockerfile
+  #   ports:
+  #    - 4200:80
+  #    - 4201:443
+  #   networks:
+  #       v3network:
+  #           ipv4_address: 10.7.0.4
+
+
+
+  redis_image:
+    image: redis
+    container_name: redis.cache
+    command: redis-server --requirepass heliosredis
+    networks:
+        v3network:
+            ipv4_address: 10.7.0.2
+  rabbitmq:
+      image: rabbitmq:3-management-alpine
+      ports:
+          - 5672:5672
+          - 15672:15672
+      networks:
+        v3network:
+            ipv4_address: 10.7.0.3
+      volumes:
+        - ./volume/rabbitmq:/data
+
+
   helios.ecrf:
     image: ${DOCKER_REGISTRY-}heliosecrf
     build:
@@ -10,36 +55,28 @@ services:
      - 3200:80
      - 3201:443
     networks:
-        vpcbr:
-            ipv4_address: 10.7.0.3
+        v3network:
+            ipv4_address: 10.7.0.6
 
-  helios.authentication:
-    image: ${DOCKER_REGISTRY-}heliosauthentication
-    build:
-      context: .
-      dockerfile: Helios.Authentication/Dockerfile
-    ports:
-     - 5200:80
-     - 5201:443
-    networks:
-        vpcbr:
-            ipv4_address: 10.7.0.5
+  # helios.ecrf.ui:
+  #   image: ${DOCKER_REGISTRY-}heliosecrfui
+  #   container_name: frontend
+  #   environment:
+  #      - REACT_APP_API_URL:"http://localhost:3201"
+  #   build:
+  #     context: .
+  #     dockerfile: Helios.EDC/Helios.eCRF/ClientApp/Dockerfile
+  #   # restart: on-failure
+  #   stdin_open: true
+  #   ports:
+  #    - 44458:44458
+  #   volumes:
+  #     - 'C:\Projects\v3\Medcase\Helios.EDC\Helios.eCRF\ClientApp\:/app'
+     
 
-
-  helios.core:
-    image: ${DOCKER_REGISTRY-}helioscore
-    build:
-      context: .
-      dockerfile: Helios.EDC/Helios.Core/Dockerfile
-    ports:
-     - 4200:80
-     - 4201:443
-    networks:
-        vpcbr:
-            ipv4_address: 10.7.0.4
 
 networks:
-  vpcbr:
+  v3network:
     driver: bridge
     ipam:
      config:
