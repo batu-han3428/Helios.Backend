@@ -134,7 +134,7 @@ const userRoutes = [
     { path: "/visits/:studyId", component: <Study />, menuType: "study", roles: ['TenantAdmin'] },
 
     //site & laboratories
-    { path: "/sitelaboratories-sites-site/:studyId", component: <Sites />, menuType: "study", roles: ['TenantAdmin'] },
+    { path: "/sites/:studyId", component: <Sites />, menuType: "study", roles: ['TenantAdmin'] },
 
     //permissions
     { path: "/permissions/:studyId", component: <Permission />, menuType: "study", roles: ['TenantAdmin'] },
