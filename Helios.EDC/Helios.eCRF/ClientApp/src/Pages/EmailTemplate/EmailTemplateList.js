@@ -1,24 +1,34 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect, useRef } from "react";
-import {
-    Row, Col, Card, CardBody, FormFeedback, Label, Input, Form, Button
-} from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Row, Col, Card, CardBody, Button } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { formatDate } from "../../helpers/format_date";
 import { useSelector, useDispatch } from 'react-redux';
 import { startloading, endloading } from '../../store/loader/actions';
 import { MDBDataTable } from "mdbreact";
-import ModalComp from '../../components/Common/ModalComp/ModalComp';
 import ToastComp from '../../components/Common/ToastComp/ToastComp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLazyEmailTemplateListGetQuery, useEmailTemplateDeleteMutation } from '../../store/services/EmailTemplate';
 import Swal from 'sweetalert2';
+import templateTypeItems from './TemplateTypeItems';
 
 
 const EmailTemplateList = props => {
 
-    const modalRef = useRef();
+    const location = useLocation();
+
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+    const [stateToast, setStateToast] = useState(false);
+
+    useEffect(() => {
+        if (location.state !== null) {
+            setToastMessage(location.state.message);
+            setStateToast(location.state.state);
+            setShowToast(true);
+        }
+    }, []);
 
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -58,7 +68,6 @@ const EmailTemplateList = props => {
     };
 
     const getActions = (item) => {
-        console.log(item)
         const actions = (
             <div className="icon-container">
                 <div title={props.t("Update")} className="icon icon-update" onClick={() => addOrUpdateTemplate(item.id)}></div>
@@ -73,31 +82,31 @@ const EmailTemplateList = props => {
                 label: props.t("Template header"),
                 field: "name",
                 sort: "asc",
-                style: { width: '150px' }
+                width: 500
             },
             {
                 label: props.t("Template type"),
                 field: "templateType",
                 sort: "asc",
-                style: { width: '150px' }
+                width: 50
             },
             {
                 label: props.t("Created on"),
                 field: "createdAt",
                 sort: "asc",
-                style: { width: '150px' }
+                width: 50
             },
             {
                 label: props.t("Last updated on"),
                 field: "updatedAt",
                 sort: "asc",
-                style: { width: '150px' }
+                width: 50
             },
             {
                 label: props.t('Actions'),
                 field: 'actions',
                 sort: 'disabled',
-                style: { width: '50px' }
+                width: 50
             }
         ],
         rows: tableData
@@ -117,8 +126,9 @@ const EmailTemplateList = props => {
             const updatedEmailTemplateData = emailTemplateData.map(item => {
                 return {
                     ...item,
-                    createdOn: formatDate(item.createdAt),
-                    lastUpdatedOn: formatDate(item.updatedAt),
+                    templateType: props.t(templateTypeItems.find(e => e.value === item.templateType).label) || "",
+                    createdAt: formatDate(item.createdAt),
+                    updatedAt: formatDate(item.updatedAt),
                     actions: getActions(item)
                 };
             });
@@ -241,13 +251,13 @@ const EmailTemplateList = props => {
                 </div>
             </div>
       
-            {/*<ToastComp*/}
-            {/*    title="İşlem bilgisi"*/}
-            {/*    message={message}*/}
-            {/*    showToast={showToast}*/}
-            {/*    setShowToast={setShowToast}*/}
-            {/*    stateToast={stateToast}*/}
-            {/*/>*/}
+            <ToastComp
+                title="İşlem bilgisi"
+                message={toastMessage}
+                showToast={showToast}
+                setShowToast={setShowToast}
+                stateToast={stateToast}
+            />
         </React.Fragment>
     );
 };

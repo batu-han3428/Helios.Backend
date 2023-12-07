@@ -1,8 +1,6 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect, useRef } from "react";
-import {
-    Row, Col, Card, CardBody, CardHeader, FormFeedback, Label, Input, Form, Button, CardTitle, CardText, ListGroup, ListGroupItem
-} from "reactstrap";
+import { Card, CardBody, CardHeader, FormFeedback, Label, Input, Form, CardTitle, ListGroup, ListGroupItem } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLazyEmailTemplateTagListGetQuery, useAddEmailTemplateTagMutation, useDeleteEmailTemplateTagMutation } from '../../../store/services/EmailTemplate';
@@ -18,8 +16,6 @@ import "./templateTagList.css";
 
 const TemplateTagList = props => {
 
-    //const [list, setList] = useState({ id: 1, title: 'List 1', items: ['@StudyName', '@CycleName', '@PatientNo'] });
-
     const modalRef = useRef();
 
     const dispatch = useDispatch();
@@ -29,24 +25,17 @@ const TemplateTagList = props => {
     const [trigger, { data: emailTemplateTagData, isLoading, isError }] = useLazyEmailTemplateTagListGetQuery();
 
     useEffect(() => {
-        console.log(props.tenantId)
-        console.log(props.templateType)
         if (props.tenantId && props.templateType) {
+            dispatch(startloading());
             trigger({ tenantId: props.tenantId, templateType: props.templateType });
         }
     }, [props.tenantId, props.templateType])
 
     useEffect(() => {
-        dispatch(startloading());
         if (emailTemplateTagData && !isLoading && !isError) {
-
             setList(emailTemplateTagData);
-
             dispatch(endloading());
-
         } else if (isError && !isLoading) {
-            dispatch(endloading());
-        } else {
             dispatch(endloading());
         }
     }, [emailTemplateTagData, isError, isLoading]);
@@ -143,19 +132,14 @@ const TemplateTagList = props => {
         onSubmit: async (values) => {
             try {
                 dispatch(startloading());
-                console.log(values)
                 const response = await addEmailTemplateTag(values);
                 if (response.data.isSuccess) {
-                    //setMessage(response.data.message)
-                    //setStateToast(true);
-                    //setShowToast(true);
                     modalRef.current.tog_backdrop();
                     dispatch(endloading());
+                    props.toast(response.data.message, true);
                 } else {
-                    //setMessage(response.data.message)
-                    //setStateToast(false);
-                    //setShowToast(true);
                     dispatch(endloading());
+                    props.toast(response.data.message, false);
                 }
             } catch (e) {
                 dispatch(endloading());
@@ -169,10 +153,10 @@ const TemplateTagList = props => {
 
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                console.log('kopyalandı', textToCopy);
+                props.toast('kopyalandı ' + textToCopy, true);
             })
             .catch((err) => {
-                console.error('kopyalanırken bir hata oluştu:', err);
+                props.toast('kopyalanırken bir hata oluştu.', false);
             });
     }
 
@@ -214,7 +198,6 @@ const TemplateTagList = props => {
                                         value={optionGroupTemplateType[0].options.find(option => option.value === validationType.values.templateType)}
                                         name="templateType"
                                         onChange={(selectedOption) => {
-                                            console.log(selectedOption)
                                             const formattedValue = {
                                                 target: {
                                                     name: 'templateType',
