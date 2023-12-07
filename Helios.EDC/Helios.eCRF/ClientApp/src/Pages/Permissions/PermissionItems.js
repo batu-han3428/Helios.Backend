@@ -51,6 +51,10 @@
             name: "sdv"
         },
         {
+            label: "Verification",
+            name: "verification"
+        },
+        {
             label: "Remote SDV",
             name: "remoteSdv"
         },

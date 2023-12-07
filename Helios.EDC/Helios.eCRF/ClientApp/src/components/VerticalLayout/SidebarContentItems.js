@@ -12,7 +12,6 @@
     admin: [
         {
             label: "Studies",
-            /* to: "/studylist",*/
             icon: "fa-solid fa-folder-tree",
             subMenu: [
                 {
@@ -37,18 +36,12 @@
             to: "/moduleList",
             icon: "fa-solid fa-puzzle-piece"
         },
-//        {
-//            label: "Form Builder",
-//            to: "/formBuilder",
-///*            icon: "ti-home",*/
-//        },
         {
             label: "Dashboard",
             to: "/dashboard",
         },
         {
             label: "Email",
-          /*  to: "/#",*/
             subMenu: [
                 {
                     label: "Inbox",
@@ -66,7 +59,6 @@
         },
         {
             label: "UI Elements",
-         /*   to: "/#",*/
             subMenu: [
                 {
                     label: "Alerts",
@@ -152,7 +144,6 @@
         },
         {
             label: "Forms",
-        /*    to: "/#",*/
             subMenu: [
                 {
                     label: "Form Elements",
@@ -194,7 +185,6 @@
         },
         {
             label: "Tables",
-          /*  to: "/#",*/
             subMenu: [
                 {
                     label: "Basic Tables",
@@ -239,60 +229,66 @@
             icon: "fa-solid fa-toggle-on"
         },
         {
-            label: "Visits",
-            to: "/visits",
-            icon: "fa-regular fa-rectangle-list",
-        },
-        {
-            label: "Site & Laboratories",
+            label: "Study design",
             icon: "fa-solid fa-folder-open",
             subMenu: [
                 {
-                    label: "Sites",
-                    to: "/sitelaboratories-sites-site",
-                    icon: "fa-solid fa-location-dot"
+                    label: "Visits",
+                    to: "/visits",
+                    icon: "fa-regular fa-rectangle-list"
+                },
+                {
+                    label: "Metadata",
+                    to: "/metadata",
+                    icon: "fa-solid fa-flask"
+                },
+                {
+                    label: "Randomization",
+                    to: "/randomization",
+                    icon: "fa-solid fa-shuffle"
+                },
+                {
+                    label: "Study documents",
+                    to: "/studydocuments",
+                    icon: "fa-regular fa-paste"
                 },
                 {
                     label: "Laboratories",
-                    to: "/sitelaboratories-laboratories",
+                    to: "/laboratories",
                     icon: "fa-solid fa-flask"
+                },
+                {
+                    label: "eMails",
+                    to: "/email-templates",
+                    icon: "fa-solid fa-envelope"
+                },
+                {
+                    label: "e-Consent",
+                    to: "/econsent",
+                    icon: "fa-regular fa-file-lines"
                 },
             ]
         },
         {
-            label: "Randomization",
-            to: "/randomization",
-            icon: "fa-solid fa-shuffle"
+            label: "Sites",
+            to: "/sites",
+            icon: "fa-solid fa-location-dot"
         },
         {
-            label: "Study documents",
-            to: "/studydocuments",
-            icon: "fa-regular fa-paste"
-        },
-        {
-            label: "e-Mail templates",
-            to: "/email-templates",
-            icon: "fa-solid fa-envelope"
-        },
-        {
-            label: "System audit trail",
-            to: "/systemaudittrail",
-            icon: "fa-solid fa-clock-rotate-left"
-        },
-        {
-            label: "e-Consent",
-            to: "/econsent",
-            icon: "fa-regular fa-file-lines"
-        },
-        {
-            label: "TMF template list",
-            to: "/tmftemplatelist",
-            icon: "fa-solid fa-table-cells-large"
-        },
-        {
-            label: "TMF e-mail template",
-            to: "/tmfemailtemplate",
-            icon: "fa-solid fa-envelope"
+            label: "TMF",
+            icon: "fa-solid fa-folder-open",
+            subMenu: [
+                {
+                    label: "Template list",
+                    to: "/tmftemplatelist",
+                    icon: "fa-solid fa-table-cells-large"
+                },
+                {
+                    label: "e-Mail template",
+                    to: "/tmfemailtemplate",
+                    icon: "fa-solid fa-envelope"
+                },
+            ]
         },
         {
             label: "Permissions",
@@ -303,6 +299,11 @@
             label: "Users",
             to: "/users",
             icon: "fa-solid fa-user-plus"
+        },
+        {
+            label: "System audit trail",
+            to: "/systemaudittrail",
+            icon: "fa-solid fa-clock-rotate-left"
         },
     ],
 };
