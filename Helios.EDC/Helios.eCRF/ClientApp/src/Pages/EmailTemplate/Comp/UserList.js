@@ -53,7 +53,7 @@ const UserList = props => {
     return (
         <Card className="mb-3">
             <CardHeader style={{ display: "flex", justifyContent: "center", alignItems: "center", background: "white", borderBottom: "1px solid #e9ecef" }}>
-                <CardTitle>List of users to view the email</CardTitle>
+                <CardTitle>{props.t("List of users to view the email")}</CardTitle>
             </CardHeader>
             <CardBody>
                 <MDBDataTable

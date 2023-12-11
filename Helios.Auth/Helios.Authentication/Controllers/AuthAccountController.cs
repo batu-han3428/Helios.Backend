@@ -222,94 +222,29 @@ namespace Helios.Authentication.Controllers
 
                     if (result.Succeeded)
                     {
-                        var userRoles = await _userManager.GetRolesAsync(user);
-                        var enumList = userRoles.Select(x => Enum.Parse<Roles>(x))
-                        .ToList();
-
                         TokenHandler tokenHandler = new TokenHandler(_configuration);
                         Token token = tokenHandler.CreateAccessToken(user);
                         user.RefreshToken = token.RefreshToken;
                         user.RefrestTokenEndDate = token.Expiration.AddMinutes(3);
-                        await _context.SaveChangesAsync();
+                        int tokenResult = await _context.SaveChangesAsync();
 
-                        switch (enumList)
+                        if (tokenResult > 0)
                         {
-                            case var _ when
-                            (
-                                enumList.Contains(Roles.SuperAdmin)
-                                ||
-                                enumList.Contains(Roles.SystemAdmin)
-                            )
-                            ||
-                            (
-                             (
-                                enumList.Contains(Roles.SuperAdmin)
-                                ||
-                                enumList.Contains(Roles.SystemAdmin)
-                             )
-                             &&
-                               enumList.Contains(Roles.TenantAdmin)
-                            ):
-                                //return new { isSuccess = true, message = "1. sayfa" };
-                            case var _ when
-                            enumList.Contains(Roles.TenantAdmin):
-                                return new ApiResponse<dynamic>
-                                {
-                                    IsSuccess = true,
-                                    Message = "2. sayfa",
-                                    Values = new { accessToken = token.AccessToken }
-                                };
-                            case var _ when
-                            (
-                                enumList.Contains(Roles.SuperAdmin)
-                                ||
-                                enumList.Contains(Roles.SystemAdmin)
-                                ||
-                                enumList.Contains(Roles.TenantAdmin)
-                            )
-                            &&
-                            (
-                                enumList.Contains(Roles.StudyUser)
-                                ||
-                                enumList.Contains(Roles.StudySubject)
-                            ):
-                                //return new { isSuccess = true, message = "3. sayfa" };
-                            case var _ when enumList.Contains(Roles.StudyUser):
-
-
-                            // altta ki geçersiz. diğer db ye gidip studyusers da ki rollerine bakıp sayısın
-                            // örn. _context.studyusers.Where(x=>x.aspnetUserId = user.Id).include(x=>x.studyuserroles).GroupBy(x => x.TenantId).Select(n => new
-                            //{
-                            //    tenantId = n.Key,
-                            //}).ToList();
-
-                            //var tenants = _context.UserRoles.Where(x=>x.UserId == user.Id).GroupBy(x => x.TenantId).Select(n => new
-                            //{
-                            //    tenantId = n.Key,
-                            //}).ToList();
-                            //if (tenants.Count > 1)
-                            //{
-                            //    return new { isSuccess = true, message = "5. sayfa" };
-                            //}
-                            //else
-                            //{
-                            //    return new { isSuccess = true, message = "4. sayfa" };
-                            //}
-                             return new ApiResponse<dynamic>
-                                {
-                                    IsSuccess = true,
-                                    Message = "2. sayfa",
-                                    Values = new { accessToken = token.AccessToken }
-                                };
-                            default:
-                                break;
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "",
+                                Values = new { accessToken = token.AccessToken }
+                            };
                         }
-
-                        return new ApiResponse<dynamic>
+                        else
                         {
-                            IsSuccess = true,
-                            Message = "Successful"
-                        };
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Unsuccessful"
+                            };
+                        }
                     }
                 }
 

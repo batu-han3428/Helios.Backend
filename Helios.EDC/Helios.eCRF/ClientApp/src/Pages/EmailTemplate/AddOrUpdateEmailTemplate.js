@@ -38,7 +38,7 @@ const AddOrUpdateEmailTemplate = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
                             <Col md={8}>
-                                <h6 className="page-title"><FontAwesomeIcon style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }} onClick={() => navigate(`/email-templates/${studyId}`)} icon="fa-solid fa-left-long" />{props.t("Study information")}</h6>
+                                <h6 className="page-title"><FontAwesomeIcon style={{ marginRight: "10px", cursor: "pointer", position: "relative", top: "0.5px" }} onClick={() => navigate(`/email-templates/${studyId}`)} icon="fa-solid fa-left-long" />{props.t("e-Mail templates")}</h6>
                             </Col>
                         </Row>
                     </div>

@@ -405,5 +405,16 @@
   "Metadata": "Metadata",
   "eMails": "Emails",
   "Verification": "Verification",
-  "e-Mail template": "e-Mail template"
+  "e-Mail template": "e-Mail template",
+  "Add system admin": "Add system admin",
+  "Add a system admin": "Add a system admin",
+  "This tag is registered for this template type.": "This tag is registered for this template type.",
+  "This template name already exists.": "This template name already exists.",
+  "This template will be deleted.": "This template will be deleted.",
+  "List of users to view the email": "List of users to view the email",
+  "This tag will be deleted.": "This tag will be deleted.",
+  "Tag copied": "Tag copied",
+  "An error occurred while copying the tag.": "An error occurred while copying the tag.",
+  "e-Mail tag": "e-Mail tag",
+  "Select all": "Select all"
 }

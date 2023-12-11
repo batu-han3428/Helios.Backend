@@ -18,6 +18,7 @@ using Org.BouncyCastle.Asn1.Crmf;
 using Helios.Authentication.Enums;
 using Newtonsoft.Json.Linq;
 using Helios.Common.Model;
+using MassTransit.Initializers;
 
 namespace Helios.Authentication.Controllers
 {
@@ -566,6 +567,248 @@ namespace Helios.Authentication.Controllers
                 IsSuccess = false,
                 Message = "An unexpected error occurred."
             };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO model)
+        {
+            if (model.Id == Guid.Empty)
+            {
+                if (await _userManager.FindByEmailAsync(model.Email) == null)
+                {
+                    var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Substring(0, 1).ToLower();
+                    var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Replace(" ", "").ToLower();
+                    var userName = string.Format("{0}_{1}{2}", Guid.NewGuid(), firstChar, lastNameEng);
+
+                    var newUserName = userName;
+                    int i = 0;
+
+                    while (await _userManager.Users.AnyAsync(x => x.UserName == newUserName))
+                    {
+                        i++;
+                        newUserName = string.Format("{0}_{1}", userName, i);
+                    }
+
+                    var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.SystemAdmin.ToString());
+
+                    var usr = new ApplicationUser
+                    {
+                        Id = Guid.NewGuid(),
+                        Email = model.Email.Trim(),
+                        UserName = newUserName,
+                        Name = model.Email.Trim(),
+                        LastName = model.Email.Trim(),
+                        ChangePassword = false,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        PhotoBase64String = "",
+                        LastChangePasswordDate = DateTime.Now
+                    };
+
+                    usr.UserRoles.Add(new ApplicationUserRole
+                    {
+                        Role = role,
+                        User = usr,
+                        RoleId = role.Id,
+                        UserId = usr.Id,
+                        StudyId = Guid.Empty,
+                        TenantId = Guid.Empty,
+                    });
+
+                    var password = StringExtensionsHelper.GenerateRandomPassword();
+
+                    var userResult = await _userManager.CreateAsync(usr, password);
+
+                    if (userResult.Succeeded)
+                    {
+                        _context.SystemAdmins.Add(new SystemAdmin
+                        {
+                            AuthUserId = usr.Id,
+                        });
+
+                        var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            model.Password = password;
+                            await _emailService.SystemAdminUserMail(model);
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "This user is already registered in the system.",
+                    };
+                }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "This user is already registered in the system.",
+            };
+        }
+
+        [HttpGet]
+        public async Task<List<SystemUserModel>> GetSystemAdminUserList()
+        {
+            return await (
+                from systemAdmin in _context.SystemAdmins
+                join userManagerUser in _userManager.Users on systemAdmin.AuthUserId equals userManagerUser.Id
+                where !systemAdmin.IsDeleted
+                select new SystemUserModel
+                {
+                    Id = userManagerUser.Id,
+                    Email = userManagerUser.Email,
+                    IsActive = systemAdmin.IsActive
+                }
+            ).ToListAsync();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SystemAdminActivePassive(SystemAdminDTO model)
+        {
+            var user = await _context.SystemAdmins.FirstOrDefaultAsync(x => x.AuthUserId == model.Id);
+
+            if (user != null)
+            {
+                user.IsActive = !user.IsActive;
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }              
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO model)
+        {
+            if (model.Id != Guid.Empty)
+            {
+                var user = await _userManager.FindByIdAsync(model.Id.ToString());
+
+                if (user == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+                else if (!user.IsActive)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Please activate the account first and then try this process again."
+                    };
+                }
+                else
+                {
+                    user.ChangePassword = false;
+                    var changePassword = await _userManager.UpdateAsync(user);
+                    if (changePassword.Succeeded)
+                    {
+                        string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                        var removeResult = await _userManager.RemovePasswordAsync(user);
+                        if (removeResult.Succeeded)
+                        {
+                            var passResult = await _userManager.AddPasswordAsync(user, newPassword);
+                            if (passResult.Succeeded)
+                            {
+                                model.Password = newPassword;
+                                model.isAddUser = false;
+                                await _emailService.SystemAdminUserMail(model);
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SystemAdminDelete(SystemAdminDTO model)
+        {
+            var user = await _context.SystemAdmins.FirstOrDefaultAsync(x => x.AuthUserId == model.Id);
+
+            if (user != null)
+            {
+                _context.SystemAdmins.Remove(user);
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
         }
         #endregion
     }

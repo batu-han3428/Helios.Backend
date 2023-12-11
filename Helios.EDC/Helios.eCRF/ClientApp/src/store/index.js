@@ -10,6 +10,7 @@ import { UsersApi } from './services/Users'
 import { TenantUsersApi } from './services/TenantUsers'
 import { SSOApi } from './services/SSO/SSO_Api'
 import { EmailTemplateApi } from './services/EmailTemplate'
+import { SystemAdminApi } from './services/SystemAdmin'
 
 export const store = configureStore({
     reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
         [TenantUsersApi.reducerPath]: TenantUsersApi.reducer,
         [SSOApi.reducerPath]: SSOApi.reducer,
         [EmailTemplateApi.reducerPath]: EmailTemplateApi.reducer,
+        [SystemAdminApi.reducerPath]: SystemAdminApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
@@ -34,7 +36,8 @@ export const store = configureStore({
             UsersApi.middleware,
             TenantUsersApi.middleware,
             SSOApi.middleware,
-            EmailTemplateApi.middleware
+            EmailTemplateApi.middleware,
+            SystemAdminApi.middleware
         )
 })
 

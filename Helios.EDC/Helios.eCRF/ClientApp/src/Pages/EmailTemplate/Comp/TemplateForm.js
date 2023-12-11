@@ -51,7 +51,7 @@ const TemplateForm = props => {
             });
             const allRoleIds = rolesData.map(item => item.id);
             const selectAllOption = {
-                label: "Select All",
+                label: props.t("Select all"),
                 value: ["All", allRoleIds]
             };
             roles.unshift(selectAllOption);
@@ -140,7 +140,7 @@ const TemplateForm = props => {
     const animatedComponents = makeAnimated();
 
     const [optionGroupRoles, setOptionGroupRoles] = useState([{
-        label: "Select All",
+        label: props.t("Select all"),
         options: []
     }]);
 
@@ -161,7 +161,7 @@ const TemplateForm = props => {
         },
         validationSchema: Yup.object().shape({
             templateType: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
         }),
         onSubmit: async (values) => {
@@ -223,7 +223,7 @@ const TemplateForm = props => {
                 return false;
             }}>
             <div className="mb-3">
-                <Label className="form-label">{props.t("Study name")}</Label>
+                <Label className="form-label">{props.t("Template header")}</Label>
                 <Input
                     name="name"
                     placeholder=""
@@ -274,7 +274,7 @@ const TemplateForm = props => {
             <div className="mb-3" style={{ position: "relative", zIndex: "112312" }}>
                 <Label className="form-label">{props.t("Roles")}</Label>
                 <Select
-                    value={validationType.values.roles[0] === "All" ? { label: "Select All", value: validationType.values.roles[1] } : optionGroupRoles[0].options.filter(option => validationType.values.roles.includes(option.value))}
+                    value={validationType.values.roles[0] === "All" ? { label: props.t("Select all"), value: validationType.values.roles[1] } : optionGroupRoles[0].options.filter(option => validationType.values.roles.includes(option.value))}
                     name="roles"
                     onChange={(selectedOptions) => {
                         const selectedValues = selectedOptions.map(option => option.value);
@@ -292,7 +292,7 @@ const TemplateForm = props => {
                             const allOptions = optionGroupRoles[0].options;
                             const selectedOptions = [];
                             for (const option of allOptions) {
-                                if (option.label !== "Select All") {
+                                if (option.label !== props.t("Select all")) {
                                     selectedOptions.push(option.value);
                                 }
                             }

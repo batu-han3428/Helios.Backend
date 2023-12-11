@@ -70,6 +70,7 @@
     "react-dropzone": "^14.2.3",
     "react-flatpickr": "^3.10.13",
     "react-i18next": "^13.2.2",
+    "react-idle-timer": "^5.7.2",
     "react-input-mask": "^2.0.4",
     "react-jvectormap": "^0.0.16",
     "react-leaflet": "^4.2.1",

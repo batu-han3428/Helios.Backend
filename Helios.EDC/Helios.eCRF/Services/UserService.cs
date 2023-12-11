@@ -535,6 +535,63 @@ namespace Helios.eCRF.Services
         }
         #endregion
 
+        #region System Admin User
+
+        public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SetSystemAdminUser", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<SystemUserModel>> GetSystemAdminUserList()
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetSystemAdminUserList", Method.Get);
+                var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SystemAdminActivePassive(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SystemAdminActivePassive", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SystemAdminResetPassword", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SystemAdminDelete(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SystemAdminDelete", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+        #endregion
+
         #region SSO
         public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
         {
