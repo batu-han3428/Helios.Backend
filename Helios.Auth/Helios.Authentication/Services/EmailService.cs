@@ -46,6 +46,11 @@ namespace Helios.Authentication.Services
             });
         }
 
+        public async Task SystemAdminUserMail(SystemAdminDTO systemAdminDTO)
+        {
+            await _backgorundWorker.Publish(systemAdminDTO);
+        }
+
         public async Task UserResetPasswordMail(StudyUserModel studyUserModel)
         {
             await _backgorundWorker.Publish(new UserResetPasswordModel

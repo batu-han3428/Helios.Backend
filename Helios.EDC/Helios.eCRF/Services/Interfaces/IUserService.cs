@@ -36,5 +36,10 @@ namespace Helios.eCRF.Services.Interfaces
         Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId);
         Task<List<UserPermissionRoleModel>> GetRoleUsers(Guid roleId);
         Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Guid studyId);
+        Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO);
+        Task<List<SystemUserModel>> GetSystemAdminUserList();
+        Task<ApiResponse<dynamic>> SystemAdminActivePassive(SystemAdminDTO systemAdminDTO);
+        Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO systemAdminDTO);
+        Task<ApiResponse<dynamic>> SystemAdminDelete(SystemAdminDTO systemAdminDTO);
     }
 }

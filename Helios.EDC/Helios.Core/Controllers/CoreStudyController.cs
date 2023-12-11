@@ -554,7 +554,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "Zaten bu template type da bu tag kayıtlı"
+                        Message = "This tag is registered for this template type."
                     };
                 }
 
@@ -644,7 +644,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "Template adı kayıtlı"
+                        Message = "This template name already exists."
                     };
                 }
 
@@ -715,7 +715,7 @@ namespace Helios.Core.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "Template adı kayıtlı"
+                        Message = "This template name already exists."
                     };
                 }
 

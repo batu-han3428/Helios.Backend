@@ -159,7 +159,7 @@ const EmailTemplateList = props => {
 
     const deleteTemplate = (id) => {
         Swal.fire({
-            title: props.t("template siliniyor!"),
+            title: props.t("This template will be deleted."),
             text: props.t("Do you confirm?"),
             icon: "warning",
             showCancelButton: true,

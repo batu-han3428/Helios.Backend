@@ -1,6 +1,5 @@
 ﻿import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { getLocalStorage } from '../../helpers/local-storage/localStorageProcess';
-import { PermissionsApi } from './Permissions';
 
 export const UsersApi = createApi({
     reducerPath: 'usersApi',

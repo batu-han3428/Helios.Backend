@@ -251,5 +251,16 @@
   "Metadata": "Metaveri",
   "eMails": "ePostalar",
   "Verification": "Doğrulama",
-  "e-Mail template": "e-Posta şablonları"
+  "e-Mail template": "e-Posta şablonları",
+  "Add system admin": "Sistem yöneticisi ekle",
+  "Add a system admin": "Sistem yöneticisi ekle",
+  "This tag is registered for this template type.": "Bu şablon tipi için bu etiket kayıtlıdır.",
+  "This template name already exists.": "Bu şablon adı zaten mevcut.",
+  "This template will be deleted.": "Bu şablon silinecektir.",
+  "List of users to view the email": "e-Postayı görüntüleyecek kullanıcıların listesi",
+  "This tag will be deleted.": "Bu etiket silinecektir.",
+  "Tag copied": "Etiket kopyalandı",
+  "An error occurred while copying the tag.": "Etiket kopyalanırken bir hata oluştu.",
+  "e-Mail tag": "e-Posta etiketi",
+  "Select all": "Hepsini seç"
 }

@@ -117,6 +117,9 @@ import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
 import EmailTemplateList from "../Pages/EmailTemplate/EmailTemplateList";
 import AddOrUpdateEmailTemplate from "../Pages/EmailTemplate/AddOrUpdateEmailTemplate";
 
+//Add system admin
+import ListSystemAdmin from "../Pages/AddSystemAdmin/ListSystemAdmin";
+
 
 const userRoutes = [
     //tenant
@@ -133,7 +136,7 @@ const userRoutes = [
     { path: "/addstudy", component: <AddOrUpdateStudy />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/visits/:studyId", component: <Study />, menuType: "study", roles: ['TenantAdmin'] },
 
-    //site & laboratories
+    //sites
     { path: "/sites/:studyId", component: <Sites />, menuType: "study", roles: ['TenantAdmin'] },
 
     //permissions
@@ -153,6 +156,8 @@ const userRoutes = [
     { path: "/email-templates/:studyId", component: <EmailTemplateList />, menuType: "study", roles: ['TenantAdmin'] },
     { path: "/set-email-templates/:studyId/:templateId?", component: <AddOrUpdateEmailTemplate />, menuType: "study", roles: ['TenantAdmin'] },
 
+    //Add system admin
+    { path: "/add-system-admin", component: <ListSystemAdmin />, menuType: "superadmin", roles: ['SuperAdmin'] },
 
 
 
@@ -219,6 +224,7 @@ const userRoutes = [
     // this route should be at the end of all other routes
     { path: "/", roles: ["TenantAdmin"], redirect: "/studylist", menuType: "admin" },
     { path: "/", roles: ["StudyUser"], redirect: "/SSO-tenants", menuType: "sso" },
+    { path: "/", roles: ["SuperAdmin"], redirect: "/add-system-admin", menuType: "superadmin" },
 ];
 
 const authRoutes = [

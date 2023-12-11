@@ -1,5 +1,6 @@
 ﻿using Helios.Authentication.Controllers.Base;
 using Helios.Authentication.Entities;
+using Helios.Authentication.Entities.Base;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -68,12 +69,16 @@ namespace Helios.Authentication.Contexts
                     }
                 }
             }
+            else
+            {
+                transId = 0;
+            }
             return transId;
         }
 
         private void InsertAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Added).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Added).ToList())
             {
                 var dd = default(DateTimeOffset).AddDays(1);
                 var dateTime = timeStamp.ToString();
@@ -82,37 +87,28 @@ namespace Helios.Authentication.Contexts
 
                 entity.Entity.IsDeleted = false;
                 entity.Entity.IsActive = true;
-                if (entity.Entity.AddedById == Guid.Empty)
-                {
-                    entity.Entity.AddedById = userId;
-                }
+                entity.Entity.AddedById = userId;
             }
         }
         private void UpdateAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Modified).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Modified).ToList())
             {
                 var dateTime = timeStamp.ToString();
                 entity.Entity.UpdatedAt = Convert.ToDateTime(dateTime);
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
-                {
-                    entity.Entity.UpdatedById = userId;
-                }
+                entity.Entity.UpdatedById = userId;
             }
         }
 
         private void DeleteAuthenticationBaseEntity(DbContext dbContext, Guid userId)
         {
-            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBaseSecureTenant>().Where(x => x.State == EntityState.Deleted).ToList())
+            foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Deleted).ToList())
             {
                 var dateTime = DateTimeOffset.Now.ToString();
                 entity.Entity.IsDeleted = true;
                 entity.Entity.IsActive = false;
                 entity.Entity.UpdatedAt = Convert.ToDateTime(dateTime);
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
-                {
-                    entity.Entity.UpdatedById = userId;
-                }
+                entity.Entity.UpdatedById = userId;
                 entity.State = EntityState.Modified;
             }
         }
@@ -122,5 +118,6 @@ namespace Helios.Authentication.Contexts
         public DbSet<TermsOfUse> TermsOfUses{ get; set; }
         public DbSet<TenantTermsOfUse> TenantTermsOfUses{ get; set; }
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }
+        public DbSet<SystemAdmin> SystemAdmins { get; set; }
     }
 }

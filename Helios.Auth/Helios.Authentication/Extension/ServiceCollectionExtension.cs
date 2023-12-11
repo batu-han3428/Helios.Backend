@@ -165,6 +165,8 @@ namespace Helios.Authentication.Extension
 
                 var rabbitMQueueName_UserConsumer = qPrefix + Configuration["AppConfig:RabbitMQueueName_UserConsumer"];
 
+                var rabbitMQueueName_SystemAdminUserConsumer = qPrefix + Configuration["AppConfig:RabbitMQueueName_SystemAdminUserConsumer"];
+
                 var rabbitMQueueName_UserResetPassword = qPrefix + Configuration["AppConfig:RabbitMQueueName_UserResetPassword"];
 
                 var rabbitMQueueName_ForgotPassword = qPrefix + Configuration["AppConfig:RabbitMQueueName_ForgotPassword"];
@@ -197,12 +199,14 @@ namespace Helios.Authentication.Extension
 
 
                 services.AddScoped<AddStudyUserConsumer>();
+                services.AddScoped<AddSystemAdminUserConsumer>();
                 services.AddScoped<UserResetPasswordConsumer>();
                 services.AddScoped<ForgotPasswordConsumer>();
                 
                 services.AddMassTransit(c =>
                 {
                     c.AddConsumer<AddStudyUserConsumer>();
+                    c.AddConsumer<AddSystemAdminUserConsumer>();
                     c.AddConsumer<UserResetPasswordConsumer>();
                     c.AddConsumer<ForgotPasswordConsumer>();
                     
@@ -216,6 +220,13 @@ namespace Helios.Authentication.Extension
                             ep.PrefetchCount = 16;
                             ep.UseMessageRetry(r => r.Interval(2, 100));
                             ep.ConfigureConsumer<AddStudyUserConsumer>(provider);
+                        });
+
+                        cfg.ReceiveEndpoint(rabbitMQueueName_SystemAdminUserConsumer, ep =>
+                        {
+                            ep.PrefetchCount = 16;
+                            ep.UseMessageRetry(r => r.Interval(2, 100));
+                            ep.ConfigureConsumer<AddSystemAdminUserConsumer>(provider);
                         });
 
                         cfg.ReceiveEndpoint(rabbitMQueueName_UserResetPassword, ep =>

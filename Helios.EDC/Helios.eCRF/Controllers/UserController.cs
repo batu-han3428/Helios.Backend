@@ -124,7 +124,6 @@ namespace Helios.eCRF.Controllers
 
         #region Permissions
 
-
         /// <summary>
         /// çalışmanın rol ve yetkilerini getirir
         /// </summary>
@@ -325,6 +324,7 @@ namespace Helios.eCRF.Controllers
         #endregion
 
         #region Tenant User
+
         /// <summary>
         /// tenantın kullanıcılarını listeler
         /// </summary>
@@ -346,6 +346,79 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> SetTenantUser(TenantUserModel tenantUserModel)
         {
             var result = await _userService.SetTenantUser(tenantUserModel);
+            return Ok(result);
+        }
+        #endregion
+
+        #region System Admin User
+
+        /// <summary>
+        /// sistem admin ekler veya günceller
+        /// </summary>
+        /// <param name="systemAdminDTO">sistem admin bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            var result = await _userService.SetSystemAdminUser(systemAdminDTO);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// sistem admin kullanıcılarını listeler
+        /// </summary>
+        /// <returns>kullanıcılar</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetSystemAdminUserList()
+        {
+            try
+            {
+                var result = await _userService.GetSystemAdminUserList();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
+        /// seçili sistem admin kullanıcısını aktif veya pasif hale getirir
+        /// </summary>
+        /// <param name="systemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SystemAdminActivePassive(SystemAdminDTO systemAdminDTO)
+        {
+            var result = await _userService.SystemAdminActivePassive(systemAdminDTO);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// seçili sistem admin kullanıcısının şifresini sıfırlar
+        /// </summary>
+        /// <param name="systemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SystemAdminResetPassword(SystemAdminDTO systemAdminDTO)
+        {
+            var result = await _userService.SystemAdminResetPassword(systemAdminDTO);
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// seçili sistem admin kullanıcısını siler
+        /// </summary>
+        /// <param name="systemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SystemAdminDelete(SystemAdminDTO systemAdminDTO)
+        {
+            var result = await _userService.SystemAdminDelete(systemAdminDTO);
             return Ok(result);
         }
         #endregion

@@ -44,7 +44,7 @@ const TemplateTagList = props => {
 
     const deleteTag = (id) => {
         Swal.fire({
-            title: "Tag silinecek.",
+            title: props.t("This tag will be deleted."),
             text: props.t("Do you confirm?"),
             icon: "warning",
             showCancelButton: true,
@@ -123,10 +123,10 @@ const TemplateTagList = props => {
         },
         validationSchema: Yup.object().shape({
             tag: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
             templateType: Yup.string().required(
-                "This value is required"
+                props.t("This value is required")
             ),
         }),
         onSubmit: async (values) => {
@@ -136,10 +136,10 @@ const TemplateTagList = props => {
                 if (response.data.isSuccess) {
                     modalRef.current.tog_backdrop();
                     dispatch(endloading());
-                    props.toast(response.data.message, true);
+                    props.toast(props.t(response.data.message), true);
                 } else {
                     dispatch(endloading());
-                    props.toast(response.data.message, false);
+                    props.toast(props.t(response.data.message), false);
                 }
             } catch (e) {
                 dispatch(endloading());
@@ -153,10 +153,10 @@ const TemplateTagList = props => {
 
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                props.toast('kopyalandı ' + textToCopy, true);
+                props.toast(props.t("Tag copied") + " " + textToCopy, true);
             })
             .catch((err) => {
-                props.toast('kopyalanırken bir hata oluştu.', false);
+                props.toast(props.t("An error occurred while copying the tag."), false);
             });
     }
 
@@ -218,7 +218,7 @@ const TemplateTagList = props => {
                                     ) : null}
                                 </div>
                                 <div className="mb-3 col-md-12">
-                                    <Label className="form-label">Mail Tag</Label>
+                                    <Label className="form-label">{props.t("e-Mail tag")}</Label>
                                     <Input
                                         name="tag"
                                         placeholder=""

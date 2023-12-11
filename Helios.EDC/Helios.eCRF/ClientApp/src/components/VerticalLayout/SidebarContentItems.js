@@ -306,6 +306,13 @@
             icon: "fa-solid fa-clock-rotate-left"
         },
     ],
+    superadmin: [
+        {
+            label: "Add system admin",
+            to: "/add-system-admin",
+            icon: "fa-solid fa-house"
+        }
+    ]
 };
 
 export default menuItems;
