@@ -48,7 +48,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>çalışma bilgileri</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<StudyDTO> GetStudy(Int64 studyId)
+        public async Task<IActionResult> GetStudy(Int64 studyId)
         {
             try
             {
