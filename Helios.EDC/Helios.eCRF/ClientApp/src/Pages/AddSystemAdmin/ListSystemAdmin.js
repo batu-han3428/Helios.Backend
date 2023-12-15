@@ -28,7 +28,7 @@ const ListSystemAdmin = props => {
     const [stateToast, setStateToast] = useState(true);
     const [modalTitle, setModalTitle] = useState("");
     const [modalButtonText, setModalButtonText] = useState("");
-    const [systemAdminId, setSystemAdminId] = useState("00000000-0000-0000-0000-000000000000");
+    const [systemAdminId, setSystemAdminId] = useState(0);
     const [table, setTable] = useState([]);
 
     const toastHandle = (message, state) => {
