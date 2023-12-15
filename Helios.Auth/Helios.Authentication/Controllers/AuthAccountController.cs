@@ -6,25 +6,11 @@ using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
 using Helios.Common.DTO;
 using MassTransit;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Math;
-using System;
-using System.Configuration;
-using System.Net.Mail;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Encodings.Web;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.Xml.Linq;
-using System.Net.Mime;
 using Helios.Common.Model;
 using System.Web;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Numerics;
 
 namespace Helios.Authentication.Controllers
 {
@@ -41,7 +27,8 @@ namespace Helios.Authentication.Controllers
         private readonly IBaseService _baseService;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, IEmailService emailService)
+        private readonly ITokenHandler _tokenHandler;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, IEmailService emailService, ITokenHandler tokenHandler)
         {
             _context = context;
             _userManager = userManager;
@@ -52,6 +39,7 @@ namespace Helios.Authentication.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
             _emailService = emailService;
+            _tokenHandler = tokenHandler;
         }
 
         [HttpPost]
@@ -222,8 +210,7 @@ namespace Helios.Authentication.Controllers
 
                     if (result.Succeeded)
                     {
-                        TokenHandler tokenHandler = new TokenHandler(_configuration);
-                        Token token = tokenHandler.CreateAccessToken(user);
+                        Token token = _tokenHandler.CreateAccessToken(user);
                         user.RefreshToken = token.RefreshToken;
                         user.RefrestTokenEndDate = token.Expiration.AddMinutes(3);
                         int tokenResult = await _context.SaveChangesAsync();

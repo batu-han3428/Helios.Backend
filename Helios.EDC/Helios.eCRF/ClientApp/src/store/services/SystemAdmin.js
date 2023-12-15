@@ -50,7 +50,6 @@ export const SystemAdminApi = createApi({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['User'],
         }),
     }),
 });

@@ -1,8 +1,6 @@
 using Helios.eCRF.Extension;
-using Helios.eCRF.Services;
-using Helios.eCRF.Services.Interfaces;
+using Helios.eCRF.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -41,7 +39,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<TimeZoneHelper>();
+});
 
 builder.Services.DefaultConfigurationService(configuration);
 

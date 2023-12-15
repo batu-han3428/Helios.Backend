@@ -1,10 +1,8 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
@@ -15,47 +13,6 @@ namespace Helios.eCRF.Services
     {
         public UserService(IConfiguration configuration) : base(configuration)
         {
-        }
-
-        public async Task<bool> AddTenant(TenantModel model)
-        {
-            using (var client = AuthServiceClient)
-            {
-                var req = new RestRequest("AdminUser/AddTenant", Method.Post);
-                //req.AddHeader("Name", name);
-                //req.AddParameter("Name", name);
-                req.AddJsonBody(model);
-                var result = await client.ExecuteAsync(req);
-                return result.IsSuccessful;
-            }
-        }
-
-        public async Task<bool> UpdateTenant(TenantModel model)
-        {
-            using (var client = AuthServiceClient)
-            {
-                var req = new RestRequest("AdminUser/UpdateTenant", Method.Post);
-                //req.AddHeader("Name", name);
-                //req.AddParameter("Name", name);
-                req.AddJsonBody(model);
-                var result = await client.ExecuteAsync(req);
-                return result.IsSuccessful;
-            }
-        }
-
-        public async Task<TenantModel> GetTenant(Guid id)
-        {
-            var tenant = new TenantModel();
-
-            using (var client = AuthServiceClient)
-            {
-                var req = new RestRequest("AdminUser/GetTenant", Method.Get);
-                req.AddParameter("id", id);
-                var result = await client.ExecuteAsync(req);
-                tenant = JsonConvert.DeserializeObject<TenantModel>(result.Content);
-            }
-
-            return tenant;
         }
 
         public async Task<UserDTO> GetUserByEmail(string mail)
@@ -119,19 +76,92 @@ namespace Helios.eCRF.Services
             return false;
         }
 
-        public async Task<List<TenantModel>> GetTenantList()
+        #region Tenants
+        private async Task<List<TenantModel>> GetAuthTenantList()
         {
-            var tenantList = new List<TenantModel>();
-
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/GetTenantList", Method.Get);
-                var result = await client.ExecuteAsync(req);
-                tenantList = JsonConvert.DeserializeObject<List<TenantModel>>(result.Content);
+                var result = await client.ExecuteAsync<List<TenantModel>>(req);
+                return result.Data;
+            }
+        }
+
+        private async Task<List<TenantModel>> GetTenantsStudyCount(List<Guid> tenantIds)
+        {
+            using (var client = CoreServiceClient)
+            {
+                string tenantIdsString = string.Join(",", tenantIds);
+                var req = new RestRequest("CoreUser/GetTenantsStudyCount", Method.Get);
+                req.AddParameter("tenantIds", tenantIdsString);
+                var result = await client.ExecuteAsync<List<TenantModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<TenantModel>> GetTenantList()
+        {
+            var authTenants = await GetAuthTenantList();
+
+            if (authTenants.Count > 0)
+            {
+                var counts = await GetTenantsStudyCount(authTenants.Select(x=>x.Id).ToList());
+
+                if (counts != null && counts.Count > 0)
+                {
+                    return (from aTenants in authTenants
+                                 join count in counts on aTenants.Id equals count.Id into countGroup
+                                 from count in countGroup.DefaultIfEmpty()
+                                 select new TenantModel
+                                 {
+                                     Id = aTenants.Id,
+                                     Name = aTenants.Name,
+                                     ActiveStudies = (count != null) ? count.ActiveStudies + " / " + aTenants.StudyLimit : "0 / " + (aTenants.StudyLimit != null ? aTenants.StudyLimit : "0"),
+                                     CreatedAt = aTenants.CreatedAt,
+                                     UpdatedAt = aTenants.UpdatedAt
+                                 }).ToList();
+                }
             }
 
-            return tenantList;
+            return authTenants;
         }
+
+        public async Task<TenantModel> GetTenant(Guid tenantId)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetTenant", Method.Get);
+                req.AddParameter("tenantId", tenantId);
+                var result = await client.ExecuteAsync<TenantModel>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SetTenant", Method.Post);
+                req.AddParameter("Id", tenantDTO.Id?.ToString());
+                req.AddParameter("UserId", tenantDTO.UserId);
+                req.AddParameter("TenantName", tenantDTO.TenantName);
+                req.AddParameter("TimeZone", tenantDTO.TimeZone);
+                req.AddParameter("StudyLimit", tenantDTO.StudyLimit);
+                req.AddParameter("UserLimit", tenantDTO.UserLimit);
+                if (tenantDTO.TenantLogo != null && tenantDTO.TenantLogo.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        tenantDTO.TenantLogo.CopyTo(ms);
+                        var fileBytes = ms.ToArray();
+                        req.AddFile("TenantLogo", fileBytes, tenantDTO.TenantLogo.FileName, tenantDTO.TenantLogo.ContentType);
+                    }
+                }
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+        #endregion
 
         #region Permissions
         public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Guid studyId)
@@ -533,6 +563,7 @@ namespace Helios.eCRF.Services
                 LastName = tenantUserModel.LastName
             });
         }
+ 
         #endregion
 
         #region System Admin User

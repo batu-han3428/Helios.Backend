@@ -1,7 +1,4 @@
 ﻿using Helios.eCRF.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
 using Helios.Common.DTO;
 using Helios.Common.Model;
 
@@ -9,9 +6,6 @@ namespace Helios.eCRF.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<bool> AddTenant(TenantModel model);
-        Task<bool> UpdateTenant(TenantModel model);
-        Task<TenantModel> GetTenant(Guid id);
         Task<UserDTO> GetUserByEmail(string mail);
         Task<dynamic> AddUser(UserDTO model);
         Task<bool> PassiveOrActiveUser(UserDTO model);
@@ -41,5 +35,7 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> SystemAdminActivePassive(SystemAdminDTO systemAdminDTO);
         Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO systemAdminDTO);
         Task<ApiResponse<dynamic>> SystemAdminDelete(SystemAdminDTO systemAdminDTO);
+        Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO);
+        Task<TenantModel> GetTenant(Guid tenantId);
     }
 }

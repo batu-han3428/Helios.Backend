@@ -2,23 +2,15 @@
 using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
-using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using System;
-using System.Net.Sockets;
-using System.Text.Encodings.Web;
 using Helios.Authentication.Services.Interfaces;
-using Google.Protobuf.WellKnownTypes;
 using Helios.Common.DTO;
-using Org.BouncyCastle.Asn1.Crmf;
 using Helios.Authentication.Enums;
-using Newtonsoft.Json.Linq;
 using Helios.Common.Model;
 using MassTransit.Initializers;
+using Azure.Storage.Blobs;
 
 namespace Helios.Authentication.Controllers
 {
@@ -32,7 +24,8 @@ namespace Helios.Authentication.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
         private readonly IEmailService _emailService;
-        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService, IEmailService emailService)
+        private readonly IFileStorageHelper _blobStorage;
+        public AdminUserController(AuthenticationContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IHttpContextAccessor contextAccessor, IBaseService baseService, IEmailService emailService, IFileStorageHelper blobStorage)
         {
             _context = context;
             _userManager = userManager;
@@ -40,84 +33,188 @@ namespace Helios.Authentication.Controllers
             _contextAccessor = contextAccessor;
             _baseService = baseService;
             _emailService = emailService;
+            _blobStorage = blobStorage;
         }
 
         #region Tenant
-        [HttpPost]
-        public async Task<bool> AddTenant(TenantModel model)
-        {
-            _context.Tenants.Add(new Tenant
-            {
-                AddedById = model.UserId,
-                Name = model.Name,
-                CreatedAt = DateTimeOffset.Now,
-                IsActive = true
-            });
-
-            var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
-
-            return result;
-        }
-
-        [HttpPost]
-        public async Task<bool> UpdateTenant(TenantModel model)
-        {
-            var tenant = await _context.Tenants.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (tenant == null)
-            {
-                return false;
-            }
-
-            tenant.Name = model.Name;
-            tenant.UpdatedAt = DateTimeOffset.Now;
-            tenant.UpdatedById = model.UserId;
-
-            _context.Tenants.Update(tenant);
-            //var result = await _context.SaveAuthenticationContextAsync(new Guid(), DateTimeOffset.Now) > 0;
-            //var result = _context.SaveChanges() > 0;
-
-            return true;
-        }
-
-        [HttpGet]
-        public async Task<TenantModel> GetTenant(Guid id)
-        {
-            var model = new TenantModel();
-
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(x => x.Id == id && x.IsActive && !x.IsDeleted);
-
-            if (tenant != null)
-            {
-                model.Id = tenant.Id;
-                model.Name = tenant.Name;
-            }
-
-            return model;
-        }
-
         [HttpGet]
         public async Task<List<TenantModel>> GetTenantList()
         {
-            try
+            return await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
             {
-                //await _backgorundWorker.Publish(new UserDTO()
-                //{
-                //    TenantId = Guid.NewGuid()
-                //});
+                Id = x.Id,
+                Name = x.Name,
+                ActiveStudies = "0",
+                StudyLimit = x.StudyLimit,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+            }).ToListAsync();
+        }
 
-                var result = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TenantModel()
+        [HttpGet]
+        public async Task<TenantModel> GetTenant(Guid tenantId)
+        {
+            var tenant = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && x.Id == tenantId).Select(x => new TenantModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                TimeZone = x.TimeZone,
+                StudyLimit = x.StudyLimit,
+                UserLimit = x.UserLimit,
+                Path = x.Logo
+            }).FirstOrDefaultAsync();
+
+            if (tenant != null)
+            {
+                if (!string.IsNullOrEmpty(tenant.Path))
                 {
-                    Id = x.Id,
-                    Name = x.Name
-                }).ToListAsync();
+                    BlobClient blobClient = await _blobStorage.GetBlob(tenant.Path);
+                    var contentType = blobClient.GetProperties();
+                    var ddd = contentType.Value.ContentType;
+                    if (blobClient != null)
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            await blobClient.DownloadToAsync(ms);
+                            tenant.Logo = Convert.ToBase64String(ms.ToArray());
+                        }
+                    }
+                }
+                
+                return tenant;
+            }
 
-                return result;
-            }
-            catch (Exception e)
+            return new TenantModel();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO)
+        {
+            if (tenantDTO.Id == Guid.Empty)
             {
-                throw;
+                if (await _context.Tenants.AnyAsync(x => x.Name == tenantDTO.TenantName && x.IsActive && !x.IsDeleted))
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "This tenant name is already exist.",
+                    };
+                }
+
+                Tenant tenant = new Tenant()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = tenantDTO.TenantName,
+                    StudyLimit = tenantDTO.StudyLimit,
+                    UserLimit = tenantDTO.UserLimit,
+                    TimeZone = tenantDTO.TimeZone
+                };
+
+                if (tenantDTO.TenantLogo != null && tenantDTO.TenantLogo.Length > 0)
+                {
+                    string folderPath = "TenantName/";
+
+                    string photoName = Path.GetFileName(tenantDTO.TenantLogo.FileName);
+
+                    string guidSuffix = Guid.NewGuid().ToString();
+
+                    string newPhotoName = $"{Path.GetFileNameWithoutExtension(photoName)}_{guidSuffix}{Path.GetExtension(photoName)}";
+
+                    await _blobStorage.CreateFolderIfNotExist(folderPath);
+
+                    string fullPath = $"{folderPath}{newPhotoName}";
+
+                    bool success = await _blobStorage.Upload(fullPath, tenantDTO.TenantLogo.OpenReadStream());
+
+                    if (success)
+                    {
+                        tenant.Logo = fullPath;
+                    }
+                }
+
+                await _context.Tenants.AddAsync(tenant);
+
+                tenantDTO.Id = tenant.Id;
             }
+            else
+            {
+                var oldEntity = _context.Tenants.FirstOrDefault(p => p.Id == tenantDTO.Id && p.IsActive && !p.IsDeleted);
+
+                if (oldEntity != null)
+                {
+                    if (oldEntity.Name != tenantDTO.TenantName)
+                    {
+                        if (await _context.Tenants.AnyAsync(x => x.Name == tenantDTO.TenantName && x.IsActive && !x.IsDeleted))
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "This tenant name is already exist.",
+                            };
+                        }
+                    }
+
+                    if (oldEntity.Name != tenantDTO.TenantName) oldEntity.Name = tenantDTO.TenantName;
+                    if(StringExtensionsHelper.NormalizeString(oldEntity.StudyLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.StudyLimit)) oldEntity.StudyLimit = tenantDTO.StudyLimit;
+                    if(StringExtensionsHelper.NormalizeString(oldEntity.UserLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.UserLimit)) oldEntity.UserLimit = tenantDTO.UserLimit;
+                    if(StringExtensionsHelper.NormalizeString(oldEntity.TimeZone) != StringExtensionsHelper.NormalizeString(tenantDTO.TimeZone)) oldEntity.TimeZone = tenantDTO.TimeZone;
+                    if(oldEntity.Logo != (tenantDTO.TenantLogo?.FileName == null ? null : "TenantName/" + tenantDTO.TenantLogo?.FileName))
+                    {
+                        string? removeFile = oldEntity.Logo;
+
+                        if (tenantDTO.TenantLogo?.Length > 0)
+                        {
+                            string folderPath = "TenantName/";
+
+                            string photoName = Path.GetFileName(tenantDTO.TenantLogo.FileName);
+
+                            string guidSuffix = Guid.NewGuid().ToString();
+
+                            string newPhotoName = $"{Path.GetFileNameWithoutExtension(photoName)}_{guidSuffix}{Path.GetExtension(photoName)}";
+
+                            await _blobStorage.CreateFolderIfNotExist(folderPath);
+
+                            string fullPath = $"{folderPath}{newPhotoName}";
+
+                            bool success = await _blobStorage.Upload(fullPath, tenantDTO.TenantLogo.OpenReadStream());
+
+                            if (success)
+                            {
+                                oldEntity.Logo = fullPath;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(removeFile)) await _blobStorage.RemoveFile(removeFile);
+                    }
+
+                    _context.Tenants.Update(oldEntity);
+                }
+            }
+
+            var result = await _context.SaveAuthenticationContextAsync(tenantDTO.UserId, DateTimeOffset.Now) > 0;
+
+            if (result)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Successful",
+                    Values = new { Id = tenantDTO.Id }
+                };
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
+        [HttpGet]
+        public async Task<string?> GetTenantStudyLimit(Guid tenantId)
+        {
+            return await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && x.Id == tenantId).Select(x => x.StudyLimit).FirstOrDefaultAsync();
         }
 
         #endregion

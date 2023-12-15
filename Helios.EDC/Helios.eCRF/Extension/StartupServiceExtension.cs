@@ -1,5 +1,6 @@
 ﻿using Helios.eCRF.Services.Interfaces;
 using Helios.eCRF.Services;
+using Helios.eCRF.Helpers;
 
 namespace Helios.eCRF.Extension
 {
@@ -12,6 +13,7 @@ namespace Helios.eCRF.Extension
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStudyService, StudyService>();
             services.AddScoped<IModuleService, ModuleService>();
+            services.AddScoped<TimeZoneHelper>();
 
             return services;
         }
