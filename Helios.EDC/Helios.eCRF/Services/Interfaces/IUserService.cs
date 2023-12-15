@@ -36,6 +36,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO systemAdminDTO);
         Task<ApiResponse<dynamic>> SystemAdminDelete(SystemAdminDTO systemAdminDTO);
         Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO);
-        Task<TenantModel> GetTenant(Guid tenantId);
+        Task<TenantModel> GetTenant(Int64 tenantId);
     }
 }

@@ -33,7 +33,7 @@ namespace Helios.Core.Controllers
                 IsActive = true
             });
 
-            var result = await _context.SaveCoreContextAsync(new Int64(), DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(0, DateTimeOffset.Now) > 0;
 
             return result;
         }

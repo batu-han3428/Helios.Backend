@@ -4,7 +4,7 @@ namespace Helios.Common.Model
 {
     public class TenantModel
     {
-        public Guid Id { get; set; }
+        public Int64 Id { get; set; }
         public string Name { get; set; }
         public string? StudyLimit { get; set; }
         public string? ActiveStudies { get; set; }

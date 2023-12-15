@@ -52,7 +52,7 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpGet]
-        public async Task<TenantModel> GetTenant(Guid tenantId)
+        public async Task<TenantModel> GetTenant(Int64 tenantId)
         {
             var tenant = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && x.Id == tenantId).Select(x => new TenantModel()
             {
@@ -211,7 +211,7 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpGet]
-        public async Task<string?> GetTenantStudyLimit(Guid tenantId)
+        public async Task<string?> GetTenantStudyLimit(Int64 tenantId)
         {
             return await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && x.Id == tenantId).Select(x => x.StudyLimit).FirstOrDefaultAsync();
         }

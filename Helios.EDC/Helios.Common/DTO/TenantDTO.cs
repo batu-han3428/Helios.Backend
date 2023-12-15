@@ -4,8 +4,8 @@ namespace Helios.Common.DTO
 {
     public class TenantDTO
     {
-        public Guid? Id { get; set; }
-        public Guid UserId { get; set; }
+        public Int64? Id { get; set; }
+        public Int64 UserId { get; set; }
         public string TenantName { get; set; }
         public string? TimeZone { get; set; }
         public string? StudyLimit { get; set; }

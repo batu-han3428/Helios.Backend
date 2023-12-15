@@ -25,15 +25,15 @@ namespace Helios.Core.Controllers
         public async Task<List<TenantModel>> GetTenantsStudyCount(string tenantIds)
         {
             string[] tenantIdsArray = tenantIds.Split(',');
-            List<Guid> tenantIdsGuid = new List<Guid>();
+            List<Int64> tenantIdsInt = new List<Int64>();
             foreach (string id in tenantIdsArray)
             {
-                if (Guid.TryParse(id, out Guid guid))
+                if (Int64.TryParse(id, out Int64 guid))
                 {
-                    tenantIdsGuid.Add(guid);
+                    tenantIdsInt.Add(guid);
                 }
             }
-            return await _context.Studies.Where(x => tenantIdsGuid.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
+            return await _context.Studies.Where(x => tenantIdsInt.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
             {
                 Id = g.Key,
                 ActiveStudies = g.Count().ToString()

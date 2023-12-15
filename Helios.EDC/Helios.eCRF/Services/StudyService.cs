@@ -35,7 +35,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        private async Task<string?> GetTenantStudyLimit(Guid tenantId)
+        private async Task<string?> GetTenantStudyLimit(Int64 tenantId)
         {
             using (var client = AuthServiceClient)
             {
@@ -59,7 +59,7 @@ namespace Helios.eCRF.Services
 
         public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
         {
-            if(studyModel.StudyId == Guid.Empty)
+            if(studyModel.StudyId == 0)
             {
                 string? studyLimit = await GetTenantStudyLimit(studyModel.TenantId);
                 studyModel.StudyLimit = studyLimit;
