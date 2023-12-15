@@ -4,7 +4,7 @@ namespace Helios.Authentication.Entities
 {
     public class TermsOfUse : EntityBase
     {
-        public Guid TenantId { get; set; }
+        public Int64 TenantId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public string Tags { get; set; }

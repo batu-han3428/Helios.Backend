@@ -9,9 +9,9 @@ namespace Helios.Core.Domains.Entities
 {
     public class Element : EntityBase
     {
-        public Guid ModuleId { get; set; }
+        public Int64 ModuleId { get; set; }
         [ForeignKey("ElementDetail")]
-        public Guid? ElementDetailId { get; set; }
+        public Int64? ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName{ get; set; }
         public string Title { get; set; }

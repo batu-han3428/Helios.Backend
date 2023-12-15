@@ -8,7 +8,7 @@ namespace Helios.Common.Model
 {
     public class BaseModel
     {
-        public Guid UserId { get; set; }
-        public Guid TenantId { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 TenantId { get; set; }
     }
 }

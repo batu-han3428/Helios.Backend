@@ -2,7 +2,7 @@
 
 namespace Helios.Authentication.Entities
 {
-    public class ApplicationUser : IdentityUser<Guid>
+    public class ApplicationUser : IdentityUser<Int64>
     {
         public ApplicationUser()
         {

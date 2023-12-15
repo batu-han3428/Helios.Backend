@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helios.Authentication.Migrations
 {
     [DbContext(typeof(AuthenticationContext))]
-    [Migration("20231122132921_MyFirstMigration")]
-    partial class MyFirstMigration
+    [Migration("20231214094300_Migration141223")]
+    partial class Migration141223
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,9 +24,9 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.ApplicationRole", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -51,9 +51,9 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.ApplicationUser", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -146,17 +146,17 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.ApplicationUserRole", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -165,14 +165,52 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Helios.Authentication.Entities.SystemAdmin", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AuthUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddedById");
+
+                    b.HasIndex("AuthUserId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("SystemAdmins");
+                });
+
             modelBuilder.Entity("Helios.Authentication.Entities.SystemAuditTrail", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Changer")
                         .IsRequired()
@@ -206,14 +244,14 @@ namespace Helios.Authentication.Migrations
                     b.Property<byte>("SystemAuditChangeType")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -226,12 +264,12 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.Tenant", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid?>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -249,8 +287,8 @@ namespace Helios.Authentication.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -259,15 +297,15 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.TenantAdmin", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AuthUserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AuthUserId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -278,14 +316,14 @@ namespace Helios.Authentication.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -302,12 +340,12 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.TenantTermsOfUse", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -318,17 +356,17 @@ namespace Helios.Authentication.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TermsOfUseId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TermsOfUseId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -345,12 +383,12 @@ namespace Helios.Authentication.Migrations
 
             modelBuilder.Entity("Helios.Authentication.Entities.TermsOfUse", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -369,8 +407,8 @@ namespace Helios.Authentication.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -379,8 +417,8 @@ namespace Helios.Authentication.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -393,7 +431,7 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("TermsOfUses");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -405,8 +443,8 @@ namespace Helios.Authentication.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -415,7 +453,7 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -427,8 +465,8 @@ namespace Helios.Authentication.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -437,7 +475,7 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("varchar(255)");
@@ -448,8 +486,8 @@ namespace Helios.Authentication.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -458,10 +496,10 @@ namespace Helios.Authentication.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("varchar(255)");
@@ -494,6 +532,31 @@ namespace Helios.Authentication.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Helios.Authentication.Entities.SystemAdmin", b =>
+                {
+                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "AddedBy")
+                        .WithMany()
+                        .HasForeignKey("AddedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "AuthUser")
+                        .WithMany()
+                        .HasForeignKey("AuthUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Helios.Authentication.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("AddedBy");
+
+                    b.Navigation("AuthUser");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Helios.Authentication.Entities.SystemAuditTrail", b =>
@@ -604,7 +667,7 @@ namespace Helios.Authentication.Migrations
                     b.Navigation("UpdatedBy");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
                     b.HasOne("Helios.Authentication.Entities.ApplicationRole", null)
                         .WithMany()
@@ -613,7 +676,7 @@ namespace Helios.Authentication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
                     b.HasOne("Helios.Authentication.Entities.ApplicationUser", null)
                         .WithMany()
@@ -622,7 +685,7 @@ namespace Helios.Authentication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.HasOne("Helios.Authentication.Entities.ApplicationUser", null)
                         .WithMany()
@@ -631,7 +694,7 @@ namespace Helios.Authentication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
                     b.HasOne("Helios.Authentication.Entities.ApplicationUser", null)
                         .WithMany()

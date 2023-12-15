@@ -10,17 +10,17 @@ namespace Helios.eCRF.Services.Interfaces
     public interface IStudyService
     {
         Task<List<StudyDTO>> GetStudyList(bool isLock);
-        Task<List<SiteDTO>> GetSiteList(Guid studyId);
+        Task<List<SiteDTO>> GetSiteList(Int64 studyId);
         Task<ApiResponse<dynamic>> SiteSaveOrUpdate(SiteModel siteModel);
         Task<ApiResponse<dynamic>> SiteDelete(SiteModel siteModel);
-        Task<SiteDTO> GetSite(Guid siteId);
-        Task<StudyDTO> GetStudy(Guid studyId);
+        Task<SiteDTO> GetSite(Int64 siteId);
+        Task<StudyDTO> GetStudy(Int64 studyId);
         Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel);
         Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO);
-        Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId);
+        Task<List<EmailTemplateModel>> GetEmailTemplateList(Int64 studyId);
         Task<ApiResponse<dynamic>> DeleteEmailTemplate(BaseDTO emailTemplateDTO);
-        Task<EmailTemplateModel> GetEmailTemplate(Guid templateId);
-        Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType);
+        Task<EmailTemplateModel> GetEmailTemplate(Int64 templateId);
+        Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Int64 tenantId, int templateType);
         Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
         Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
         Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO);

@@ -11,7 +11,7 @@ namespace Helios.Core.Domains.Entities
         public string? Name { get; set; }
         public string? TemplateBody { get; set; }
         public int TemplateType { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 StudyId { get; set; }
         public string? ExternalMails { get; set; }
         public List<MailTemplatesRoles> MailTemplatesRoles { get; set; }
     }

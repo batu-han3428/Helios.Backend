@@ -9,8 +9,8 @@ namespace Helios.Core.Domains.Entities
 {
     public class ElementDetail : EntityBase
     {
-        public Guid ElementId { get; set; }
-        public Guid ParentId { get; set; }
+        public Int64 ElementId { get; set; }
+        public Int64 ParentId { get; set; }
         public int RowIndex { get; set; }
         public int ColunmIndex { get; set; }
         public bool CanQuery { get; set; }
@@ -49,7 +49,7 @@ namespace Helios.Core.Domains.Entities
         public string? ElementOptions { get; set; } //json text value
 
         //hidden
-        public Guid TargetElementId { get; set; }
+        public Int64 TargetElementId { get; set; }
 
         //rangeslider
         public string? LeftText { get; set; }

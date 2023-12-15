@@ -48,7 +48,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>çalışma bilgileri</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetStudy(Guid studyId)
+        public async Task<StudyDTO> GetStudy(Int64 studyId)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>site listesi</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetSiteList(Guid studyId)
+        public async Task<IActionResult> GetSiteList(Int64 studyId)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>site bilgisi</returns>
         [HttpGet("{siteId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetSite(Guid siteId)
+        public async Task<IActionResult> GetSite(Int64 siteId)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>mail templateler</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetEmailTemplateList(Guid studyId)
+        public async Task<IActionResult> GetEmailTemplateList(Int64 studyId)
         {
             try
             {
@@ -216,7 +216,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>mail template</returns>
         [HttpGet("{templateId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetEmailTemplate(Guid templateId)
+        public async Task<IActionResult> GetEmailTemplate(Int64 templateId)
         {
             try
             {
@@ -239,7 +239,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>tag listesi</returns>
         [HttpGet("{tenantId}/{templateType}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        public async Task<IActionResult> GetEmailTemplateTagList(Int64 tenantId, int templateType)
         {
             try
             {

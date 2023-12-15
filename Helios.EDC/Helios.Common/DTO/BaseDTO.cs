@@ -8,8 +8,8 @@ namespace Helios.Common.DTO
 {
     public class BaseDTO
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid TenantId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 TenantId { get; set; }
     }
 }

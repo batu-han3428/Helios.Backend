@@ -4,7 +4,7 @@ namespace Helios.Authentication.Entities
 {
     public class SystemAdmin: EntityBase
     {
-        public Guid AuthUserId { get; set; }
+        public Int64 AuthUserId { get; set; }
         public ApplicationUser AuthUser { get; set; }
     }
 }

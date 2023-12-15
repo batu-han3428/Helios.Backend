@@ -7,10 +7,10 @@ namespace Helios.Core.Domains.Entities
 {
     public class ModuleElementEvent : EntityBase
     {
-        public Guid ModuleId { get; set; }
+        public Int64 ModuleId { get; set; }
         public ActionType ActionType { get; set; }
-        public Guid SourceElementId { get; set; }
-        public Guid TargetElementId { get; set; }
+        public Int64 SourceElementId { get; set; }
+        public Int64 TargetElementId { get; set; }
         public ActionCondition ValueCondition { get; set; }
         public string ActionValue { get; set; }
         public Module Module { get; set; }

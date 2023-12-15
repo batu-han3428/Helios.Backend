@@ -41,7 +41,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<StudyDTO> GetStudy(Guid studyId)
+        public async Task<StudyDTO> GetStudy(Int64 studyId)
         {
             var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyId && x.IsActive && !x.IsDeleted);
 
@@ -71,7 +71,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
         {
-            if (studyModel.StudyId == Guid.Empty)
+            if (studyModel.StudyId == 0)
             {
                 int studiesCount = await _context.Studies.Where(x => x.TenantId == studyModel.TenantId && !x.IsDemo).CountAsync();
 
@@ -84,8 +84,9 @@ namespace Helios.Core.Controllers
                     };
                 }
 
-                Guid _versionKey = Guid.NewGuid();
-                Guid _refKey = Guid.NewGuid();
+                Int64 _versionKey = 0;
+                Int64 _refKey = 0;
+
                 studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
                 var checkShortName = _context.Studies.Any(c => c.StudyLink == studyModel.StudyLink);
                 if (checkShortName)
@@ -102,7 +103,6 @@ namespace Helios.Core.Controllers
 
                 var activeResearch = new Study()
                 {
-                    Id = Guid.NewGuid(),
                     TenantId = studyModel.TenantId,
                     IsDemo = false,
                     StudyName = studyModel.StudyName,
@@ -128,7 +128,6 @@ namespace Helios.Core.Controllers
                 };
                 var demoResearch = new Study
                 {
-                    Id = Guid.NewGuid(),
                     TenantId = studyModel.TenantId,
                     IsDemo = true,
                     StudyName = "DEMO-" + studyModel.StudyName,
@@ -153,8 +152,10 @@ namespace Helios.Core.Controllers
                     //CompanyLogoPath = !string.IsNullOrEmpty(path) ? path : null,
                 };
                 _context.Studies.Add(activeResearch);
-                _context.Studies.Add(demoResearch);               
+                _context.Studies.Add(demoResearch); 
+
                 var tenantResult = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+
                 if (tenantResult)
                 {
                     demoResearch.EquivalentStudyId = activeResearch.Id;
@@ -196,7 +197,7 @@ namespace Helios.Core.Controllers
                         oldEntity.Description = studyModel.Description;
                         oldEntity.SubDescription = studyModel.SubDescription;
                         oldEntity.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
-                        oldEntity.VersionKey = Guid.NewGuid();
+                        oldEntity.VersionKey = 0;
                         //oldEntity.PatientState = research.PatientState;
                         oldEntity.StudyLanguage = studyModel.StudyLanguage;
                         //if (!string.IsNullOrEmpty(path))
@@ -222,7 +223,7 @@ namespace Helios.Core.Controllers
                         oldEntity.EquivalentStudy.Description = studyModel.Description;
                         oldEntity.EquivalentStudy.SubDescription = studyModel.SubDescription;
                         oldEntity.EquivalentStudy.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
-                        oldEntity.EquivalentStudy.VersionKey = Guid.NewGuid();
+                        oldEntity.EquivalentStudy.VersionKey = 0;
                         //oldEntity.EquivalentStudy.PatientState = research.PatientState;
                         oldEntity.EquivalentStudy.StudyLanguage = studyModel.StudyLanguage;
                         //if (oldEntity.IsDemo)
@@ -297,7 +298,7 @@ namespace Helios.Core.Controllers
 
         #region Site
         [HttpGet]
-        public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
+        public async Task<List<SiteDTO>> GetSiteList(Int64 studyId)
         {
             var result = await _context.Sites.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted).AsNoTracking().Select(x => new SiteDTO()
             {
@@ -314,7 +315,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<SiteDTO> GetSite(Guid siteId)
+        public async Task<SiteDTO> GetSite(Int64 siteId)
         {
             var site = await _context.Sites.FirstOrDefaultAsync(x => x.Id == siteId && x.IsActive && !x.IsDeleted);
 
@@ -337,7 +338,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SiteSaveOrUpdate(SiteModel siteModel)
         {
-            if (siteModel.Id == Guid.Empty)
+            if (siteModel.Id == 0)
             {
                 var hasSite = GetSiteList(siteModel.StudyId).Result.Any(a => a.Code == siteModel.Code && a.CountryCode == siteModel.CountryCode);
 
@@ -464,7 +465,7 @@ namespace Helios.Core.Controllers
 
         #region Mail Template
         [HttpGet]
-        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId)
+        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Int64 studyId)
         {
             var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Select(x => new EmailTemplateModel()
             {
@@ -481,7 +482,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteEmailTemplate(BaseDTO emailTemplateDTO)
         {
-            if (emailTemplateDTO.UserId != Guid.Empty && emailTemplateDTO.Id != Guid.Empty)
+            if (emailTemplateDTO.UserId != 0 && emailTemplateDTO.Id != 0)
             {
                 var data = await _context.MailTemplates.FirstOrDefaultAsync(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.Id == emailTemplateDTO.Id);
 
@@ -519,7 +520,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<EmailTemplateModel> GetEmailTemplate(Guid templateId)
+        public async Task<EmailTemplateModel> GetEmailTemplate(Int64 templateId)
         {
             var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.Id == templateId).Include(x=>x.MailTemplatesRoles).Select(x => new EmailTemplateModel()
             {
@@ -539,7 +540,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Int64 tenantId, int templateType)
         {
             var result = await _context.MailTemplateTags.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == tenantId && x.TemplateType == templateType).Select(x => new EmailTemplateTagModel()
             {
@@ -553,7 +554,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
         {
-            if (emailTemplateTagDTO.UserId != Guid.Empty && emailTemplateTagDTO.TenantId != Guid.Empty)
+            if (emailTemplateTagDTO.UserId != 0 && emailTemplateTagDTO.TenantId != 0)
             {
                 if(_context.MailTemplateTags.Any(x=>x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.TemplateType == emailTemplateTagDTO.TemplateType && x.Tag == emailTemplateTagDTO.Tag.Trim())){
                     return new ApiResponse<dynamic>
@@ -602,7 +603,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO)
         {
-            if (emailTemplateTagDTO.UserId != Guid.Empty && emailTemplateTagDTO.Id != Guid.Empty)
+            if (emailTemplateTagDTO.UserId != 0 && emailTemplateTagDTO.Id != 0)
             {
                 var data = await _context.MailTemplateTags.FirstOrDefaultAsync(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.Id == emailTemplateTagDTO.Id);
 
@@ -642,7 +643,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO)
         {
-            if (emailTemplateDTO.Id == Guid.Empty)
+            if (emailTemplateDTO.Id == 0)
             {
                 if (_context.MailTemplates.Any(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Name == emailTemplateDTO.Name.Trim()))
                 {
@@ -655,7 +656,6 @@ namespace Helios.Core.Controllers
 
                 var mailTemplate = new MailTemplates()
                 {
-                    Id = Guid.NewGuid(),
                     TenantId = emailTemplateDTO.TenantId,
                     TemplateType = emailTemplateDTO.TemplateType,
                     StudyId = emailTemplateDTO.StudyId,

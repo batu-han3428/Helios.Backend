@@ -9,9 +9,9 @@ namespace Helios.Common.DTO
 {
     public class TenantUserDTO
     {
-        public Guid StudyUserId { get; set; }
-        public Guid AuthUserId { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 StudyUserId { get; set; }
+        public Int64 AuthUserId { get; set; }
+        public Int64 StudyId { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public bool IsActive { get; set; }

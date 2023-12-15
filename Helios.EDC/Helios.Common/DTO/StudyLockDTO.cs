@@ -8,8 +8,8 @@ namespace Helios.Common.DTO
 {
     public class StudyLockDTO
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 UserId { get; set; }
         public bool IsLock { get; set; }
     }
 }

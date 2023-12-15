@@ -1,5 +1,4 @@
-﻿using Helios.Authentication.Controllers.Base;
-using Helios.Authentication.Entities;
+﻿using Helios.Authentication.Entities;
 using Helios.Authentication.Entities.Base;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -7,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Helios.Authentication.Contexts
 {
-    public class AuthenticationContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid, IdentityUserClaim<Guid>, ApplicationUserRole,
-        IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
+    public class AuthenticationContext : IdentityDbContext<ApplicationUser, ApplicationRole, Int64, IdentityUserClaim<Int64>, ApplicationUserRole,
+        IdentityUserLogin<Int64>, IdentityRoleClaim<Int64>, IdentityUserToken<Int64>>
     {
         public AuthenticationContext(DbContextOptions<AuthenticationContext> options) : base(options)
         {
@@ -44,7 +43,7 @@ namespace Helios.Authentication.Contexts
 
         }
 
-        public async Task<int> SaveAuthenticationContextAsync(Guid userId, DateTimeOffset saveDate)
+        public async Task<int> SaveAuthenticationContextAsync(Int64 userId, DateTimeOffset saveDate)
         {
             var transId = -1;
             if (this.ChangeTracker.HasChanges())
@@ -76,7 +75,7 @@ namespace Helios.Authentication.Contexts
             return transId;
         }
 
-        private void InsertAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
+        private void InsertAuthenticationBaseEntity(DbContext dbContext, Int64 userId, DateTimeOffset timeStamp)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Added).ToList())
             {
@@ -90,7 +89,7 @@ namespace Helios.Authentication.Contexts
                 entity.Entity.AddedById = userId;
             }
         }
-        private void UpdateAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
+        private void UpdateAuthenticationBaseEntity(DbContext dbContext, Int64 userId, DateTimeOffset timeStamp)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Modified).ToList())
             {
@@ -100,7 +99,7 @@ namespace Helios.Authentication.Contexts
             }
         }
 
-        private void DeleteAuthenticationBaseEntity(DbContext dbContext, Guid userId)
+        private void DeleteAuthenticationBaseEntity(DbContext dbContext, Int64 userId)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Deleted).ToList())
             {

@@ -7,8 +7,8 @@ namespace Helios.Core.Domains.Entities
 {
     public class Subject : EntityBase
     {
-        public Guid SiteId { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 SiteId { get; set; }
+        public Int64 StudyId { get; set; }
         public string InitialName { get; set; }
         public string SubjectNumber { get; set; }
         public DataStatus DataStatus { get; set; }

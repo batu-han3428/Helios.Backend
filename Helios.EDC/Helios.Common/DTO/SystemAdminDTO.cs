@@ -8,8 +8,8 @@ namespace Helios.Common.DTO
 {
     public class SystemAdminDTO
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 UserId { get; set; }
         public string Email { get; set; }
         public string? Password { get; set; }
         public string? Language { get; set; }

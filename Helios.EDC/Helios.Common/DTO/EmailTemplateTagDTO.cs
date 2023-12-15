@@ -8,9 +8,9 @@ namespace Helios.Common.DTO
 {
     public class EmailTemplateTagDTO
     {
-        public Guid? Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid TenantId { get; set; }
+        public Int64? Id { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 TenantId { get; set; }
         public string? Tag { get; set; }
         public int? TemplateType { get; set; }
     }

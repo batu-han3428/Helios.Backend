@@ -5,11 +5,11 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyVisitPageModule : EntityBase
     {
-        public Guid StudyVisitPageId { get; set; }
+        public Int64 StudyVisitPageId { get; set; }
         [ForeignKey("StudyRoleModulePermission")]
-        public Guid StudyRoleModulePermissionId { get; set; }
-        public Guid ReferenceKey { get; set; }
-        public Guid VersionKey { get; set; }
+        public Int64 StudyRoleModulePermissionId { get; set; }
+        public Int64 ReferenceKey { get; set; }
+        public Int64 VersionKey { get; set; }
         public int Order {get;set;}
         public bool CanFreeze { get; set; }
         public bool CanLock { get; set; }

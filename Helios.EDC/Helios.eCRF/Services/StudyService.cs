@@ -24,7 +24,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<StudyDTO> GetStudy(Guid studyId)
+        public async Task<StudyDTO> GetStudy(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -80,7 +80,7 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region Site
-        public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
+        public async Task<List<SiteDTO>> GetSiteList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -91,7 +91,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<SiteDTO> GetSite(Guid siteId)
+        public async Task<SiteDTO> GetSite(Int64 siteId)
         {
             using (var client = CoreServiceClient)
             {
@@ -126,7 +126,7 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region Mail Template
-        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Guid studyId)
+        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -148,7 +148,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<EmailTemplateModel> GetEmailTemplate(Guid templateId)
+        public async Task<EmailTemplateModel> GetEmailTemplate(Int64 templateId)
         {
             using (var client = CoreServiceClient)
             {
@@ -159,7 +159,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Guid tenantId, int templateType)
+        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Int64 tenantId, int templateType)
         {
             using (var client = CoreServiceClient)
             {

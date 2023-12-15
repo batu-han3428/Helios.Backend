@@ -9,8 +9,8 @@ namespace Helios.Common.DTO
 {
     public class UserPermissionDTO
     {
-        public Guid Id { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 StudyId { get; set; }
 
         [Required]
         public string RoleName { get; set; }

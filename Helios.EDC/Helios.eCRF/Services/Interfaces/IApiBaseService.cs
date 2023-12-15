@@ -4,9 +4,9 @@
     {
         string ClientIp { get; set; }
         string HttpContextRequestPath { get; set; }
-        Guid UserId { get; set; }
-        Guid ResearchId { get; set; }
-        Guid TenantId { get; set; }
-        Guid ResearcherId { get; set; }
+        Int64 UserId { get; set; }
+        Int64 ResearchId { get; set; }
+        Int64 TenantId { get; set; }
+        Int64 ResearcherId { get; set; }
     }
 }

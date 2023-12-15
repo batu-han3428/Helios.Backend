@@ -9,9 +9,9 @@ namespace Helios.Common.DTO
 {
     public class StudyDTO
     {
-        public Guid Id { get; set; }
-        public Guid? EquivalentStudyId { get; set; }
-        public Guid UserId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64? EquivalentStudyId { get; set; }
+        public Int64 UserId { get; set; }
         public string StudyName { get; set; }
         public string? ProtocolCode { get; set; }
         public bool AskSubjectInitial { get; set; }

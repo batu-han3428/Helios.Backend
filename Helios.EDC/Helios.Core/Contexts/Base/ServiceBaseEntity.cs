@@ -7,9 +7,9 @@ namespace Helios.Core.Contexts.Base
     public abstract class ServiceBaseEntity : IServiceBaseEntity
     {
         [Key]
-        public Guid Id { get; set; }
-        public Guid AddedById { get; set; }
-        public Guid? UpdatedById { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 AddedById { get; set; }
+        public Int64? UpdatedById { get; set; }
 
 
         [Column(TypeName = "bit(1)")]
@@ -34,6 +34,6 @@ namespace Helios.Core.Contexts.Base
         /// <summary>
         /// Study spesific Id => ResearchId or TenantId
         /// </summary>
-        public Guid TenantId { get; set; }
+        public Int64 TenantId { get; set; }
     }
 }

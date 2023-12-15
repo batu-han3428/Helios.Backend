@@ -9,7 +9,7 @@ namespace Helios.Common.DTO
 {
     public class SiteDTO
     {
-        public Guid Id { get; set; }
+        public Int64 Id { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public string CountryName { get; set; }

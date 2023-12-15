@@ -5,10 +5,10 @@ namespace Helios.Core.Domains.Entities
 {
     public class SubjectVisit : EntityBase
     {
-        public Guid StudyVisitId { get; set; }
-        public Guid SubjectId { get; set; }
-        public Guid ParentSubjectVisitId { get; set; }
-        public Guid RelatedSubjectVisitId { get; set; }
+        public Int64 StudyVisitId { get; set; }
+        public Int64 SubjectId { get; set; }
+        public Int64 ParentSubjectVisitId { get; set; }
+        public Int64 RelatedSubjectVisitId { get; set; }
         public DataStatus Status { get; set; }
         public bool Freeze { get; set; }
         public bool Lock { get; set; }

@@ -90,7 +90,7 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO)
         {
-            if (tenantDTO.Id == Guid.Empty)
+            if (tenantDTO.Id == 0)
             {
                 if (await _context.Tenants.AnyAsync(x => x.Name == tenantDTO.TenantName && x.IsActive && !x.IsDeleted))
                 {
@@ -103,7 +103,6 @@ namespace Helios.Authentication.Controllers
 
                 Tenant tenant = new Tenant()
                 {
-                    Id = Guid.NewGuid(),
                     Name = tenantDTO.TenantName,
                     StudyLimit = tenantDTO.StudyLimit,
                     UserLimit = tenantDTO.UserLimit,
@@ -265,7 +264,6 @@ namespace Helios.Authentication.Controllers
 
                     var usr = new ApplicationUser
                     {
-                        Id = Guid.NewGuid(),
                         Email = model.Email.Trim(),
                         UserName = newUserName,
                         Name = model.FirstName,
@@ -368,10 +366,10 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpGet]
-        public async Task<bool> SendNewPasswordForUser(Guid userId)
+        public async Task<bool> SendNewPasswordForUser(Int64 userId)
         {
             var result = false;
-            if (userId != Guid.Empty)
+            if (userId != 0)
             {
                 var user = await _userManager.FindByIdAsync(userId.ToString());
 
@@ -502,14 +500,16 @@ namespace Helios.Authentication.Controllers
         public async Task<List<AspNetUserDTO>> GetUserList(string AuthUserIds)
         {
             string[] authUserIdsArray = AuthUserIds.Split(',');
-            List<Guid> authUserIds = new List<Guid>();
+            List<Int64> authUserIds = new List<Int64>();
+
             foreach (string id in authUserIdsArray)
             {
-                if (Guid.TryParse(id, out Guid guid))
+                if (Int64.TryParse(id, out Int64 int64))
                 {
-                    authUserIds.Add(guid);
+                    authUserIds.Add(int64);
                 }
             }
+
             return await _userManager.Users.Where(x => x.IsActive && authUserIds.Contains(x.Id)).Select(x => new AspNetUserDTO
             {
                 Id = x.Id,
@@ -555,7 +555,6 @@ namespace Helios.Authentication.Controllers
 
                 var usr = new ApplicationUser
                 {
-                    Id = Guid.NewGuid(),
                     Email = model.Email.Trim(),
                     UserName = newUserName,
                     Name = model.Name,
@@ -616,7 +615,7 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> UserResetPassword(StudyUserModel model)
         {
-            if (model.AuthUserId != Guid.Empty)
+            if (model.AuthUserId != 0)
             {
                 var user = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
 
@@ -669,13 +668,13 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO model)
         {
-            if (model.Id == Guid.Empty)
+            if (model.Id == 0)
             {
                 if (await _userManager.FindByEmailAsync(model.Email) == null)
                 {
                     var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Substring(0, 1).ToLower();
                     var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Replace(" ", "").ToLower();
-                    var userName = string.Format("{0}_{1}{2}", Guid.NewGuid(), firstChar, lastNameEng);
+                    var userName = string.Format("{0}_{1}{2}", new Int64(), firstChar, lastNameEng);
 
                     var newUserName = userName;
                     int i = 0;
@@ -690,7 +689,6 @@ namespace Helios.Authentication.Controllers
 
                     var usr = new ApplicationUser
                     {
-                        Id = Guid.NewGuid(),
                         Email = model.Email.Trim(),
                         UserName = newUserName,
                         Name = model.Email.Trim(),
@@ -708,8 +706,8 @@ namespace Helios.Authentication.Controllers
                         User = usr,
                         RoleId = role.Id,
                         UserId = usr.Id,
-                        StudyId = Guid.Empty,
-                        TenantId = Guid.Empty,
+                        StudyId = 0,
+                        TenantId = 0,
                     });
 
                     var password = StringExtensionsHelper.GenerateRandomPassword();
@@ -817,7 +815,7 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SystemAdminResetPassword(SystemAdminDTO model)
         {
-            if (model.Id != Guid.Empty)
+            if (model.Id != 0)
             {
                 var user = await _userManager.FindByIdAsync(model.Id.ToString());
 

@@ -3,8 +3,8 @@ namespace Helios.Common.Model
 {
     public class StudyModel: BaseModel
     {
-        public Guid StudyId { get; set; }
-        public Guid DemoStudyId { get; set; }
+        public Int64 StudyId { get; set; }
+        public Int64 DemoStudyId { get; set; }
         public bool AskSubjectInitial { get; set; }
         public string Description { get; set; }
         public bool DoubleDataEntry { get; set; }

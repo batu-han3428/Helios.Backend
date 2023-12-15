@@ -4,9 +4,9 @@ namespace Helios.Core.Domains.Entities
 {
     public class Study : EntityBase
     {
-        public Guid ReferenceKey { get; set; }
-        public Guid VersionKey { get; set; }
-        public Guid? EquivalentStudyId { get; set; }
+        public Int64 ReferenceKey { get; set; }
+        public Int64 VersionKey { get; set; }
+        public Int64? EquivalentStudyId { get; set; }
         public string? StudyState{ get; set; }
         public int StudyType { get; set; }
         public bool AskSubjectInitial { get; set; }

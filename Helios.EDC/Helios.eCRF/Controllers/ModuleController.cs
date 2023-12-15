@@ -79,7 +79,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="id">modül id</param>
         /// <returns>istenen modülün bilgilerini döner</returns>
         [HttpGet]
-        public async Task<ModuleModel> GetModule(Guid id)
+        public async Task<ModuleModel> GetModule(Int64 id)
         {
             var result = await _moduleService.GetModule(id);
 
@@ -102,7 +102,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<List<ElementModel>> GetModuleElements(string id)
         {
-            var moduleId = Guid.Parse(id);
+            var moduleId = Int64.Parse(id);
             var result = await _moduleService.GetModuleElements(moduleId);
 
             return result;
@@ -111,7 +111,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<ElementModel> GetElementData(string id)
         {
-            var elementId = Guid.Parse(id);
+            var elementId = Int64.Parse(id);
             var result = await _moduleService.GetElementData(elementId);
 
             return result;
@@ -143,23 +143,23 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> CopyElement(string id)
         {
-            var elmId = Guid.Parse(id);
-            var result = await _moduleService.CopyElement(elmId, new Guid());
+            var elmId = Int64.Parse(id);
+            var result = await _moduleService.CopyElement(elmId, new Int64());
             return result;
         }
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteElement(string id)
         {
-            var elmId = Guid.Parse(id);
-            var result = await _moduleService.DeleteElement(elmId, new Guid());
+            var elmId = Int64.Parse(id);
+            var result = await _moduleService.DeleteElement(elmId, new Int64());
             return result;
         }
 
         [HttpGet]
         public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(string id)
         {
-            var elementId = Guid.Parse(id);
+            var elementId = Int64.Parse(id);
             var result = _moduleService.GetMultipleTagList(elementId).Result.GroupBy(x => x.Tagkey).ToList();
 
             return result;

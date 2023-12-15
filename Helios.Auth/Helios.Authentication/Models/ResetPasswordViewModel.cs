@@ -24,7 +24,7 @@ namespace Helios.Authentication.Models
         public bool Sso { get; set; }
 
         public bool FirstLogin { get; set; }
-        public Guid FirstResearchId { get; set; }
-        public Guid UserId { get; set; }
+        public Int64 FirstResearchId { get; set; }
+        public Int64 UserId { get; set; }
     }
 }
