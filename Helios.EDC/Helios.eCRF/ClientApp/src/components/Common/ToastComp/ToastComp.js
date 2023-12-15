@@ -20,7 +20,7 @@ const ToastComp = ({ title, message, showToast, setShowToast, stateToast, autohi
 
 
     return (
-        <Toast isOpen={showToast} className={stateToast ? "tost success" : "tost error"} autohide={autohide} onClose={handleClose}>
+        <Toast isOpen={showToast} className={stateToast ? "tost success" : "tost error"} onClose={handleClose}>
             {!autohide &&
                 <ToastHeader toggle={handleClose}>
                 {/*  {title}*/}

@@ -85,7 +85,7 @@ const AddOrUpdateTenant = props => {
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
         initialValues: {
-            id: "00000000-0000-0000-0000-000000000000",
+            id: 0,
             userId: userInformation.userId,
             tenantName: "",
             timeZone: "",
@@ -119,7 +119,7 @@ const AddOrUpdateTenant = props => {
                     setMessage(props.t(response.data.message));
                     setStateToast(true);
                     setShowToast(true);
-                    if (validationType.values.id === "00000000-0000-0000-0000-000000000000") {
+                    if (validationType.values.id === 0) {
                         validationType.setFieldValue("id", response.data.values.id);
                     }
                 } else {

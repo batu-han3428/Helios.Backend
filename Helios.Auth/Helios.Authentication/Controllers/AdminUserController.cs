@@ -90,6 +90,8 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO)
         {
+            bool result = false;
+
             if (tenantDTO.Id == 0)
             {
                 if (await _context.Tenants.AnyAsync(x => x.Name == tenantDTO.TenantName && x.IsActive && !x.IsDeleted))
@@ -132,6 +134,8 @@ namespace Helios.Authentication.Controllers
                 }
 
                 await _context.Tenants.AddAsync(tenant);
+
+                result = await _context.SaveAuthenticationContextAsync(tenantDTO.UserId, DateTimeOffset.Now) > 0;
 
                 tenantDTO.Id = tenant.Id;
             }
@@ -186,10 +190,10 @@ namespace Helios.Authentication.Controllers
                     }
 
                     _context.Tenants.Update(oldEntity);
+
+                    result = await _context.SaveAuthenticationContextAsync(tenantDTO.UserId, DateTimeOffset.Now) > 0;
                 }
             }
-
-            var result = await _context.SaveAuthenticationContextAsync(tenantDTO.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {
@@ -700,38 +704,33 @@ namespace Helios.Authentication.Controllers
                         LastChangePasswordDate = DateTime.Now
                     };
 
-                    usr.UserRoles.Add(new ApplicationUserRole
-                    {
-                        Role = role,
-                        User = usr,
-                        RoleId = role.Id,
-                        UserId = usr.Id,
-                        StudyId = 0,
-                        TenantId = 0,
-                    });
-
                     var password = StringExtensionsHelper.GenerateRandomPassword();
 
                     var userResult = await _userManager.CreateAsync(usr, password);
 
                     if (userResult.Succeeded)
                     {
-                        _context.SystemAdmins.Add(new SystemAdmin
-                        {
-                            AuthUserId = usr.Id,
-                        });
+                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
 
-                        var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                        if (result)
+                        if (addRoleResult.Succeeded)
                         {
-                            model.Password = password;
-                            await _emailService.SystemAdminUserMail(model);
-                            return new ApiResponse<dynamic>
+                            _context.SystemAdmins.Add(new SystemAdmin
                             {
-                                IsSuccess = true,
-                                Message = "Successful"
-                            };
+                                AuthUserId = usr.Id,
+                            });
+
+                            var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            if (result)
+                            {
+                                model.Password = password;
+                                await _emailService.SystemAdminUserMail(model);
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
                         }
                     }
 

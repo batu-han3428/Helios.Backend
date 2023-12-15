@@ -103,7 +103,7 @@ namespace Helios.eCRF.Services
         {
             var authTenants = await GetAuthTenantList();
 
-            if (authTenants.Count > 0)
+            if (authTenants != null && authTenants.Count > 0)
             {
                 var counts = await GetTenantsStudyCount(authTenants.Select(x=>x.Id).ToList());
 
@@ -121,9 +121,13 @@ namespace Helios.eCRF.Services
                                      UpdatedAt = aTenants.UpdatedAt
                                  }).ToList();
                 }
+                else
+                {
+                    return authTenants;
+                }
             }
 
-            return authTenants;
+            return new List<TenantModel>();
         }
 
         public async Task<TenantModel> GetTenant(Int64 tenantId)
