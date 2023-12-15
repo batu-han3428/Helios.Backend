@@ -1,12 +1,7 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
-using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
-using MassTransit.Internals.GraphValidation;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using RestSharp;
 
 namespace Helios.eCRF.Services
@@ -40,7 +35,18 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
+        private async Task<string?> GetTenantStudyLimit(Guid tenantId)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetTenantStudyLimit", Method.Get);
+                req.AddParameter("tenantId", tenantId);
+                var result = await client.ExecuteAsync<string?>(req);
+                return result.Data;
+            }
+        }
+
+        private async Task<ApiResponse<dynamic>> SetStudy(StudyModel studyModel)
         {
             using (var client = CoreServiceClient)
             {
@@ -49,6 +55,16 @@ namespace Helios.eCRF.Services
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
             }
+        }
+
+        public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
+        {
+            if(studyModel.StudyId == Guid.Empty)
+            {
+                string? studyLimit = await GetTenantStudyLimit(studyModel.TenantId);
+                studyModel.StudyLimit = studyLimit;
+            }
+            return await SetStudy(studyModel);
         }
 
         public async Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO)

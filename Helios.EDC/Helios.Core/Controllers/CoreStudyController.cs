@@ -4,15 +4,9 @@ using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
 using Helios.Core.helpers;
-using Helios.Core.Models;
-using MassTransit.Internals.GraphValidation;
-using MassTransit.JobService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -79,6 +73,17 @@ namespace Helios.Core.Controllers
         {
             if (studyModel.StudyId == Guid.Empty)
             {
+                int studiesCount = await _context.Studies.Where(x => x.TenantId == studyModel.TenantId && !x.IsDemo).CountAsync();
+
+                if ((studyModel.StudyLimit != null ? Convert.ToInt32(studyModel.StudyLimit) : 0) <= studiesCount)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Your limit for adding study has been reached. Please contact the system administrator."
+                    };
+                }
+
                 Guid _versionKey = Guid.NewGuid();
                 Guid _refKey = Guid.NewGuid();
                 studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);

@@ -312,6 +312,23 @@
             to: "/add-system-admin",
             icon: "fa-solid fa-house"
         }
+    ],
+    systemadmin: [
+        {
+            label: "Tenants",
+            to: "/tenants",
+            icon: "fa-solid fa-house"
+        },
+        {
+            label: "Users",
+            to: "/users",
+            icon: "fa-solid fa-house"
+        },
+        {
+            label: "Settings",
+            to: "/settings",
+            icon: "fa-solid fa-house"
+        }
     ]
 };
 

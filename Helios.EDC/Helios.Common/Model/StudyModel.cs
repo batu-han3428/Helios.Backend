@@ -1,10 +1,4 @@
-﻿using Helios.Common.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Helios.Common.Model
 {
     public class StudyModel: BaseModel
@@ -21,6 +15,6 @@ namespace Helios.Common.Model
         public string SubDescription { get; set; }
         public int SubjectNumberDigist { get; set; }
         public int StudyLanguage { get; set; }
-
+        public string? StudyLimit { get; set; }
     }
 }

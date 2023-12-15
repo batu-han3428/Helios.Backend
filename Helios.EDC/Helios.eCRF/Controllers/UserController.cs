@@ -1,8 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
-using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,62 +17,6 @@ namespace Helios.eCRF.Controllers
         {
             this._userService = userService;
         }
-
-        /// <summary>
-        /// tenant ekler
-        /// </summary>
-        /// <param name="name">tenant ismi</param>
-        /// <returns>başarılı başarısız</returns>
-        [HttpPost]
-        public async Task<bool> AddTenant(string name)
-        {
-            var model = new TenantModel { Name = name };
-            var result = await _userService.AddTenant(model);
-            return result;
-            //return Ok("Form data received successfully"); 
-        }
-
-
-        /// <summary>
-        /// tenant günceller
-        /// </summary>
-        /// <param name="model">tenant bilgileri</param>
-        /// <returns>başarılı başarısız</returns>
-        [HttpPost]
-        public async Task<bool> UpdateTenant(TenantModel model)
-        {
-            var result = await _userService.UpdateTenant(model);
-            return result;
-            //return Ok("Form data received successfully"); 
-        }
-
-
-        /// <summary>
-        /// seçili tenantı getirir
-        /// </summary>
-        /// <param name="id">tenant id</param>
-        /// <returns>tenant bilgisi</returns>
-        [HttpGet]
-        public async Task<TenantModel> GetTenant(Guid id)
-        {
-            var result = await _userService.GetTenant(id);
-
-            return result;
-        }
-
-
-        /// <summary>
-        /// tenantları listeler
-        /// </summary>
-        /// <returns>tenant listesi</returns>
-        [HttpGet]
-        public async Task<List<TenantModel>> GetTenantList()
-        {
-            var result = await _userService.GetTenantList();
-
-            return result;
-        }
-
 
         /// <summary>
         /// kullanıcının mail adresine göre bilgilerini getirir
@@ -121,6 +63,59 @@ namespace Helios.eCRF.Controllers
             var result = await _userService.PassiveOrActiveUser(model);
             return Ok(result);
         }
+
+        #region Tenants
+
+        /// <summary>
+        /// tenantları listeler
+        /// </summary>
+        /// <returns>tenant listesi</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetTenantList()
+        {
+            try
+            {
+                var result = await _userService.GetTenantList();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        /// <summary>
+        /// seçili tenant bilgilerini getirir
+        /// </summary>
+        /// <param name="tenantId">tenant id</param>
+        /// <returns>tenant bilgileri</returns>
+        [HttpGet("{tenantId}")]
+        public async Task<IActionResult> GetTenant(Guid tenantId)
+        {
+            try
+            {
+                var result = await _userService.GetTenant(tenantId);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        /// <summary>
+        /// tenant siler ya da günceller
+        /// </summary>
+        /// <param name="model">tenant bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetTenant([FromForm] TenantDTO tenantDTO)
+        {
+            var result = await _userService.SetTenant(tenantDTO);
+            return Ok(result);
+        }
+        #endregion
 
         #region Permissions
 

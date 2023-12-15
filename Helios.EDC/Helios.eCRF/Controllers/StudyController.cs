@@ -1,8 +1,5 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
-using Helios.eCRF.Models;
-using Helios.eCRF.Services;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +26,18 @@ namespace Helios.eCRF.Controllers
         /// <returns>çalışmalar</returns>
         [HttpGet("{isLock}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
+        public async Task<IActionResult> GetStudyList(bool isLock)
         {
-            var result = await _studyService.GetStudyList(isLock);
+            try
+            {
+                var result = await _studyService.GetStudyList(isLock);
 
-            return result;
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
 
 
@@ -44,11 +48,18 @@ namespace Helios.eCRF.Controllers
         /// <returns>çalışma bilgileri</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<StudyDTO> GetStudy(Guid studyId)
+        public async Task<IActionResult> GetStudy(Guid studyId)
         {
-            var result = await _studyService.GetStudy(studyId);
+            try
+            {
+                var result = await _studyService.GetStudy(studyId);
 
-            return result;
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
 
 
@@ -92,11 +103,18 @@ namespace Helios.eCRF.Controllers
         /// <returns>site listesi</returns>
         [HttpGet("{studyId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<List<SiteDTO>> GetSiteList(Guid studyId)
+        public async Task<IActionResult> GetSiteList(Guid studyId)
         {
-            var result = await _studyService.GetSiteList(studyId);
+            try
+            {
+                var result = await _studyService.GetSiteList(studyId);
 
-            return result;
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
 
 
@@ -107,11 +125,18 @@ namespace Helios.eCRF.Controllers
         /// <returns>site bilgisi</returns>
         [HttpGet("{siteId}")]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<SiteDTO> GetSite(Guid siteId)
+        public async Task<IActionResult> GetSite(Guid siteId)
         {
-            var result = await _studyService.GetSite(siteId);
+            try
+            {
+                var result = await _studyService.GetSite(siteId);
 
-            return result;
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
 
 

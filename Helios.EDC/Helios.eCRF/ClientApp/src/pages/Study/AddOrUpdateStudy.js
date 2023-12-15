@@ -2,19 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { withTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    FormGroup,
-    CardSubtitle,
-    Label,
-    Input,
-    Form,
-    FormFeedback,
-    Collapse
-} from "reactstrap";
+import { Row, Col, Card, CardBody, FormGroup, CardSubtitle, Label, Input, Form, FormFeedback } from "reactstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Select from "react-select";
@@ -35,8 +23,9 @@ const AddOrUpdateStudy = props => {
     const [skip, setSkip] = useState(true);
     const [apiStudyData, setApiStudyData] = useState(null);
     const [showToast, setShowToast] = useState(false);
-    const [newSave, setNewSave] = useState(true);
+    const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
+    const [autoHideToast, setAutoHideToast] = useState(true);
 
     const dispatch = useDispatch();
 
@@ -93,6 +82,8 @@ const AddOrUpdateStudy = props => {
             const response = await studySave(values);
             if (response.data.isSuccess) {
                 dispatch(endloading());
+                setMessage(props.t(response.data.message));
+                setAutoHideToast(true);
                 setStateToast(true);
                 setShowToast(true);
                 if (studyId === '00000000-0000-0000-0000-000000000000') {
@@ -100,7 +91,10 @@ const AddOrUpdateStudy = props => {
                 }
             } else {
                 dispatch(endloading());
+                setMessage(props.t(response.data.message));
                 setStateToast(false);
+                setAutoHideToast(false);
+                setShowToast(true);
             }
         }
     });
@@ -115,7 +109,6 @@ const AddOrUpdateStudy = props => {
     useEffect(() => {
         setApiStudyData(null);
         if (location.state !== null) {
-            setNewSave(false);
             dispatch(startloading());
             setStudyId(location.state.studyId);
             setSkip(false);
@@ -351,11 +344,12 @@ const AddOrUpdateStudy = props => {
                 </div>
             </div>
             <ToastComp
-                title={ newSave ?  "Kayıt" : "Güncelleme"}
-                message={ newSave ?  " Kayıt başarılı" : "Güncelleme başarılı"}
+                title="İşlem bilgisi"
+                message={message}
                 showToast={showToast}
                 setShowToast={setShowToast}
-                stateToast={ stateToast }
+                stateToast={stateToast}
+                autohide={autoHideToast}
             />
         </React.Fragment>
     );

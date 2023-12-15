@@ -416,5 +416,20 @@
   "Tag copied": "Tag copied",
   "An error occurred while copying the tag.": "An error occurred while copying the tag.",
   "e-Mail tag": "e-Mail tag",
-  "Select all": "Select all"
+  "Select all": "Select all",
+  "Tenants": "Tenants",
+  "Add a tenant": "Add a tenant",
+  "Tenant name": "Tenant name",
+  "Active studies": "Active studies",
+  "Updated on": "Updated on",
+  "Tenant information": "Tenant information",
+  "Currently selected time zone": "Currently selected time zone",
+  "All other time zones": "All other time zones",
+  "Time zone": "Time zone",
+  "Study limit that can be added": "Study limit that can be added",
+  "User limit that can be added": "User limit that can be added",
+  "Tenant logo": "Tenant logo",
+  "Drop photo here or click to upload": "Drop photo here or click to upload",
+  "Your limit for adding study has been reached. Please contact the system administrator.": "Your limit for adding study has been reached. Please contact the system administrator.",
+  "This tenant name is already exist.": "This tenant name is already exist."
 }

@@ -230,5 +230,16 @@ namespace Helios.Authentication.Helpers
             }
         }
 
+        public static string NormalizeString(string value)
+        {
+            if (value == null || value == "null")
+            {
+                return null;
+            }
+            else
+            {
+                return value;
+            }
+        }
     }
 }

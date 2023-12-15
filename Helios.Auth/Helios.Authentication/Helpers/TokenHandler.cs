@@ -1,19 +1,25 @@
 ﻿using Helios.Authentication.Entities;
 using Helios.Authentication.Models;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Helios.Authentication.Helpers
 {
-    public class TokenHandler
+    public interface ITokenHandler
+    {
+        Token CreateAccessToken(ApplicationUser user);
+        public string CreateRefreshToken();
+    }
+    public class TokenHandler: ITokenHandler
     {
         public IConfiguration Configuration { get; set; }
-        public TokenHandler(IConfiguration configuration)
+        public ITimeZoneHelper TimeZoneHelper { get; set; }
+        public TokenHandler(IConfiguration configuration, ITimeZoneHelper timeZoneHelper)
         {
             Configuration = configuration;
+            TimeZoneHelper = timeZoneHelper;
         }
         public Token CreateAccessToken(ApplicationUser user)
         {
@@ -41,6 +47,7 @@ namespace Helios.Authentication.Helpers
             securityToken.Payload["mail"] = user.Email;
             securityToken.Payload["userId"] = user.Id;
             securityToken.Payload["tenantId"] = user.UserRoles.Count > 0 ? user.UserRoles.First().TenantId : "";
+            securityToken.Payload["timeZone"] = TimeZoneHelper.GetTimeZoneInformation(user);
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 

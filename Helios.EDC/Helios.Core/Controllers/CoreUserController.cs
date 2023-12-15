@@ -4,16 +4,8 @@ using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
-using RestSharp;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Principal;
-using System.Xml.Linq;
-using static MassTransit.ValidationResultExtensions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -27,6 +19,27 @@ namespace Helios.Core.Controllers
         {
             _context = context;
         }
+
+        #region Tenants     
+        [HttpGet]
+        public async Task<List<TenantModel>> GetTenantsStudyCount(string tenantIds)
+        {
+            string[] tenantIdsArray = tenantIds.Split(',');
+            List<Guid> tenantIdsGuid = new List<Guid>();
+            foreach (string id in tenantIdsArray)
+            {
+                if (Guid.TryParse(id, out Guid guid))
+                {
+                    tenantIdsGuid.Add(guid);
+                }
+            }
+            return await _context.Studies.Where(x => tenantIdsGuid.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
+            {
+                Id = g.Key,
+                ActiveStudies = g.Count().ToString()
+            }).ToListAsync();
+        }
+        #endregion
 
         #region Permissions
         [HttpGet]

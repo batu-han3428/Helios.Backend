@@ -120,6 +120,10 @@ import AddOrUpdateEmailTemplate from "../Pages/EmailTemplate/AddOrUpdateEmailTem
 //Add system admin
 import ListSystemAdmin from "../Pages/AddSystemAdmin/ListSystemAdmin";
 
+//System admin tenants
+import TenantsList from "../Pages/Tenants/TenantsList";
+import AddOrUpdateTenant from "../Pages/Tenants/AddOrUpdateTenant.js";
+
 
 const userRoutes = [
     //tenant
@@ -158,6 +162,11 @@ const userRoutes = [
 
     //Add system admin
     { path: "/add-system-admin", component: <ListSystemAdmin />, menuType: "superadmin", roles: ['SuperAdmin'] },
+
+    //System admin tenants
+    { path: "/tenants", component: <TenantsList />, menuType: "systemadmin", roles: ['SystemAdmin'] },
+    { path: "/set-tenant/:tenantId?", component: <AddOrUpdateTenant />, menuType: "systemadmin", roles: ['SystemAdmin'] },
+
 
 
 
@@ -225,6 +234,7 @@ const userRoutes = [
     { path: "/", roles: ["TenantAdmin"], redirect: "/studylist", menuType: "admin" },
     { path: "/", roles: ["StudyUser"], redirect: "/SSO-tenants", menuType: "sso" },
     { path: "/", roles: ["SuperAdmin"], redirect: "/add-system-admin", menuType: "superadmin" },
+    { path: "/", roles: ["SystemAdmin"], redirect: "/tenants", menuType: "systemadmin" },
 ];
 
 const authRoutes = [

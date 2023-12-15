@@ -262,5 +262,21 @@
   "Tag copied": "Etiket kopyalandı",
   "An error occurred while copying the tag.": "Etiket kopyalanırken bir hata oluştu.",
   "e-Mail tag": "e-Posta etiketi",
-  "Select all": "Hepsini seç"
+  "Select all": "Hepsini seç",
+  "Tenants": "Abonelikler",
+  "Settings": "Ayarlar",
+  "Add a tenant": "Abonelik ekle",
+  "Tenant name": "Abonelik adı",
+  "Active studies": "Aktif çalışmalar",
+  "Updated on": "Güncellenme tarihi",
+  "Tenant information": "Abonelik bilgileri",
+  "Currently selected time zone": "Şu anda seçili saat dilimi",
+  "All other time zones": "Diğer tüm zaman dilimleri",
+  "Time zone": "Zaman dilimi",
+  "Study limit that can be added": "Ekelenebilecek çalışma limiti",
+  "User limit that can be added": "Ekelenebilecek kullanıcı limiti",
+  "Tenant logo": "Abonelik logosu",
+  "Drop photo here or click to upload": "Fotoğrafı buraya bırakın veya yüklemek için tıklayın",
+  "Your limit for adding study has been reached. Please contact the system administrator.": "Çalışma ekleme limitiniz dolmuştur. Lütfen sistem yöneticisi ile iletişime geçiniz.",
+  "This tenant name is already exist.": "Bu abonelik adı zaten kayıtlı."
 }
