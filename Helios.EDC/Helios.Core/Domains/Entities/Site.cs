@@ -4,7 +4,7 @@ namespace Helios.Core.Domains.Entities
 {
     public class Site : EntityBase
     {
-        public Guid StudyId { get; set; }
+        public Int64 StudyId { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public string Country { get; set; }

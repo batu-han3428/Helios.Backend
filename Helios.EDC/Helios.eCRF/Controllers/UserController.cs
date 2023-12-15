@@ -55,7 +55,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="id">tenant id</param>
         /// <returns>tenant bilgisi</returns>
         [HttpGet]
-        public async Task<TenantModel> GetTenant(Guid id)
+        public async Task<TenantModel> GetTenant(Int64 id)
         {
             var result = await _userService.GetTenant(id);
 
@@ -97,7 +97,7 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveAdminUser(UserDTO model)
         {
-            if (model.Id == Guid.Empty)
+            if (model.Id == 0)
             {
                 var result = await _userService.AddUser(model);
                 return Ok(result);
@@ -130,7 +130,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="studyId">çalışma id</param>
         /// <returns>rol ve yetkiler</returns>
         [HttpGet("{studyId}")]
-        public async Task<IActionResult> GetPermissionRoleList(Guid studyId)
+        public async Task<IActionResult> GetPermissionRoleList(Int64 studyId)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="studyId">çalışma id</param>
         /// <returns>roller</returns>
         [HttpGet("{studyId}")]
-        public async Task<IActionResult> GetRoleList(Guid studyId)
+        public async Task<IActionResult> GetRoleList(Int64 studyId)
         {
             var result = await _userService.GetRoleList(studyId);
             return Ok(result);
@@ -163,7 +163,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="roleId">rol id</param>
         /// <returns>rolün kullanıcıları</returns>
         [HttpGet("{roleId}")]
-        public async Task<IActionResult> GetRoleUsers(Guid roleId)
+        public async Task<IActionResult> GetRoleUsers(Int64 roleId)
         {
             var result = await _userService.GetRoleUsers(roleId);
             return Ok(result);
@@ -176,7 +176,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="studyId">çalışma id</param>
         /// <returns>çalışmada ki kullanıcılar ve rolleri</returns>
         [HttpGet("{studyId}")]
-        public async Task<IActionResult> GetStudyRoleUsers(Guid studyId)
+        public async Task<IActionResult> GetStudyRoleUsers(Int64 studyId)
         {
             try
             {
@@ -238,7 +238,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="studyId">çalışma id</param>
         /// <returns>kullanıcılar</returns>
         [HttpGet("{studyId}")]
-        public async Task<IActionResult> GetStudyUserList(Guid studyId)
+        public async Task<IActionResult> GetStudyUserList(Int64 studyId)
         {
             var result = await _userService.GetStudyUserList(studyId);
             return Ok(result);
@@ -252,7 +252,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="studyId">çalışma id</param>
         /// <returns>kullanıcı bilgisi ya da uyarı</returns>
         [HttpGet("{email}/{studyId}")]
-        public async Task<IActionResult> GetStudyUser(string email, Guid studyId)
+        public async Task<IActionResult> GetStudyUser(string email, Int64 studyId)
         {
             var result = await _userService.GetStudyUser(email, studyId);
             return Ok(result);
@@ -331,7 +331,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="tenantId">tenant id</param>
         /// <returns>kullanıcılar</returns>
         [HttpGet("{tenantId}")]
-        public async Task<IActionResult> GetTenantUserList(Guid tenantId)
+        public async Task<IActionResult> GetTenantUserList(Int64 tenantId)
         {
             var result = await _userService.GetTenantUserList(tenantId);
             return Ok(result);
@@ -433,7 +433,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>tenant listesi</returns>
         [HttpGet("{userId}")]
         [Authorize(Roles = "StudyUser")]
-        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
             return await _userService.GetUserTenantList(userId);
         }
@@ -446,7 +446,7 @@ namespace Helios.eCRF.Controllers
         /// <returns>tenant listesi</returns>
         [HttpGet("{tenantId}/{userId}")]
         [Authorize(Roles = "StudyUser")]
-        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId)
+        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Int64 tenantId, Int64 userId)
         {
             return await _userService.GetUserStudiesList(tenantId, userId);
         }

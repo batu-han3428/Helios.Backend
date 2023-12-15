@@ -4,8 +4,8 @@ namespace Helios.Core.Contexts.Base
 {
     public class ServiceContextBase : DbContext
     {
-        protected Guid TenantId { get; set; }
-        protected Guid CurrentUserId { get; set; }
+        protected Int64 TenantId { get; set; }
+        protected Int64 CurrentUserId { get; set; }
 
 
         //protected abstract void OnModelCreating(ModelBuilder modelBuilder);
@@ -21,12 +21,12 @@ namespace Helios.Core.Contexts.Base
         {
         }
 
-        public void SetCurrentUser(Guid userId)
+        public void SetCurrentUser(Int64 userId)
         {
             this.CurrentUserId = userId;
         }
 
-        public void SetTenantId(Guid tenantId)
+        public void SetTenantId(Int64 tenantId)
         {
             this.TenantId = tenantId;
         }
@@ -38,8 +38,8 @@ namespace Helios.Core.Contexts.Base
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
 
-            if (this.CurrentUserId == Guid.Empty)
-                throw new NullReferenceException("You must set current user of context via method name 'context.SetCurrentUser(Guid userId)'");
+            if (this.CurrentUserId == 0)
+                throw new NullReferenceException("You must set current user of context via method name 'context.SetCurrentUser(Int64 userId)'");
             int affectedRow = 0;
             if (this.ChangeTracker.HasChanges())
             {
@@ -79,7 +79,7 @@ namespace Helios.Core.Contexts.Base
         private void SetTenantBaseEntity()
         {
             var tenantEntities = this.ChangeTracker.Entries<IServiceTenantBaseEntity>().Where(x => x.State != EntityState.Deleted && x.State != EntityState.Unchanged).ToList();
-            if (tenantEntities.Any() && this.TenantId == Guid.Empty)
+            if (tenantEntities.Any() && this.TenantId == 0)
                 throw new Exception("TenantId cannot be null for tenant safe entitites.");
 
             foreach (var entity in tenantEntities)
@@ -89,7 +89,7 @@ namespace Helios.Core.Contexts.Base
 
 
 
-        private void InsertBaseEntity(Guid userId, DateTime date)
+        private void InsertBaseEntity(Int64 userId, DateTime date)
         {
             foreach (var entity in this.ChangeTracker.Entries<IServiceBaseEntity>().Where(x => x.State == EntityState.Added).ToList())
             {
@@ -97,33 +97,33 @@ namespace Helios.Core.Contexts.Base
                 entity.Entity.UpdatedAt = date;
                 entity.Entity.IsDeleted = entity.Entity.IsDeleted;
                 entity.Entity.IsActive = entity.Entity.IsActive;
-                if (entity.Entity.AddedById == Guid.Empty)
+                if (entity.Entity.AddedById == 0)
                 {
                     entity.Entity.AddedById = userId;
                 }
             }
         }
 
-        private void UpdateBaseEntity(Guid userId, DateTime date)
+        private void UpdateBaseEntity(Int64 userId, DateTime date)
         {
             foreach (var entity in this.ChangeTracker.Entries<IServiceBaseEntity>().Where(x => x.State == EntityState.Modified).ToList())
             {
                 entity.Entity.UpdatedAt = date;
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
+                if (entity.Entity.UpdatedById == 0 || entity.Entity.UpdatedById == null)
                 {
                     entity.Entity.UpdatedById = userId;
                 }
             }
         }
 
-        private void DeleteBaseEntity(Guid userId, DateTime date)
+        private void DeleteBaseEntity(Int64 userId, DateTime date)
         {
             foreach (var entity in this.ChangeTracker.Entries<IServiceBaseEntity>().Where(x => x.State == EntityState.Deleted).ToList())
             {
                 entity.Entity.IsDeleted = true;
                 entity.Entity.IsActive = false;
                 entity.Entity.UpdatedAt = date;
-                if (entity.Entity.UpdatedById == Guid.Empty || entity.Entity.UpdatedById == null)
+                if (entity.Entity.UpdatedById == 0 || entity.Entity.UpdatedById == null)
                 {
                     entity.Entity.UpdatedById = userId;
                 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Helios.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class MyFirstMigration : Migration
+    public partial class Migration141223 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,9 +19,10 @@ namespace Helios.Core.Migrations
                 name: "ElementDetails",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ParentId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ElementId = table.Column<long>(type: "bigint", nullable: false),
+                    ParentId = table.Column<long>(type: "bigint", nullable: false),
                     RowIndex = table.Column<int>(type: "int", nullable: false),
                     ColunmIndex = table.Column<int>(type: "int", nullable: false),
                     CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -56,14 +58,14 @@ namespace Helios.Core.Migrations
                     AddTodayDate = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ElementOptions = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    TargetElementId = table.Column<long>(type: "bigint", nullable: false),
                     LeftText = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RightText = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -77,15 +79,69 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
+                name: "MailTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TemplateBody = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TemplateType = table.Column<int>(type: "int", nullable: false),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
+                    ExternalMails = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MailTemplates", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
+                name: "MailTemplateTags",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Tag = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TemplateType = table.Column<int>(type: "int", nullable: false),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MailTemplateTags", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
                 name: "Modules",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -102,16 +158,17 @@ namespace Helios.Core.Migrations
                 name: "MultipleChoiceTag",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Key = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Value = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -128,10 +185,11 @@ namespace Helios.Core.Migrations
                 name: "Studies",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    EquivalentStudyId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ReferenceKey = table.Column<long>(type: "bigint", nullable: false),
+                    VersionKey = table.Column<long>(type: "bigint", nullable: false),
+                    EquivalentStudyId = table.Column<long>(type: "bigint", nullable: true),
                     StudyState = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StudyType = table.Column<int>(type: "int", nullable: false),
@@ -154,9 +212,9 @@ namespace Helios.Core.Migrations
                     StudyName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -178,8 +236,9 @@ namespace Helios.Core.Migrations
                 name: "SystemAuditTrails",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
                     Changer = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ClientIp = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
@@ -191,8 +250,8 @@ namespace Helios.Core.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     OldValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -206,12 +265,42 @@ namespace Helios.Core.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
 
             migrationBuilder.CreateTable(
+                name: "MailTemplatesRoles",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MailTemplateId = table.Column<long>(type: "bigint", nullable: false),
+                    RoleId = table.Column<long>(type: "bigint", nullable: false),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MailTemplatesRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MailTemplatesRoles_MailTemplates_MailTemplateId",
+                        column: x => x.MailTemplateId,
+                        principalTable: "MailTemplates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_turkish_ci");
+
+            migrationBuilder.CreateTable(
                 name: "Elements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ElementDetailId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ModuleId = table.Column<long>(type: "bigint", nullable: false),
+                    ElementDetailId = table.Column<long>(type: "bigint", nullable: true),
                     ElementType = table.Column<int>(type: "int", nullable: false),
                     ElementName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -227,9 +316,9 @@ namespace Helios.Core.Migrations
                     IsDependent = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsReadonly = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanMissing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -257,17 +346,18 @@ namespace Helios.Core.Migrations
                 name: "ModuleElementEvents",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ModuleId = table.Column<long>(type: "bigint", nullable: false),
                     ActionType = table.Column<int>(type: "int", nullable: false),
-                    SourceElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SourceElementId = table.Column<long>(type: "bigint", nullable: false),
+                    TargetElementId = table.Column<long>(type: "bigint", nullable: false),
                     ValueCondition = table.Column<int>(type: "int", nullable: false),
                     ActionValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -290,8 +380,9 @@ namespace Helios.Core.Migrations
                 name: "Sites",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Code = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
@@ -301,9 +392,9 @@ namespace Helios.Core.Migrations
                     CountryCode = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MaxEnrolmentCount = table.Column<int>(type: "int", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -326,8 +417,9 @@ namespace Helios.Core.Migrations
                 name: "StudyRoles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Add = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -394,9 +486,9 @@ namespace Helios.Core.Migrations
                     ExportPatientForm = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AddAdverseEvent = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AddMultiVisit = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -419,10 +511,11 @@ namespace Helios.Core.Migrations
                 name: "StudyVisits",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
+                    ReferenceKey = table.Column<long>(type: "bigint", nullable: false),
+                    VersionKey = table.Column<long>(type: "bigint", nullable: false),
                     VisitType = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -435,9 +528,9 @@ namespace Helios.Core.Migrations
                     CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     SAELockHour = table.Column<int>(type: "int", nullable: false),
                     SAELockAction = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -460,9 +553,10 @@ namespace Helios.Core.Migrations
                 name: "Subjects",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SiteId = table.Column<long>(type: "bigint", nullable: false),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
                     InitialName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     SubjectNumber = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
@@ -477,9 +571,9 @@ namespace Helios.Core.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RandomDataDate = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
                     UserValueUpdateDate = table.Column<DateTimeOffset>(type: "datetime", nullable: true),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -508,18 +602,19 @@ namespace Helios.Core.Migrations
                 name: "StudyRoleModulePermissions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyRoleId = table.Column<long>(type: "bigint", nullable: false),
+                    StudyVisitPageModuleId = table.Column<long>(type: "bigint", nullable: false),
                     Read = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Write = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     SDV = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -542,15 +637,16 @@ namespace Helios.Core.Migrations
                 name: "StudyUsers",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AuthUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyId = table.Column<long>(type: "bigint", nullable: false),
+                    AuthUserId = table.Column<long>(type: "bigint", nullable: false),
                     SuperUserIdList = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StudyRoleId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    StudyRoleId = table.Column<long>(type: "bigint", nullable: true),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -578,10 +674,11 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPages",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitId = table.Column<long>(type: "bigint", nullable: false),
+                    ReferenceKey = table.Column<long>(type: "bigint", nullable: false),
+                    VersionKey = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Order = table.Column<int>(type: "int", nullable: false),
@@ -591,9 +688,9 @@ namespace Helios.Core.Migrations
                     CanVerify = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -616,11 +713,12 @@ namespace Helios.Core.Migrations
                 name: "SubjectVisits",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SubjectId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ParentSubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    RelatedSubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitId = table.Column<long>(type: "bigint", nullable: false),
+                    SubjectId = table.Column<long>(type: "bigint", nullable: false),
+                    ParentSubjectVisitId = table.Column<long>(type: "bigint", nullable: false),
+                    RelatedSubjectVisitId = table.Column<long>(type: "bigint", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -635,9 +733,9 @@ namespace Helios.Core.Migrations
                     FormName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RowIndex = table.Column<int>(type: "int", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -666,12 +764,13 @@ namespace Helios.Core.Migrations
                 name: "StudyUserSites",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SiteId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyUserId = table.Column<long>(type: "bigint", nullable: false),
+                    SiteId = table.Column<long>(type: "bigint", nullable: false),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -700,11 +799,12 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPageModules",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyRoleModulePermissionId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ReferenceKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    VersionKey = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageId = table.Column<long>(type: "bigint", nullable: false),
+                    StudyRoleModulePermissionId = table.Column<long>(type: "bigint", nullable: false),
+                    ReferenceKey = table.Column<long>(type: "bigint", nullable: false),
+                    VersionKey = table.Column<long>(type: "bigint", nullable: false),
                     Order = table.Column<int>(type: "int", nullable: false),
                     CanFreeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanLock = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -712,9 +812,9 @@ namespace Helios.Core.Migrations
                     CanVerify = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanSdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -743,9 +843,10 @@ namespace Helios.Core.Migrations
                 name: "SubjectVisitPages",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SubjectVisitId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SubjectVisitId = table.Column<long>(type: "bigint", nullable: false),
+                    StudyVisitPageId = table.Column<long>(type: "bigint", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Freeze = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Lock = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -754,9 +855,9 @@ namespace Helios.Core.Migrations
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Verification = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -785,8 +886,9 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPageModuleElements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageModuleId = table.Column<long>(type: "bigint", nullable: false),
                     ElementType = table.Column<int>(type: "int", nullable: false),
                     ElementName = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -801,9 +903,9 @@ namespace Helios.Core.Migrations
                     IsRequired = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDependent = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CanMissing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -826,13 +928,14 @@ namespace Helios.Core.Migrations
                 name: "SubjectVisitPageModules",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageModuleId = table.Column<long>(type: "bigint", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    SubjectVisitPageId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    SubjectVisitPageId = table.Column<long>(type: "bigint", nullable: true),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -860,9 +963,10 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPageModuleElementDetails",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ParentId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageModuleElementId = table.Column<long>(type: "bigint", nullable: false),
+                    ParentId = table.Column<long>(type: "bigint", nullable: false),
                     RowIndex = table.Column<int>(type: "int", nullable: false),
                     ColunmIndex = table.Column<int>(type: "int", nullable: false),
                     CanQuery = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -889,9 +993,9 @@ namespace Helios.Core.Migrations
                     Layout = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     Options = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -914,17 +1018,18 @@ namespace Helios.Core.Migrations
                 name: "StudyVisitPageModuleElementEvents",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageModuleElementId = table.Column<long>(type: "bigint", nullable: false),
                     ActionType = table.Column<int>(type: "int", nullable: false),
-                    SourceElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    TargetElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SourceElementId = table.Column<long>(type: "bigint", nullable: false),
+                    TargetElementId = table.Column<long>(type: "bigint", nullable: false),
                     ValueCondition = table.Column<int>(type: "int", nullable: false),
                     ActionValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -947,18 +1052,19 @@ namespace Helios.Core.Migrations
                 name: "SubjectVisitPageModuleElements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StudyVisitPageModuleElementId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SubjectVisitModuleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StudyVisitPageModuleElementId = table.Column<long>(type: "bigint", nullable: false),
+                    SubjectVisitModuleId = table.Column<long>(type: "bigint", nullable: false),
                     UserValue = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ShowOnScreen = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     MissingData = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Sdv = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Query = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    TenantId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    AddedById = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UpdatedById = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TenantId = table.Column<long>(type: "bigint", nullable: false),
+                    AddedById = table.Column<long>(type: "bigint", nullable: false),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetime", nullable: false),
@@ -993,6 +1099,11 @@ namespace Helios.Core.Migrations
                 name: "IX_Elements_ModuleId",
                 table: "Elements",
                 column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MailTemplatesRoles_MailTemplateId",
+                table: "MailTemplatesRoles",
+                column: "MailTemplateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ModuleElementEvents_ModuleId",
@@ -1134,6 +1245,12 @@ namespace Helios.Core.Migrations
                 name: "Elements");
 
             migrationBuilder.DropTable(
+                name: "MailTemplatesRoles");
+
+            migrationBuilder.DropTable(
+                name: "MailTemplateTags");
+
+            migrationBuilder.DropTable(
                 name: "ModuleElementEvents");
 
             migrationBuilder.DropTable(
@@ -1156,6 +1273,9 @@ namespace Helios.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "ElementDetails");
+
+            migrationBuilder.DropTable(
+                name: "MailTemplates");
 
             migrationBuilder.DropTable(
                 name: "Modules");

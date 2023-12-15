@@ -32,7 +32,7 @@ namespace Helios.Authentication.Models
 
         //[Required]
         public string ProfilPhotoPath { get; set; }
-        public Guid TimeZoneId { get; set; }
+        public Int64 TimeZoneId { get; set; }
         public string TimeZone { get; set; }
         public int TimeZoneOffset { get; set; }
     }

@@ -5,7 +5,7 @@ namespace Helios.Authentication.Services.Interfaces
 {
     public interface IBaseService
     {
-        void SaveSystemAuditTrail(Guid ResearchId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Guid UserId, string ClientIp);
+        void SaveSystemAuditTrail(Int64 ResearchId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Int64 UserId, string ClientIp);
         Task SendMail(string mail, string subject, string content, Attachment attachment = null);
     }
 }

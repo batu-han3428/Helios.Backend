@@ -8,7 +8,7 @@ namespace Helios.Common.Model
 {
     public class SSOUserStudyModel: BaseModel
     {
-        public Guid StudyId { get; set; }
+        public Int64 StudyId { get; set; }
         public string StudyName { get; set; }
         public string UserRoleName { get; set; }
         public string Statu { get; set; }

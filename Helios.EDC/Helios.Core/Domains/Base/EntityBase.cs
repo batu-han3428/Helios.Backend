@@ -6,10 +6,10 @@ namespace Helios.Core.Domains.Base
     public class EntityBase : IBase
     {
         [Key]
-        public Guid Id { get; set; }
-        public Guid TenantId { get; set; }
-        public Guid AddedById { get; set; }
-        public Guid? UpdatedById { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 TenantId { get; set; }
+        public Int64 AddedById { get; set; }
+        public Int64? UpdatedById { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
 

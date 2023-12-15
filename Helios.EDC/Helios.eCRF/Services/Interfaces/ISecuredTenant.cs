@@ -2,6 +2,6 @@
 {
     public interface ISecuredTenant
     {
-        Guid TenantId { get; set; }
+        Int64 TenantId { get; set; }
     }
 }

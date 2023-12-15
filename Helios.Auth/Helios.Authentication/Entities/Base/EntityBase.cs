@@ -7,9 +7,9 @@ namespace Helios.Authentication.Entities.Base
     public class EntityBase : IBase
     {
         [Key]
-        public Guid Id { get; set; }
-        public Guid AddedById { get; set; }
-        public Guid? UpdatedById { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 AddedById { get; set; }
+        public Int64? UpdatedById { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
 
@@ -20,6 +20,6 @@ namespace Helios.Authentication.Entities.Base
         public DateTimeOffset UpdatedAt { get; set; }
 
         public ApplicationUser AddedBy { get; set; }
-        public ApplicationUser UpdatedBy { get; set; }
+        public ApplicationUser? UpdatedBy { get; set; }
     }
 }

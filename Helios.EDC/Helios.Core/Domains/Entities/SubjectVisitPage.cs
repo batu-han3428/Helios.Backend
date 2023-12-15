@@ -5,8 +5,8 @@ namespace Helios.Core.Domains.Entities
 {
     public class SubjectVisitPage : EntityBase
     {
-        public Guid SubjectVisitId { get; set; }
-        public Guid StudyVisitPageId { get; set; }
+        public Int64 SubjectVisitId { get; set; }
+        public Int64 StudyVisitPageId { get; set; }
         public DataStatus Status { get; set; }
         public bool Freeze { get; set; }
         public bool Lock { get; set; }

@@ -33,7 +33,7 @@ namespace Helios.Core.Controllers
                 IsActive = true
             });
 
-            var result = await _context.SaveCoreContextAsync(new Guid(), DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(new Int64(), DateTimeOffset.Now) > 0;
 
             return result;
         }
@@ -53,7 +53,7 @@ namespace Helios.Core.Controllers
             module.UpdatedById = model.UserId;
 
             _context.Modules.Update(module);
-            var result = await _context.SaveCoreContextAsync(new Guid(), DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(new Int64(), DateTimeOffset.Now) > 0;
 
             return result;
         }
@@ -79,7 +79,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<ModuleModel> GetModule(Guid id)
+        public async Task<ModuleModel> GetModule(Int64 id)
         {
             var model = new ModuleModel();
 
@@ -108,7 +108,7 @@ namespace Helios.Core.Controllers
         #endregion
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(Guid moduleId)
+        public async Task<List<ElementModel>> GetModuleElements(Int64 moduleId)
         {
             var result = await _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted)
                 .Include(x => x.ElementDetail)
@@ -125,7 +125,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<ElementModel> GetElementData(Guid id)
+        public async Task<ElementModel> GetElementData(Int64 id)
         {
             var result = await _context.Elements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted)
                 .Include(x => x.ElementDetail)
@@ -170,12 +170,12 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var id = new Guid();
-            var userId = model.UserId != "" ? Guid.Parse(model.UserId) : new Guid();
-            var moduleId = Guid.Parse(model.ModuleId);
+            var id = new Int64();
+            var userId = model.UserId != "" ? Int64.Parse(model.UserId) : new Int64();
+            var moduleId = Int64.Parse(model.ModuleId);
 
             if (!string.IsNullOrEmpty(model.Id))
-                id = Guid.Parse(model.Id);
+                id = Int64.Parse(model.Id);
 
             var element = await _context.Elements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
@@ -226,7 +226,7 @@ namespace Helios.Core.Controllers
                         UpperLimit = model.UpperLimit,
                         Layout = model.Layout,
                         ElementOptions = model.ElementOptions
-                        //TargetElementId = Guid.Parse(model.DependentTargetFieldId),
+                        //TargetElementId = Int64.Parse(model.DependentTargetFieldId),
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -242,7 +242,7 @@ namespace Helios.Core.Controllers
                     {
                         var elementEvent = new ModuleElementEvent()
                         {
-                            SourceElementId = Guid.Parse(model.DependentTargetFieldId),
+                            SourceElementId = Int64.Parse(model.DependentTargetFieldId),
                             TargetElementId = elm.Id,
                             ValueCondition = (ActionCondition)model.DependentCondition,
                             ActionType = (ActionType)model.DependentAction,
@@ -273,7 +273,7 @@ namespace Helios.Core.Controllers
                 element.IsTitleHidden = model.IsTitleHidden;
                 element.Width = model.Width;
                 element.IsRequired = model.IsRequired;
-                element.ModuleId = Guid.Parse(model.ModuleId);
+                element.ModuleId = Int64.Parse(model.ModuleId);
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = userId;
 
@@ -300,7 +300,7 @@ namespace Helios.Core.Controllers
                     {
                         var elementEvent = new ModuleElementEvent()
                         {
-                            SourceElementId = Guid.Parse(model.DependentSourceFieldId),
+                            SourceElementId = Int64.Parse(model.DependentSourceFieldId),
                             TargetElementId = element.Id,
                             ValueCondition = (ActionCondition)model.DependentCondition,
                             ActionType = (ActionType)model.DependentAction,
@@ -312,7 +312,7 @@ namespace Helios.Core.Controllers
                     }
                     else
                     {
-                        dep.SourceElementId = Guid.Parse(model.DependentSourceFieldId);
+                        dep.SourceElementId = Int64.Parse(model.DependentSourceFieldId);
                         dep.TargetElementId = element.Id;
                         dep.ValueCondition = (ActionCondition)model.DependentCondition;
                         dep.ActionType = (ActionType)model.DependentAction;
@@ -333,20 +333,18 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> CopyElement(ElementModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var elmId = Guid.Parse(model.Id);
-            var userId = Guid.Parse(model.UserId);
+            var elmId = Int64.Parse(model.Id);
+            var userId = Int64.Parse(model.UserId);
 
             var element = await _context.Elements.Where(x => x.Id == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (element != null)
             {
-                element.Id = Guid.NewGuid();
                 element.ElementName = element.ElementName + "_1";
                 element.Order = element.Order++;
 
                 var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-                elementDetail.Id = Guid.NewGuid();
                 elementDetail.ElementId = element.Id;
 
                 element.ElementDetailId = elementDetail.Id;
@@ -381,8 +379,8 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> DeleteElement(ElementModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var elmId = Guid.Parse(model.Id);
-            var userId = Guid.Parse(model.UserId);
+            var elmId = Int64.Parse(model.Id);
+            var userId = Int64.Parse(model.UserId);
 
             var element = await _context.Elements.Where(x => x.Id == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
             var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == elmId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -410,7 +408,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<TagModel>> GetMultipleTagList(Guid id)
+        public async Task<List<TagModel>> GetMultipleTagList(Int64 id)
         {
             var result = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).Select(x => new TagModel()
             {
@@ -427,7 +425,7 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
         {
             var result = new ApiResponse<dynamic>();
-            Guid userId = new Guid();
+            int userId = 0;
             var dbTags = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).ToListAsync();
 
             foreach (var item in tags)

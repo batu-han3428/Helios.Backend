@@ -9,8 +9,8 @@ namespace Helios.Common.Model
 {
     public class UserPermissionModel : BaseModel
     {
-        public Guid Id { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 StudyId { get; set; }
 
         [Required]
         public string RoleName { get; set; }
@@ -82,7 +82,7 @@ namespace Helios.Common.Model
     
     public class SetPermissionModel : BaseModel
     {
-        public Guid Id { get; set; }
+        public Int64 Id { get; set; }
         public string PermissionName { get; set; }
         public bool Value { get; set; }
     }

@@ -10,7 +10,7 @@ namespace Helios.eCRF.Services.Interfaces
     public interface IAuthService
     {
         Task<ApiResponse<dynamic>> LoginAsync(AccountModel model);
-        Task<bool> SendNewPasswordForUser(Guid userId);
+        Task<bool> SendNewPasswordForUser(Int64 userId);
         Task<bool> UserProfileResetPassword(UserDTO model);
         Task<ApiResponse<dynamic>> ContactUsMailAsync(ContactUsModel contactUsDTO);
         Task<ApiResponse<dynamic>> SaveForgotPassword(string Mail, string Language);

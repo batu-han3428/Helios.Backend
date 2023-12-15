@@ -2,13 +2,13 @@
 
 namespace Helios.Authentication.Entities
 {
-    public class ApplicationUserRole : IdentityUserRole<Guid>
+    public class ApplicationUserRole : IdentityUserRole<Int64>
     {
-        public override Guid UserId { get; set; }
-        public override Guid RoleId { get; set; }
+        public override Int64 UserId { get; set; }
+        public override Int64 RoleId { get; set; }
         public ApplicationUser User { get; set; }
         public ApplicationRole Role { get; set; }
-        public Guid TenantId { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 TenantId { get; set; }
+        public Int64 StudyId { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace Helios.Core.Domains.Entities
 {
     public class SystemAuditTrail : EntityBase
     {
-        public Guid TenantId { get; set; }
+        public Int64 TenantId { get; set; }
         public string Changer { get; set; }
         public string ClientIp { get; set; }
         public SystemAuditChangeType SystemAuditChangeType { get; set; }

@@ -9,15 +9,15 @@ namespace Helios.Common.Model
 {
     public class EmailTemplateModel
     {
-        public Guid Id { get; set; }
-        public Guid TenantId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 TenantId { get; set; }
         public string? Name { get; set; }
         public string? TemplateBody { get; set; }
-        public Guid? MailTemplateTagId { get; set; }
+        public Int64? MailTemplateTagId { get; set; }
         public int TemplateType { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 StudyId { get; set; }
         public List<string>? ExternalMails { get; set; }
-        public List<Guid> Roles { get; set; }
+        public List<Int64> Roles { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset CreatedAt { get; set; }
 

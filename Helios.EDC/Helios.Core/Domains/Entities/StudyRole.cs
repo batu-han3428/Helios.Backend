@@ -5,7 +5,7 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyRole : EntityBase
     {
-        public Guid StudyId { get; set; }
+        public Int64 StudyId { get; set; }
         public string Name { get; set; }
         public bool Add { get; set; }
         public bool View { get; set; }

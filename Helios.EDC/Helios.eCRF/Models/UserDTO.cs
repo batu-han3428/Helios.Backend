@@ -4,8 +4,8 @@ namespace Helios.eCRF.Models
 {
     public class UserDTO
     {
-        public Guid Id { get; set; }
-        public Guid TenantId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 TenantId { get; set; }
         public Roles Role { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

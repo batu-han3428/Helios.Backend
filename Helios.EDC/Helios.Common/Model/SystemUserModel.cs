@@ -8,7 +8,7 @@ namespace Helios.Common.Model
 {
     public class SystemUserModel
     {
-        public Guid Id { get; set; }
+        public Int64 Id { get; set; }
         public string Email { get; set; }
         public bool IsActive { get; set; }
     }

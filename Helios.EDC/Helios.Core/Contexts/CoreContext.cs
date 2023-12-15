@@ -20,7 +20,7 @@ namespace Helios.Core.Contexts
             base.OnModelCreating(modelBuilder);
         }
 
-        public async Task<int> SaveCoreContextAsync(Guid userId, DateTimeOffset saveDate)
+        public async Task<int> SaveCoreContextAsync(Int64 userId, DateTimeOffset saveDate)
         {
             var transId = -1;
             if (this.ChangeTracker.HasChanges())
@@ -52,7 +52,7 @@ namespace Helios.Core.Contexts
             return transId;
         }
 
-        private void InsertAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
+        private void InsertAuthenticationBaseEntity(DbContext dbContext, Int64 userId, DateTimeOffset timeStamp)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Added).ToList())
             {
@@ -66,7 +66,7 @@ namespace Helios.Core.Contexts
                 entity.Entity.AddedById = userId;
             }          
         }
-        private void UpdateAuthenticationBaseEntity(DbContext dbContext, Guid userId, DateTimeOffset timeStamp)
+        private void UpdateAuthenticationBaseEntity(DbContext dbContext, Int64 userId, DateTimeOffset timeStamp)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Modified).ToList())
             {
@@ -76,7 +76,7 @@ namespace Helios.Core.Contexts
             }
         }
 
-        private void DeleteAuthenticationBaseEntity(DbContext dbContext, Guid userId)
+        private void DeleteAuthenticationBaseEntity(DbContext dbContext, Int64 userId)
         {
             foreach (var entity in dbContext.ChangeTracker.Entries<EntityBase>().Where(x => x.State == EntityState.Deleted).ToList())
             {

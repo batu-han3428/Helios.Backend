@@ -74,7 +74,7 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<dynamic> AddUserRole(string mail, int role, Guid tenantId)
+        public async Task<dynamic> AddUserRole(string mail, int role, Int64 tenantId)
         {
             try
             {
@@ -533,9 +533,9 @@ namespace Helios.Authentication.Controllers
 
         #region SSO
         [HttpGet]
-        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
-            if (userId != Guid.Empty)
+            if (userId != 0)
             {
                 return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new TenantUserModel
                 {

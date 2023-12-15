@@ -18,7 +18,7 @@ namespace Helios.Core.Services
             _smtpClient = smtpClient;
             _config = config;
         }
-        public void SaveSystemAuditTrail(Guid TenantId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Guid UserId, string ClientIp)
+        public void SaveSystemAuditTrail(Int64 TenantId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Int64 UserId, string ClientIp)
         {
             //var changer = _context.Users.Where(s => s.Id == UserId).AsNoTracking().Select(a => a.Name + " " + a.LastName).FirstOrDefault();
 

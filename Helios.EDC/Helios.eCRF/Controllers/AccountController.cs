@@ -39,7 +39,7 @@ namespace Helios.eCRF.Controllers
         /// <param name="userId">kullanıcının id si</param>
         /// <returns>başarılı başarısız döner</returns>
         [HttpGet]
-        public async Task<IActionResult> SendNewPasswordForUser(Guid userId)
+        public async Task<IActionResult> SendNewPasswordForUser(Int64 userId)
         {
             var result = await authService.SendNewPasswordForUser(userId);
             return Ok(result);

@@ -8,8 +8,8 @@ namespace Helios.Common.Model
 {
     public class TenantUserModel: BaseModel
     {
-        public Guid AuthUserId { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 AuthUserId { get; set; }
+        public Int64 StudyId { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }

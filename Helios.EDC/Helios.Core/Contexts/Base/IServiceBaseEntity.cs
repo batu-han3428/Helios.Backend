@@ -5,9 +5,9 @@ namespace Helios.Core.Contexts.Base
 {
     public interface IServiceBaseEntity
     {
-        Guid Id { get; set; }
-        Guid AddedById { get; set; }
-        Guid? UpdatedById { get; set; }
+        Int64 Id { get; set; }
+        Int64 AddedById { get; set; }
+        Int64? UpdatedById { get; set; }
         bool IsActive { get; set; }
         bool IsDeleted { get; set; }
 
@@ -21,6 +21,6 @@ namespace Helios.Core.Contexts.Base
     }
     public interface IServiceTenantBaseEntity
     {
-        Guid TenantId { get; set; }
+        Int64 TenantId { get; set; }
     }
 }

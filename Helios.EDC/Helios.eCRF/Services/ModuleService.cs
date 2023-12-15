@@ -49,7 +49,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<ModuleModel> GetModule(Guid id)
+        public async Task<ModuleModel> GetModule(Int64 id)
         {
             var module = new ModuleModel();
 
@@ -78,7 +78,7 @@ namespace Helios.eCRF.Services
             return moduleList;
         }
 
-        public async Task<List<ElementModel>> GetModuleElements(Guid id)
+        public async Task<List<ElementModel>> GetModuleElements(Int64 id)
         {
             var elements = new List<ElementModel>();
 
@@ -93,7 +93,7 @@ namespace Helios.eCRF.Services
             return elements;
         }
 
-        public async Task<ElementModel> GetElementData(Guid id)
+        public async Task<ElementModel> GetElementData(Int64 id)
         {
             var element = new ElementModel();
 
@@ -121,7 +121,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<ApiResponse<dynamic>> CopyElement(Guid id, Guid userId)
+        public async Task<ApiResponse<dynamic>> CopyElement(Int64 id, Int64 userId)
         {
             var model = new ElementModel()
             {
@@ -138,7 +138,7 @@ namespace Helios.eCRF.Services
             }
         }
     
-        public async Task<ApiResponse<dynamic>> DeleteElement(Guid id, Guid userId)
+        public async Task<ApiResponse<dynamic>> DeleteElement(Int64 id, Int64 userId)
         {
             var model = new ElementModel()
             {
@@ -155,7 +155,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<TagModel>> GetMultipleTagList(Guid id)
+        public async Task<List<TagModel>> GetMultipleTagList(Int64 id)
         {
             var tagList = new List<TagModel>();
 

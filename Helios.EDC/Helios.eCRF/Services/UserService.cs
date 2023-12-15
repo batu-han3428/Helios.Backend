@@ -43,7 +43,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<TenantModel> GetTenant(Guid id)
+        public async Task<TenantModel> GetTenant(Int64 id)
         {
             var tenant = new TenantModel();
 
@@ -134,7 +134,7 @@ namespace Helios.eCRF.Services
         }
 
         #region Permissions
-        public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Guid studyId)
+        public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -145,7 +145,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<UserPermissionDTO>> GetRoleList(Guid studyId)
+        public async Task<List<UserPermissionDTO>> GetRoleList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -156,7 +156,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        private async Task<UserPermissionRoleDTO> GetUserIdsRole(Guid roleId)
+        private async Task<UserPermissionRoleDTO> GetUserIdsRole(Int64 roleId)
         {
             using (var client = CoreServiceClient)
             {
@@ -167,7 +167,7 @@ namespace Helios.eCRF.Services
             }
         }
         
-        public async Task<List<UserPermissionRoleModel>> GetRoleUsers(Guid roleId)
+        public async Task<List<UserPermissionRoleModel>> GetRoleUsers(Int64 roleId)
         {
             var userIdsRole = await GetUserIdsRole(roleId);
 
@@ -185,7 +185,7 @@ namespace Helios.eCRF.Services
             return new List<UserPermissionRoleModel>();
         }
 
-        private async Task<List<StudyUsersRolesDTO>> GetStudyUserIdsRole(Guid studyId)
+        private async Task<List<StudyUsersRolesDTO>> GetStudyUserIdsRole(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -196,7 +196,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Guid studyId)
+        public async Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Int64 studyId)
         {
             var userIdsRole = await GetStudyUserIdsRole(studyId);
 
@@ -251,7 +251,7 @@ namespace Helios.eCRF.Services
 
         #region Study user
 
-        private async Task<List<StudyUserDTO>> GetStudyUsers(Guid studyId)
+        private async Task<List<StudyUserDTO>> GetStudyUsers(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -262,7 +262,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        private async Task<List<AspNetUserDTO>> GetUserList(List<Guid> AuthUserIds)
+        private async Task<List<AspNetUserDTO>> GetUserList(List<Int64> AuthUserIds)
         {
             using (var client = AuthServiceClient)
             {
@@ -285,7 +285,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        private async Task<bool> GetCheckStudyUser(Guid authUserId, Guid studyId)
+        private async Task<bool> GetCheckStudyUser(Int64 authUserId, Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
@@ -329,7 +329,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<StudyUserDTO>> GetStudyUserList(Guid studyId)
+        public async Task<List<StudyUserDTO>> GetStudyUserList(Int64 studyId)
         {
             List<StudyUserDTO> studyUsers = await GetStudyUsers(studyId);
 
@@ -361,7 +361,7 @@ namespace Helios.eCRF.Services
             return new List<StudyUserDTO>();
         }
 
-        public async Task<ApiResponse<StudyUserDTO>> GetStudyUser(string email, Guid studyId)
+        public async Task<ApiResponse<StudyUserDTO>> GetStudyUser(string email, Int64 studyId)
         {
             var user = await GetUser(email);
 
@@ -404,7 +404,7 @@ namespace Helios.eCRF.Services
 
         public async Task<ApiResponse<dynamic>> SetStudyUser(StudyUserModel studyUserModel)
         {
-            if (studyUserModel.AuthUserId == Guid.Empty)
+            if (studyUserModel.AuthUserId == 0)
             {
                 var result = await AddStudyUser(studyUserModel);
 
@@ -426,7 +426,7 @@ namespace Helios.eCRF.Services
 
             var response = await SetStudyUserCore(studyUserModel);
 
-            if (response.IsSuccess && studyUserModel.StudyUserId == Guid.Empty)
+            if (response.IsSuccess && studyUserModel.StudyUserId == 0)
             {
                 await AddStudyUserMail(studyUserModel);
             }
@@ -481,7 +481,7 @@ namespace Helios.eCRF.Services
 
         #region Tenant user
 
-        private async Task<List<TenantUserDTO>> GetTenantUsers(Guid tenantId)
+        private async Task<List<TenantUserDTO>> GetTenantUsers(Int64 tenantId)
         {
             using (var client = CoreServiceClient)
             {
@@ -492,7 +492,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<TenantUserDTO>> GetTenantUserList(Guid tenantId)
+        public async Task<List<TenantUserDTO>> GetTenantUserList(Int64 tenantId)
         {
             List<TenantUserDTO> tenantUsers = await GetTenantUsers(tenantId);
 
@@ -593,7 +593,7 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region SSO
-        public async Task<List<TenantUserModel>> GetUserTenantList(Guid userId)
+        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
             using (var client = AuthServiceClient)
             {
@@ -604,7 +604,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Guid tenantId, Guid userId)
+        public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Int64 tenantId, Int64 userId)
         {
             using (var client = CoreServiceClient)
             {

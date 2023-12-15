@@ -9,9 +9,9 @@ namespace Helios.Common.Model
 {
     public class StudyUserModel: BaseModel
     {
-        public Guid StudyUserId { get; set; }
-        public Guid AuthUserId { get; set; }
-        public Guid StudyId { get; set; }
+        public Int64 StudyUserId { get; set; }
+        public Int64 AuthUserId { get; set; }
+        public Int64 StudyId { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public string Password { get; set; }
@@ -20,8 +20,8 @@ namespace Helios.Common.Model
         public bool FirstAddition { get; set; } = false;
         public bool IsActive { get; set; }
         public string Email { get; set; }
-        public Guid? RoleId { get; set; }
-        public List<Guid> SiteIds { get; set; }
-        public List<Guid> ResponsiblePersonIds { get; set; }
+        public Int64? RoleId { get; set; }
+        public List<Int64> SiteIds { get; set; }
+        public List<Int64> ResponsiblePersonIds { get; set; }
     }
 }

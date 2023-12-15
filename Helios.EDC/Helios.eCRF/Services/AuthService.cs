@@ -23,7 +23,7 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<bool> SendNewPasswordForUser(Guid userId)
+        public async Task<bool> SendNewPasswordForUser(Int64 userId)
         {
             using (var client = AuthServiceClient)
             {

@@ -12,14 +12,14 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> AddModule(ModuleModel model);
         Task<bool> UpdateModule(ModuleModel model);
         Task<bool> DeleteModule(ModuleModel model);
-        Task<ModuleModel> GetModule(Guid id);
+        Task<ModuleModel> GetModule(Int64 id);
         Task<List<ModuleModel>> GetModuleList();
-        Task<List<ElementModel>> GetModuleElements(Guid id);
-        Task<ElementModel> GetElementData(Guid id);
+        Task<List<ElementModel>> GetModuleElements(Int64 id);
+        Task<ElementModel> GetElementData(Int64 id);
         Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model);
-        Task<ApiResponse<dynamic>> CopyElement(Guid id, Guid userId);
-        Task<ApiResponse<dynamic>> DeleteElement(Guid id, Guid userId);
-        Task<List<TagModel>> GetMultipleTagList(Guid id);
+        Task<ApiResponse<dynamic>> CopyElement(Int64 id, Int64 userId);
+        Task<ApiResponse<dynamic>> DeleteElement(Int64 id, Int64 userId);
+        Task<List<TagModel>> GetMultipleTagList(Int64 id);
         Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags);
     }
 }

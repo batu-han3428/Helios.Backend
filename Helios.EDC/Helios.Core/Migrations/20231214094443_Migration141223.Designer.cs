@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helios.Core.Migrations
 {
     [DbContext(typeof(CoreContext))]
-    [Migration("20231122133446_MyFirstMigration")]
-    partial class MyFirstMigration
+    [Migration("20231214094443_Migration141223")]
+    partial class Migration141223
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,12 +27,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Element", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("CanMissing")
                         .HasColumnType("tinyint(1)");
@@ -44,8 +44,8 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("ElementDetailId")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("ElementDetailId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ElementName")
                         .IsRequired()
@@ -75,14 +75,14 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsTitleHidden")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("ModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ModuleId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -91,8 +91,8 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<byte>("Width")
                         .HasColumnType("tinyint unsigned");
@@ -109,15 +109,15 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.ElementDetail", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("AddTodayDate")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ButtonText")
                         .HasColumnType("longtext");
@@ -149,8 +149,8 @@ namespace Helios.Core.Migrations
                     b.Property<int>("EProPageNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ElementId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ElementOptions")
                         .HasColumnType("longtext");
@@ -191,8 +191,8 @@ namespace Helios.Core.Migrations
                     b.Property<int>("ParentElementEProPageNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ParentId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("RightText")
                         .HasColumnType("longtext");
@@ -209,11 +209,11 @@ namespace Helios.Core.Migrations
                     b.Property<int>("StartYear")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TargetElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TargetElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Unit")
                         .HasColumnType("longtext");
@@ -221,8 +221,8 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UpperLimit")
                         .HasColumnType("longtext");
@@ -232,14 +232,139 @@ namespace Helios.Core.Migrations
                     b.ToTable("ElementDetails");
                 });
 
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MailTemplateTags", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Tag")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TemplateType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MailTemplateTags");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MailTemplates", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("ExternalMails")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TemplateBody")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TemplateType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MailTemplates");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MailTemplatesRoles", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("MailTemplateId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailTemplateId");
+
+                    b.ToTable("MailTemplatesRoles");
+                });
+
             modelBuilder.Entity("Helios.Core.Domains.Entities.Module", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -254,14 +379,14 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -270,9 +395,9 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.ModuleElementEvent", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ActionType")
                         .HasColumnType("int");
@@ -281,8 +406,8 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -293,23 +418,23 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("ModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ModuleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("SourceElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SourceElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TargetElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TargetElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ValueCondition")
                         .HasColumnType("int");
@@ -323,12 +448,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.MultipleChoiceTag", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -347,14 +472,14 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -367,12 +492,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Site", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -402,17 +527,17 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -423,12 +548,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Study", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("AskSubjectInitial")
                         .HasColumnType("tinyint(1)");
@@ -442,8 +567,8 @@ namespace Helios.Core.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("EquivalentStudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("EquivalentStudyId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
@@ -463,8 +588,8 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("ReasonForChange")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("ReferenceKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ReferenceKey")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("StudyLanguage")
                         .HasColumnType("int");
@@ -489,17 +614,17 @@ namespace Helios.Core.Migrations
                     b.Property<string>("SubDescription")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("VersionKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("VersionKey")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -510,9 +635,9 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRole", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("AEArchive")
                         .HasColumnType("tinyint(1)");
@@ -529,8 +654,8 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("AddMultiVisit")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("ApproveAudit")
                         .HasColumnType("tinyint(1)");
@@ -701,11 +826,11 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("StudyFoldersView")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("TmfAdmin")
                         .HasColumnType("tinyint(1)");
@@ -719,8 +844,8 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("UploadAuditing")
                         .HasColumnType("tinyint(1)");
@@ -743,12 +868,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyRoleModulePermission", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -774,20 +899,20 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("SDV")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("StudyRoleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyRoleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyVisitPageModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Write")
                         .HasColumnType("tinyint(1)");
@@ -802,15 +927,15 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUser", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AuthUserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AuthUserId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -821,24 +946,24 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid?>("StudyRoleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("StudyRoleId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SuperUserIdList")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -851,12 +976,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyUserSite", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -867,20 +992,20 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("SiteId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SiteId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyUserId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyUserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -893,12 +1018,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisit", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("CanFreeze")
                         .HasColumnType("tinyint(1)");
@@ -934,8 +1059,8 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ReferenceKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ReferenceKey")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("SAELockAction")
                         .HasColumnType("tinyint(1)");
@@ -943,20 +1068,20 @@ namespace Helios.Core.Migrations
                     b.Property<int>("SAELockHour")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("VersionKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("VersionKey")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VisitType")
                         .HasColumnType("int");
@@ -970,12 +1095,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPage", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("CanFreeze")
                         .HasColumnType("tinyint(1)");
@@ -1011,23 +1136,23 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ReferenceKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ReferenceKey")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyVisitId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("VersionKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("VersionKey")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1038,12 +1163,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModule", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("CanFreeze")
                         .HasColumnType("tinyint(1)");
@@ -1075,26 +1200,26 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ReferenceKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ReferenceKey")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyRoleModulePermissionId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyRoleModulePermissionId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyVisitPageId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("VersionKey")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("VersionKey")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1108,12 +1233,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModuleElement", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("CanMissing")
                         .HasColumnType("tinyint(1)");
@@ -1153,11 +1278,11 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyVisitPageModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -1166,8 +1291,8 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<byte>("Width")
                         .HasColumnType("tinyint unsigned");
@@ -1181,12 +1306,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModuleElementDetail", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ButtonText")
                         .IsRequired()
@@ -1248,17 +1373,17 @@ namespace Helios.Core.Migrations
                     b.Property<int>("ParentElementEProPageNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ParentId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("RowIndex")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyVisitPageModuleElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -1267,8 +1392,8 @@ namespace Helios.Core.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UpperLimit")
                         .IsRequired()
@@ -1283,9 +1408,9 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.StudyVisitPageModuleElementEvents", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ActionType")
                         .HasColumnType("int");
@@ -1294,8 +1419,8 @@ namespace Helios.Core.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1306,23 +1431,23 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("SourceElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SourceElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyVisitPageModuleElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TargetElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TargetElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ValueCondition")
                         .HasColumnType("int");
@@ -1336,12 +1461,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Subject", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1375,11 +1500,11 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("Signature")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("SiteId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SiteId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("StudyId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SubjectNumber")
                         .IsRequired()
@@ -1388,14 +1513,14 @@ namespace Helios.Core.Migrations
                     b.Property<int>("SubjectStatus")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset?>("UserValueUpdateDate")
                         .HasColumnType("datetime");
@@ -1414,12 +1539,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisit", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1444,14 +1569,14 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("Lock")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("ParentSubjectVisitId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("ParentSubjectVisitId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Query")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("RelatedSubjectVisitId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("RelatedSubjectVisitId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("RowIndex")
                         .HasColumnType("int");
@@ -1468,20 +1593,20 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyVisitId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Verification")
                         .IsRequired()
@@ -1498,12 +1623,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPage", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1532,20 +1657,20 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyVisitPageId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("SubjectVisitId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SubjectVisitId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Verification")
                         .IsRequired()
@@ -1562,12 +1687,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModule", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1581,20 +1706,20 @@ namespace Helios.Core.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudyVisitPageModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid?>("SubjectVisitPageId")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("SubjectVisitPageId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1607,12 +1732,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SubjectVisitPageModuleElement", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime");
@@ -1635,20 +1760,20 @@ namespace Helios.Core.Migrations
                     b.Property<bool>("ShowOnScreen")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<Guid>("StudyVisitPageModuleElementId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("StudyVisitPageModuleElementId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("SubjectVisitModuleId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("SubjectVisitModuleId")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UserValue")
                         .IsRequired()
@@ -1665,12 +1790,12 @@ namespace Helios.Core.Migrations
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.SystemAuditTrail", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("AddedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("AddedById")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Changer")
                         .IsRequired()
@@ -1704,14 +1829,14 @@ namespace Helios.Core.Migrations
                     b.Property<byte>("SystemAuditChangeType")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("char(36)");
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("char(36)");
+                    b.Property<long?>("UpdatedById")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1733,6 +1858,17 @@ namespace Helios.Core.Migrations
                     b.Navigation("ElementDetail");
 
                     b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MailTemplatesRoles", b =>
+                {
+                    b.HasOne("Helios.Core.Domains.Entities.MailTemplates", "MailTemplate")
+                        .WithMany("MailTemplatesRoles")
+                        .HasForeignKey("MailTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MailTemplate");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.ModuleElementEvent", b =>
@@ -1993,6 +2129,11 @@ namespace Helios.Core.Migrations
                 {
                     b.Navigation("Element")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Helios.Core.Domains.Entities.MailTemplates", b =>
+                {
+                    b.Navigation("MailTemplatesRoles");
                 });
 
             modelBuilder.Entity("Helios.Core.Domains.Entities.Study", b =>
