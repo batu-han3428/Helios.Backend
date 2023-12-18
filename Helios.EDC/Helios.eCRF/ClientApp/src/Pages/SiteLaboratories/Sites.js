@@ -415,10 +415,8 @@ const Sites = props => {
                 buttonText={siteId === 0 ? props.t("Save") : props.t("Update") }
             />
             <ToastComp
-                title="İşlem bilgisi"
                 message={message}
                 showToast={showToast}
-                setShowToast={setShowToast}
                 stateToast={stateToast}
             />
         </React.Fragment>

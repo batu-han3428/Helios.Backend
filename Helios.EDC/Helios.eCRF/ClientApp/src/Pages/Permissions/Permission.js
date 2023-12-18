@@ -297,10 +297,8 @@ const Permission = props => {
                 isButton={modalButton}
             />
             <ToastComp
-                title="İşlem bilgisi"
                 message={message}
                 showToast={showToast}
-                setShowToast={setShowToast}
                 stateToast={stateToast}
             />
         </React.Fragment>

@@ -1,35 +1,26 @@
 ﻿import React, { useEffect } from "react";
-import { Toast, ToastHeader, ToastBody } from "reactstrap";
-import "./ToastComp.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const ToastComp = ({ title, message, showToast, setShowToast, stateToast, autohide = true }) => {
-
-    const handleClose = () => {
-        setShowToast(false);
-    };
+const ToastComp = ({ message, showToast, stateToast, autohide = true }) => {
 
     useEffect(() => {
-        if (showToast && autohide) {
-            const timer = setTimeout(() => {
-                setShowToast(false);
-            }, 5000);
-
-            return () => clearTimeout(timer);
+        if (showToast) {
+            if (stateToast) {
+                toast.success(message, {
+                    autoClose: autohide
+                });
+            } else {
+                toast.error(message, {
+                    autoClose: autohide
+                });
+            }
         }
-    }, [showToast, setShowToast, autohide]);
+    }, [showToast, stateToast, autohide]);
 
 
     return (
-        <Toast isOpen={showToast} className={stateToast ? "tost success" : "tost error"} onClose={handleClose}>
-            {!autohide &&
-                <ToastHeader toggle={handleClose}>
-                {/*  {title}*/}
-                </ToastHeader>
-            }   
-            <ToastBody>
-                {message}
-            </ToastBody>
-        </Toast>
+        <ToastContainer />
     );
 }
 

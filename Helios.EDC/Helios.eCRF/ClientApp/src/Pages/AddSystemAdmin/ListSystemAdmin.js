@@ -287,10 +287,8 @@ const ListSystemAdmin = props => {
                 size="md"
             />
             <ToastComp
-                title="İşlem bilgisi"
                 message={message}
                 showToast={showToast}
-                setShowToast={setShowToast}
                 stateToast={stateToast}
             />
         </>

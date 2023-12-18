@@ -190,10 +190,8 @@ function ElementList(props) {
                 {content}
             </div>
             <ToastComp
-                title="Toast"
                 message={message}
                 showToast={showToast}
-                setShowToast={setShowToast}
                 stateToast={stateToast}
             />
         </div>
