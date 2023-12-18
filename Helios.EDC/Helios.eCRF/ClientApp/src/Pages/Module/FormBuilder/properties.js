@@ -41,7 +41,7 @@ class Properties extends React.Component {
             // General properties
             Id: props.Id,
             ModuleId: 1,
-            ElementDetailId: '',
+            ElementDetailId: 0,
             ElementType: props.Type,
             ElementName: '',
             Title: '',
@@ -475,7 +475,7 @@ class Properties extends React.Component {
             isValid = false;
         }
 
-        if (this.state.IsDependent && (this.state.DependentSourceFieldId == '' || this.state.DependentTargetFieldId == '')) {
+        if (this.state.IsDependent && (this.state.DependentSourceFieldId == 0 || this.state.DependentTargetFieldId == 0)) {
             this.setState({ DepFldInputClass: "form-control is-invalid" });
             isValid = false;
         }
@@ -505,7 +505,7 @@ class Properties extends React.Component {
                 body: JSON.stringify({
                     Id: this.state.Id,
                     ModuleId: this.state.ModuleId,
-                    UserId: '',
+                    UserId: 0,
                     ElementDetailId: this.state.ElementDetailId,
                     ElementType: this.state.ElementType,
                     ElementName: this.state.ElementName,

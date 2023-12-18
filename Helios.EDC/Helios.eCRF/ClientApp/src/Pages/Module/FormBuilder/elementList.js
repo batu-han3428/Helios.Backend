@@ -42,7 +42,7 @@ const elements = [
 function ElementList(props) {
     const baseUrl = "https://localhost:7196";
     const [moduleId, setModuleId] = useState(1);
-    const [elementId, setElementId] = useState("");
+    const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);

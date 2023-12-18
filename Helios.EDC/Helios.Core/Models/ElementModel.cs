@@ -5,10 +5,10 @@ namespace Helios.Core.Models
 {
     public class ElementModel
     {
-        public string Id { get; set; }
-        public string ModuleId { get; set; }
-        public string UserId { get; set; }
-        public string ElementDetailId { get; set; }
+        public Int64 Id { get; set; }
+        public Int64 ModuleId { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName { get; set; }
         public string Title { get; set; }
@@ -60,8 +60,8 @@ namespace Helios.Core.Models
         //public string RightText { get; set; }
 
         ////dependent
-        public string DependentSourceFieldId { get; set; }
-        public string DependentTargetFieldId { get; set; }
+        public Int64 DependentSourceFieldId { get; set; }
+        public Int64 DependentTargetFieldId { get; set; }
         public int DependentCondition { get; set; }
         public int DependentAction { get; set; }
         public string DependentFieldValue { get; set; }

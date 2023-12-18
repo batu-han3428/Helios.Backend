@@ -61,8 +61,8 @@ namespace Helios.eCRF.Models
         //public string RightText { get; set; }
 
         ////dependent
-        public string DependentSourceFieldId { get; set; } = "";
-        public string DependentTargetFieldId { get; set; } = "";
+        public Int64 DependentSourceFieldId { get; set; }
+        public Int64 DependentTargetFieldId { get; set; }
         public int DependentCondition { get; set; } = 0;
         public int DependentAction { get; set; } = 0;
         public string DependentFieldValue { get; set; } = "";
