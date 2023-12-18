@@ -4,7 +4,7 @@
 }
 
 .custom-editor-class{
-    height:200px !important;
+    min-height:200px !important;
 }
 
 .rdw-image-modal {

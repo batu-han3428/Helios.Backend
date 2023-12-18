@@ -115,7 +115,7 @@ const TemplateTagList = props => {
     const validationType = useFormik({
         enableReinitialize: true,
         initialValues: {
-            id: "00000000-0000-0000-0000-000000000000",
+            id: 0,
             userid: props.userId,
             tenantid: props.tenantId,
             tag: "",

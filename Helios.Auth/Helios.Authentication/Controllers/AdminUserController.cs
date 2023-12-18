@@ -570,28 +570,33 @@ namespace Helios.Authentication.Controllers
                     LastChangePasswordDate = DateTime.Now
                 };
 
-                usr.UserRoles.Add(new ApplicationUserRole
-                {
-                    Role = role,
-                    User = usr,
-                    RoleId = role.Id,
-                    UserId = usr.Id,
-                    StudyId = model.StudyId,
-                    TenantId = model.TenantId,
-                });
-
                 var password = StringExtensionsHelper.GenerateRandomPassword();
 
                 var userResult = await _userManager.CreateAsync(usr, password);
 
                 if (userResult.Succeeded)
                 {
-                    return new ApiResponse<StudyUserDTO>
+                    usr.UserRoles.Add(new ApplicationUserRole
                     {
-                        IsSuccess = true,
-                        Message = "",
-                        Values = new StudyUserDTO { AuthUserId = usr.Id, Password = password }
-                    };
+                        Role = role,
+                        User = usr,
+                        RoleId = role.Id,
+                        UserId = usr.Id,
+                        StudyId = model.StudyId,
+                        TenantId = model.TenantId,
+                    });
+
+                    var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    if (result)
+                    {
+                        return new ApiResponse<StudyUserDTO>
+                        {
+                            IsSuccess = true,
+                            Message = "",
+                            Values = new StudyUserDTO { AuthUserId = usr.Id, Password = password }
+                        };
+                    }
                 }
 
                 return new ApiResponse<StudyUserDTO>

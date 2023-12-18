@@ -667,8 +667,7 @@ namespace Helios.Core.Controllers
                 var roles = emailTemplateDTO.Roles.Select(x => new MailTemplatesRoles
                 {
                     RoleId = x,
-                    TenantId = emailTemplateDTO.TenantId,
-                    MailTemplateId = mailTemplate.Id
+                    TenantId = emailTemplateDTO.TenantId
                 }).ToList();
 
                 mailTemplate.MailTemplatesRoles.AddRange(roles);
