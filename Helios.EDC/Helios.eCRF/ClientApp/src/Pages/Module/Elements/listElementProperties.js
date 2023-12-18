@@ -504,10 +504,8 @@ class ListElementProperties extends Component {
                 </Col>
                 {/* } />*/}
                 <ToastComp
-                    title="Toast"
                     message={this.state.toastMessage}
                     showToast={this.state.showToast}
-                    setShowToast={this.setShowToast}
                     stateToast={this.state.stateToast}
                 />
             </div>

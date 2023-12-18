@@ -947,10 +947,8 @@ class Properties extends React.Component {
                     </Col>
                 </form>
                 <ToastComp
-                    title="Toast"
                     message={this.state.toastMessage}
                     showToast={this.state.showToast}
-                    setShowToast={this.setShowToast}
                     stateToast={this.state.stateToast}
                 />
                 {/*</ElementBase>*/}
