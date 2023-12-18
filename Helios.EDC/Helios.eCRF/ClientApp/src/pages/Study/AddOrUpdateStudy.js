@@ -19,7 +19,7 @@ import AccordionComp from '../../components/Common/AccordionComp/AccordionComp';
 
 const AddOrUpdateStudy = props => {
 
-    const [studyId, setStudyId] = useState('00000000-0000-0000-0000-000000000000');
+    const [studyId, setStudyId] = useState(0);
     const [skip, setSkip] = useState(true);
     const [apiStudyData, setApiStudyData] = useState(null);
     const [showToast, setShowToast] = useState(false);
@@ -54,7 +54,6 @@ const AddOrUpdateStudy = props => {
     const validationType = useFormik({
         // enableReinitialize : use this flag when initial values needs to be changed
         enableReinitialize: true,
-
         initialValues: {
             userid: userInformation.userId,
             tenantid: userInformation.tenantId,
@@ -86,7 +85,7 @@ const AddOrUpdateStudy = props => {
                 setAutoHideToast(true);
                 setStateToast(true);
                 setShowToast(true);
-                if (studyId === '00000000-0000-0000-0000-000000000000') {
+                if (studyId === 0) {
                     setStudyId(response.data.values.studyId);
                 }
             } else {

@@ -431,5 +431,6 @@
   "Tenant logo": "Tenant logo",
   "Drop photo here or click to upload": "Drop photo here or click to upload",
   "Your limit for adding study has been reached. Please contact the system administrator.": "Your limit for adding study has been reached. Please contact the system administrator.",
-  "This tenant name is already exist.": "This tenant name is already exist."
+  "This tenant name is already exist.": "This tenant name is already exist.",
+  "You will not be able to recover this site!": "You will not be able to recover this site!"
 }

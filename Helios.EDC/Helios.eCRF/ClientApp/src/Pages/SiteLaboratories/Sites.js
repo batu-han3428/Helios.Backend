@@ -30,7 +30,7 @@ const Sites = props => {
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
-    const [siteId, setSiteId] = useState('00000000-0000-0000-0000-000000000000');
+    const [siteId, setSiteId] = useState(0);
 
     const dispatch = useDispatch();
 
@@ -48,8 +48,8 @@ const Sites = props => {
 
     const siteDeleteHandle = (id) => {
         Swal.fire({
-            title: "You will not be able to recover this site!",
-            text: "Do you confirm?",
+            title: props.t("You will not be able to recover this site!"),
+            text: props.t("Do you confirm?"),
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3bbfad",
@@ -163,7 +163,7 @@ const Sites = props => {
         rows: tableData
     }
 
-    const [triggerSites, resultSites, lastPromiseInfoSites] = useLazySiteListGetQuery();
+    const [triggerSites, resultSites] = useLazySiteListGetQuery();
     const { data: siteData, error, isLoading } = resultSites;
 
     useEffect(() => {
@@ -196,7 +196,7 @@ const Sites = props => {
             validationType.setErrors({});
             validationType.resetForm();
         });
-        setSiteId('00000000-0000-0000-0000-000000000000');
+        setSiteId(0);
     };
 
     const validationType = useFormik({
@@ -214,10 +214,10 @@ const Sites = props => {
         },
         validationSchema: Yup.object().shape({
             code: Yup.string().required(
-                "This value is required"
+                props.t("This field is required")
             ),
             name: Yup.string().required(
-                "This value is required"
+                props.t("This field is required")
             ),
         }),
         onSubmit: async (values) => {
@@ -309,7 +309,7 @@ const Sites = props => {
             </div>
             <ModalComp
                 refs={modalRef}
-                title={siteId === '00000000-0000-0000-0000-000000000000' ? props.t("Add a site") : props.t("Update site")}
+                title={siteId === 0 ? props.t("Add a site") : props.t("Update site")}
                 body={
                     <>
                         <Alert color="warning">
@@ -412,7 +412,7 @@ const Sites = props => {
                 }
                 resetValue={resetValue}
                 handle={() => validationType.handleSubmit()}
-                buttonText={siteId === '00000000-0000-0000-0000-000000000000' ? props.t("Save") : props.t("Update") }
+                buttonText={siteId === 0 ? props.t("Save") : props.t("Update") }
             />
             <ToastComp
                 title="İşlem bilgisi"

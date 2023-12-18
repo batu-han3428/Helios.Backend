@@ -32,7 +32,7 @@ const User = props => {
     const studyInformation = useSelector(state => state.rootReducer.Study);
 
     const [tableData, setTableData] = useState([]);
-    const [studyUserId, setStudyUserId] = useState('00000000-0000-0000-0000-000000000000');
+    const [studyUserId, setStudyUserId] = useState(0);
     const [updateItem, setUpdateItem] = useState({});
     const [optionGroupRoles, setOptionGroupRoles] = useState([]);
     const [optionGroupSites, setOptionGroupSites] = useState([]);
@@ -178,13 +178,13 @@ const User = props => {
         return siteDropdown;
     }
    
-    const [trigger, result, lastPromiseInfo] = useLazyUserListGetQuery();
+    const [trigger, result] = useLazyUserListGetQuery();
     const { data: usersData, error, isLoading } = result;
 
-    const [triggerRoles, resultRoles, lastPromiseInfoRoles] = useLazyRoleListGetQuery();
+    const [triggerRoles, resultRoles] = useLazyRoleListGetQuery();
     const { data: rolesData, isLoadingRoles, isErrorRoles } = resultRoles;
 
-    const [triggerSites, resultSites, lastPromiseInfoSites] = useLazySiteListGetQuery();
+    const [triggerSites, resultSites] = useLazySiteListGetQuery();
     const { data: sitesData, isLoadingSites, isErrorSites } = resultSites;
 
     useEffect(() => {
@@ -304,7 +304,7 @@ const User = props => {
         setUpdateItem({});
         setUserControl(true);
         setIsRequired(false);
-        setStudyUserId('00000000-0000-0000-0000-000000000000');
+        setStudyUserId(0);
     };
 
     const [userSet] = useUserSetMutation();
@@ -313,14 +313,14 @@ const User = props => {
         enableReinitialize: true,
         initialValues: {
             studyUserId: studyUserId,
-            authUserId: "00000000-0000-0000-0000-000000000000",
+            authUserId: 0,
             userid: userInformation.userId,
             tenantid: userInformation.tenantId,
             studyId: studyInformation.studyId,
             name: "",
             lastname: "",
             email: "",
-            roleid: "00000000-0000-0000-0000-000000000000",
+            roleid: 0,
             siteIds: [],
             responsiblePersonIds: []
         },
@@ -374,27 +374,34 @@ const User = props => {
     };
 
     useEffect(() => {
-        if (studyUserId !== '00000000-0000-0000-0000-000000000000' && updateItem.authUserId !== "00000000-0000-0000-0000-000000000000") {
-            const haveSameItems = arraysHaveSameItems(sitesData.map(site => site.id), updateItem.sites.map(site => site.id));
+        if (studyUserId !== 0 && updateItem.authUserId !== 0) {
 
-            let sites = null;
+            let sites = [];
 
-            if (haveSameItems) {
-                sites = ["All", ["All", updateItem.sites.map(site => site.id)]];
-            } else {
-                sites = updateItem.sites.map(site => site.id);
+            if (sitesData.length > 0) {
+                const haveSameItems = arraysHaveSameItems(sitesData.map(site => site.id), updateItem.sites.map(site => site.id));
+
+                if (haveSameItems) {
+                    sites = ["All", ["All", updateItem.sites.map(site => site.id)]];
+                } else {
+                    sites = updateItem.sites.map(site => site.id);
+                }
             }
 
-            let responsiblePersonData = usersData.map(user => user.authUserId).filter(id => id !== updateItem.authUserId);
+            let responsiblePerson = [];
 
-            const haveSameItemsResponsiblePerson = arraysHaveSameItems(responsiblePersonData, updateItem.responsiblePerson.map(user => user));
+            if (usersData.length > 0) {
+                let responsiblePersonData = usersData.map(user => user.authUserId).filter(id => id !== updateItem.authUserId);
 
-            let responsiblePerson = null;
+                if (responsiblePersonData.length > 0) {
+                    const haveSameItemsResponsiblePerson = arraysHaveSameItems(responsiblePersonData, updateItem.responsiblePerson.map(user => user));
 
-            if (haveSameItemsResponsiblePerson) {
-                responsiblePerson = ["All", ["All", updateItem.responsiblePerson.map(user => user)]];
-            } else {
-                responsiblePerson = updateItem.responsiblePerson.map(user => user);
+                    if (haveSameItemsResponsiblePerson) {
+                        responsiblePerson = ["All", ["All", updateItem.responsiblePerson.map(user => user)]];
+                    } else {
+                        responsiblePerson = updateItem.responsiblePerson.map(user => user);
+                    }
+                }
             }
 
             validationType.setValues({
@@ -445,7 +452,8 @@ const User = props => {
                         password: "",
                         researchName: studyInformation.studyName,
                         researchLanguage: studyInformation.studyLanguage,
-                        firstAddition: false
+                        firstAddition: false,
+                        responsiblePersonIds: []
                     };
                     const response = await userActivePassive(activePassiveData);
                     if (response.data.isSuccess) {
@@ -495,20 +503,21 @@ const User = props => {
                 try {
                     dispatch(startloading());
                     var activePassiveData = {
-                        studyUserId: "00000000-0000-0000-0000-000000000000",
-                        authUserId: "00000000-0000-0000-0000-000000000000",
+                        studyUserId: 0,
+                        authUserId: 0,
                         studyId: studyInformation.studyId,
                         userId: userInformation.userId,
                         name: "",
                         lastName: "",
                         isActive: true,
                         email: "",
-                        roleId: "00000000-0000-0000-0000-000000000000",
+                        roleId: 0,
                         siteIds: [],
                         password: "",
                         researchName: studyInformation.studyName,
                         researchLanguage: studyInformation.studyLanguage,
-                        firstAddition: false
+                        firstAddition: false,
+                        responsiblePersonIds: []
                     };
                     const response = await usersActivePassive(activePassiveData);
                     if (response.data.isSuccess) {
@@ -571,7 +580,8 @@ const User = props => {
                         password: "",
                         researchName: studyInformation.studyName,
                         researchLanguage: studyInformation.studyLanguage,
-                        firstAddition: false
+                        firstAddition: false,
+                        responsiblePersonIds: []
                     };
                     const response = await userDelete(deleteData);
                     if (response.data.isSuccess) {
@@ -631,7 +641,8 @@ const User = props => {
                 password: "",
                 researchName: studyInformation.studyName,
                 researchLanguage: studyInformation.studyLanguage,
-                firstAddition: false
+                firstAddition: false,
+                responsiblePersonIds: []
             };
             const response = await userResetPassword(resetPasswordData);
             if (response.data.isSuccess) {
@@ -660,7 +671,7 @@ const User = props => {
     useEffect(() => {
         if (userData && !isLoadingUser && !isErrorUser) {
             if (userData.isSuccess) {
-                if (userData.values.authUserId !== "00000000-0000-0000-0000-000000000000") {
+                if (userData.values.authUserId !== 0) {
                     validationType.setValues({
                         studyUserId: studyUserId,
                         authUserId: userData.values.authUserId,
@@ -670,8 +681,9 @@ const User = props => {
                         name: userData.values.name,
                         lastname: userData.values.lastName,
                         email: userData.values.email,
-                        roleid: "00000000-0000-0000-0000-000000000000",
-                        siteIds: []
+                        roleid: 0,
+                        siteIds: [],
+                        responsiblePersonIds: []
                     });
                 } else {
                     setIsRequired(true);
@@ -693,7 +705,7 @@ const User = props => {
         <React.Fragment>
             <ModalComp
                 refs={modalRef}
-                title={studyUserId === '00000000-0000-0000-0000-000000000000' ? props.t("Add a user") : props.t("Update user")}
+                title={studyUserId === 0 ? props.t("Add a user") : props.t("Update user")}
                 body={
                     <>
                         {userControl ?
@@ -744,7 +756,7 @@ const User = props => {
                                             invalid={
                                                 validationType.touched.name && validationType.errors.name ? true : false
                                             }
-                                            disabled={validationType.values.authUserId !== "00000000-0000-0000-0000-000000000000" ? true : false}
+                                            disabled={validationType.values.authUserId !== 0 ? true : false}
                                         />
                                         {validationType.touched.name && validationType.errors.name ? (
                                             <FormFeedback type="invalid">{validationType.errors.name}</FormFeedback>
@@ -764,7 +776,7 @@ const User = props => {
                                             invalid={
                                                 validationType.touched.lastname && validationType.errors.lastname ? true : false
                                             }
-                                            disabled={validationType.values.authUserId !== "00000000-0000-0000-0000-000000000000" ? true : false}
+                                            disabled={validationType.values.authUserId !== 0 ? true : false}
                                         />
                                         {validationType.touched.lastname && validationType.errors.lastname ? (
                                             <FormFeedback type="invalid">{validationType.errors.lastname}</FormFeedback>
@@ -901,7 +913,7 @@ const User = props => {
                 }
                 resetValue={resetValue}
                 handle={() => validationType.handleSubmit()}
-                buttonText={studyUserId === '00000000-0000-0000-0000-000000000000' ? props.t("Save") : props.t("Update")}
+                buttonText={studyUserId === 0 ? props.t("Save") : props.t("Update")}
             />
             <div className="page-content">
                 <div className="container-fluid">

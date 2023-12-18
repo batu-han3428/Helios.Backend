@@ -1,6 +1,6 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect } from "react";
-import { Card, Label, Input, Form, Button } from "reactstrap";
+import { Card, Label, Input, Form, Button, FormFeedback } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { useDispatch } from 'react-redux';
 import { startloading, endloading } from '../../../store/loader/actions';
@@ -77,14 +77,16 @@ const TemplateForm = props => {
     useEffect(() => {
         if (mailTemplateData && !isLoadingUpdate && !isErrorUpdate) {
 
-            const haveSameItems = arraysHaveSameItems(rolesData.map(role => role.id), mailTemplateData.roles);
+            let roles = [];
 
-            let roles = null;
+            if (rolesData.length > 0) {
+                const haveSameItems = arraysHaveSameItems(rolesData.map(role => role.id), mailTemplateData.roles);
 
-            if (haveSameItems) {
-                roles = ["All", ["All", mailTemplateData.roles]];
-            } else {
-                roles = mailTemplateData.roles;
+                if (haveSameItems) {
+                    roles = ["All", ["All", mailTemplateData.roles]];
+                } else {
+                    roles = mailTemplateData.roles;
+                }
             }
 
             validationType.setValues({
@@ -149,7 +151,7 @@ const TemplateForm = props => {
     const validationType = useFormik({
         enableReinitialize: true,
         initialValues: {
-            id: "00000000-0000-0000-0000-000000000000",
+            id: 0,
             userid: props.userId,
             tenantid: props.tenantId,
             studyId: props.studyId,
@@ -160,9 +162,13 @@ const TemplateForm = props => {
             editor: null
         },
         validationSchema: Yup.object().shape({
-            templateType: Yup.string().required(
-                props.t("This value is required")
+            name: Yup.string().required(
+                props.t("This field is required")
             ),
+            templateType: Yup.number().transform((value, originalValue) => originalValue === 0 ? undefined : value)
+                .nullable(true)
+                .required(props.t("This field is required")),
+            editor: Yup.mixed().nullable(true).required(props.t("This field is required")),
         }),
         onSubmit: async (values) => {
             try {
@@ -202,7 +208,7 @@ const TemplateForm = props => {
 
     const formClearAll = () => {
         validationType.setValues({
-            id: "00000000-0000-0000-0000-000000000000",
+            id: 0,
             userid: props.userId,
             tenantid: props.tenantId,
             studyId: props.studyId,
@@ -237,6 +243,9 @@ const TemplateForm = props => {
                         validationType.touched.name && validationType.errors.name ? true : false
                     }
                 />
+                {validationType.touched.name && validationType.errors.name ? (
+                    <FormFeedback type="invalid">{validationType.errors.name}</FormFeedback>
+                ) : null}
             </div>
             <div className="mb-3" style={{ position: "relative", zIndex: "112313" }}>
                 <Label>{props.t("Template type")}</Label>
@@ -249,18 +258,19 @@ const TemplateForm = props => {
                     name="templateType"
                     onChange={(selectedOption) => {
                         props.setTemplateType(selectedOption.value);
-                        const formattedValue = {
-                            target: {
-                                name: 'templateType',
-                                value: selectedOption.value
-                            }
-                        };
-                        validationType.handleChange(formattedValue);
+                        validationType.setFieldValue('templateType', selectedOption.value);
                     }}
                     options={optionGroupTemplateType}
                     classNamePrefix="select2-selection"
                     placeholder={props.t("Select")}
+                    invalid={
+                        validationType.touched.templateType && validationType.errors.templateType ? true : false
+                    }
                 />
+                {validationType.touched.templateType && validationType.errors.templateType ? (
+                    <div type="invalid" className="invalid-feedback" style={{display:"block"}}>{props.t("This field is required")}</div>
+                ) : null}
+               
             </div>
             <div className="mb-3">
                 <Label>{props.t("External e-mails")}</Label>
@@ -346,10 +356,14 @@ const TemplateForm = props => {
                             const contentState = data.getCurrentContent();
                             const contentStateRaw = convertToRaw(contentState);
                             const htmlContent = draftToHtml(contentStateRaw);
-                            validationType.setFieldValue('editor', htmlContent);
+                            validationType.setFieldValue('editor', contentState.hasText() ? htmlContent : null);
                         }}
+                        editorStyle={{ resize: 'vertical' }}
                     />
                 </Card>
+                {validationType.touched.editor && validationType.errors.editor ? (
+                    <div type="invalid" className="invalid-feedback" style={{ display: "block" }}>{props.t("This field is required")}</div>
+                ) : null}
             </div>
             <div className="mb-3" style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button onClick={()=>formClearAll()} style={{ backgroundColor: "#fff", color: "grey" }} color="light">
