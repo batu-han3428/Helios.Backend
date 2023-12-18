@@ -27,13 +27,14 @@ namespace Helios.Core.Controllers
         {
             _context.Modules.Add(new Domains.Entities.Module
             {
+                TenantId = model.TenantId,
                 AddedById = model.UserId,
                 Name = model.Name,
                 CreatedAt = DateTimeOffset.Now,
                 IsActive = true
             });
 
-            var result = await _context.SaveCoreContextAsync(0, DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
             return result;
         }
@@ -53,7 +54,7 @@ namespace Helios.Core.Controllers
             module.UpdatedById = model.UserId;
 
             _context.Modules.Update(module);
-            var result = await _context.SaveCoreContextAsync(new Int64(), DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
             return result;
         }
@@ -74,8 +75,9 @@ namespace Helios.Core.Controllers
             module.IsDeleted = true;
 
             _context.Modules.Update(module);
+            var result = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
-            return true;
+            return result;
         }
 
         [HttpGet]

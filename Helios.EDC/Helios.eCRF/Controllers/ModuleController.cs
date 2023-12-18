@@ -26,7 +26,7 @@ namespace Helios.eCRF.Controllers
         {
             var result = false;
 
-            if (!string.IsNullOrEmpty(model.Id))
+            if (model.Id != 0)
             {
                 result = await _moduleService.UpdateModule(model);
             }
@@ -100,10 +100,9 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(string id)
+        public async Task<List<ElementModel>> GetModuleElements(Int64 id)
         {
-            var moduleId = Int64.Parse(id);
-            var result = await _moduleService.GetModuleElements(moduleId);
+            var result = await _moduleService.GetModuleElements(id);
 
             return result;
         }

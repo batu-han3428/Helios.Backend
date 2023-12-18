@@ -41,7 +41,7 @@ const elements = [
 
 function ElementList(props) {
     const baseUrl = "https://localhost:7196";
-    const [moduleId, setModuleId] = useState("08dbc973-abe2-4694-8d6c-b4697950e3f7");
+    const [moduleId, setModuleId] = useState(1);
     const [elementId, setElementId] = useState("");
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);

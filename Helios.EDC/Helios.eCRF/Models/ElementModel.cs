@@ -5,10 +5,10 @@ namespace Helios.eCRF.Models
 {
     public class ElementModel
     {
-        public string Id { get; set; }
-        public string ModuleId { get; set; } = "";
-        public string UserId { get; set; } = "";
-        public string ElementDetailId { get; set; } = "";
+        public Int64 Id { get; set; }
+        public Int64 ModuleId { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 ElementDetailId { get; set; }
         public ElementType ElementType { get; set; } = 0;
         public string ElementName { get; set; } = "";
         public string Title { get; set; } = "";
