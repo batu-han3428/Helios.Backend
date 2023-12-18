@@ -40,7 +40,7 @@ class Properties extends React.Component {
 
             // General properties
             Id: props.Id,
-            ModuleId: '08dbc973-abe2-4694-8d6c-b4697950e3f7',
+            ModuleId: 1,
             ElementDetailId: '',
             ElementType: props.Type,
             ElementName: '',
@@ -72,8 +72,8 @@ class Properties extends React.Component {
             widthSelectedGroup: null,
 
             // Dependency properties
-            DependentSourceFieldId: '',
-            DependentTargetFieldId: '',
+            DependentSourceFieldId: 0,
+            DependentTargetFieldId: 0,
             DependentCondition: 0,
             DependentAction: 0,
             DependentFieldValue: [],
@@ -81,7 +81,7 @@ class Properties extends React.Component {
             wth: 10,
 
             // Relation
-            RelationFieldId: '',
+            RelationFieldId: 0,
             RelationVariableName: '',
 
             // Elements properties
@@ -284,7 +284,7 @@ class Properties extends React.Component {
                 this.state.dependentFieldOptionGroup = depFldOptionGroup;
                 this.state.relationFieldOptionGroup = depFldOptionGroup;
 
-                if (this.state.Id != "") {
+                if (this.state.Id != 0) {
                     var t = this.state.DependentSourceFieldId;
 
                     var f = this.state.dependentFieldOptionGroup.filter(function (e) {
@@ -521,8 +521,8 @@ class Properties extends React.Component {
                     CanMissing: this.state.CanMissing == 'on' ? true : false,
 
                     // Dependency properties
-                    DependentSourceFieldId: this.state.DependentSourceFieldId == null ? "" : this.state.DependentSourceFieldId,
-                    DependentTargetFieldId: this.state.DependentTargetFieldId == null ? "" : this.state.DependentTargetFieldId,
+                    DependentSourceFieldId: this.state.DependentSourceFieldId == null ? 0 : this.state.DependentSourceFieldId,
+                    DependentTargetFieldId: this.state.DependentTargetFieldId == null ? 0 : this.state.DependentTargetFieldId,
                     DependentCondition: this.state.DependentCondition,
                     DependentAction: this.state.DependentAction,
                     DependentFieldValue: JSON.stringify(this.state.DependentFieldValue),

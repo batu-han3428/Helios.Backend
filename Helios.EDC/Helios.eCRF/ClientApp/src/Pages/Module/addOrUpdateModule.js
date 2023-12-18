@@ -18,7 +18,6 @@ function AddOrUpdateModule() {
         })
             .then(response => response.json())
             .then(data => {
-                debugger;
                 // Handle response from the controller
             })
             .catch(error => {

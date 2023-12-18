@@ -18,17 +18,19 @@ import './module.css';
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { startloading, endloading } from '../../store/loader/actions';
 import { formatDate } from "../../helpers/format_date";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-let id = "";
+let id = 0;
 
 function ModuleList() {
+    const userInformation = useSelector(state => state.rootReducer.Login);
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const baseUrl = "https://localhost:7196";
 
     const [Name, setName] = useState('');
-    const [Id, setId] = useState('');
+    const [Id, setId] = useState(0);
     const [NameClass, setNameClass] = useState('form-control');
     const [RequiredError, setRequiredError] = useState('This value is required');
     const [modal_large, setmodal_large] = useState(false);
@@ -76,8 +78,6 @@ function ModuleList() {
     };
 
     const handleSubmit = (e) => {
-        debugger;
-
         if (Name == "") {
             setNameClass("is-invalid form-control");
             e.preventDefault();
@@ -91,13 +91,14 @@ function ModuleList() {
                 },
                 body: JSON.stringify({
                     Id: Id,
-                    Name: Name
+                    TenantId: userInformation.TenantId,
+                    Name: Name,
+                    UserId: userInformation.userId
                 })
 
             })
                 .then(response => response.json())
                 .then(data => {
-                    debugger;
                     tog_large();
                     // Handle response from the controller
                 })
@@ -182,7 +183,7 @@ function ModuleList() {
                                     <div className='form-group'>
                                         <label> Name</label>
                                         <input className={NameClass} value={Name} onChange={handleNameChange} type='text' id='Name' />
-                                        <div type="invalid" class="invalid-feedback">{RequiredError}</div>
+                                        <div type="invalid" className="invalid-feedback">{RequiredError}</div>
                                     </div>
                                 </div>
                             </div>

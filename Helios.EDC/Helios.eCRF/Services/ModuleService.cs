@@ -125,8 +125,8 @@ namespace Helios.eCRF.Services
         {
             var model = new ElementModel()
             {
-                Id = id.ToString(),
-                UserId = userId.ToString(),
+                Id = id,
+                UserId = userId,
             };
 
             using (var client = CoreServiceClient)
@@ -142,8 +142,8 @@ namespace Helios.eCRF.Services
         {
             var model = new ElementModel()
             {
-                Id = id.ToString(),
-                UserId = userId.ToString(),
+                Id = id,
+                UserId = userId,
             };
 
             using (var client = CoreServiceClient)
