@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useRef } from "react";
 import {
     Row,
     Col,
@@ -20,9 +20,7 @@ import { withTranslation } from "react-i18next";
 const ContactUs = (props) => {
     document.title = "Contact Us Page | Veltrix - React Admin & Dashboard Template";
 
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
+    const toastRef = useRef();
 
     const dispatch = useDispatch();
 
@@ -59,15 +57,17 @@ const ContactUs = (props) => {
             const response = await contactUsPost(values);
 
             if (response.data.isSuccess) {
-                setMessage(props.t(response.data.message))
-                setStateToast(true);
-                setShowToast(true);
                 dispatch(endloading());
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: true
+                });
             } else {
-                setMessage(props.t(response.data.message))
-                setStateToast(false);
-                setShowToast(true);
                 dispatch(endloading());
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: false
+                });
             }
         }
     });
@@ -231,9 +231,7 @@ const ContactUs = (props) => {
                 </div>
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

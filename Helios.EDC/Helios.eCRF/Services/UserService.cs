@@ -1,5 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
+using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
@@ -141,8 +142,34 @@ namespace Helios.eCRF.Services
             }
         }
 
+        private async Task<int> GetStudyCount(Int64? tenantId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetStudyCount", Method.Get);
+                req.AddParameter("tenantId", tenantId.ToString());
+                var result = await client.ExecuteAsync<int>(req);
+                return result.Data;
+            }
+        }
+
         public async Task<ApiResponse<dynamic>> SetTenant(TenantDTO tenantDTO)
         {
+            if (tenantDTO.Id.HasValue && tenantDTO.Id != 0)
+            {
+                int studyCount = await GetStudyCount(tenantDTO.Id);
+
+                if (studyCount > Convert.ToInt32(tenantDTO.StudyLimit))
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a bigger number.",
+                        Values = new {Change= studyCount }
+                    };
+                }
+            }
+           
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/SetTenant", Method.Post);

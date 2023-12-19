@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Row, Col } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { useSelector } from 'react-redux';
@@ -13,16 +13,15 @@ import TemplateForm from './Comp/TemplateForm';
 
 const AddOrUpdateEmailTemplate = props => {
 
+    const toastRef = useRef();
+
     const { studyId, templateId } = useParams();
 
-    const [toastMessage, setToastMessage] = useState("");
-    const [showToast, setShowToast] = useState(false);
-    const [stateToast, setStateToast] = useState(false);
-
     const toastHandle = (message, state) => {
-        setToastMessage(message);
-        setStateToast(state);
-        setShowToast(true);
+        toastRef.current.setToast({
+            message: message,
+            stateToast: state
+        });
     }
 
     const userInformation = useSelector(state => state.rootReducer.Login);
@@ -62,9 +61,7 @@ const AddOrUpdateEmailTemplate = props => {
                 </div>
             </div>
             <ToastComp
-                message={toastMessage}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

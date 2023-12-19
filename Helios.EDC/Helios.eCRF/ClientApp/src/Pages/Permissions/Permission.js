@@ -18,6 +18,8 @@ import PermissionShowUsersRole from './PermissionShowUsersRole';
 
 const Permission = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const modalContentRef = useRef();
@@ -29,9 +31,6 @@ const Permission = props => {
     const dispatch = useDispatch();
 
     const [openSections, setOpenSections] = useState({});
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const [roles, setRoles] = useState([]);
     const [modalContent, setModalContent] = useState(null);
     const [modalButton, setModalButton] = useState(true);
@@ -39,9 +38,10 @@ const Permission = props => {
     const [modalButtonText, setModalButtonText] = useState("");
 
     const modalToast = (message, state) => {
-        setMessage(message);
-        setStateToast(state);
-        setShowToast(true);
+        toastRef.current.setToast({
+            message: message,
+            stateToast: state
+        });
     }
 
     const toggleAccordion = (key) => {
@@ -87,14 +87,16 @@ const Permission = props => {
         };
         const response = await setPermission(model);
         if (response.data.isSuccess) {
-            setMessage(response.data.message)
-            setStateToast(true);
-            setShowToast(true);
+            toastRef.current.setToast({
+                message: props.t(response.data.message),
+                stateToast: true
+            });
             dispatch(endloading());
         } else {
-            setMessage(response.data.message)
-            setStateToast(false);
-            setShowToast(true);
+            toastRef.current.setToast({
+                message: props.t(response.data.message),
+                stateToast: false
+            });
             dispatch(endloading());
         }
     }
@@ -297,9 +299,7 @@ const Permission = props => {
                 isButton={modalButton}
             />
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

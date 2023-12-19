@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { withTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Row, Col, Card, CardBody, FormGroup, CardSubtitle, Label, Input, Form, FormFeedback } from "reactstrap";
@@ -19,13 +19,11 @@ import AccordionComp from '../../components/Common/AccordionComp/AccordionComp';
 
 const AddOrUpdateStudy = props => {
 
+    const toastRef = useRef();
+
     const [studyId, setStudyId] = useState(0);
     const [skip, setSkip] = useState(true);
     const [apiStudyData, setApiStudyData] = useState(null);
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
-    const [autoHideToast, setAutoHideToast] = useState(true);
 
     const dispatch = useDispatch();
 
@@ -81,19 +79,22 @@ const AddOrUpdateStudy = props => {
             const response = await studySave(values);
             if (response.data.isSuccess) {
                 dispatch(endloading());
-                setMessage(props.t(response.data.message));
-                setAutoHideToast(true);
-                setStateToast(true);
-                setShowToast(true);
+
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: true
+                });
+
                 if (studyId === 0) {
                     setStudyId(response.data.values.studyId);
                 }
             } else {
                 dispatch(endloading());
-                setMessage(props.t(response.data.message));
-                setStateToast(false);
-                setAutoHideToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: false,
+                    autoHide: false
+                });
             }
         }
     });
@@ -343,10 +344,7 @@ const AddOrUpdateStudy = props => {
                 </div>
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
-                autohide={autoHideToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

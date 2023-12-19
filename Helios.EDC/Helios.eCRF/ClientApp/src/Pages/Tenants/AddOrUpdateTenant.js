@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { withTranslation } from "react-i18next";
@@ -19,15 +19,13 @@ import ToastComp from '../../components/Common/ToastComp/ToastComp';
 
 const AddOrUpdateTenant = props => {
 
+    const toastRef = useRef();
+
     const userInformation = useSelector(state => state.rootReducer.Login);
 
     const dispatch = useDispatch();
 
     const navigate = useNavigate();
-
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
 
     const [allOptions, setAllOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -116,17 +114,19 @@ const AddOrUpdateTenant = props => {
 
                 if (response.data.isSuccess) {
                     dispatch(endloading());
-                    setMessage(props.t(response.data.message));
-                    setStateToast(true);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: true
+                    });
                     if (validationType.values.id === 0) {
                         validationType.setFieldValue("id", response.data.values.id);
                     }
                 } else {
                     dispatch(endloading());
-                    setMessage(props.t(response.data.message));
-                    setStateToast(false);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: response.data.values.hasOwnProperty("change") ? props.t(response.data.message).replace(/@Change/g, response.data.values.change) : props.t(response.data.message),
+                        stateToast: false
+                    });
                 }
             } catch (e) {
                 dispatch(endloading());
@@ -334,9 +334,7 @@ const AddOrUpdateTenant = props => {
                 </div>
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </>
     )

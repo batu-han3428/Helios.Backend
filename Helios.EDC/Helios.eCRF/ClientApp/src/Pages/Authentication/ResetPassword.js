@@ -16,14 +16,12 @@ import ToastComp from '../../components/Common/ToastComp/ToastComp';
 
 const ResetPassword = props => {
 
+    const toastRef = useRef();
+
     const { code, username } = useParams();
 
     const usernameParams = new URLSearchParams(username);
     const codeParams = new URLSearchParams(code);
-
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
 
     const dispatch = useDispatch();
 
@@ -94,9 +92,11 @@ const ResetPassword = props => {
                     dispatch(endloading());
                     navigate(`/login`, { state: { email: validationType.values.email }});
                 } else {
-                    setMessage(props.t(response.data.message))
-                    setStateToast(false);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: false
+                    });
+
                     dispatch(endloading());
                 }
             } catch (e) {
@@ -218,9 +218,7 @@ const ResetPassword = props => {
                 </Container>
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </>
     )
