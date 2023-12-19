@@ -27,6 +27,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const TenantUsers = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const userInformation = useSelector(state => state.rootReducer.Login);
@@ -35,9 +37,6 @@ const TenantUsers = props => {
 
     const [liveTableData, setLiveTableData] = useState([]);
     const [demoTableData, setDemoTableData] = useState([]);
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const [basicActive, setBasicActive] = useState('tab1');
     const [excelData, setExcelData] = useState([]);
 
@@ -271,15 +270,17 @@ const TenantUsers = props => {
                 dispatch(startloading());
                 const response = await tenantUserSet(values);
                 if (response.data.isSuccess) {
-                    setMessage(response.data.message)
-                    setStateToast(true);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: true
+                    });
                     modalRef.current.tog_backdrop();
                     dispatch(endloading());
                 } else {
-                    setMessage(response.data.message)
-                    setStateToast(false);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: false
+                    });
                     dispatch(endloading());
                 }
             } catch (e) {
@@ -474,9 +475,7 @@ const TenantUsers = props => {
                 buttonText={props.t("Update")}
             />
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

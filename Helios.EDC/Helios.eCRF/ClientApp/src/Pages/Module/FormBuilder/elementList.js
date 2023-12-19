@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ListItem } from 'react';
+import React, { useState, useEffect, ListItem, useRef } from 'react';
 import {
     Row,
     Col,
@@ -40,15 +40,15 @@ const elements = [
 ];
 
 function ElementList(props) {
+
+    const toastRef = useRef();
+
     const baseUrl = "https://localhost:7196";
     const [moduleId, setModuleId] = useState(1);
     const [elementId, setElementId] = useState("");
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const dispatch = useDispatch();
 
     const removeBodyCss = () => {
@@ -74,14 +74,16 @@ function ElementList(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.isSuccess) {
-                    setMessage(data.message)
-                    setStateToast(true);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: data.message,
+                        stateToast: true
+                    });
                     dispatch(endloading());
                 } else {
-                    setMessage(data.message)
-                    setStateToast(false);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: data.message,
+                        stateToast: false
+                    });
                     dispatch(endloading());
                 }
             })
@@ -190,9 +192,7 @@ function ElementList(props) {
                 {content}
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </div>
 

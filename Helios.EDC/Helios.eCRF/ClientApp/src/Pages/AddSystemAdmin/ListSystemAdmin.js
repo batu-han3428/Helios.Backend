@@ -15,6 +15,8 @@ import Swal from 'sweetalert2';
 
 const ListSystemAdmin = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const modalContentRef = useRef();
@@ -23,18 +25,16 @@ const ListSystemAdmin = props => {
 
     const dispatch = useDispatch();
 
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const [modalTitle, setModalTitle] = useState("");
     const [modalButtonText, setModalButtonText] = useState("");
     const [systemAdminId, setSystemAdminId] = useState(0);
     const [table, setTable] = useState([]);
 
     const toastHandle = (message, state) => {
-        setMessage(message);
-        setStateToast(state);
-        setShowToast(true);
+        toastRef.current.setToast({
+            message: message,
+            stateToast: state
+        });
     }
 
     const addSystemAdmin = () => {
@@ -153,9 +153,10 @@ const ListSystemAdmin = props => {
             dispatch(startloading());
             if (!item.isActive) {
                 dispatch(endloading());
-                setMessage(props.t("Please activate the account first and then try this process again."));
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t("Please activate the account first and then try this process again."),
+                    stateToast: false
+                });
                 return;
             }
             const response = await systemAdminResetPassword({
@@ -166,20 +167,23 @@ const ListSystemAdmin = props => {
             });
             if (response.data.isSuccess) {
                 dispatch(endloading());
-                setMessage(response.data.message)
-                setStateToast(true);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: true
+                });
             } else {
                 dispatch(endloading());
-                setMessage(response.data.message)
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: false
+                });
             }
         } catch (error) {
             dispatch(endloading());
-            setMessage(props.t("An error occurred while processing your request."))
-            setStateToast(true);
-            setShowToast(true);
+            toastRef.current.setToast({
+                message: props.t("An error occurred while processing your request."),
+                stateToast: false
+            });
         }
     }
 
@@ -287,9 +291,7 @@ const ListSystemAdmin = props => {
                 size="md"
             />
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </>
     )

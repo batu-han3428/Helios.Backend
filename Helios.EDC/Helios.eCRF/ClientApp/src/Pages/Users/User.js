@@ -25,6 +25,8 @@ import { exportToExcel } from '../../helpers/ExcelDownload';
 
 const User = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const userInformation = useSelector(state => state.rootReducer.Login);
@@ -37,9 +39,6 @@ const User = props => {
     const [optionGroupRoles, setOptionGroupRoles] = useState([]);
     const [optionGroupSites, setOptionGroupSites] = useState([]);
     const [optionGroupResponsiblePerson, setOptionGroupResponsiblePerson] = useState([]);
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const [userControl, setUserControl] = useState(true);
     const [skip, setSkip] = useState(true);
     const [isRequired, setIsRequired] = useState(false);
@@ -346,15 +345,17 @@ const User = props => {
                         firstAddition: false
                     });
                     if (response.data.isSuccess) {
-                        setMessage(props.t(response.data.message))
-                        setStateToast(true);
-                        setShowToast(true);
+                        toastRef.current.setToast({
+                            message: props.t(response.data.message),
+                            stateToast: true
+                        });
                         modalRef.current.tog_backdrop();
                         dispatch(endloading());
                     } else {
-                        setMessage(props.t(response.data.message))
-                        setStateToast(false);
-                        setShowToast(true);
+                        toastRef.current.setToast({
+                            message: props.t(response.data.message),
+                            stateToast: false
+                        });
                         dispatch(endloading());
                     }
                 } else {
@@ -621,9 +622,10 @@ const User = props => {
             dispatch(startloading());
             if (!item.isActive) {
                 dispatch(endloading());
-                setMessage(props.t("Please activate the account first and then try this process again."));
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t("Please activate the account first and then try this process again."),
+                    stateToast: false
+                });
                 return;
             }
 
@@ -647,20 +649,23 @@ const User = props => {
             const response = await userResetPassword(resetPasswordData);
             if (response.data.isSuccess) {
                 dispatch(endloading());
-                setMessage(response.data.message)
-                setStateToast(true);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: true
+                });
             } else {
                 dispatch(endloading());
-                setMessage(response.data.message)
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: false
+                });
             }
         } catch (error) {
             dispatch(endloading());
-            setMessage(props.t("An error occurred while processing your request."))
-            setStateToast(true);
-            setShowToast(true);
+            toastRef.current.setToast({
+                message: props.t("An error occurred while processing your request."),
+                stateToast: false
+            });
         }
     }
 
@@ -694,9 +699,10 @@ const User = props => {
             } else {
                 setSkip(true);
                 dispatch(endloading());
-                setMessage(userData.message)
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: userData.message,
+                    stateToast: false
+                });
             }
         } 
     }, [userData, isErrorUser, isLoadingUser]);
@@ -991,9 +997,7 @@ const User = props => {
                 </div>
             </div>
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

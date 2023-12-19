@@ -279,5 +279,6 @@
   "Drop photo here or click to upload": "Fotoğrafı buraya bırakın veya yüklemek için tıklayın",
   "Your limit for adding study has been reached. Please contact the system administrator.": "Çalışma ekleme limitiniz dolmuştur. Lütfen sistem yöneticisi ile iletişime geçiniz.",
   "This tenant name is already exist.": "Bu abonelik adı zaten kayıtlı.",
-  "You will not be able to recover this site!": "Bu merkezi kurtaramayacaksınız!"
+  "You will not be able to recover this site!": "Bu merkezi kurtaramayacaksınız!",
+  "@Change studies have been added to the tenant. For this reason, you cannot enter a bigger number.": "Aboneliğe @Change tane çalışma eklenmiştir. Bu sebeple daha büyük bir rakam giremezsiniz."
 }

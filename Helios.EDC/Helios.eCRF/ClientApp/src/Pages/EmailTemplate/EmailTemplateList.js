@@ -1,5 +1,5 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Row, Col, Card, CardBody, Button } from "reactstrap";
 import { withTranslation } from "react-i18next";
 import { formatDate } from "../../helpers/format_date";
@@ -16,17 +16,16 @@ import templateTypeItems from './TemplateTypeItems';
 
 const EmailTemplateList = props => {
 
-    const location = useLocation();
+    const toastRef = useRef();
 
-    const [toastMessage, setToastMessage] = useState("");
-    const [showToast, setShowToast] = useState(false);
-    const [stateToast, setStateToast] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
         if (location.state !== null) {
-            setToastMessage(location.state.message);
-            setStateToast(location.state.state);
-            setShowToast(true);
+            toastRef.current.setToast({
+                message: location.state.message,
+                stateToast: location.state.state
+            });
         }
     }, []);
 
@@ -251,9 +250,7 @@ const EmailTemplateList = props => {
                 </div>
             </div>
             <ToastComp
-                message={toastMessage}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );

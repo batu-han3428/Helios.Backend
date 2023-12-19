@@ -100,11 +100,6 @@ class Properties extends React.Component {
             DepActInputClass: '',
             DepFldVlInputClass: 'form-control input-tag',
 
-            // Toast
-            showToast: false,
-            toastMessage: "",
-            stateToast: true,
-
             // dependent
             dependentFieldOptionGroup: [],
             dependentFieldsSelectedGroup: 0,
@@ -128,12 +123,11 @@ class Properties extends React.Component {
             relationFieldOptionGroup: [],
             relationFieldsSelectedGroup: 0,
         };
-
+        this.toastRef = React.createRef();
         this.fillDependentFieldList();
         this.getElementData();
 
         this.toggle = this.toggle.bind(this);
-        this.setShowToast.bind(this);
         this.handleSaveModuleContent = this.handleSaveModuleContent.bind(this);
         this.getElementData = this.getElementData.bind(this);
         this.fillDependentFieldList = this.fillDependentFieldList.bind(this);
@@ -168,10 +162,6 @@ class Properties extends React.Component {
         this.changeUpperLimit.bind(this);
         this.changeLayout.bind(this);
         this.changeSavedTagList.bind(this);
-    }
-
-    setShowToast() {
-        this.state.showToast = false;
     }
 
     toggle(tab) {
@@ -947,9 +937,7 @@ class Properties extends React.Component {
                     </Col>
                 </form>
                 <ToastComp
-                    message={this.state.toastMessage}
-                    showToast={this.state.showToast}
-                    stateToast={this.state.stateToast}
+                    ref={this.toastRef}
                 />
                 {/*</ElementBase>*/}
             </div>

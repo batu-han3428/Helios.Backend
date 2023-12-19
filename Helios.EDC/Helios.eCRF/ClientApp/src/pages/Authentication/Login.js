@@ -30,6 +30,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Login = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const ssoRef = useRef();
@@ -68,10 +70,6 @@ const Login = props => {
     const [loginPost, { isLoading }] = useLoginPostMutation();
     const [formData, setFormData] = useState({ Email: '', Password: '', Language: props.i18n.language });
 
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
-    
     const handleSubmit = async (e) => {
         try {
             dispatch(startloading());
@@ -84,9 +82,10 @@ const Login = props => {
 
                 dispatch(endloading()) 
                 if (result === false) {
-                    setMessage(props.t("An unexpected error occurred."))
-                    setStateToast(false);
-                    setShowToast(true);
+                    toastRef.current.setToast({
+                        message: props.t("An unexpected error occurred."),
+                        stateToast: false
+                    });
                 } else {
                     dispatch(loginuser(result));
                     navigate("/");
@@ -96,13 +95,11 @@ const Login = props => {
                 if (response.data.values !== null) {
                     if (response.data.values.hasOwnProperty("redirect")) {
                         navigate(response.data.values.redirect);
-                    } else if (response.data.values.hasOwnProperty("change")) {
-                        setMessage(props.t(response.data.message).replace(/@Change/g, response.data.values.change));
-                    } else {
-                        setMessage(props.t(response.data.message));
-                    }
-                    setStateToast(false);
-                    setShowToast(true);
+                    } 
+                    toastRef.current.setToast({
+                        message: response.data.values.hasOwnProperty("change") ? props.t(response.data.message).replace(/@Change/g, response.data.values.change) : props.t(response.data.message),
+                        stateToast: false
+                    });
                 }
             }
         } catch (error) {
@@ -116,9 +113,10 @@ const Login = props => {
     };
 
     const forgotPasswordToast = (message, state) => {
-        setMessage(message);
-        setStateToast(state);
-        setShowToast(true);
+        toastRef.current.setToast({
+            message: message,
+            stateToast: state
+        });
     }
 
     document.title = "Login | Veltrix - React Admin & Dashboard Template";
@@ -228,9 +226,7 @@ const Login = props => {
                 size="md"
             />
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </>       
   );

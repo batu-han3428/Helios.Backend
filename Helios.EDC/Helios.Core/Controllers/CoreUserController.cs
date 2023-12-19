@@ -39,6 +39,12 @@ namespace Helios.Core.Controllers
                 ActiveStudies = g.Count().ToString()
             }).ToListAsync();
         }
+
+        [HttpGet]
+        public async Task<int> GetStudyCount(Int64? tenantId)
+        {
+            return await _context.Studies.Where(x => x.TenantId == tenantId && !x.IsDemo).CountAsync();
+        }
         #endregion
 
         #region Permissions

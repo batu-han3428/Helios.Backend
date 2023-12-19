@@ -35,11 +35,6 @@ class ListElementProperties extends Component {
         super(props);
         debugger;
         this.state = {
-            // Toast
-            showToast: false,
-            toastMessage: "",
-            stateToast: true,
-
             Id: '00000000-0000-0000-0000-000000000000',
             layoutOptionGroup: [
                 { label: "Vertical", value: 1 },
@@ -66,7 +61,7 @@ class ListElementProperties extends Component {
             operationType: 1,
             isEdit: false,
         }
-
+        this.toastRef = React.createRef();
         var l = this.state.layoutOptionGroup.filter(function (e) {
             if (e.value == props.Layout)
                 return e;
@@ -245,13 +240,15 @@ class ListElementProperties extends Component {
                             //};
                             if (data.isSuccess) {
                                 this.toggleNewTagModal();
-                                this.state.toastMessage = data.message;
-                                this.state.stateToast = true;
-                                this.state.showToast = true;
+                                this.toastRef.current.setToast({
+                                    message: data.message,
+                                    stateToast: true
+                                });
                             } else {
-                                this.state.toastMessage = data.message;
-                                this.state.stateToast = false;
-                                this.state.showToast = true;
+                                this.toastRef.current.setToast({
+                                    message: data.message,
+                                    stateToast: false
+                                });
                             }
 
                             this.getMultipleTagList();
@@ -266,9 +263,11 @@ class ListElementProperties extends Component {
                     }));
 
                     this.toggleNewTagModal();
-                    this.state.toastMessage = "Successful";
-                    this.state.stateToast = true;
-                    this.state.showToast = true;
+
+                    this.toastRef.current.setToast({
+                        message: "Successful",
+                        stateToast: true
+                    });
                 }
             }
             else {
@@ -304,9 +303,10 @@ class ListElementProperties extends Component {
 
                 this.props.changeSavedTagList(newtgs);
                 this.toggleNewTagModal();
-                this.state.toastMessage = "Successful";
-                this.state.stateToast = true;
-                this.state.showToast = true;
+                this.toastRef.current.setToast({
+                    message: "Successful",
+                    stateToast: true
+                });
             }
         }
     };
@@ -504,9 +504,7 @@ class ListElementProperties extends Component {
                 </Col>
                 {/* } />*/}
                 <ToastComp
-                    message={this.state.toastMessage}
-                    showToast={this.state.showToast}
-                    stateToast={this.state.stateToast}
+                    ref={this.toastRef}
                 />
             </div>
         );

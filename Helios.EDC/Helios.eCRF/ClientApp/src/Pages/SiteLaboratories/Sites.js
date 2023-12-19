@@ -19,6 +19,8 @@ import { exportToExcel } from '../../helpers/ExcelDownload';
 
 const Sites = props => {
 
+    const toastRef = useRef();
+
     const modalRef = useRef();
 
     const userInformation = useSelector(state => state.rootReducer.Login);
@@ -27,9 +29,6 @@ const Sites = props => {
 
     const [skip, setSkip] = useState(true);
     const [tableData, setTableData] = useState([]);
-    const [showToast, setShowToast] = useState(false);
-    const [message, setMessage] = useState("");
-    const [stateToast, setStateToast] = useState(true);
     const [siteId, setSiteId] = useState(0);
 
     const dispatch = useDispatch();
@@ -224,15 +223,18 @@ const Sites = props => {
             dispatch(startloading());
             const response = await siteSaveOrUpdate(values);
             if (response.data.isSuccess) {
-                setMessage(props.t(response.data.message))
-                setStateToast(true);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: true
+                });
+
                 modalRef.current.tog_backdrop();
                 dispatch(endloading());
             } else {
-                setMessage(props.t(response.data.message))
-                setStateToast(false);
-                setShowToast(true);
+                toastRef.current.setToast({
+                    message: props.t(response.data.message),
+                    stateToast: false
+                });
                 dispatch(endloading());
             }
         }
@@ -415,9 +417,7 @@ const Sites = props => {
                 buttonText={siteId === 0 ? props.t("Save") : props.t("Update") }
             />
             <ToastComp
-                message={message}
-                showToast={showToast}
-                stateToast={stateToast}
+                ref={toastRef}
             />
         </React.Fragment>
     );
