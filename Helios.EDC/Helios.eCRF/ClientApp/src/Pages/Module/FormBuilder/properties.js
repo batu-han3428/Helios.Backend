@@ -23,7 +23,7 @@ import Select from "react-select";
 import classnames from "classnames";
 import TextElementProperties from '../Elements/textElementProperties.js'
 import NumericElementProperties from '../Elements/numericElementProperties.js'
-import ListElementProperties from '../Elements/listElementProperties.js'
+import ListElementProperties from '../Elements/listElementProperties.js';
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
@@ -34,12 +34,15 @@ const baseUrl = "https://localhost:7196";
 class Properties extends React.Component {
     constructor(props) {
         super(props);
+
         this.state = {
-            activeTab: "1",
+            activeTab: props.ActiveTab,
             showWhereElementPropeties: 0,
 
             // General properties
             Id: props.Id,
+            TenantId: props.TenantId,
+            UserId: props.UserId,
             ModuleId: 1,
             ElementDetailId: 0,
             ElementType: props.Type,
@@ -253,22 +256,27 @@ class Properties extends React.Component {
         this.setState({ IsHidden: e.target.value });
     };
 
-    handleIsRequiredChange(e) {
-        this.setState({ IsRequired: e.target.value });
+    handleIsRequiredChange() {
+        this.setState((prevState) => ({
+            IsRequired: !prevState.IsRequired,
+        }));
     };
 
-    handleIsReadonlyChange(e) {
-        this.setState({ IsReadonly: e.target.value });
+    handleIsReadonlyChange() {
+        this.setState((prevState) => ({
+            IsReadonly: !prevState.IsReadonly,
+        }));
     };
 
-    handleCanMissingChange(e) {
-        this.setState({ CanMissing: e.target.value });
+    handleCanMissingChange() {
+        this.setState((prevState) => ({
+            CanMissing: !prevState.CanMissing,
+        }));
     };
 
     // #region dependent
     fillDependentFieldList() {
         var depFldOptionGroup = [];
-
         fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
@@ -287,6 +295,7 @@ class Properties extends React.Component {
                 if (this.state.Id != 0) {
                     var t = this.state.DependentSourceFieldId;
 
+                    debugger;
                     var f = this.state.dependentFieldOptionGroup.filter(function (e) {
                         if (e.value == t)
                             return e;
@@ -400,7 +409,7 @@ class Properties extends React.Component {
     }
 
     getElementData() {
-        if (this.state.Id != "") {
+        if (this.state.Id != 0) {
             fetch(baseUrl + '/Module/GetElementData?id=' + this.state.Id, {
                 method: 'GET',
             })
@@ -505,7 +514,8 @@ class Properties extends React.Component {
                 body: JSON.stringify({
                     Id: this.state.Id,
                     ModuleId: this.state.ModuleId,
-                    UserId: 0,
+                    TenantId: this.state.TenantId,
+                    UserId: this.state.UserId,
                     ElementDetailId: this.state.ElementDetailId,
                     ElementType: this.state.ElementType,
                     ElementName: this.state.ElementName,
@@ -514,11 +524,11 @@ class Properties extends React.Component {
                     Order: this.state.Order,
                     Description: this.state.Description,
                     Width: this.state.FieldWidths,
-                    IsHidden: this.state.IsHidden == 'on' ? true : false,
-                    IsRequired: this.state.IsRequired == 'on' ? true : false,
+                    IsHidden: this.state.IsHidden,
+                    IsRequired: this.state.IsRequired,
                     IsDependent: this.state.IsDependent,
                     IsReadonly: this.state.IsReadonly,
-                    CanMissing: this.state.CanMissing == 'on' ? true : false,
+                    CanMissing: this.state.CanMissing,
 
                     // Dependency properties
                     DependentSourceFieldId: this.state.DependentSourceFieldId == null ? 0 : this.state.DependentSourceFieldId,
@@ -771,68 +781,69 @@ class Properties extends React.Component {
                                                 </div>
                                             </Col>
                                         </Row>
-                                        <Row>
-                                            <Col sm="12">
-                                                <div className="mb-3">
-                                                    <Label>Dependent field</Label>
-                                                    <Select
-                                                        value={this.state.dependentFieldsSelectedGroup}
-                                                        onChange={this.handleDependentFieldChange}
-                                                        options={this.state.dependentFieldOptionGroup}
-                                                        classNamePrefix="select2-selection"
-                                                        className={this.state.DepFldInputClass}
-                                                        isDisabled={this.state.dependentEnabled}
-                                                    />
-                                                </div>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col sm="4">
-                                                <div className="mb-3">
-                                                    <Label>Dependency condition</Label>
-                                                    <Select
-                                                        value={this.state.conditionSelectedGroup}
-                                                        onChange={this.handleDependentConditionChange}
-                                                        options={this.state.conditionOptionGroup}
-                                                        classNamePrefix="select2-selection"
-                                                        className={this.state.DepConInputClass}
-                                                        isDisabled={this.state.dependentEnabled}
-                                                    />
-                                                </div>
-                                            </Col>
-                                            <Col sm="4">
-                                                <div className="mb-3">
-                                                    <Label>Dependency action</Label>
-                                                    <Select
-                                                        value={this.state.actionSelectedGroup}
-                                                        onChange={this.handleDependentActionChange}
-                                                        options={this.state.actionOptionGroup}
-                                                        classNamePrefix="select2-selection"
-                                                        className={this.state.DepActInputClass}
-                                                        isDisabled={this.state.dependentEnabled}
-                                                    />
-                                                </div>
-                                            </Col>
-                                            <Col sm="4">
-                                                <label
-                                                    htmlFor="example-text-input"
-                                                    className="col-md-12 col-form-label"
-                                                >
-                                                    Dependent filed value
-                                                </label>
-                                                <div className={this.state.DepFldVlInputClass} >
-                                                    <div className="input-tag__tags" >
-                                                        {this.state.DependentFieldValue.map((tag, i) => (
-                                                            <p key={tag}>
-                                                                {tag}
-                                                                <button type="button" style={{ background: 'none' }} onClick={() => { this.removeDependentFieldValueTag(i); }}>+</button>
-                                                            </p>
-                                                        ))}
-                                                        <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.dependentFieldValueInputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; }} /></p>
+                                        {this.state.IsDependent == 1 && (
+                                            <>
+                                                <Row>
+                                                <Col sm="12">
+                                                    <div className="mb-3">
+                                                        <Label>Dependent field</Label>
+                                                        <Select
+                                                            value={this.state.dependentFieldsSelectedGroup}
+                                                            onChange={this.handleDependentFieldChange}
+                                                            options={this.state.dependentFieldOptionGroup}
+                                                            classNamePrefix="select2-selection"
+                                                            className={this.state.DepFldInputClass}
+                                                            isDisabled={this.state.dependentEnabled} />
                                                     </div>
-                                                </div>
-                                            </Col>
-                                        </Row>
+                                                </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col sm="4">
+                                                        <div className="mb-3">
+                                                            <Label>Dependency condition</Label>
+                                                            <Select
+                                                                value={this.state.conditionSelectedGroup}
+                                                                onChange={this.handleDependentConditionChange}
+                                                                options={this.state.conditionOptionGroup}
+                                                                classNamePrefix="select2-selection"
+                                                                className={this.state.DepConInputClass}
+                                                                isDisabled={this.state.dependentEnabled} />
+                                                        </div>
+                                                    </Col>
+                                                    <Col sm="4">
+                                                        <div className="mb-3">
+                                                            <Label>Dependency action</Label>
+                                                            <Select
+                                                                value={this.state.actionSelectedGroup}
+                                                                onChange={this.handleDependentActionChange}
+                                                                options={this.state.actionOptionGroup}
+                                                                classNamePrefix="select2-selection"
+                                                                className={this.state.DepActInputClass}
+                                                                isDisabled={this.state.dependentEnabled} />
+                                                        </div>
+                                                    </Col>
+                                                    <Col sm="4">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-12 col-form-label"
+                                                        >
+                                                            Dependent filed value
+                                                        </label>
+                                                        <div className={this.state.DepFldVlInputClass}>
+                                                            <div className="input-tag__tags">
+                                                                {this.state.DependentFieldValue.map((tag, i) => (
+                                                                    <p key={tag}>
+                                                                        {tag}
+                                                                        <button type="button" style={{ background: 'none' }} onClick={() => { this.removeDependentFieldValueTag(i); } }>+</button>
+                                                                    </p>
+                                                                ))}
+                                                                <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.dependentFieldValueInputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; } } /></p>
+                                                            </div>
+                                                        </div>
+                                                    </Col>
+                                                </Row>
+                                            </>
+                                        )}
                                         {/*<AccordionComp title="Advanced options" body={*/}
                                         {/*    <div>*/}
                                         <Row>

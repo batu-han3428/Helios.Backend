@@ -140,26 +140,23 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> CopyElement(string id)
+        public async Task<ApiResponse<dynamic>> CopyElement(Int64 id, Int64 userId)
         {
-            var elmId = Int64.Parse(id);
-            var result = await _moduleService.CopyElement(elmId, new Int64());
+            var result = await _moduleService.CopyElement(id, userId);
             return result;
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteElement(string id)
+        public async Task<ApiResponse<dynamic>> DeleteElement(Int64 id, Int64 userId)
         {
-            var elmId = Int64.Parse(id);
-            var result = await _moduleService.DeleteElement(elmId, new Int64());
+            var result = await _moduleService.DeleteElement(id, userId);
             return result;
         }
 
         [HttpGet]
-        public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(string id)
+        public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(Int64 id)
         {
-            var elementId = Int64.Parse(id);
-            var result = _moduleService.GetMultipleTagList(elementId).Result.GroupBy(x => x.Tagkey).ToList();
+            var result = _moduleService.GetMultipleTagList(id).Result.GroupBy(x => x.Tagkey).ToList();
 
             return result;
         }

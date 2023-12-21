@@ -121,6 +121,8 @@ namespace Helios.Core.Controllers
                     ElementName = x.ElementName,
                     ElementType = x.ElementType,
                     Order = x.Order,
+                    IsDependent = x.IsDependent,
+                    IsRelated = x.IsRelated,
                 }).OrderBy(x => x.Order).ToListAsync();
 
             return result;
@@ -129,27 +131,30 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<ElementModel> GetElementData(Int64 id)
         {
-            var result = await _context.Elements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted)
-                .Include(x => x.ElementDetail)
-                .Select(x => new ElementModel()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    ElementName = x.ElementName,
-                    ElementType = x.ElementType,
-                    Description = x.Description,
-                    IsRequired = x.IsRequired,
-                    IsHidden = x.IsHidden,
-                    CanMissing = x.CanMissing,
-                    Width = x.Width,
-                    Unit = x.ElementDetail.Unit,
-                    Mask = x.ElementDetail.Mask,
-                    LowerLimit = x.ElementDetail.LowerLimit,
-                    UpperLimit = x.ElementDetail.UpperLimit,
-                    Layout = x.ElementDetail.Layout,
-                    IsDependent = x.IsDependent,
-                    ElementOptions = x.ElementDetail.ElementOptions
-                }).FirstOrDefaultAsync();
+            var result = new ElementModel();
+
+            result = await _context.Elements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted)
+               .Include(x => x.ElementDetail)
+               .Select(x => new ElementModel()
+               {
+                   Id = x.Id,
+                   Title = x.Title,
+                   ElementName = x.ElementName,
+                   ElementType = x.ElementType,
+                   Description = x.Description,
+                   IsRequired = x.IsRequired,
+                   IsHidden = x.IsHidden,
+                   CanMissing = x.CanMissing,
+                   Width = x.Width,
+                   Unit = x.ElementDetail.Unit,
+                   Mask = x.ElementDetail.Mask,
+                   LowerLimit = x.ElementDetail.LowerLimit,
+                   UpperLimit = x.ElementDetail.UpperLimit,
+                   Layout = x.ElementDetail.Layout,
+                   IsDependent = x.IsDependent,
+                   IsRelated = x.IsRelated,
+                   ElementOptions = x.ElementDetail.ElementOptions
+               }).FirstOrDefaultAsync();
 
             if (result.IsDependent)
             {
@@ -179,7 +184,7 @@ namespace Helios.Core.Controllers
             {
                 var moduleElements = _context.Elements.Where(x => x.ModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
 
-                if (moduleElements.FirstOrDefault(x => x.ElementName == model.ElementName) != null)
+                if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
                 {
                     result.IsSuccess = false;
                     result.Message = "Duplicate element name";
@@ -187,7 +192,7 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                var moduleElementMaxOrder = moduleElements.Select(x => x.Order).Max();
+                var moduleElementMaxOrder = moduleElements.Count() > 0 ? moduleElements.Select(x => x.Order).Max() : 1;
 
                 var elm = new Element()
                 {
@@ -203,6 +208,7 @@ namespace Helios.Core.Controllers
                     Width = model.Width,
                     IsRequired = model.IsRequired,
                     ModuleId = model.ModuleId,
+                    TenantId = model.TenantId,
                     Order = moduleElementMaxOrder + 1,
                     //CreatedAt = DateTimeOffset.Now,
                     //AddedById = userId,
@@ -216,13 +222,14 @@ namespace Helios.Core.Controllers
                     var elementDetail = new ElementDetail()
                     {
                         ElementId = elm.Id,
+                        TenantId = model.TenantId,
                         Unit = model.Unit,
                         Mask = model.Mask,
                         LowerLimit = model.LowerLimit,
                         UpperLimit = model.UpperLimit,
                         Layout = model.Layout,
-                        ElementOptions = model.ElementOptions
-                        //TargetElementId = Int64.Parse(model.DependentTargetFieldId),
+                        ElementOptions = model.ElementOptions,
+                        MetaDataTags = model.ElementName,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -240,6 +247,7 @@ namespace Helios.Core.Controllers
                         {
                             SourceElementId = model.DependentTargetFieldId,
                             TargetElementId = elm.Id,
+                            TenantId = model.TenantId,
                             ValueCondition = (ActionCondition)model.DependentCondition,
                             ActionType = (ActionType)model.DependentAction,
                             ActionValue = model.DependentFieldValue,
@@ -249,7 +257,21 @@ namespace Helios.Core.Controllers
                     }
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    result.Message = result.IsSuccess ? "Successful" : "Error";
+
+                    //control for both of element and elementDetail saved
+                    var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
+                    if (elmDtl == null)
+                    {
+                        elm.IsActive = false;
+                        elm.IsDeleted = true;
+                        _context.Elements.Update(elm);
+                        var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        result.IsSuccess = false;
+                        result.Message = "Operation failed. Please try again.";
+                    }
+                    else
+                        result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
                 else
                 {
@@ -326,7 +348,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> CopyElement(ElementModel model)
+        public async Task<ApiResponse<dynamic>> CopyElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
 
@@ -334,25 +356,41 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
-                element.ElementName = element.ElementName + "_1";
-                element.Order = element.Order++;
+                var name = element.ElementName + "_1";
+
+                for (; ; )
+                {
+                    if (checkElementName(element.ModuleId, name).Result)
+                        break;
+                    else
+                        name = name + "_1";
+                }
+
+                element.Id = 0;
+                element.ElementName = name;
+                element.Order = (element.Order + 1);
 
                 var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-                elementDetail.ElementId = element.Id;
-
-                element.ElementDetailId = elementDetail.Id;
+                elementDetail.Id = 0;
 
                 _context.Add(element);
                 _context.Add(elementDetail);
+
+                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                elementDetail.ElementId = element.Id;
+                element.ElementDetailId = elementDetail.Id;
+
+                _context.Update(element);
+                _context.Update(elementDetail);
 
                 var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 foreach (var item in moduleElements)
                 {
-                    if (item.Order >= element.Order)
+                    if (item.Order >= element.Order && item.Id != element.Id)
                     {
-                        item.Order = item.Order++;
+                        item.Order = (item.Order + 1);
                         _context.Update(item);
                     }
                 }
@@ -370,10 +408,9 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteElement(ElementModel model)
+        public async Task<ApiResponse<dynamic>> DeleteElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
             var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
@@ -447,6 +484,16 @@ namespace Helios.Core.Controllers
             return result;
         }
 
+        private async Task<bool> checkElementName(Int64 moduleId, string elementName, List<Element> moduleElements = null)
+        {
+            if (moduleElements == null)
+                moduleElements = _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
+
+            if (moduleElements.FirstOrDefault(x => x.ElementName == elementName) != null)
+                return false;
+            else
+                return true;
+        }
 
     }
 }

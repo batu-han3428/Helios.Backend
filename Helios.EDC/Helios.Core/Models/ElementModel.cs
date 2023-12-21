@@ -7,18 +7,20 @@ namespace Helios.Core.Models
     {
         public Int64 Id { get; set; }
         public Int64 ModuleId { get; set; }
+        public Int64 TenantId { get; set; }
         public Int64 UserId { get; set; }
         public Int64 ElementDetailId { get; set; }
-        public ElementType ElementType { get; set; }
-        public string ElementName { get; set; }
-        public string Title { get; set; }
+        public ElementType ElementType { get; set; } = 0;
+        public string ElementName { get; set; } = "";
+        public string Title { get; set; } = "";
         public bool IsTitleHidden { get; set; }
-        public int Order { get; set; }
-        public string Description { get; set; }
-        public GridLayout Width { get; set; }
+        public int Order { get; set; } = 0;
+        public string Description { get; set; } = "";
+        public GridLayout Width { get; set; } = 0;
         public bool IsHidden { get; set; }
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
+        public bool IsRelated { get; set; }
         public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
 
@@ -35,10 +37,10 @@ namespace Helios.Core.Models
         //public int EProPageNumber { get; set; }
         //public string ButtonText { get; set; }
         //public string DefaultValue { get; set; }
-        public string Unit { get; set; }
-        public string Mask { get; set; }
-        public string LowerLimit { get; set; }
-        public string UpperLimit { get; set; }
+        public string Unit { get; set; } = "";
+        public string Mask { get; set; } = "";
+        public string LowerLimit { get; set; } = "";
+        public string UpperLimit { get; set; } = "";
         public AlignLayout Layout { get; set; }
         //public string Extension { get; set; } //numeric description
         //public int StartDay { get; set; }
@@ -62,8 +64,14 @@ namespace Helios.Core.Models
         ////dependent
         public Int64 DependentSourceFieldId { get; set; }
         public Int64 DependentTargetFieldId { get; set; }
-        public int DependentCondition { get; set; }
-        public int DependentAction { get; set; }
-        public string DependentFieldValue { get; set; }
+        public int DependentCondition { get; set; } = 0;
+        public int DependentAction { get; set; } = 0;
+        public string DependentFieldValue { get; set; } = "";
+    }
+
+    public class ElementShortModel
+    {
+        public Int64 Id { get; set; }
+        public Int64 UserId { get; set; }
     }
 }

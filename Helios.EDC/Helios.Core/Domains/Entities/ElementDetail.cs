@@ -13,14 +13,7 @@ namespace Helios.Core.Domains.Entities
         public Int64 ParentId { get; set; }
         public int RowIndex { get; set; }
         public int ColunmIndex { get; set; }
-        public bool CanQuery { get; set; }
-        public bool CanSdv { get; set; }
-        public bool CanRemoteSdv { get; set; }
-        public bool CanComment { get; set; }
-        public bool CanDataEntry { get; set; }
-        public int ParentElementEProPageNumber { get; set; }
         public string? MetaDataTags { get; set; }
-        public int EProPageNumber { get; set; }
         public string? ButtonText { get; set; }
         public string? DefaultValue { get; set; }
         public string? Unit { get; set; }
@@ -49,7 +42,7 @@ namespace Helios.Core.Domains.Entities
         public string? ElementOptions { get; set; } //json text value
 
         //hidden
-        public Int64 TargetElementId { get; set; }
+        public Int64? TargetElementId { get; set; }
 
         //rangeslider
         public string? LeftText { get; set; }

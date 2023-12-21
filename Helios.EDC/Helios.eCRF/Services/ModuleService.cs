@@ -123,7 +123,7 @@ namespace Helios.eCRF.Services
 
         public async Task<ApiResponse<dynamic>> CopyElement(Int64 id, Int64 userId)
         {
-            var model = new ElementModel()
+            var model = new ElementShortModel()
             {
                 Id = id,
                 UserId = userId,
@@ -140,7 +140,7 @@ namespace Helios.eCRF.Services
     
         public async Task<ApiResponse<dynamic>> DeleteElement(Int64 id, Int64 userId)
         {
-            var model = new ElementModel()
+            var model = new ElementShortModel()
             {
                 Id = id,
                 UserId = userId,

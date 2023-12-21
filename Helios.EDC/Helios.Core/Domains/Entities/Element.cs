@@ -22,6 +22,7 @@ namespace Helios.Core.Domains.Entities
         public bool IsHidden { get; set; }
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
+        public bool IsRelated { get; set; }
         public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
         public Module Module { get; set; }

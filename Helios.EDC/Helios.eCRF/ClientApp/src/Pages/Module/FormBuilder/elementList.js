@@ -14,7 +14,7 @@ import {
 } from "reactstrap";
 import Properties from './properties.js';
 import './formBuilder.css';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
@@ -46,29 +46,32 @@ function ElementList(props) {
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
+    const [activeTab, setActiveTab] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [message, setMessage] = useState("");
     const [stateToast, setStateToast] = useState(true);
     const dispatch = useDispatch();
+    const userInformation = useSelector(state => state.rootReducer.Login);
 
     const removeBodyCss = () => {
         document.body.classList.add("no_padding");
     };
 
-    const tog_large = (e, type, id) => {
-        if (id != "") {
+    const tog_large = (e, type, id, tabid) => {
+        if (id != 0) {
             setElementId(id);
         }
         else {
             setElementType(type);
         }
 
+        setActiveTab(tabid);
         setmodal_large(!modal_large);
         removeBodyCss();
     };
 
     const copyElement = (e, id) => {
-        fetch(baseUrl + '/Module/CopyElement?id=' + id, {
+        fetch(baseUrl + '/Module/CopyElement?id=' + id + '&userId=' + userInformation.userId, {
             method: 'POST',
         })
             .then(response => response.json())
@@ -104,8 +107,7 @@ function ElementList(props) {
             if (result.isConfirmed) {
                 try {
                     dispatch(startloading());
-
-                    fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
+                    fetch(baseUrl + '/Module/DeleteElement?id=' + id + '&userId=' + userInformation.userId, {
                         method: 'POST',
                     })
                         .then(response => response.json())
@@ -130,7 +132,7 @@ function ElementList(props) {
     }
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '')}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '', 0)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
     );
 
     const fetchData = () => {
@@ -152,7 +154,16 @@ function ElementList(props) {
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
                 </label>
-                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id)}><i className="far fa-edit"></i></Button>
+                {item.isDependent && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-link"></i></Button>
+                )}
+                {item.isRelated && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
+                )}
+                {item.elementType === 7 /*calculated*/ && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id,"1")}><i className="fas fa-calculator"></i></Button>
+                )}
+                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="far fa-edit"></i></Button>
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
@@ -181,7 +192,7 @@ function ElementList(props) {
                     <Modal isOpen={modal_large} toggle={tog_large} size="lg">
                         <ModalHeader className="mt-0" toggle={tog_large}>Properties</ModalHeader>
                         <ModalBody>
-                            <Properties Type={elementType} Id={elementId}></Properties>
+                            <Properties Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab}></Properties>
                         </ModalBody>
                     </Modal>
                 </Col>
