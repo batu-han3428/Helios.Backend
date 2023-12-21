@@ -11,6 +11,10 @@ using Helios.Authentication.Enums;
 using Helios.Common.Model;
 using MassTransit.Initializers;
 using Azure.Storage.Blobs;
+using Helios.Common.Enums;
+using Azure.Storage.Blobs.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace Helios.Authentication.Controllers
 {
@@ -287,7 +291,7 @@ namespace Helios.Authentication.Controllers
                         UserId = usr.Id,
                     });
 
-                    if (model.Role == Enums.Roles.StudyUser)
+                    if (model.Role == Roles.StudyUser)
                     {
                         //studyuser ve rolüne de ekleme yapılmalı
                     }
@@ -466,7 +470,7 @@ namespace Helios.Authentication.Controllers
         {
             var result = false;
 
-            if (!String.IsNullOrEmpty(model.Password))
+            if (!string.IsNullOrEmpty(model.Password))
             {
                 var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == model.UserId);
 
@@ -675,14 +679,18 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO model)
+        public async Task<ApiResponse<SystemAdminDTO>> SetSystemAdminUser(SystemAdminDTO model)
         {
             if (model.Id == 0)
             {
-                if (await _userManager.FindByEmailAsync(model.Email) == null)
+                var usr = await _userManager.FindByEmailAsync(model.Email);
+                var password = "";
+                bool isRole = false;
+
+                if (usr == null)
                 {
-                    var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Substring(0, 1).ToLower();
-                    var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.Email).Replace(" ", "").ToLower();
+                    var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Name).Substring(0, 1).ToLower();
+                    var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
                     var userName = string.Format("{0}_{1}{2}", new Int64(), firstChar, lastNameEng);
 
                     var newUserName = userName;
@@ -696,12 +704,13 @@ namespace Helios.Authentication.Controllers
 
                     var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.SystemAdmin.ToString());
 
-                    var usr = new ApplicationUser
+                    usr = new ApplicationUser
                     {
                         Email = model.Email.Trim(),
                         UserName = newUserName,
-                        Name = model.Email.Trim(),
-                        LastName = model.Email.Trim(),
+                        Name = model.Name.Trim(),
+                        LastName = model.LastName.Trim(),
+                        PhoneNumber = model.PhoneNumber.Trim(),
                         ChangePassword = false,
                         EmailConfirmed = true,
                         IsActive = true,
@@ -709,7 +718,7 @@ namespace Helios.Authentication.Controllers
                         LastChangePasswordDate = DateTime.Now
                     };
 
-                    var password = StringExtensionsHelper.GenerateRandomPassword();
+                    password = StringExtensionsHelper.GenerateRandomPassword();
 
                     var userResult = await _userManager.CreateAsync(usr, password);
 
@@ -719,47 +728,109 @@ namespace Helios.Authentication.Controllers
 
                         if (addRoleResult.Succeeded)
                         {
-                            _context.SystemAdmins.Add(new SystemAdmin
-                            {
-                                AuthUserId = usr.Id,
-                            });
-
-                            var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                            if (result)
-                            {
-                                model.Password = password;
-                                await _emailService.SystemAdminUserMail(model);
-                                return new ApiResponse<dynamic>
-                                {
-                                    IsSuccess = true,
-                                    Message = "Successful"
-                                };
-                            }
+                            isRole = true;
+                            model.Password = password;
+                            await _emailService.SystemAdminUserMail(model);
                         }
                     }
 
-                    return new ApiResponse<dynamic>
+                    if (string.IsNullOrEmpty(model.Password))
                     {
-                        IsSuccess = false,
-                        Message = "Unsuccessful"
-                    };
+                        return new ApiResponse<SystemAdminDTO>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }     
                 }
-                else
+
+                if (!await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == usr.Id))
                 {
-                    return new ApiResponse<dynamic>
+                    var result = await AddSystemAdmins(usr, password, isRole);
+
+                    if (result)
                     {
-                        IsSuccess = false,
-                        Message = "This user is already registered in the system.",
-                    };
+                        return new ApiResponse<SystemAdminDTO>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful",
+                            Values = new SystemAdminDTO  { Password = model.Password}
+                        };
+                    }
+                    else
+                    {
+                        return new ApiResponse<SystemAdminDTO>
+                        {
+                            IsSuccess = false,
+                            Message = "An unexpected error occurred.",
+                        };
+                    }
                 }
+
+          
+                return new ApiResponse<SystemAdminDTO>
+                {
+                    IsSuccess = false,
+                    Message = "This user is already registered in the system.",
+                };
+                
             }
 
-            return new ApiResponse<dynamic>
+            return new ApiResponse<SystemAdminDTO>
             {
                 IsSuccess = false,
                 Message = "This user is already registered in the system.",
             };
+
+            async Task<bool> AddSystemAdmins(ApplicationUser? usr, string password, bool isRole)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        usr.ChangePassword = false;
+                        var changePassword = await _userManager.UpdateAsync(usr);
+                        if (changePassword.Succeeded)
+                        {
+                            string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                            var removeResult = await _userManager.RemovePasswordAsync(usr);
+                            if (removeResult.Succeeded)
+                            {
+                                var passResult = await _userManager.AddPasswordAsync(usr, newPassword);
+                                if (passResult.Succeeded)
+                                {
+                                    model.Password = newPassword;
+                                    await _emailService.SystemAdminUserMail(model);
+                                }
+                            }
+                        }
+                    }
+
+
+                    if (!isRole)
+                    {
+                        var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.SystemAdmin.ToString());
+
+                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
+
+                        if (!addRoleResult.Succeeded)
+                        {
+                            return false;
+                        }
+                    }
+
+                    await _context.SystemAdmins.AddAsync(new SystemAdmin
+                    {
+                        AuthUserId = usr.Id,
+                    });
+
+                    return await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
         }
 
         [HttpGet]
@@ -772,7 +843,10 @@ namespace Helios.Authentication.Controllers
                 select new SystemUserModel
                 {
                     Id = userManagerUser.Id,
+                    Name = userManagerUser.Name,
+                    LastName = userManagerUser.LastName,
                     Email = userManagerUser.Email,
+                    PhoneNumber = userManagerUser.PhoneNumber,
                     IsActive = systemAdmin.IsActive
                 }
             ).ToListAsync();
@@ -879,35 +953,255 @@ namespace Helios.Authentication.Controllers
 
             if (user != null)
             {
-                _context.SystemAdmins.Remove(user);
+                var aspNetUser = await _userManager.FindByIdAsync(user.AuthUserId.ToString());
 
-                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                if (aspNetUser != null)
+                {
+                    var aspNetResult = await _userManager.RemoveFromRoleAsync(aspNetUser, Roles.SystemAdmin.ToString());
 
-                if (result)
-                {
-                    return new ApiResponse<dynamic>
+                    if (aspNetResult.Succeeded)
                     {
-                        IsSuccess = true,
-                        Message = "Successful"
-                    };
-                }
-                else
-                {
-                    return new ApiResponse<dynamic>
+                        _context.SystemAdmins.Remove(user);
+
+                        var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }
+                    else
                     {
-                        IsSuccess = false,
-                        Message = "Unsuccessful"
-                    };
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
                 }
             }
-            else
+
+            return new ApiResponse<dynamic>
             {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetTenantAdminUser(SystemAdminDTO model)
+        {
+            if (model.Id == 0)
+            {
+                var usr = await _userManager.FindByEmailAsync(model.Email);
+                bool isRole = false;
+
+                if (usr == null)
+                {
+                    var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Name).Substring(0, 1).ToLower();
+                    var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
+                    var userName = string.Format("{0}_{1}{2}", new Int64(), firstChar, lastNameEng);
+
+                    var newUserName = userName;
+                    int i = 0;
+
+                    while (await _userManager.Users.AnyAsync(x => x.UserName == newUserName))
+                    {
+                        i++;
+                        newUserName = string.Format("{0}_{1}", userName, i);
+                    }
+
+                    var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.TenantAdmin.ToString());
+
+                    usr = new ApplicationUser
+                    {
+                        Email = model.Email.Trim(),
+                        UserName = newUserName,
+                        Name = model.Name.Trim(),
+                        LastName = model.LastName.Trim(),
+                        PhoneNumber = model.PhoneNumber.Trim(),
+                        ChangePassword = false,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        PhotoBase64String = "",
+                        LastChangePasswordDate = DateTime.Now
+                    };
+
+                    model.Password = StringExtensionsHelper.GenerateRandomPassword();
+
+                    var userResult = await _userManager.CreateAsync(usr, model.Password);
+
+                    if (userResult.Succeeded)
+                    {
+                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
+
+                        if (addRoleResult.Succeeded)
+                        {
+                            isRole = true;
+                            await _emailService.SystemAdminUserMail(model);
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(model.Password))
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                }
+
+                if(!await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == usr.Id))
+                {
+                    var result = await AddTenantsTenantAdmins(usr, model.Password, isRole);
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "An unexpected error occurred.",
+                        };
+                    }
+                }
+
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "An unexpected error occurred."
+                    Message = "This user is already registered in the system.",
                 };
             }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "This user is already registered in the system.",
+            };
+
+
+            async Task<bool> AddTenantsTenantAdmins(ApplicationUser? usr, string password, bool isRole)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        usr.ChangePassword = false;
+                        var changePassword = await _userManager.UpdateAsync(usr);
+                        if (changePassword.Succeeded)
+                        {
+                            string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                            var removeResult = await _userManager.RemovePasswordAsync(usr);
+                            if (removeResult.Succeeded)
+                            {
+                                var passResult = await _userManager.AddPasswordAsync(usr, newPassword);
+                                if (passResult.Succeeded)
+                                {
+                                    model.Password = newPassword;
+                                    await _emailService.SystemAdminUserMail(model);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!isRole)
+                    {
+                        var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.TenantAdmin.ToString());
+
+                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
+
+                        if (!addRoleResult.Succeeded)
+                        {
+                            return false;
+                        }
+                    }
+
+                    await _context.TenantAdmins.AddAsync(new TenantAdmin
+                    {
+                        AuthUserId = usr.Id,
+                    });
+
+                    List<TenantsTenantAdmins> tenantsTenantAdmins = model.TenantIds.Select(x => new TenantsTenantAdmins
+                    {
+                        TenantId = x,
+                        TenantAdminId = usr.Id
+                    }).ToList();
+
+                    if (tenantsTenantAdmins.Count > 0)
+                    {
+                        await _context.TenantsTenantAdmins.AddRangeAsync(tenantsTenantAdmins);
+                    }
+
+                    return await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }              
+            }
+        }
+
+        [HttpGet]
+        public async Task<List<SystemUserModel>> GetTenantAndSystemAdminUserList()
+        {
+            var emptyTenantList = new List<object>();
+
+            var result = await (
+                from userManagerUser in _userManager.Users
+                join systemAdmin in _context.SystemAdmins on userManagerUser.Id equals systemAdmin.AuthUserId into systemAdmins
+                from sysAdmin in systemAdmins.DefaultIfEmpty()
+                join tenantAdmin in _context.TenantAdmins on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
+                from tenAdmin in tenantAdmins.DefaultIfEmpty()
+                join tenantsTenantAdmin in _context.TenantsTenantAdmins on userManagerUser.Id equals tenantsTenantAdmin.TenantAdminId into tenantsTenantAdmins
+                from tta in tenantsTenantAdmins.DefaultIfEmpty()
+                join tenant in _context.Tenants on tta.TenantId equals tenant.Id into tenants
+                where
+                    (sysAdmin != null && !sysAdmin.IsDeleted && sysAdmin.IsActive) ||
+                    (tenAdmin != null && !tenAdmin.IsDeleted && tenAdmin.IsActive)
+                select new SystemUserModel
+                {
+                    Id = userManagerUser.Id,
+                    Name = userManagerUser.Name,
+                    LastName = userManagerUser.LastName,
+                    Email = userManagerUser.Email,
+                    PhoneNumber = userManagerUser.PhoneNumber,
+                    IsActive = (sysAdmin != null && sysAdmin.IsActive) || (tenAdmin != null && tenAdmin.IsActive),
+                    Roles = userManagerUser.UserRoles.Select(ur => new
+                    {
+                        RoleId = ur.RoleId,
+                        RoleName = ur.Role.Name
+                    }).ToList(),
+                    Tenants = tenants
+                        .Select(t => new
+                        {
+                            TenantId = t.Id,
+                            TenantName = t.Name
+                        })
+                        .ToList()
+                }
+            ).ToListAsync();
+
+            return result; 
         }
         #endregion
     }

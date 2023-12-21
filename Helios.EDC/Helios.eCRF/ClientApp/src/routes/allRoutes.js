@@ -83,53 +83,51 @@ import UiSessionTimeout from "../Pages/Template/Ui/UiSessionTimeout";
 import UiOffcanvas from "../Pages/Template/Ui/UiOffcanvas";
 
 
-//tenant
-import TenantList from "../Pages/Tenant/tenantList.js";
-import TenantAddOrUpdate from "../Pages/Tenant/addOrUpdateTenant.js";
-
-import FormBuilder from "../Pages/Module/FormBuilder/formBuilder.js";
-import Module from "../Pages/Module/moduleList.js";
-import AddOrUpdateModule from "../Pages/Module/addOrUpdateModule.js";
+//Module
+import FormBuilder from "../Pages/TenantAdmin/Module/FormBuilder/formBuilder.js";
+import Module from "../Pages/TenantAdmin/Module/moduleList.js";
+import AddOrUpdateModule from "../Pages/TenantAdmin/Module/addOrUpdateModule.js";
 
 //Study
-import StudyList from "../Pages/Study/StudyList";
-import LockedList from "../Pages/Study/LockedList";
-import AddOrUpdateStudy from "../Pages/Study/AddOrUpdateStudy";
-import Study from "../Pages/Study/Study";
+import StudyList from "../Pages/TenantAdmin/Study/StudyList";
+import LockedList from "../Pages/TenantAdmin/Study/LockedList";
+import AddOrUpdateStudy from "../Pages/TenantAdmin/Study/AddOrUpdateStudy";
+import Study from "../Pages/TenantAdmin/Study/Study";
 
 //Site & Laboratories
-import Sites from "../Pages/SiteLaboratories/Sites";
+import Sites from "../Pages/TenantAdmin/SiteLaboratories/Sites";
 
 //Permissions
-import Permission from "../Pages/Permissions/Permission";
+import Permission from "../Pages/TenantAdmin/Permissions/Permission";
 
 //Users
-import User from "../Pages/Users/User";
+import User from "../Pages/TenantAdmin/Users/User";
 
 //Admin Users
-import TenantUsers from "../Pages/TenantUsers/TenantUsers";
+import TenantUsers from "../Pages/TenantAdmin/TenantUsers/TenantUsers";
 
 //SSO
-import SSO_Studies from "../Pages/SSO/SSO_Studies";
-import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
+import SSO_Studies from "../Pages/StudyUser/SSO/SSO_Studies";
+import SSO_Tenants from "../Pages/StudyUser/SSO/SSO_Tenants";
 
 //E-mail template
-import EmailTemplateList from "../Pages/EmailTemplate/EmailTemplateList";
-import AddOrUpdateEmailTemplate from "../Pages/EmailTemplate/AddOrUpdateEmailTemplate";
+import EmailTemplateList from "../Pages/TenantAdmin/EmailTemplate/EmailTemplateList";
+import AddOrUpdateEmailTemplate from "../Pages/TenantAdmin/EmailTemplate/AddOrUpdateEmailTemplate";
 
 //Add system admin
-import ListSystemAdmin from "../Pages/AddSystemAdmin/ListSystemAdmin";
+import ListSystemAdmin from "../Pages/SuperAdmin/AddSystemAdmin/ListSystemAdmin";
 
 //System admin tenants
-import TenantsList from "../Pages/Tenants/TenantsList";
-import AddOrUpdateTenant from "../Pages/Tenants/AddOrUpdateTenant.js";
+import TenantsList from "../Pages/SystemAdmin/Tenants/TenantsList";
+import AddOrUpdateTenant from "../Pages/SystemAdmin/Tenants/AddOrUpdateTenant.js";
+
+//System admin users
+import ListTenantAndSystemAdmin from "../Pages/SystemAdmin/Users/ListTenantAndSystemAdmin";
 
 
 const userRoutes = [
-    //tenant
-    { path: "/Tenant", component: <TenantList />, menuType: "admin", roles: ['TenantAdmin'] },
-    { path: "/addTenant", component: <TenantAddOrUpdate />, menuType: "admin", roles: ['TenantAdmin'] },
 
+    //Module
     { path: "/moduleList", component: <Module />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/formBuilder", component: <FormBuilder />, menuType: "admin", roles: ['TenantAdmin'] },
@@ -167,7 +165,9 @@ const userRoutes = [
     { path: "/tenants", component: <TenantsList />, menuType: "systemadmin", roles: ['SystemAdmin'] },
     { path: "/set-tenant/:tenantId?", component: <AddOrUpdateTenant />, menuType: "systemadmin", roles: ['SystemAdmin'] },
 
-
+    //System admin users
+    { path: "/tenant-and-system-admins", component: <ListTenantAndSystemAdmin />, menuType: "systemadmin", roles: ['SystemAdmin'] },
+    
 
 
     //dashborad

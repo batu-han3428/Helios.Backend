@@ -27,11 +27,6 @@
             ],
         },
         {
-            label: "Tenant",
-            to: "/tenant",
-            icon: "fa-solid fa-list-ul"
-        },
-        {
             label: "Module",
             to: "/moduleList",
             icon: "fa-solid fa-puzzle-piece"
@@ -321,7 +316,7 @@
         },
         {
             label: "Users",
-            to: "/users",
+            to: "/tenant-and-system-admins",
             icon: "fa-solid fa-house"
         },
         {

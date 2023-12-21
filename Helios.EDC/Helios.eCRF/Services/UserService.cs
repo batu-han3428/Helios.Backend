@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Model;
 using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
@@ -7,6 +8,7 @@ using Helios.eCRF.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
+using static MassTransit.Monitoring.Performance.BuiltInCounters;
 
 namespace Helios.eCRF.Services
 {
@@ -78,7 +80,7 @@ namespace Helios.eCRF.Services
         }
 
         #region Tenants
-        private async Task<List<TenantModel>> GetAuthTenantList()
+        public async Task<List<TenantModel>> GetAuthTenantList()
         {
             using (var client = AuthServiceClient)
             {
@@ -164,7 +166,7 @@ namespace Helios.eCRF.Services
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a bigger number.",
+                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.",
                         Values = new {Change= studyCount }
                     };
                 }
@@ -599,13 +601,13 @@ namespace Helios.eCRF.Services
 
         #region System Admin User
 
-        public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
+        public async Task<ApiResponse<SystemAdminDTO>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/SetSystemAdminUser", Method.Post);
                 req.AddJsonBody(systemAdminDTO);
-                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                var result = await client.ExecuteAsync<ApiResponse<SystemAdminDTO>>(req);
                 return result.Data;
             }
         }
@@ -654,6 +656,51 @@ namespace Helios.eCRF.Services
         }
         #endregion
 
+        #region Tenant Admin User
+        private async Task<ApiResponse<dynamic>> SetTenantAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SetTenantAdminUser", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SetSystemAdminAndTenantAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            ApiResponse<dynamic> result = null;
+
+            if (systemAdminDTO.RoleIds.Contains((int)Roles.SystemAdmin))
+            {
+                var result1 = await SetSystemAdminUser(systemAdminDTO);
+
+                result = new ApiResponse<dynamic>
+                {
+                    IsSuccess = result1.IsSuccess,
+                    Message = result1.Message
+                };
+
+                if (!result1.IsSuccess)
+                {                   
+                    return result;
+                }
+                else
+                {
+                    systemAdminDTO.Password = result1.Values.Password;
+                }
+            }
+
+            if (systemAdminDTO.RoleIds.Contains((int)Roles.TenantAdmin))
+            {
+                result = await SetTenantAdminUser(systemAdminDTO);
+            }
+
+            return result;
+        }
+        #endregion
+
         #region SSO
         public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
@@ -674,6 +721,16 @@ namespace Helios.eCRF.Services
                 req.AddParameter("tenantId", tenantId);
                 req.AddParameter("userId", userId);
                 var result = await client.ExecuteAsync<List<SSOUserStudyModel>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<List<SystemUserModel>> GetTenantAndSystemAdminUserList()
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetTenantAndSystemAdminUserList", Method.Get);
+                var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
                 return result.Data;
             }
         }

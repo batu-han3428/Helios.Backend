@@ -20,6 +20,9 @@ export const TenantsApi = createApi({
             query: () => `/User/GetTenantList`,
             providesTags: ['Tenants'],
         }),
+        tenantListAuthGet: builder.query({
+            query: () => `/User/GetAuthTenantList`,
+        }),
         tenantGet: builder.query({
             query: (data) => `/User/GetTenant/${data.tenantId}`,
             refetchOnMountOrArgChange: true,
@@ -39,6 +42,8 @@ export const TenantsApi = createApi({
 
 
 export const { useTenantListGetQuery } = TenantsApi;
+
+export const { useTenantListAuthGetQuery } = TenantsApi;
 
 export const { useLazyTenantGetQuery } = TenantsApi;
 

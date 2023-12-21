@@ -9,6 +9,7 @@ namespace Helios.Authentication.Entities
         public string? UserLimit { get; set; }
         public string? TimeZone { get; set; }
         public string? Logo { get; set; }
+        List<TenantsTenantAdmins> TenantsTenantAdmins { get; set; }
 
     }
 }

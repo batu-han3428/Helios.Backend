@@ -69,7 +69,7 @@ namespace Helios.eCRF.Controllers
         #region Tenants
 
         /// <summary>
-        /// tenantları listeler
+        /// tenantları çalışma sayılarıyla listeler
         /// </summary>
         /// <returns>tenant listesi</returns>
         [HttpGet]
@@ -86,6 +86,23 @@ namespace Helios.eCRF.Controllers
             }
         }
 
+        /// <summary>
+        /// tenantları listeler
+        /// </summary>
+        /// <returns>tenant listesi</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAuthTenantList()
+        {
+            try
+            {
+                var result = await _userService.GetAuthTenantList();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+        }
 
         /// <summary>
         /// seçili tenant bilgilerini getirir
@@ -417,6 +434,39 @@ namespace Helios.eCRF.Controllers
         {
             var result = await _userService.SystemAdminDelete(systemAdminDTO);
             return Ok(result);
+        }
+        #endregion
+
+        #region Tenant Admin User
+
+        /// <summary>
+        /// rol seçimine göre kullanıcı ekler veya günceller
+        /// </summary>
+        /// <param name="systemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> SetSystemAdminAndTenantAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            var result = await _userService.SetSystemAdminAndTenantAdminUser(systemAdminDTO);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// tenant admin ve sistem admin kullanıcılarını listeler
+        /// </summary>
+        /// <returns>kullanıcılar</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetTenantAndSystemAdminUserList()
+        {
+            try
+            {
+                var result = await _userService.GetTenantAndSystemAdminUserList();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
         }
         #endregion
 

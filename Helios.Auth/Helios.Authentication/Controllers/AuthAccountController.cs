@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Helios.Common.Model;
 using System.Web;
+using Helios.Common.Enums;
 
 namespace Helios.Authentication.Controllers
 {
@@ -522,18 +523,20 @@ namespace Helios.Authentication.Controllers
         [HttpGet]
         public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
-            if (userId != 0)
-            {
-                return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new TenantUserModel
-                {
-                    TenantId = x.Tenant.Id,
-                    Name = x.Tenant.Name
-                }).ToListAsync();
-            }
-            else
-            {
-                return new List<TenantUserModel>();
-            }
+            //if (userId != 0)
+            //{
+            //    return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new TenantUserModel
+            //    {
+            //        TenantId = x.Tenant.Id,
+            //        Name = x.Tenant.Name
+            //    }).ToListAsync();
+            //}
+            //else
+            //{
+            //    return new List<TenantUserModel>();
+            //}
+
+            return new List<TenantUserModel>();
         }
         #endregion
     }
