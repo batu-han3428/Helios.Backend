@@ -701,6 +701,47 @@ namespace Helios.eCRF.Services
         }
         #endregion
 
+        #region Tenant And System Admin User
+        private async Task<ApiResponse<dynamic>> TenantAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/TenantAdminDelete", Method.Post);
+                req.AddJsonBody(tenantAndSystemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> TenantAndSystemAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            ApiResponse<dynamic> result = null;
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.SystemAdmin))
+            {
+                var result1 = await SystemAdminDelete(new SystemAdminDTO { Id = tenantAndSystemAdminDTO.RoleIds.Where(x => x == (Int64)Roles.SystemAdmin).First(), UserId = tenantAndSystemAdminDTO.UserId });
+
+                result = new ApiResponse<dynamic>
+                {
+                    IsSuccess = result1.IsSuccess,
+                    Message = result1.Message
+                };
+
+                if (!result1.IsSuccess)
+                {
+                    return result;
+                }
+            }
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.TenantAdmin))
+            {
+                result = await TenantAdminDelete(tenantAndSystemAdminDTO);
+            }
+
+            return result;
+        }
+        #endregion
+
         #region SSO
         public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {

@@ -1066,7 +1066,7 @@ namespace Helios.Authentication.Controllers
 
                 if(!await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == usr.Id))
                 {
-                    var result = await AddTenantsTenantAdmins(usr, model.Password, isRole);
+                    var result = await AddTenantAdmins(usr, model.Password, isRole);
 
                     if (result)
                     {
@@ -1100,7 +1100,7 @@ namespace Helios.Authentication.Controllers
             };
 
 
-            async Task<bool> AddTenantsTenantAdmins(ApplicationUser? usr, string password, bool isRole)
+            async Task<bool> AddTenantAdmins(ApplicationUser? usr, string password, bool isRole)
             {
                 try
                 {
@@ -1136,20 +1136,15 @@ namespace Helios.Authentication.Controllers
                         }
                     }
 
-                    await _context.TenantAdmins.AddAsync(new TenantAdmin
+                    List<TenantAdmin> tenantAdmins = model.TenantIds.Select(x => new TenantAdmin
                     {
                         AuthUserId = usr.Id,
-                    });
-
-                    List<TenantsTenantAdmins> tenantsTenantAdmins = model.TenantIds.Select(x => new TenantsTenantAdmins
-                    {
-                        TenantId = x,
-                        TenantAdminId = usr.Id
+                        TenantId = x
                     }).ToList();
 
-                    if (tenantsTenantAdmins.Count > 0)
+                    if (tenantAdmins.Count > 0)
                     {
-                        await _context.TenantsTenantAdmins.AddRangeAsync(tenantsTenantAdmins);
+                        await _context.TenantAdmins.AddRangeAsync(tenantAdmins);
                     }
 
                     return await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -1172,9 +1167,9 @@ namespace Helios.Authentication.Controllers
                 from sysAdmin in systemAdmins.DefaultIfEmpty()
                 join tenantAdmin in _context.TenantAdmins on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
                 from tenAdmin in tenantAdmins.DefaultIfEmpty()
-                join tenantsTenantAdmin in _context.TenantsTenantAdmins on userManagerUser.Id equals tenantsTenantAdmin.TenantAdminId into tenantsTenantAdmins
-                from tta in tenantsTenantAdmins.DefaultIfEmpty()
-                join tenant in _context.Tenants on tta.TenantId equals tenant.Id into tenants
+                //join tenantsTenantAdmin in _context.TenantsTenantAdmins on userManagerUser.Id equals tenantsTenantAdmin.TenantAdminId into tenantsTenantAdmins
+                //from tta in tenantsTenantAdmins.DefaultIfEmpty()
+                join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
                 where
                     (sysAdmin != null && !sysAdmin.IsDeleted && sysAdmin.IsActive) ||
                     (tenAdmin != null && !tenAdmin.IsDeleted && tenAdmin.IsActive)
@@ -1202,6 +1197,61 @@ namespace Helios.Authentication.Controllers
             ).ToListAsync();
 
             return result; 
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> TenantAdminDelete(TenantAndSystemAdminDTO model)
+        {
+            var user = await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == model.Id).ToListAsync();
+
+            if (user.Count > 0)
+            {
+                _context.TenantAdmins.RemoveRange(user.Where(x=>model.TenantIds.Contains(x.TenantId)));
+
+                if (!user.Any(x=>!model.TenantIds.Contains(x.TenantId)))
+                {
+                    var aspNetUser = await _userManager.FindByIdAsync(user.First().AuthUserId.ToString());
+
+                    if (aspNetUser != null)
+                    {
+                        var aspNetResult = await _userManager.RemoveFromRoleAsync(aspNetUser, Roles.TenantAdmin.ToString());
+
+                        if (!aspNetResult.Succeeded)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }
+                }
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "An unexpected error occurred."
+            };
         }
         #endregion
     }

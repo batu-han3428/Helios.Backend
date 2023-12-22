@@ -281,22 +281,36 @@ const ListTenantAndSystemAdmin = props => {
 
     const [systemAdminDelete] = useSystemAdminDeleteMutation();
 
-    const [swalShown, setSwalShown] = useState({ show: false, value: null })
+    const [swalShown, setSwalShown] = useState({ show: false, value: null, isDropdown: true })
     const [deleteSubmit, setDeleteSubmit] = useState(false);
 
     const deleteUser = (item) => {
+        console.log('delete', item.roles)
+        let isDropdown = true;
+        if ((item.roles && item.roles.length === 1 && item.roles[0].roleId === 2) || (item.roles && item.roles.length === 1 && item.roles[0].roleId === 3 && item.tenants && item.tenants.length === 1)) {
+            isDropdown = false;
+        }
+
         Swal.fire({
-            title: props.t("You will not be able to recover this user!"),
+            title: isDropdown ? props.t("Please select which account of the user you want to delete.") : props.t("You will not be able to recover this user!"),
+            icon: "warning",
             html: '<div id="custom-container"></div>',
             showCancelButton: true,
+            confirmButtonColor: "#3bbfad",
+            confirmButtonText: props.t("Yes"),
+            cancelButtonText: props.t("Cancel"),
             didOpen: () => {
                 const customContainer = document.getElementById('custom-container');
                 if (customContainer) {
+                    const swalContrainer = document.getElementById('swal2-html-container');
+                    if (swalContrainer) {
+                        swalContrainer.style.overflowX = 'hidden'
+                    }
                     customContainer.style.display = 'block';
-                    setSwalShown({ show: true, value: item });
+                    setSwalShown({ show: true, value: item, isDropdown: isDropdown });
                 }
             },
-            didClose: () => setSwalShown({ show: false, value: null }),
+            didClose: () => setSwalShown({ show: false, value: null, isDropdown: isDropdown }),
             preConfirm: () => {
                 setDeleteSubmit(true);
                 return false;
@@ -360,7 +374,7 @@ const ListTenantAndSystemAdmin = props => {
             />
             {swalShown.show &&
                 createPortal(
-                    <DeleteTenantAndSystemAdmin data={swalShown.value} submit={deleteSubmit} setSubmit={setDeleteSubmit} />
+                    <DeleteTenantAndSystemAdmin isDropdown={swalShown.isDropdown} data={swalShown.value} submit={deleteSubmit} setSubmit={setDeleteSubmit} />
                     ,Swal.getHtmlContainer()
                 )
             }

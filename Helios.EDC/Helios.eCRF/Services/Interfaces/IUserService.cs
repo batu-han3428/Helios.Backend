@@ -40,5 +40,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> SetSystemAdminAndTenantAdminUser(SystemAdminDTO systemAdminDTO);
         Task<List<SystemUserModel>> GetTenantAndSystemAdminUserList();
         Task<List<TenantModel>> GetAuthTenantList();
+        Task<ApiResponse<dynamic>> TenantAndSystemAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO);
     }
 }

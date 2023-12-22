@@ -114,7 +114,6 @@ namespace Helios.Authentication.Contexts
 
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantAdmin> TenantAdmins { get; set; }
-        public DbSet<TenantsTenantAdmins> TenantsTenantAdmins { get; set; }
         public DbSet<TermsOfUse> TermsOfUses{ get; set; }
         public DbSet<TenantTermsOfUse> TenantTermsOfUses{ get; set; }
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }

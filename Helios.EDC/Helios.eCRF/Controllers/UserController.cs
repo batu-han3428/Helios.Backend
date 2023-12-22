@@ -468,6 +468,20 @@ namespace Helios.eCRF.Controllers
                 return StatusCode(500);
             }
         }
+
+
+        /// <summary>
+        /// seçili tenant admin ve system adminleri siler
+        /// </summary>
+        /// <param name="tenantAndSystemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> TenantAndSystemAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            var result = await _userService.TenantAndSystemAdminDelete(tenantAndSystemAdminDTO);
+            return Ok(result);
+        }
+        
         #endregion
 
         #region SSO

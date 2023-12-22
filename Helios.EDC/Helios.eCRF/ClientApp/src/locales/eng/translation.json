@@ -434,5 +434,6 @@
   "This tenant name is already exist.": "This tenant name is already exist.",
   "You will not be able to recover this site!": "You will not be able to recover this site!",
   "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.": "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.",
-  "Phone number": "Phone number"
+  "Phone number": "Phone number",
+  "Please select which account of the user you want to delete.": "Please select which account of the user you want to delete."
 }
