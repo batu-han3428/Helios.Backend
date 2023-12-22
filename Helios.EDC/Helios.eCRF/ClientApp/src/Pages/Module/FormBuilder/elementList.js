@@ -20,23 +20,23 @@ import Swal from 'sweetalert2'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 
 const elements = [
-    { key: 1, name: 'Label', icon: 'fas fa-ad' },
-    { key: 2, name: 'Text', icon: 'fas fa-ad' },
+    { key: 1, name: 'Label', icon: 'fas fa-text-height' },
+    { key: 2, name: 'Text', icon: 'fas fa-font' },
     { key: 3, name: 'Hidden', icon: 'fas fa-puzzle-piece' },
-    { key: 4, name: 'Numeric', icon: 'fas fa-ad' },
+    { key: 4, name: 'Numeric', icon: 'fas fa-sort-numeric-down' },
     { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
-    { key: 6, name: 'Date', icon: 'fas fa-calendar-alt' },
+    { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
     { key: 7, name: 'Calculation', icon: 'fas fa-calculator' },
-    { key: 8, name: 'Radio Button', icon: 'fas fa-ad' },
+    { key: 8, name: 'Radio Button', icon: 'ion ion-md-radio-button-on' },
     { key: 9, name: 'CheckList', icon: 'fas fa-check-square' },
-    { key: 10, name: 'Drop Down', icon: 'fas fa-ad' },
-    { key: 11, name: 'Drop Down Checklist', icon: 'fas fa-ad' },
-    { key: 12, name: 'File Attachmen', icon: 'fas fa-file' },
-    { key: 13, name: 'Range Slider', icon: 'fas fa-ad' },
-    { key: 14, name: 'Concomitant medication', icon: 'fas fa-ad' },
-    { key: 15, name: 'Table', icon: 'fas fa-ad' },
-    { key: 16, name: 'Datagrid', icon: 'fas fa-ad' },
-    { key: 17, name: 'Adverse Event', icon: 'fas fa-ad' }
+    { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
+    { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
+    { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
+    { key: 13, name: 'Range Slider', icon: 'fas fa-sliders-h' },
+    { key: 14, name: 'Concomitant medication', icon: 'dripicons-view-list' },
+    { key: 15, name: 'Table', icon: 'fas fa-table' },
+    { key: 16, name: 'Datagrid', icon: 'fas fa-table' },
+    { key: 17, name: 'Adverse Event', icon: 'fas fa-heartbeat' }
 ];
 
 function ElementList(props) {
