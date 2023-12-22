@@ -33,9 +33,10 @@ const baseUrl = "https://localhost:7196";
 class ListElementProperties extends Component {
     constructor(props) {
         super(props);
-        debugger;
+
         this.state = {
-            Id: '00000000-0000-0000-0000-000000000000',
+
+            Id: 0,
             layoutOptionGroup: [
                 { label: "Vertical", value: 1 },
                 { label: "Horizontal", value: 2 },
@@ -48,8 +49,10 @@ class ListElementProperties extends Component {
             allTagList: [],
             savedTagList: props.SavedTagList,
 
+            tagId: 0,
             tagKey: '',
             tagKeyDisableStatus: false,
+            tagAddDisableStatus: false,
             tagKeyInpCls: 'form-control',
             rows: [{
                 tagName: '',
@@ -80,6 +83,7 @@ class ListElementProperties extends Component {
         this.handleSaveTag = this.handleSaveTag.bind(this);
         this.handleEditSavedTag = this.handleEditSavedTag.bind(this);
         this.handleDeleteSavedTag = this.handleDeleteSavedTag.bind(this);
+        this.fillSavedTagList = this.fillSavedTagList.bind(this);
 
         this.getMultipleTagList();
     }
@@ -91,7 +95,7 @@ class ListElementProperties extends Component {
     getMultipleTagList() {
         var tgOptionGroup = [];
 
-        if (this.state.Id != "") {
+        if (this.state.Id == 0) {
             fetch(baseUrl + '/Module/GetMultipleTagList?id=' + this.state.Id, {
                 method: 'GET',
             })
@@ -141,11 +145,7 @@ class ListElementProperties extends Component {
             });
         });
 
-        this.props.changeSavedTagList(tgs);
-
-        this.setState(prevState => ({
-            savedTagList: [...prevState.savedTagList, ...tgs],
-        }));
+        this.fillSavedTagList(tgs);
     };
 
     toggleNewTagModal = (e, isEdit) => {
@@ -154,7 +154,8 @@ class ListElementProperties extends Component {
         this.state.tagKeyInpCls = 'form-control';
         this.state.operationType = e;
         this.state.modalState = !(this.state.modalState);
-        this.state.tagKeyDisableStatus = false;
+        this.state.tagAddDisableStatus = false;
+        this.state.tagKeyDisableStatus = e == 0 || isEdit;
         this.state.isEdit = isEdit;
     };
 
@@ -193,7 +194,7 @@ class ListElementProperties extends Component {
         var tagKey = this.state.tagKey;
         var isValid = true;
 
-        if (this.state.tagKey == '') {
+        if (this.state.tagKey == '' && this.state.operationType == 1) {
             isValid = false;
         }
 
@@ -258,10 +259,7 @@ class ListElementProperties extends Component {
                         });
                 }
                 else {
-                    this.setState(prevState => ({
-                        savedTagList: [...prevState.savedTagList, ...tags],
-                    }));
-
+                    this.fillSavedTagList(tags);
                     this.toggleNewTagModal();
 
                     this.toastRef.current.setToast({
@@ -298,7 +296,6 @@ class ListElementProperties extends Component {
 
                 this.setState(prevState => ({
                     savedTagList: [...prevState.savedTagList, ...newtgs],
-                }, () => {
                 }));
 
                 this.props.changeSavedTagList(newtgs);
@@ -311,39 +308,72 @@ class ListElementProperties extends Component {
         }
     };
 
-    handleEditSavedTag = (id, index) => {
-        var r = this.state.savedTagList.filter(function (e) {
-            if (e.id == id)
-                return e;
+    fillSavedTagList = (tgs) => {
+        var tmptgs = [];
+        this.state.savedTagList.filter(function (e) {
+            tmptgs.push(e);
         });
 
-        var n = [];
-        this.state.allTagList.filter(function (e) {
-            e.filter(function (ee) {
-                if (ee.id == id) {
-                    //return ee;
-                    //break;
-                    n.push(ee);
-                }
-            });
+        tgs.filter(function (e) {
+            tmptgs.push(e);
         });
 
-        var t = [{
-            tagName: r[0].tagName,
-            tagValue: r[0].tagValue,
-            tagNameInpCls: 'form-control',
-            tagValueInpCls: 'form-control',
-        }];
-
-        this.toggleNewTagModal(0, true);
-        this.state.tagKey = n[0].tagkey;
-        this.state.tagKeyDisableStatus = true;
-        this.isEdit = true;
-        this.state.editIndex = index;
+        this.state.savedTagList = [];
 
         this.setState(prevState => ({
-            rows: [...prevState.rows, ...t],
+            savedTagList: [...prevState.savedTagList, ...tmptgs],
         }));
+
+        this.props.changeSavedTagList(tmptgs);
+    };
+
+    handleEditSavedTag = (id, index) => {
+        this.state.editIndex = index;
+
+        if (id != undefined) {
+            var r = this.state.savedTagList[index];
+            var n = [];
+            this.state.allTagList.filter(function (e) {
+                e.filter(function (ee) {
+                    if (ee.id == id) {
+                        n.push(ee);
+                    }
+                });
+            });
+
+            var t = [{
+                tagName: r.tagName,
+                tagValue: r.tagValue,
+                tagNameInpCls: 'form-control',
+                tagValueInpCls: 'form-control',
+            }];
+
+            this.toggleNewTagModal(0, true);
+            this.state.tagKey = n[0].tagkey;
+            this.state.tagKeyDisableStatus = true;
+            this.state.tagAddDisableStatus = true;
+            this.isEdit = true;
+
+            this.setState(prevState => ({
+                rows: [...prevState.rows, ...t],
+            }));
+        }
+        else {
+            var tt = this.state.savedTagList[index];
+
+            this.setState((prevState) => ({
+                rows: [...prevState.rows, {
+                    tagKey: '', tagName: tt.tagName, tagValue: tt.tagValue,
+                    tagNameInpCls: 'form-control',
+                    tagValueInpCls: 'form-control',
+                }], // Add a new row to the state
+            }));
+
+            this.toggleNewTagModal(0, true);
+            this.state.tagKeyDisableStatus = true;
+            this.state.tagAddDisableStatus = true;
+            this.isEdit = true;
+        }
     }
 
     handleDeleteSavedTag = (index) => {
@@ -359,153 +389,158 @@ class ListElementProperties extends Component {
     render() {
         return (
             <div>
-                {/*<AccordionComp title="Option properties" body={*/}
-                <Row className="mb-3">
-                    <label
-                        htmlFor="example-text-input"
-                        className="col-md-2 col-form-label"
-                    >
-                        Layout
-                    </label>
-                    <div className="col-md-10">
-                        <Select
-                            value={this.state.layoutSelectedGroup}
-                            onChange={this.handleLayoutChange}
-                            options={this.state.layoutOptionGroup}
-                            classNamePrefix="select2-selection" />
-                    </div>
-                </Row>
-                <Row className="mb-3">
-                    <label
-                        htmlFor="example-text-input"
-                        className="col-md-2 col-form-label"
-                    >
-                        Tag list
-                    </label>
-                    <div className="col-md-10">
-                        <Select
-                            value={this.state.TagListSelectedGroup}
-                            onChange={this.handleTagListChange}
-                            options={this.state.TagListOptionGroup}
-                            classNamePrefix="select2-selection" />
-                    </div>
-                </Row>
-                <Row className="mb-3">
-                    <div className="table-responsive">
-                        <Table className="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Text to be shown to the user</th>
-                                    <th>Data to be saved to database</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.props.SavedTagList.map((row, index) => (
-                                    <tr key={index}>
-                                        <td>
-                                            {row.tagName}
-                                        </td>
-                                        <td>{row.tagValue}</td>
-                                        <td>
-                                            <Button className="actionBtn" onClick={() => this.handleEditSavedTag(row.id, index)}>
-                                                <i className="far fa-edit" ></i>
-                                            </Button>
-                                            <Button className="actionBtn" onClick={() => this.handleDeleteSavedTag(index)}>
-                                                <i className="far fa-trash-alt"></i>
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
-                </Row>
-                <Row className="mb-3">
-                    <input className="btn btn-primary col-md-3 ml-5" type="button" value="Add another" onClick={() => this.toggleNewTagModal(0, false)} />
-                    <input className="btn btn-success col-md-3 ml-5" type="button" value="Add a tag" onClick={() => this.toggleNewTagModal(1, false)} />
-                </Row>
-                <Col sm={6} md={4} xl={3}>
-                    <Modal isOpen={this.state.modalState} toggle={this.toggleNewTagModal} size="lg">
-                        <ModalHeader className="mt-0" toggle={this.toggleNewTagModal}>Add new tag</ModalHeader>
-                        <ModalBody>
-                            <div>
-                                <Row className="mb-3">
-                                    <label
-                                        htmlFor="example-text-input"
-                                        className="col-md-2 col-form-label"
-                                    >
-                                        Tag name
-                                    </label>
-                                    <div className="col-md-10">
-                                        <input
-                                            value={this.state.tagKey}
-                                            onChange={this.handleTagKeyChange}
-                                            className={this.state.tagKeyInpCls}
-                                            type="text"
-                                            disabled={this.state.tagKeyDisableStatus}
-                                        />
-                                    </div>
-                                </Row>
-                                <Row>
-                                    <div className="table-responsive">
-                                        <Table className="table table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Text to be shown to the user</th>
-                                                    <th>Data to be saved to database</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {this.state.rows.map((row, index) => (
-                                                    <tr key={index}>
-                                                        <td>
-                                                            <input
-                                                                type="text"
-                                                                className={row.tagNameInpCls}
-                                                                value={row.tagName}
-                                                                onChange={(e) => this.handleInputChange(index, 'tagName', e.target.value)}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="text"
-                                                                className={row.tagValueInpCls}
-                                                                value={row.tagValue}
-                                                                onChange={(e) => this.handleInputChange(index, 'tagValue', e.target.value)}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <Button className="actionBtn" onClick={() => this.removeRow(index)}>
-                                                                <i className="far fa-trash-alt"></i>
-                                                            </Button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </Table>
-                                        <Button color="success" onClick={this.addRow} className='mt-1' disabled={this.state.tagKeyDisableStatus}>
-                                            Add another
-                                        </Button>
-                                    </div>
-                                </Row>
+                <AccordionComp title="Option properties" body={
+                    <div>
+                        <Row className="mb-3">
+                            <label
+                                htmlFor="example-text-input"
+                                className="col-md-2 col-form-label"
+                            >
+                                Layout
+                            </label>
+                            <div className="col-md-10">
+                                <Select
+                                    value={this.state.layoutSelectedGroup}
+                                    onChange={this.handleLayoutChange}
+                                    options={this.state.layoutOptionGroup}
+                                    classNamePrefix="select2-selection" />
                             </div>
-                        </ModalBody>
-                        <ModalFooter>
-                            {/*<Button color="secondary" onClick={this.toggleNewTagModal}>*/}
-                            {/*    Close*/}
-                            {/*</Button>*/}
-                            <Button color="success" onClick={this.handleSaveTag}>
-                                Save
-                            </Button>
-                        </ModalFooter>
-                    </Modal>
-                </Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <label
+                                htmlFor="example-text-input"
+                                className="col-md-2 col-form-label"
+                            >
+                                Tag list
+                            </label>
+                            <div className="col-md-10">
+                                <Select
+                                    value={this.state.TagListSelectedGroup}
+                                    onChange={this.handleTagListChange}
+                                    options={this.state.TagListOptionGroup}
+                                    classNamePrefix="select2-selection" />
+                            </div>
+                        </Row>
+                        <Row className="mb-3">
+                            <div className="table-responsive">
+                                <Table className="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Text to be shown to the user</th>
+                                            <th>Data to be saved to database</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.props.SavedTagList.map((row, index) => (
+                                            <tr key={index}>
+                                                <td>
+                                                    {row.tagName}
+                                                </td>
+                                                <td>{row.tagValue}</td>
+                                                <td>
+                                                    <Button className="actionBtn" onClick={() => this.handleEditSavedTag(row.id, index)}>
+                                                        <i className="far fa-edit" ></i>
+                                                    </Button>
+                                                    <Button className="actionBtn" onClick={() => this.handleDeleteSavedTag(index)}>
+                                                        <i className="far fa-trash-alt"></i>
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </Row>
+                        <Row className="mb-3">
+                            <input className="btn btn-primary col-md-3 ml-5" type="button" value="Add another" onClick={() => this.toggleNewTagModal(0, false)} />
+                            <input className="btn btn-success col-md-3 ml-5" type="button" value="Add a tag" onClick={() => this.toggleNewTagModal(1, false)} />
+                        </Row>
+                        <Col sm={6} md={4} xl={3}>
+                            <Modal isOpen={this.state.modalState} toggle={this.toggleNewTagModal} size="lg">
+                                <ModalHeader className="mt-0" toggle={this.toggleNewTagModal}>Add new tag</ModalHeader>
+                                <ModalBody>
+                                    <div>
+                                        <Row className="mb-3">
+                                            <label
+                                                htmlFor="example-text-input"
+                                                className="col-md-2 col-form-label"
+                                                style={{ display: this.state.tagKeyDisableStatus ? 'none' : 'block' }}
+                                            >
+                                                Tag name
+                                            </label>
+                                            <div className="col-md-10">
+                                                <input
+                                                    value={this.state.tagKey}
+                                                    onChange={this.handleTagKeyChange}
+                                                    className={this.state.tagKeyInpCls}
+                                                    type="text"
+                                                    disabled={this.state.tagKeyDisableStatus}
+                                                    style={{ display: this.state.tagKeyDisableStatus ? 'none' : 'block' }}
+                                                />
+                                            </div>
+                                        </Row>
+                                        <Row>
+                                            <div className="table-responsive">
+                                                <Table className="table table-hover mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Text to be shown to the user</th>
+                                                            <th>Data to be saved to database</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {this.state.rows.map((row, index) => (
+                                                            <tr key={index}>
+                                                                <td>
+                                                                    <input
+                                                                        type="text"
+                                                                        className={row.tagNameInpCls}
+                                                                        value={row.tagName}
+                                                                        onChange={(e) => this.handleInputChange(index, 'tagName', e.target.value)}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <input
+                                                                        type="text"
+                                                                        className={row.tagValueInpCls}
+                                                                        value={row.tagValue}
+                                                                        onChange={(e) => this.handleInputChange(index, 'tagValue', e.target.value)}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <Button className="actionBtn" onClick={() => this.removeRow(index)}>
+                                                                        <i className="far fa-trash-alt"></i>
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </Table>
+                                                <Button color="success" onClick={this.addRow} className='mt-1' disabled={this.state.tagAddDisableStatus}>
+                                                    Add another
+                                                </Button>
+                                            </div>
+                                        </Row>
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter>
+                                    {/*<Button color="secondary" onClick={this.toggleNewTagModal}>*/}
+                                    {/*    Close*/}
+                                    {/*</Button>*/}
+                                    <Button color="success" onClick={this.handleSaveTag}>
+                                        Save
+                                    </Button>
+                                </ModalFooter>
+                            </Modal>
+                        </Col>
                 {/* } />*/}
                 <ToastComp
                     ref={this.toastRef}
                 />
+                    </div>
+                } />
             </div>
         );
     }

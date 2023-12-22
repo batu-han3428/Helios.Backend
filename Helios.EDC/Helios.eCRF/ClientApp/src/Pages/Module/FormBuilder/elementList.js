@@ -14,29 +14,29 @@ import {
 } from "reactstrap";
 import Properties from './properties.js';
 import './formBuilder.css';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 
 const elements = [
-    { key: 1, name: 'Label', icon: 'fas fa-ad' },
-    { key: 2, name: 'Text', icon: 'fas fa-ad' },
+    { key: 1, name: 'Label', icon: 'fas fa-text-height' },
+    { key: 2, name: 'Text', icon: 'fas fa-font' },
     { key: 3, name: 'Hidden', icon: 'fas fa-puzzle-piece' },
-    { key: 4, name: 'Numeric', icon: 'fas fa-ad' },
+    { key: 4, name: 'Numeric', icon: 'fas fa-sort-numeric-down' },
     { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
-    { key: 6, name: 'Date', icon: 'fas fa-calendar-alt' },
+    { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
     { key: 7, name: 'Calculation', icon: 'fas fa-calculator' },
-    { key: 8, name: 'Radio Button', icon: 'fas fa-ad' },
+    { key: 8, name: 'Radio Button', icon: 'ion ion-md-radio-button-on' },
     { key: 9, name: 'CheckList', icon: 'fas fa-check-square' },
-    { key: 10, name: 'Drop Down', icon: 'fas fa-ad' },
-    { key: 11, name: 'Drop Down Checklist', icon: 'fas fa-ad' },
-    { key: 12, name: 'File Attachmen', icon: 'fas fa-file' },
-    { key: 13, name: 'Range Slider', icon: 'fas fa-ad' },
-    { key: 14, name: 'Concomitant medication', icon: 'fas fa-ad' },
-    { key: 15, name: 'Table', icon: 'fas fa-ad' },
-    { key: 16, name: 'Datagrid', icon: 'fas fa-ad' },
-    { key: 17, name: 'Adverse Event', icon: 'fas fa-ad' }
+    { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
+    { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
+    { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
+    { key: 13, name: 'Range Slider', icon: 'fas fa-sliders-h' },
+    { key: 14, name: 'Concomitant medication', icon: 'dripicons-view-list' },
+    { key: 15, name: 'Table', icon: 'fas fa-table' },
+    { key: 16, name: 'Datagrid', icon: 'fas fa-table' },
+    { key: 17, name: 'Adverse Event', icon: 'fas fa-heartbeat' }
 ];
 
 function ElementList(props) {
@@ -45,30 +45,33 @@ function ElementList(props) {
 
     const baseUrl = "https://localhost:7196";
     const [moduleId, setModuleId] = useState(1);
-    const [elementId, setElementId] = useState("");
+    const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
+    const [activeTab, setActiveTab] = useState(false);
     const dispatch = useDispatch();
+    const userInformation = useSelector(state => state.rootReducer.Login);
 
     const removeBodyCss = () => {
         document.body.classList.add("no_padding");
     };
 
-    const tog_large = (e, type, id) => {
-        if (id != "") {
+    const tog_large = (e, type, id, tabid) => {
+        if (id != 0) {
             setElementId(id);
         }
         else {
             setElementType(type);
         }
 
+        setActiveTab(tabid);
         setmodal_large(!modal_large);
         removeBodyCss();
     };
 
     const copyElement = (e, id) => {
-        fetch(baseUrl + '/Module/CopyElement?id=' + id, {
+        fetch(baseUrl + '/Module/CopyElement?id=' + id + '&userId=' + userInformation.userId, {
             method: 'POST',
         })
             .then(response => response.json())
@@ -106,8 +109,7 @@ function ElementList(props) {
             if (result.isConfirmed) {
                 try {
                     dispatch(startloading());
-
-                    fetch(baseUrl + '/Module/DeleteElement?id=' + id, {
+                    fetch(baseUrl + '/Module/DeleteElement?id=' + id + '&userId=' + userInformation.userId, {
                         method: 'POST',
                     })
                         .then(response => response.json())
@@ -132,7 +134,7 @@ function ElementList(props) {
     }
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '')}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '', 0)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
     );
 
     const fetchData = () => {
@@ -154,7 +156,16 @@ function ElementList(props) {
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
                 </label>
-                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id)}><i className="far fa-edit"></i></Button>
+                {item.isDependent && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-link"></i></Button>
+                )}
+                {item.isRelated && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
+                )}
+                {item.elementType === 7 /*calculated*/ && (
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id,"1")}><i className="fas fa-calculator"></i></Button>
+                )}
+                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="far fa-edit"></i></Button>
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
@@ -183,7 +194,7 @@ function ElementList(props) {
                     <Modal isOpen={modal_large} toggle={tog_large} size="lg">
                         <ModalHeader className="mt-0" toggle={tog_large}>Properties</ModalHeader>
                         <ModalBody>
-                            <Properties Type={elementType} Id={elementId}></Properties>
+                            <Properties Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab}></Properties>
                         </ModalBody>
                     </Modal>
                 </Col>

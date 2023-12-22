@@ -7,6 +7,7 @@ namespace Helios.eCRF.Models
     {
         public Int64 Id { get; set; }
         public Int64 ModuleId { get; set; }
+        public Int64 TenantId { get; set; }
         public Int64 UserId { get; set; }
         public Int64 ElementDetailId { get; set; }
         public ElementType ElementType { get; set; } = 0;
@@ -19,6 +20,7 @@ namespace Helios.eCRF.Models
         public bool IsHidden { get; set; }
         public bool IsRequired { get; set; }
         public bool IsDependent { get; set; }
+        public bool IsRelated { get; set; }
         public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
 
@@ -61,10 +63,16 @@ namespace Helios.eCRF.Models
         //public string RightText { get; set; }
 
         ////dependent
-        public string DependentSourceFieldId { get; set; } = "";
-        public string DependentTargetFieldId { get; set; } = "";
+        public Int64 DependentSourceFieldId { get; set; }
+        public Int64 DependentTargetFieldId { get; set; }
         public int DependentCondition { get; set; } = 0;
         public int DependentAction { get; set; } = 0;
         public string DependentFieldValue { get; set; } = "";
+    }
+
+    public class ElementShortModel
+    {
+        public Int64 Id { get; set; }
+        public Int64 UserId { get; set; }
     }
 }
