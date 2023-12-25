@@ -18,6 +18,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
+import TextElement from '../Elements/textElement.js';
+import NumericElement from '../Elements/numericElement.js';
+import RadioElement from '../Elements/radioElement.js';
+import CheckElement from '../Elements/checkElement.js';
+import DropdownElement from '../Elements/dropdownElement.js';
+import DropdownCheckListElement from '../Elements/dropdownCheckListElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -134,7 +140,7 @@ function ElementList(props) {
     }
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, '', 0)}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
     );
 
     const fetchData = () => {
@@ -150,9 +156,45 @@ function ElementList(props) {
             });
     }
 
+    const renderElementsSwitch = (param) => {
+        switch (param.elementType) {
+            case 2:
+                return <TextElement IsDisable={"disabled"} />;
+            case 4:
+                return <NumericElement
+                    IsDisable={"disabled"}
+                    Unit={""}
+                    Mask={""}
+                    LowerLimit={0}
+                    UpperLimit={0}
+                />;
+            case 8: return <RadioElement
+                IsDisable={"disabled"}
+                ElementOptions={param.elementOptions}
+            />
+            case 9:
+                return <CheckElement
+                    IsDisable={"disabled"}
+                    ElementOptions={param.elementOptions}
+                />
+            case 10:
+                return <DropdownElement
+                    IsDisable={true}
+                    ElementOptions={param.elementOptions}
+                />
+            case 11:
+                return <DropdownCheckListElement
+                    IsDisable={true}
+                    ElementOptions={param.elementOptions}
+                />
+            default:
+                return <TextElement IsDisable={"disabled"} />;
+        }
+    }
+
     const content = moduleElementList.map((item) =>
-        <Row className="mb-3" key={item.id}>
-            <div>
+        <Row className="mb-6" key={item.id}>
+            <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
                 </label>
@@ -163,17 +205,14 @@ function ElementList(props) {
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
                 )}
                 {item.elementType === 7 /*calculated*/ && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id,"1")}><i className="fas fa-calculator"></i></Button>
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="fas fa-calculator"></i></Button>
                 )}
                 <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="far fa-edit"></i></Button>
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
             <div className="col-md-10">
-                <input
-                    className="form-control"
-                    type="text"
-                    disabled />
+                {renderElementsSwitch(item)}
             </div>
         </Row>
     );

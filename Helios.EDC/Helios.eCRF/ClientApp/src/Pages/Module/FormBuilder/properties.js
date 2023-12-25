@@ -243,7 +243,9 @@ class Properties extends React.Component {
     };
 
     handleIsHiddenChange(e) {
-        this.setState({ IsHidden: e.target.value });
+        this.setState((prevState) => ({
+            IsHidden: !prevState.IsHidden,
+        }));
     };
 
     handleIsRequiredChange() {

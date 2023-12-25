@@ -123,6 +123,8 @@ namespace Helios.Core.Controllers
                     Order = x.Order,
                     IsDependent = x.IsDependent,
                     IsRelated = x.IsRelated,
+                    ElementOptions = x.ElementDetail.ElementOptions,
+                    Width = x.Width
                 }).OrderBy(x => x.Order).ToListAsync();
 
             return result;
