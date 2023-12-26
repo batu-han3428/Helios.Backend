@@ -159,36 +159,53 @@ function ElementList(props) {
     const renderElementsSwitch = (param) => {
         switch (param.elementType) {
             case 2:
-                return <TextElement IsDisable={"disabled"} />;
+                var w = param.width === 0 ? 12 : param.width;
+                return <TextElement IsDisable={"disabled"}
+                    FieldWidths={w}
+                />;
             case 4:
+                w = param.width === 0 ? 12 : param.width;
                 return <NumericElement
                     IsDisable={"disabled"}
+                    FieldWidths={w}
                     Unit={""}
                     Mask={""}
                     LowerLimit={0}
                     UpperLimit={0}
                 />;
-            case 8: return <RadioElement
-                IsDisable={"disabled"}
-                ElementOptions={param.elementOptions}
-            />
+            case 8:
+                w = param.width === 0 ? 12 : param.width;
+                return <RadioElement
+                    IsDisable={"disabled"}
+                    FieldWidths={w}
+                    ElementOptions={param.elementOptions}
+                />
             case 9:
+                w = param.width === 0 ? 12 : param.width;
                 return <CheckElement
                     IsDisable={"disabled"}
+                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             case 10:
+                var w = param.width === 0 ? 12 : param.width;
                 return <DropdownElement
                     IsDisable={true}
+                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             case 11:
+                w = param.width === 0 ? 12 : param.width;
                 return <DropdownCheckListElement
                     IsDisable={true}
+                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             default:
-                return <TextElement IsDisable={"disabled"} />;
+                w = param.width === 0 ? 12 : param.width;
+                return <TextElement IsDisable={"disabled"}
+                    FieldWidths={w}
+                />;
         }
     }
 
@@ -211,7 +228,7 @@ function ElementList(props) {
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
-            <div className="col-md-10">
+            <div className="col-md-12">
                 {renderElementsSwitch(item)}
             </div>
         </Row>

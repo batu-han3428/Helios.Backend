@@ -4,17 +4,17 @@ import Select from "react-select";
 class DropdownCheckListElement extends Component {
     constructor(props) {
         super(props);
-
+        
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: props.FieldWidths,
+            FieldWidths: "mb-3 col-md-" + props.FieldWidths,
             ElementOptions: JSON.parse(props.ElementOptions),
         }
     }
 
     render() {
         return (
-            <div className="mb-3">
+            <div className={this.state.FieldWidths} >
                 <Select
                     options={this.state.ElementOptions}
                     classNamePrefix="select2-selection"

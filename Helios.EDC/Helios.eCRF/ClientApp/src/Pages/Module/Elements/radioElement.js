@@ -10,14 +10,14 @@ class RadioElement extends Component {
 
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: props.FieldWidths,
+            FieldWidths: "mb-3 col-md-" + props.FieldWidths,
             ElementOptions: JSON.parse(props.ElementOptions),
         }
     }
 
     render() {
         return (
-            <div className="mb-3">
+            <div className={this.state.FieldWidths}>
                 {this.state.ElementOptions.map((item, index) =>
                     <div className="form-check form-check-inline" key={index}>
                         <Input
