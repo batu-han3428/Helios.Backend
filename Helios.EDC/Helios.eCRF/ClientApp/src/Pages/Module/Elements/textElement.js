@@ -6,16 +6,18 @@ class TextElement extends Component {
 
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: props.FieldWidths,
         }
     }
 
     render() {
-        return(
-        <input
-            className="form-control"
-            type="text"
-            disabled={this.state.isDisable} />
-        )}
+        return (
+            <div style={{ marginRight: "20px" }} >
+                <input
+                    className="form-control"
+                    type="text"
+                    disabled={this.state.isDisable} />
+            </div>
+        )
+    }
 };
 export default TextElement;

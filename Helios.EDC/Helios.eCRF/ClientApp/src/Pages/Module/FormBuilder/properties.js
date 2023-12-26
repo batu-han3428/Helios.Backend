@@ -439,7 +439,7 @@ class Properties extends React.Component {
         this.state.DependentTargetFieldId = data.dependentTargetFieldId;
         this.state.DependentCondition = data.dependentCondition;
         this.state.DependentAction = data.dependentAction;
-        this.state.DependentFieldValue = data.dependentFieldValue == null ? [] : JSON.parse(data.dependentFieldValue);
+        this.state.DependentFieldValue = data.dependentFieldValue == "" ? [] : JSON.parse(data.dependentFieldValue);
 
         var w = this.state.widthOptionGroup.filter(function (e) {
             if (e.value == data.width)

@@ -159,7 +159,8 @@ function ElementList(props) {
     const renderElementsSwitch = (param) => {
         switch (param.elementType) {
             case 2:
-                return <TextElement IsDisable={"disabled"} />;
+                return <TextElement IsDisable={"disabled"}
+                />;
             case 4:
                 return <NumericElement
                     IsDisable={"disabled"}
@@ -168,10 +169,11 @@ function ElementList(props) {
                     LowerLimit={0}
                     UpperLimit={0}
                 />;
-            case 8: return <RadioElement
-                IsDisable={"disabled"}
-                ElementOptions={param.elementOptions}
-            />
+            case 8:
+                return <RadioElement
+                    IsDisable={"disabled"}
+                    ElementOptions={param.elementOptions}
+                />
             case 9:
                 return <CheckElement
                     IsDisable={"disabled"}
@@ -188,12 +190,15 @@ function ElementList(props) {
                     ElementOptions={param.elementOptions}
                 />
             default:
-                return <TextElement IsDisable={"disabled"} />;
+                return <TextElement IsDisable={"disabled"}
+                />;
         }
     }
 
-    const content = moduleElementList.map((item) =>
-        <Row className="mb-6" key={item.id}>
+    const content = moduleElementList.map((item) => {
+        var w = item.width === 0 ? 12 : item.width;
+        var cls = "mb-6 col-md-" + w;
+        return <Row className={cls} key={item.id}>
             <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
@@ -211,10 +216,9 @@ function ElementList(props) {
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
-            <div className="col-md-10">
                 {renderElementsSwitch(item)}
-            </div>
         </Row>
+        }
     );
 
     useEffect(() => {
@@ -238,7 +242,7 @@ function ElementList(props) {
                     </Modal>
                 </Col>
             </div>
-            <div style={{ margin: '10px 0 10px 215px' }}>
+            <div style={{ margin: '10px 20px 10px 215px' }} className="row">
                 {content}
             </div>
             <ToastComp

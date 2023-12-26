@@ -6,7 +6,6 @@ class NumericElement extends Component {
 
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: props.FieldWidths,
             Unit: props.Unit,
             Mask: props.Mask,
             LowerLimit: props.LowerLimit,

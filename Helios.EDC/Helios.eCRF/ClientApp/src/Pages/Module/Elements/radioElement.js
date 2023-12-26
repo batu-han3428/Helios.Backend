@@ -10,7 +10,6 @@ class RadioElement extends Component {
 
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: props.FieldWidths,
             ElementOptions: JSON.parse(props.ElementOptions),
         }
     }
