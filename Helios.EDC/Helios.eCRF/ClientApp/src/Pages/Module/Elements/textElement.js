@@ -3,16 +3,15 @@ import React, { Component } from 'react';
 class TextElement extends Component {
     constructor(props) {
         super(props);
-        
+
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: "col-md-" + props.FieldWidths,
         }
     }
 
     render() {
         return (
-            <div className={this.state.FieldWidths} >
+            <div style={{ marginRight: "20px" }} >
                 <input
                     className="form-control"
                     type="text"

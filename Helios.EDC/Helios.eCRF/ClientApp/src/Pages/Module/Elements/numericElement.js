@@ -6,7 +6,6 @@ class NumericElement extends Component {
 
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: "col-md-" + props.FieldWidths,
             Unit: props.Unit,
             Mask: props.Mask,
             LowerLimit: props.LowerLimit,
@@ -37,15 +36,13 @@ class NumericElement extends Component {
 
     render() {
         return (
-            <div className={this.state.FieldWidths} >
-                <input
+            <input
                 className="form-control"
                 type="number"
                 disabled={this.state.isDisable}
                 value={this.state.Value}
                 onChange={this.handleChange}
-                />
-            </div>
+            />
         )
     }
 };

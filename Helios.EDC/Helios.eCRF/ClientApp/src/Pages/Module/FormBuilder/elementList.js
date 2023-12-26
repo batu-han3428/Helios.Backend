@@ -159,58 +159,46 @@ function ElementList(props) {
     const renderElementsSwitch = (param) => {
         switch (param.elementType) {
             case 2:
-                var w = param.width === 0 ? 12 : param.width;
                 return <TextElement IsDisable={"disabled"}
-                    FieldWidths={w}
                 />;
             case 4:
-                w = param.width === 0 ? 12 : param.width;
                 return <NumericElement
                     IsDisable={"disabled"}
-                    FieldWidths={w}
                     Unit={""}
                     Mask={""}
                     LowerLimit={0}
                     UpperLimit={0}
                 />;
             case 8:
-                w = param.width === 0 ? 12 : param.width;
                 return <RadioElement
                     IsDisable={"disabled"}
-                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             case 9:
-                w = param.width === 0 ? 12 : param.width;
                 return <CheckElement
                     IsDisable={"disabled"}
-                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             case 10:
-                var w = param.width === 0 ? 12 : param.width;
                 return <DropdownElement
                     IsDisable={true}
-                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             case 11:
-                w = param.width === 0 ? 12 : param.width;
                 return <DropdownCheckListElement
                     IsDisable={true}
-                    FieldWidths={w}
                     ElementOptions={param.elementOptions}
                 />
             default:
-                w = param.width === 0 ? 12 : param.width;
                 return <TextElement IsDisable={"disabled"}
-                    FieldWidths={w}
                 />;
         }
     }
 
-    const content = moduleElementList.map((item) =>
-        <Row className="mb-6" key={item.id}>
+    const content = moduleElementList.map((item) => {
+        var w = item.width === 0 ? 12 : item.width;
+        var cls = "mb-6 col-md-" + w;
+        return <Row className={cls} key={item.id}>
             <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
                     {item.title}
@@ -228,10 +216,9 @@ function ElementList(props) {
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
-            <div className="col-md-12">
                 {renderElementsSwitch(item)}
-            </div>
         </Row>
+        }
     );
 
     useEffect(() => {
@@ -255,7 +242,7 @@ function ElementList(props) {
                     </Modal>
                 </Col>
             </div>
-            <div style={{ margin: '10px 0 10px 215px' }}>
+            <div style={{ margin: '10px 20px 10px 215px' }} className="row">
                 {content}
             </div>
             <ToastComp

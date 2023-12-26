@@ -7,14 +7,13 @@ class DropdownElement extends Component {
         
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: "mb-3 col-md-" + props.FieldWidths,
             ElementOptions: JSON.parse(props.ElementOptions),
         }
     }
 
     render() {
         return (
-            <div className={this.state.FieldWidths}>
+            <div className="mb-3">
                 <Select
                     classNamePrefix="select2-selection"
                     options={this.state.ElementOptions}

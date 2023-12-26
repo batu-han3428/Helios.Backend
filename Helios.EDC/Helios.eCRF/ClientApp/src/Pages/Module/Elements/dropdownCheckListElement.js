@@ -7,14 +7,13 @@ class DropdownCheckListElement extends Component {
         
         this.state = {
             isDisable: props.IsDisable,
-            FieldWidths: "mb-3 col-md-" + props.FieldWidths,
             ElementOptions: JSON.parse(props.ElementOptions),
         }
     }
 
     render() {
         return (
-            <div className={this.state.FieldWidths} >
+            <div className="mb-3" >
                 <Select
                     options={this.state.ElementOptions}
                     classNamePrefix="select2-selection"
