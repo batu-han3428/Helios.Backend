@@ -24,12 +24,18 @@ function FormBuilder(props) {
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
-            <div id="page-wrap" style={{ padding: "15px", width: '100%', marginTop: '70px' }}>
-                <div><h3>FormBuilder</h3>
-                </div>
-                <hr />
-                <div>
-                    <ElementList />
+            <div className="page-content">
+                <div className="container-fluid">
+                    <div className="page-title-box">
+                        <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
+                            <Col md={8}>
+                                <h6 className="page-title">FormBuilder</h6>
+                            </Col>
+                        </Row>
+                    </div>
+                    <div>
+                        <ElementList />
+                    </div>
                 </div>
             </div>
         </div>
