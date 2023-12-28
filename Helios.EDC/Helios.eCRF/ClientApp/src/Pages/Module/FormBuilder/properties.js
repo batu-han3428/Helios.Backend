@@ -24,6 +24,7 @@ import classnames from "classnames";
 import TextElementProperties from '../Elements/textElementProperties.js'
 import NumericElementProperties from '../Elements/numericElementProperties.js'
 import ListElementProperties from '../Elements/listElementProperties.js';
+import LabelElementProperties from "../Elements/labelElementProperties.js";
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
@@ -125,6 +126,7 @@ class Properties extends React.Component {
             //relation
             relationFieldOptionGroup: [],
             relationFieldsSelectedGroup: 0,
+            fieldWidthsW: "",
         };
         this.toastRef = React.createRef();
         this.fillDependentFieldList();
@@ -153,18 +155,15 @@ class Properties extends React.Component {
         this.handleDependentFieldChange = this.handleDependentFieldChange.bind(this);
         this.handleDependentConditionChange = this.handleDependentConditionChange.bind(this);
         this.handleDependentActionChange = this.handleDependentActionChange.bind(this);
-        //this.handleDependentFieldValueChange = this.handleDependentFieldValueChange.bind(this);
-        //this.handleDataReceived = this.handleDataReceived.bind(this);
         this.handleRelationFieldChange = this.handleRelationFieldChange.bind(this);
 
-        //this.changeFieldWidth.bind(this);
-        //this.changeDependentFieldValue.bind(this);
         this.changeUnit.bind(this);
         this.changeMask.bind(this);
         this.changeLowerLimit.bind(this);
         this.changeUpperLimit.bind(this);
         this.changeLayout.bind(this);
         this.changeSavedTagList.bind(this);
+        this.changeLableTitle.bind(this);
     }
 
     toggle(tab) {
@@ -177,12 +176,21 @@ class Properties extends React.Component {
 
     renderElementPropertiesSwitch(param) {
         switch (param) {
+            case 1:
+                this.state.showWhereElementPropeties = 2;
+                this.state.fieldWidthsW = "col-md-6";
+                return <LabelElementProperties
+                    changeLableTitle={this.changeLableTitle} Title={this.state.Title}
+                />;
+                break;
             case 2:
                 this.state.showWhereElementPropeties = 0;
+                this.state.fieldWidthsW = "col-md-10";
                 return <TextElementProperties changeUnit={this.changeUnit} Unit={this.state.Unit} />;
                 break;
             case 4:
                 this.state.showWhereElementPropeties = 0;
+                this.state.fieldWidthsW = "col-md-10";
                 return <NumericElementProperties
                     changeUnit={this.changeUnit} Unit={this.state.Unit}
                     changeMask={this.changeMask} Mask={this.state.Mask}
@@ -195,12 +203,15 @@ class Properties extends React.Component {
             case 10:
             case 11:
                 this.state.showWhereElementPropeties = 1;
+                this.state.fieldWidthsW = "col-md-10";
                 return <ListElementProperties
                     changeLayout={this.changeLayout} Layout={this.state.Layout}
                     changeSavedTagList={this.changeSavedTagList} SavedTagList={this.state.SavedTagList}
                 />;
                 break;
             default:
+                this.state.showWhereElementPropeties = 0;
+                this.state.fieldWidthsW = "col-md-10";
                 return <TextElementProperties changeUnit={this.changeUnit} />;
         }
     }
@@ -287,7 +298,6 @@ class Properties extends React.Component {
                 if (this.state.Id != 0) {
                     var t = this.state.DependentSourceFieldId;
 
-                    debugger;
                     var f = this.state.dependentFieldOptionGroup.filter(function (e) {
                         if (e.value == t)
                             return e;
@@ -376,6 +386,10 @@ class Properties extends React.Component {
         this.setState({ SavedTagList: newValue });
     };
 
+    changeLableTitle = (newValue) => {
+        this.setState({ Title: newValue });
+    };
+
     removeDependentFieldValueTag = (i) => {
         const newTags = [...this.state.DependentFieldValue];
         newTags.splice(i, 1);
@@ -419,7 +433,6 @@ class Properties extends React.Component {
     }
 
     fillElementProperties(data) {
-        debugger;
         this.state.Title = data.title;
         this.state.ElementName = data.elementName;
         this.state.Description = data.description;
@@ -535,7 +548,7 @@ class Properties extends React.Component {
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
                     Layout: this.state.Layout,
-                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList): ""
+                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : ""
                 })
             }).then(res => res.json())
                 .then(data => {
@@ -608,56 +621,62 @@ class Properties extends React.Component {
                                             Dependency
                                         </NavLink>
                                     </NavItem>
-                                    <NavItem>
-                                        <NavLink
-                                            style={{ cursor: "pointer" }}
-                                            className={classnames({
-                                                active: this.state.activeTab === "3",
-                                            })}
-                                            onClick={() => {
-                                                this.toggle("3");
-                                            }}
-                                        >
-                                            Validation
-                                        </NavLink>
-                                    </NavItem>
-                                    <NavItem>
-                                        <NavLink
-                                            style={{ cursor: "pointer" }}
-                                            className={classnames({
-                                                active: this.state.activeTab === "4",
-                                            })}
-                                            onClick={() => {
-                                                this.toggle("4");
-                                            }}
-                                        >
-                                            Metadata
-                                        </NavLink>
-                                    </NavItem>
+                                    {this.state.showWhereElementPropeties !== 2 &&
+                                        <>
+                                            <NavItem>
+                                                <NavLink
+                                                    style={{ cursor: "pointer" }}
+                                                    className={classnames({
+                                                        active: this.state.activeTab === "3",
+                                                    })}
+                                                    onClick={() => {
+                                                        this.toggle("3");
+                                                    }}
+                                                >
+                                                    Validation
+                                                </NavLink>
+                                            </NavItem><NavItem>
+                                                <NavLink
+                                                    style={{ cursor: "pointer" }}
+                                                    className={classnames({
+                                                        active: this.state.activeTab === "4",
+                                                    })}
+                                                    onClick={() => {
+                                                        this.toggle("4");
+                                                    }}
+                                                >
+                                                    Metadata
+                                                </NavLink>
+                                            </NavItem>
+                                        </>
+                                    }
                                 </Nav>
 
                                 <TabContent activeTab={this.state.activeTab} className="p-3 text-muted">
                                     <TabPane tabId="1">
                                         <Row>
                                             <Col sm="12">
-                                                <Row className="mb-3">
-                                                    <label
-                                                        htmlFor="example-text-input"
-                                                        className="col-md-2 col-form-label"
-                                                    >
-                                                        Title
-                                                    </label>
-                                                    <div className="col-md-10">
-                                                        <input
-                                                            value={this.state.Title}
-                                                            onChange={this.handleTitleChange}
-                                                            className="form-control"
-                                                            type="text"
-                                                            placeholder="Title"
+                                                {this.state.showWhereElementPropeties === 2 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                {this.state.showWhereElementPropeties !== 2 &&
+                                                    <Row className="mb-3">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-2 col-form-label"
+                                                        >
+                                                            Title
+                                                        </label>
+                                                        <div className="col-md-10">
+                                                            <input
+                                                                value={this.state.Title}
+                                                                onChange={this.handleTitleChange}
+                                                                className="form-control"
+                                                                type="text"
+                                                                placeholder="Title"
 
-                                                        />
-                                                    </div>
-                                                </Row>
+                                                            />
+                                                        </div>
+                                                    </Row>
+                                                }
                                                 <Row className="mb-3">
                                                     <label
                                                         htmlFor="example-text-input"
@@ -676,23 +695,25 @@ class Properties extends React.Component {
                                                         <div type="invalid" className="invalid-feedback">{this.state.RequiredError}</div>
                                                     </div>
                                                 </Row>
-                                                <Row className="mb-3">
-                                                    <label
-                                                        htmlFor="example-text-input"
-                                                        className="col-md-2 col-form-label"
-                                                    >
-                                                        Description
-                                                    </label>
-                                                    <div className="col-md-10">
-                                                        <input
-                                                            value={this.state.Description}
-                                                            onChange={this.handleDescriptionChange}
-                                                            className="form-control"
-                                                            type="text"
-                                                            placeholder="Description"
-                                                        />
-                                                    </div>
-                                                </Row>
+                                                {this.state.showWhereElementPropeties !== 2 &&
+                                                    <Row className="mb-3">
+                                                        <label
+                                                            htmlFor="example-text-input"
+                                                            className="col-md-2 col-form-label"
+                                                        >
+                                                            Description
+                                                        </label>
+                                                        <div className="col-md-10">
+                                                            <input
+                                                                value={this.state.Description}
+                                                                onChange={this.handleDescriptionChange}
+                                                                className="form-control"
+                                                                type="text"
+                                                                placeholder="Description"
+                                                            />
+                                                        </div>
+                                                    </Row>
+                                                }
                                                 <AccordionComp title="Advanced options" body={
                                                     <div>
                                                         {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
@@ -703,7 +724,7 @@ class Properties extends React.Component {
                                                             >
                                                                 Field width
                                                             </label>
-                                                            <div className="col-md-10">
+                                                            <div className={this.state.fieldWidthsW} >
                                                                 <Select
                                                                     value={this.state.widthSelectedGroup}
                                                                     onChange={this.handleWidthChange}
@@ -712,27 +733,31 @@ class Properties extends React.Component {
                                                                 />
                                                             </div>
                                                         </Row>
-                                                        {this.state.showWhereElementPropeties == 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                        {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                         <Row className="mb-3 ml-0">
-                                                            <div className="form-check col-md-6">
-                                                                <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
-                                                                <label className="form-check-label" htmlFor="isRequired">Is required</label>
-                                                            </div>
+                                                            {this.state.showWhereElementPropeties !== 2 &&
+                                                                <div className="form-check col-md-6">
+                                                                    <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
+                                                                    <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                                </div>
+                                                            }
                                                             <div className="form-check col-md-6">
                                                                 <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
                                                                 <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
                                                             </div>
                                                         </Row>
-                                                        <Row className="mb-3 ml-0">
-                                                            <div className="form-check col-md-6">
-                                                                <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
-                                                                <label className="form-check-label" htmlFor="canMissing">Can missing</label>
-                                                            </div>
-                                                        </Row>
+                                                        {this.state.showWhereElementPropeties !== 2 &&
+                                                            <Row className="mb-3 ml-0">
+                                                                <div className="form-check col-md-6">
+                                                                    <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
+                                                                    <label className="form-check-label" htmlFor="canMissing">Can missing</label>
+                                                                </div>
+                                                            </Row>
+                                                        }
                                                     </div>
                                                 } />
                                                 <div>
-                                                    {this.state.showWhereElementPropeties == 1 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                    {this.state.showWhereElementPropeties === 1 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                 </div>
                                             </Col>
                                         </Row>
@@ -776,18 +801,18 @@ class Properties extends React.Component {
                                         {this.state.IsDependent == 1 && (
                                             <>
                                                 <Row>
-                                                <Col sm="12">
-                                                    <div className="mb-3">
-                                                        <Label>Dependent field</Label>
-                                                        <Select
-                                                            value={this.state.dependentFieldsSelectedGroup}
-                                                            onChange={this.handleDependentFieldChange}
-                                                            options={this.state.dependentFieldOptionGroup}
-                                                            classNamePrefix="select2-selection"
-                                                            className={this.state.DepFldInputClass}
-                                                            isDisabled={this.state.dependentEnabled} />
-                                                    </div>
-                                                </Col>
+                                                    <Col sm="12">
+                                                        <div className="mb-3">
+                                                            <Label>Dependent field</Label>
+                                                            <Select
+                                                                value={this.state.dependentFieldsSelectedGroup}
+                                                                onChange={this.handleDependentFieldChange}
+                                                                options={this.state.dependentFieldOptionGroup}
+                                                                classNamePrefix="select2-selection"
+                                                                className={this.state.DepFldInputClass}
+                                                                isDisabled={this.state.dependentEnabled} />
+                                                        </div>
+                                                    </Col>
                                                 </Row>
                                                 <Row>
                                                     <Col sm="4">
@@ -826,10 +851,10 @@ class Properties extends React.Component {
                                                                 {this.state.DependentFieldValue.map((tag, i) => (
                                                                     <p key={tag}>
                                                                         {tag}
-                                                                        <button type="button" style={{ background: 'none' }} onClick={() => { this.removeDependentFieldValueTag(i); } }>+</button>
+                                                                        <button type="button" style={{ background: 'none' }} onClick={() => { this.removeDependentFieldValueTag(i); }}>+</button>
                                                                     </p>
                                                                 ))}
-                                                                <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.dependentFieldValueInputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; } } /></p>
+                                                                <p className="input-tag__tags__input"><input type="text" style={{ width: this.state.wth + 'px' }} onKeyDown={this.dependentFieldValueInputKeyDown} onKeyUp={this.inputKeyUp} ref={c => { this.tagInput = c; }} /></p>
                                                             </div>
                                                         </div>
                                                     </Col>
@@ -901,46 +926,50 @@ class Properties extends React.Component {
                                         {/*    </div>*/}
                                         {/*} />*/}
                                     </TabPane>
-                                    <TabPane tabId="3">
-                                        <Row>
-                                            <Col sm="12">
-                                                <CardText className="mb-0">
-                                                    Etsy mixtape wayfarers, ethical wes anderson tofu
-                                                    before they sold out mcsweeney's organic lomo
-                                                    retro fanny pack lo-fi farm-to-table readymade.
-                                                    Messenger bag gentrify pitchfork tattooed craft
-                                                    beer, iphone skateboard locavore carles etsy
-                                                    salvia banksy hoodie helvetica. DIY synth PBR
-                                                    banksy irony. Leggings gentrify squid 8-bit cred
-                                                    pitchfork. Williamsburg banh mi whatever
-                                                    gluten-free, carles pitchfork biodiesel fixie etsy
-                                                    retro mlkshk vice blog. Scenester cred you
-                                                    probably haven't heard of them, vinyl craft beer
-                                                    blog stumptown. Pitchfork sustainable tofu synth
-                                                    chambray yr.
-                                                </CardText>
-                                            </Col>
-                                        </Row>
-                                    </TabPane>
-                                    <TabPane tabId="4">
-                                        <Row>
-                                            <Col sm="12">
-                                                <CardText className="mb-0">
-                                                    Trust fund seitan letterpress, keytar raw denim
-                                                    keffiyeh etsy art party before they sold out
-                                                    master cleanse gluten-free squid scenester freegan
-                                                    cosby sweater. Fanny pack portland seitan DIY, art
-                                                    party locavore wolf cliche high life echo park
-                                                    Austin. Cred vinyl keffiyeh DIY salvia PBR, banh
-                                                    mi before they sold out farm-to-table VHS viral
-                                                    locavore cosby sweater. Lomo wolf viral, mustache
-                                                    readymade thundercats keffiyeh craft beer marfa
-                                                    ethical. Wolf salvia freegan, sartorial keffiyeh
-                                                    echo park vegan.
-                                                </CardText>
-                                            </Col>
-                                        </Row>
-                                    </TabPane>
+                                    {this.state.showWhereElementPropeties !== 2 &&
+                                        <>
+                                            <TabPane tabId="3">
+                                                <Row>
+                                                    <Col sm="12">
+                                                        <CardText className="mb-0">
+                                                            Etsy mixtape wayfarers, ethical wes anderson tofu
+                                                            before they sold out mcsweeney's organic lomo
+                                                            retro fanny pack lo-fi farm-to-table readymade.
+                                                            Messenger bag gentrify pitchfork tattooed craft
+                                                            beer, iphone skateboard locavore carles etsy
+                                                            salvia banksy hoodie helvetica. DIY synth PBR
+                                                            banksy irony. Leggings gentrify squid 8-bit cred
+                                                            pitchfork. Williamsburg banh mi whatever
+                                                            gluten-free, carles pitchfork biodiesel fixie etsy
+                                                            retro mlkshk vice blog. Scenester cred you
+                                                            probably haven't heard of them, vinyl craft beer
+                                                            blog stumptown. Pitchfork sustainable tofu synth
+                                                            chambray yr.
+                                                        </CardText>
+                                                    </Col>
+                                                </Row>
+                                            </TabPane>
+                                            <TabPane tabId="4">
+                                                <Row>
+                                                    <Col sm="12">
+                                                        <CardText className="mb-0">
+                                                            Trust fund seitan letterpress, keytar raw denim
+                                                            keffiyeh etsy art party before they sold out
+                                                            master cleanse gluten-free squid scenester freegan
+                                                            cosby sweater. Fanny pack portland seitan DIY, art
+                                                            party locavore wolf cliche high life echo park
+                                                            Austin. Cred vinyl keffiyeh DIY salvia PBR, banh
+                                                            mi before they sold out farm-to-table VHS viral
+                                                            locavore cosby sweater. Lomo wolf viral, mustache
+                                                            readymade thundercats keffiyeh craft beer marfa
+                                                            ethical. Wolf salvia freegan, sartorial keffiyeh
+                                                            echo park vegan.
+                                                        </CardText>
+                                                    </Col>
+                                                </Row>
+                                            </TabPane>
+                                        </>
+                                    }
                                 </TabContent>
                             </CardBody>
                         </Card>
@@ -952,7 +981,6 @@ class Properties extends React.Component {
                 <ToastComp
                     ref={this.toastRef}
                 />
-                {/*</ElementBase>*/}
             </div>
 
         );

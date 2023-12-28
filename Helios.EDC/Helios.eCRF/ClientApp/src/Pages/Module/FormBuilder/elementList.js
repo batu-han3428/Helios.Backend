@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ListItem, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Row,
     Col,
@@ -24,6 +24,7 @@ import RadioElement from '../Elements/radioElement.js';
 import CheckElement from '../Elements/checkElement.js';
 import DropdownElement from '../Elements/dropdownElement.js';
 import DropdownCheckListElement from '../Elements/dropdownCheckListElement.js';
+import LabelElement from '../Elements/labelElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -158,6 +159,8 @@ function ElementList(props) {
 
     const renderElementsSwitch = (param) => {
         switch (param.elementType) {
+            case 1:
+                return <LabelElement Title={param.title} />;
             case 2:
                 return <TextElement IsDisable={"disabled"}
                 />;
@@ -201,7 +204,7 @@ function ElementList(props) {
         return <Row className={cls} key={item.id}>
             <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
-                    {item.title}
+                    {item.elementType !== 1 && item.title}
                 </label>
                 {item.isDependent && (
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-link"></i></Button>
@@ -216,7 +219,10 @@ function ElementList(props) {
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
-                {renderElementsSwitch(item)}
+            {renderElementsSwitch(item)}
+            <label style={{ fontSize: "8pt", textDecoration:'none' }}>
+                {item.description}
+            </label>
         </Row>
         }
     );

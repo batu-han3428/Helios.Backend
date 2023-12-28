@@ -118,6 +118,7 @@ namespace Helios.Core.Controllers
                 {
                     Id = x.Id,
                     Title = x.Title,
+                    Description = x.Description,
                     ElementName = x.ElementName,
                     ElementType = x.ElementType,
                     Order = x.Order,

@@ -46,4 +46,5 @@ class NumericElement extends Component {
         )
     }
 };
+
 export default NumericElement;
