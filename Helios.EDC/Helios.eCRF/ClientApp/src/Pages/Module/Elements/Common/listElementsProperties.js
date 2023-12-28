@@ -1,6 +1,4 @@
-import { extend } from 'jquery';
-import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
-import ElementBase from './Base/elementBase.js';
+import React, { Component} from 'react';
 import {
     Button,
     Card,
@@ -23,14 +21,13 @@ import {
     TabPane,
     Label
 } from "reactstrap";
-import Properties from '../FormBuilder/properties.js';
-import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
+import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import Select from "react-select";
-import ToastComp from '../../../components/Common/ToastComp/ToastComp';
+import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
 
 const baseUrl = "https://localhost:7196";
 
-class ListElementProperties extends Component {
+class ListElementsProperties extends Component {
     constructor(props) {
         super(props);
 
@@ -546,4 +543,4 @@ class ListElementProperties extends Component {
     }
 };
 
-export default ListElementProperties;
+export default ListElementsProperties;

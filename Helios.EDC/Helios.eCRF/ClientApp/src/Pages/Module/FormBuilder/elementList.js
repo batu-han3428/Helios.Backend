@@ -18,13 +18,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2'
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
-import TextElement from '../Elements/textElement.js';
-import NumericElement from '../Elements/numericElement.js';
-import RadioElement from '../Elements/radioElement.js';
-import CheckElement from '../Elements/checkElement.js';
-import DropdownElement from '../Elements/dropdownElement.js';
-import DropdownCheckListElement from '../Elements/dropdownCheckListElement.js';
-import LabelElement from '../Elements/labelElement.js';
+import TextElement from '../Elements/TextElement/textElement.js';
+import NumericElement from '../Elements/NumericElement/numericElement.js';
+import RadioElement from '../Elements/RadioElement/radioElement.js';
+import CheckElement from '../Elements/CheckElement/checkElement.js';
+import DropdownElement from '../Elements/DropdownElement/dropdownElement.js';
+import DropdownCheckListElement from '../Elements/DropdownCheckListElement/dropdownCheckListElement.js';
+import LabelElement from '../Elements/LabelElement/labelElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },

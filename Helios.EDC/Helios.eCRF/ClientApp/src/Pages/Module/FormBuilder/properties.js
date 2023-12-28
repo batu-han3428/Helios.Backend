@@ -21,14 +21,13 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import classnames from "classnames";
-import TextElementProperties from '../Elements/textElementProperties.js'
-import NumericElementProperties from '../Elements/numericElementProperties.js'
-import ListElementProperties from '../Elements/listElementProperties.js';
-import LabelElementProperties from "../Elements/labelElementProperties.js";
+import TextElementProperties from '../Elements/TextElement/textElementProperties.js';
+import NumericElementProperties from '../Elements/NumericElement/numericElementProperties.js';
+import ListElementsProperties from '../Elements/Common/listElementsProperties.js';
+import LabelElementProperties from "../Elements/LabelElement/labelElementProperties.js";
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
-import TagInput from '../../../components/Common/TagComp/TagInput.js';
 
 const baseUrl = "https://localhost:7196";
 
@@ -204,7 +203,7 @@ class Properties extends React.Component {
             case 11:
                 this.state.showWhereElementPropeties = 1;
                 this.state.fieldWidthsW = "col-md-10";
-                return <ListElementProperties
+                return <ListElementsProperties
                     changeLayout={this.changeLayout} Layout={this.state.Layout}
                     changeSavedTagList={this.changeSavedTagList} SavedTagList={this.state.SavedTagList}
                 />;

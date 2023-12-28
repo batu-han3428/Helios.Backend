@@ -1,6 +1,4 @@
-import { extend } from 'jquery';
-import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
-import ElementBase from './Base/elementBase.js';
+import React, { Component } from 'react';
 import {
     Card,
     CardBody,
