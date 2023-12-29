@@ -18,16 +18,16 @@ import Authmiddleware from "./routes/middleware/Authmiddleware"
 // layouts Format
 import NonAuthLayout from "./components/NonAuthLayout"
 
-import NotFound from './Pages/NotFound/NotFound'
-import AccessDeniend from './Pages/AccessDenied/AccessDenied'
-import ContactUs from './Pages/ContactUs/ContactUs'
+import NotFound from './Pages/Common/NotFound/NotFound'
+import AccessDeniend from './Pages/Common/AccessDenied/AccessDenied'
+import ContactUs from './Pages/Common/ContactUs/ContactUs'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faLocationDot, faUserPlus, faUserGear, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl, faX } from '@fortawesome/free-solid-svg-icons'
+import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faLocationDot, faUserPlus, faUserGear, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl, faX, faGear } from '@fortawesome/free-solid-svg-icons'
 import { faRectangleList, faPaste, faFileLines } from '@fortawesome/free-regular-svg-icons';
 
 
-library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faRectangleList, faLocationDot, faUserPlus, faUserGear, faPaste, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFileLines, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl, faX)
+library.add(faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faRectangleList, faLocationDot, faUserPlus, faUserGear, faPaste, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFileLines, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl, faX, faGear)
 
 const App = () => {
   return (

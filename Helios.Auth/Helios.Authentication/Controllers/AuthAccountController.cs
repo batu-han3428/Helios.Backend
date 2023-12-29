@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Helios.Common.Model;
 using System.Web;
+using Helios.Common.Enums;
 
 namespace Helios.Authentication.Controllers
 {

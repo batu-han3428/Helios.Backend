@@ -1,4 +1,4 @@
-﻿using Helios.Authentication.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Authentication.Models
 {

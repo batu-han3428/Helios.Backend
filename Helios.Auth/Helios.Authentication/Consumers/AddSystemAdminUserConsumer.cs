@@ -42,6 +42,7 @@ namespace Helios.Authentication.Consumers
             using (StreamReader reader = File.OpenText(tempPath))
             {
                 mailContent = reader.ReadToEnd()
+                    .Replace("@FullName", model.Name + " " + model.LastName)
                     .Replace("@Email", model.Email)
                     .Replace("@Password", model.Password)
                     .Replace("@ContactLink", "https://localhost:44458/ContactUs")

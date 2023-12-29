@@ -1,12 +1,13 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Net;
 
 namespace Helios.eCRF.Services
 {
@@ -78,17 +79,17 @@ namespace Helios.eCRF.Services
         }
 
         #region Tenants
-        private async Task<List<TenantModel>> GetAuthTenantList()
+        public async Task<RestResponse<List<TenantModel>>> GetAuthTenantList()
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/GetTenantList", Method.Get);
                 var result = await client.ExecuteAsync<List<TenantModel>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        private async Task<List<TenantModel>> GetTenantsStudyCount(List<Int64> tenantIds)
+        private async Task<RestResponse<List<TenantModel>>> GetTenantsStudyCount(List<Int64> tenantIds)
         {
             using (var client = CoreServiceClient)
             {
@@ -96,49 +97,82 @@ namespace Helios.eCRF.Services
                 var req = new RestRequest("CoreUser/GetTenantsStudyCount", Method.Get);
                 req.AddParameter("tenantIds", tenantIdsString);
                 var result = await client.ExecuteAsync<List<TenantModel>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<List<TenantModel>> GetTenantList()
+        public async Task<RestResponse<List<TenantModel>>> GetTenantList()
         {
+            RestRequest restRequest = new RestRequest();
+
             var authTenants = await GetAuthTenantList();
 
-            if (authTenants != null && authTenants.Count > 0)
+            if (!authTenants.IsSuccessful && authTenants.Data == null)
             {
-                var counts = await GetTenantsStudyCount(authTenants.Select(x=>x.Id).ToList());
+                return new RestResponse<List<TenantModel>>(restRequest)
+                {
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
 
-                if (counts != null && counts.Count > 0)
+            if (authTenants.Data.Count > 0)
+            {
+                var counts = await GetTenantsStudyCount(authTenants.Data.Select(x=>x.Id).ToList());
+
+                if (!counts.IsSuccessful && counts.Data == null)
                 {
-                    return (from aTenants in authTenants
-                                 join count in counts on aTenants.Id equals count.Id into countGroup
-                                 from count in countGroup.DefaultIfEmpty()
-                                 select new TenantModel
-                                 {
-                                     Id = aTenants.Id,
-                                     Name = aTenants.Name,
-                                     ActiveStudies = (count != null) ? count.ActiveStudies + " / " + aTenants.StudyLimit : "0 / " + (aTenants.StudyLimit != null ? aTenants.StudyLimit : "0"),
-                                     CreatedAt = aTenants.CreatedAt,
-                                     UpdatedAt = aTenants.UpdatedAt
-                                 }).ToList();
+                    return new RestResponse<List<TenantModel>>(restRequest)
+                    {
+                        Data = null,
+                        StatusCode = HttpStatusCode.InternalServerError
+                    };
                 }
-                else
+
+                if (counts.Data.Count > 0)
                 {
-                    return authTenants;
+                    try
+                    {
+                        var data = (from aTenants in authTenants.Data
+                                    join count in counts.Data on aTenants.Id equals count.Id into countGroup
+                                    from count in countGroup.DefaultIfEmpty()
+                                    select new TenantModel
+                                    {
+                                        Id = aTenants.Id,
+                                        Name = aTenants.Name,
+                                        ActiveStudies = (count != null) ? count.ActiveStudies + " / " + aTenants.StudyLimit : "0 / " + (aTenants.StudyLimit != null ? aTenants.StudyLimit : "0"),
+                                        CreatedAt = aTenants.CreatedAt,
+                                        UpdatedAt = aTenants.UpdatedAt
+                                    }).ToList();
+
+                        return new RestResponse<List<TenantModel>>(restRequest)
+                        {
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception)
+                    {
+                        return new RestResponse<List<TenantModel>>(restRequest)
+                        {
+                            Data = null,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
                 }
             }
 
-            return new List<TenantModel>();
+            return authTenants;
         }
 
-        public async Task<TenantModel> GetTenant(Int64 tenantId)
+        public async Task<RestResponse<TenantModel>> GetTenant(Int64 tenantId)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/GetTenant", Method.Get);
                 req.AddParameter("tenantId", tenantId);
                 var result = await client.ExecuteAsync<TenantModel>(req);
-                return result.Data;
+                return result;
             }
         }
 
@@ -164,7 +198,7 @@ namespace Helios.eCRF.Services
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a bigger number.",
+                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.",
                         Values = new {Change= studyCount }
                     };
                 }
@@ -195,85 +229,173 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region Permissions
-        public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Int64 studyId)
+        public async Task<RestResponse<List<UserPermissionDTO>>> GetPermissionRoleList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetPermissionRoleList", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<UserPermissionDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<List<UserPermissionDTO>> GetRoleList(Int64 studyId)
+        public async Task<RestResponse<List<UserPermissionDTO>>> GetRoleList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetRoleList", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<UserPermissionDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        private async Task<UserPermissionRoleDTO> GetUserIdsRole(Int64 roleId)
+        private async Task<RestResponse<UserPermissionRoleDTO>> GetUserIdsRole(Int64 roleId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetUserIdsRole", Method.Get);
                 req.AddParameter("roleId", roleId);
                 var result = await client.ExecuteAsync<UserPermissionRoleDTO>(req);
-                return result.Data;
+                return result;
             }
         }
         
-        public async Task<List<UserPermissionRoleModel>> GetRoleUsers(Int64 roleId)
+        public async Task<RestResponse<List<UserPermissionRoleModel>>> GetRoleUsers(Int64 roleId)
         {
+            RestRequest restRequest = new RestRequest();
+
             var userIdsRole = await GetUserIdsRole(roleId);
 
-            if (userIdsRole != null && userIdsRole.UserIds.Count > 0)
+            if (!userIdsRole.IsSuccessful && userIdsRole.Data == null)
             {
-                var result = await GetUserList(userIdsRole.UserIds);
-
-                return result.Select(x => new UserPermissionRoleModel
+                return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
                 {
-                    Role = userIdsRole.Role,
-                    Name = x.Name + " " + x.LastName
-                }).ToList();
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
 
-            return new List<UserPermissionRoleModel>();
+            if (userIdsRole.Data.UserIds.Count > 0)
+            {
+                var result = await GetUserList(userIdsRole.Data.UserIds);
+
+                if (result.IsSuccessful && result.Data != null && result.Data.Count > 0)
+                {
+                    try
+                    {
+                        var data = result.Data.Select(x => new UserPermissionRoleModel
+                        {
+                            Role = userIdsRole.Data.Role,
+                            Name = x.Name + " " + x.LastName
+                        }).ToList();
+
+                        return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                        {
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception)
+                    {
+                        return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                        {
+                            Data = null,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
+                }
+                else
+                {
+                    return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                    {
+                        Data = null,
+                        StatusCode = HttpStatusCode.InternalServerError
+                    };
+                }
+            }
+            else
+            {
+                return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                {
+                    Data = new List<UserPermissionRoleModel>(),
+                    StatusCode = HttpStatusCode.OK
+                };
+            }
         }
 
-        private async Task<List<StudyUsersRolesDTO>> GetStudyUserIdsRole(Int64 studyId)
+        private async Task<RestResponse<List<StudyUsersRolesDTO>>> GetStudyUserIdsRole(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetStudyUserIdsRole", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<StudyUsersRolesDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<List<UserPermissionRoleModel>> GetStudyRoleUsers(Int64 studyId)
+        public async Task<RestResponse<List<UserPermissionRoleModel>>> GetStudyRoleUsers(Int64 studyId)
         {
+            RestRequest restRequest = new RestRequest();
+
             var userIdsRole = await GetStudyUserIdsRole(studyId);
 
-            if (userIdsRole.Count > 0)
+            if (!userIdsRole.IsSuccessful && userIdsRole.Data == null)
             {
-                var result = await GetUserList(userIdsRole.Select(x=>x.Id).ToList());
+                return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                {
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
 
-                return result.Join(userIdsRole, aspNetUser => aspNetUser.Id, studyUser => studyUser.Id, (aspNetUser, studyUser) =>
+            if (userIdsRole.Data.Count > 0)
+            {
+                var result = await GetUserList(userIdsRole.Data.Select(x=>x.Id).ToList());
+
+                if (result.IsSuccessful && result.Data != null && result.Data.Count > 0) {
+                    try
+                    {
+                        var data = result.Data.Join(userIdsRole.Data, aspNetUser => aspNetUser.Id, studyUser => studyUser.Id, (aspNetUser, studyUser) =>
                                     new UserPermissionRoleModel
                                     {
                                         Role = studyUser.RoleName,
                                         Name = aspNetUser.Name + " " + aspNetUser.LastName
                                     }).ToList();
-            }
 
-            return new List<UserPermissionRoleModel>();
+                        return new RestResponse<List<UserPermissionRoleModel>>(restRequest){
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception)
+                    {
+                        return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                        {
+                            Data = null,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
+                }
+                else
+                {
+                    return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                    {
+                        Data = null,
+                        StatusCode = HttpStatusCode.InternalServerError
+                    };
+                }
+            }
+            else
+            {
+                return new RestResponse<List<UserPermissionRoleModel>>(restRequest)
+                {
+                    Data = new List<UserPermissionRoleModel>(),
+                    StatusCode = HttpStatusCode.OK
+                };
+            }
         }
 
         public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
@@ -312,18 +434,18 @@ namespace Helios.eCRF.Services
 
         #region Study user
 
-        private async Task<List<StudyUserDTO>> GetStudyUsers(Int64 studyId)
+        private async Task<RestResponse<List<StudyUserDTO>>> GetStudyUsers(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetStudyUsers", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<StudyUserDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        private async Task<List<AspNetUserDTO>> GetUserList(List<Int64> AuthUserIds)
+        private async Task<RestResponse<List<AspNetUserDTO>>> GetUserList(List<Int64> AuthUserIds)
         {
             using (var client = AuthServiceClient)
             {
@@ -331,7 +453,7 @@ namespace Helios.eCRF.Services
                 var req = new RestRequest("AdminUser/GetUserList", Method.Get);
                 req.AddParameter("AuthUserIds", authUserIdsString);
                 var users = await client.ExecuteAsync<List<AspNetUserDTO>>(req);
-                return users.Data;
+                return users;
             }
         }
 
@@ -390,17 +512,30 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<List<StudyUserDTO>> GetStudyUserList(Int64 studyId)
+        public async Task<RestResponse<List<StudyUserDTO>>> GetStudyUserList(Int64 studyId)
         {
-            List<StudyUserDTO> studyUsers = await GetStudyUsers(studyId);
+            RestRequest restRequest = new RestRequest();
 
-            if (studyUsers.Count > 0)
+            var studyUsers = await GetStudyUsers(studyId);
+
+            if (!studyUsers.IsSuccessful && studyUsers.Data == null)
             {
-                List<AspNetUserDTO> aspNetUserDTOs = await GetUserList(studyUsers.Select(x => x.AuthUserId).ToList());
-
-                if (aspNetUserDTOs.Count > 0)
+                return new RestResponse<List<StudyUserDTO>>(restRequest)
                 {
-                    return aspNetUserDTOs.Join(studyUsers, aspNetUser => aspNetUser.Id, studyUser => studyUser.AuthUserId, (aspNetUser, studyUser) =>
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+
+            if (studyUsers.Data.Count > 0)
+            {
+                var aspNetUserDTOs = await GetUserList(studyUsers.Data.Select(x => x.AuthUserId).ToList());
+
+                if (aspNetUserDTOs.IsSuccessful && aspNetUserDTOs.Data != null && aspNetUserDTOs.Data.Count > 0)
+                {
+                    try
+                    {
+                        var data = aspNetUserDTOs.Data.Join(studyUsers.Data, aspNetUser => aspNetUser.Id, studyUser => studyUser.AuthUserId, (aspNetUser, studyUser) =>
                                     new StudyUserDTO
                                     {
                                         StudyUserId = studyUser.StudyUserId,
@@ -416,10 +551,34 @@ namespace Helios.eCRF.Services
                                         CreatedOn = studyUser.CreatedOn,
                                         LastUpdatedOn = studyUser.LastUpdatedOn
                                     }).ToList();
+                        return new RestResponse<List<StudyUserDTO>>(restRequest)
+                        {
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception)
+                    {
+                        return new RestResponse<List<StudyUserDTO>>(restRequest)
+                        {
+                            Data = null,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
+                }
+                else
+                {
+                    return new RestResponse<List<StudyUserDTO>>(restRequest)
+                    {
+                        Data = null,
+                        StatusCode = HttpStatusCode.InternalServerError
+                    };
                 }
             }
-
-            return new List<StudyUserDTO>();
+            else
+            {
+                return studyUsers;
+            }
         }
 
         public async Task<ApiResponse<StudyUserDTO>> GetStudyUser(string email, Int64 studyId)
@@ -542,46 +701,83 @@ namespace Helios.eCRF.Services
 
         #region Tenant user
 
-        private async Task<List<TenantUserDTO>> GetTenantUsers(Int64 tenantId)
+        private async Task<RestResponse<List<TenantUserDTO>>> GetTenantUsers(Int64 tenantId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/GetTenantUsers", Method.Get);
                 req.AddParameter("tenantId", tenantId);
                 var result = await client.ExecuteAsync<List<TenantUserDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<List<TenantUserDTO>> GetTenantUserList(Int64 tenantId)
+        public async Task<RestResponse<List<TenantUserDTO>>> GetTenantUserList(Int64 tenantId)
         {
-            List<TenantUserDTO> tenantUsers = await GetTenantUsers(tenantId);
+            RestRequest restRequest = new RestRequest();
 
-            if (tenantUsers.Count > 0)
+            var tenantUsers = await GetTenantUsers(tenantId);
+
+            if (!tenantUsers.IsSuccessful && tenantUsers.Data == null)
             {
-                List<AspNetUserDTO> aspNetUserDTOs = await GetUserList(tenantUsers.Select(x => x.AuthUserId).ToList());
-
-                if (aspNetUserDTOs.Count > 0)
+                return new RestResponse<List<TenantUserDTO>>(restRequest)
                 {
-                    return aspNetUserDTOs.Join(tenantUsers, aspNetUser => aspNetUser.Id, tenantUser => tenantUser.AuthUserId, (aspNetUser, tenantUser) =>
-                                    new TenantUserDTO
-                                    {
-                                        StudyUserId = tenantUser.StudyUserId,
-                                        AuthUserId = aspNetUser.Id,
-                                        StudyId = tenantUser.StudyId,
-                                        Name = aspNetUser.Name,
-                                        LastName = aspNetUser.LastName,
-                                        IsActive = tenantUser.IsActive,
-                                        Email = aspNetUser.Email,
-                                        StudyName = tenantUser.StudyName,
-                                        StudyDemoLive = tenantUser.StudyDemoLive,
-                                        CreatedOn = tenantUser.CreatedOn,
-                                        LastUpdatedOn = tenantUser.LastUpdatedOn
-                                    }).ToList();
-                }
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
 
-            return new List<TenantUserDTO>();
+            if (tenantUsers.Data.Count > 0)
+            {
+                var aspNetUserDTOs = await GetUserList(tenantUsers.Data.Select(x => x.AuthUserId).ToList());
+
+                if (aspNetUserDTOs.IsSuccessful && aspNetUserDTOs.Data != null && aspNetUserDTOs.Data.Count > 0)
+                {
+                    try
+                    {
+                        var data = aspNetUserDTOs.Data.Join(tenantUsers.Data, aspNetUser => aspNetUser.Id, tenantUser => tenantUser.AuthUserId, (aspNetUser, tenantUser) =>
+                                                            new TenantUserDTO
+                                                            {
+                                                                StudyUserId = tenantUser.StudyUserId,
+                                                                AuthUserId = aspNetUser.Id,
+                                                                StudyId = tenantUser.StudyId,
+                                                                Name = aspNetUser.Name,
+                                                                LastName = aspNetUser.LastName,
+                                                                IsActive = tenantUser.IsActive,
+                                                                Email = aspNetUser.Email,
+                                                                StudyName = tenantUser.StudyName,
+                                                                StudyDemoLive = tenantUser.StudyDemoLive,
+                                                                CreatedOn = tenantUser.CreatedOn,
+                                                                LastUpdatedOn = tenantUser.LastUpdatedOn
+                                                            }).ToList();
+
+                        return new RestResponse<List<TenantUserDTO>>(restRequest) { 
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception e)
+                    {
+                        return new RestResponse<List<TenantUserDTO>>(restRequest)
+                        {
+                            Data = null,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
+                }
+                else
+                {
+                    return new RestResponse<List<TenantUserDTO>>(restRequest)
+                    {
+                        Data = null,
+                        StatusCode = HttpStatusCode.InternalServerError
+                    };
+                }
+            }
+            else
+            {
+                return tenantUsers;
+            }
         }
 
         public async Task<ApiResponse<dynamic>> SetTenantUser(TenantUserModel tenantUserModel)
@@ -599,24 +795,24 @@ namespace Helios.eCRF.Services
 
         #region System Admin User
 
-        public async Task<ApiResponse<dynamic>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
+        public async Task<ApiResponse<SystemAdminDTO>> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/SetSystemAdminUser", Method.Post);
                 req.AddJsonBody(systemAdminDTO);
-                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                var result = await client.ExecuteAsync<ApiResponse<SystemAdminDTO>>(req);
                 return result.Data;
             }
         }
 
-        public async Task<List<SystemUserModel>> GetSystemAdminUserList()
+        public async Task<RestResponse<List<SystemUserModel>>> GetSystemAdminUserList()
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/GetSystemAdminUserList", Method.Get);
                 var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
-                return result.Data;
+                return result;
             }
         }
 
@@ -654,6 +850,131 @@ namespace Helios.eCRF.Services
         }
         #endregion
 
+        #region Tenant Admin User
+        private async Task<ApiResponse<dynamic>> SetTenantAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SetTenantAdminUser", Method.Post);
+                req.AddJsonBody(systemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> SetSystemAdminAndTenantAdminUser(SystemAdminDTO systemAdminDTO)
+        {
+            ApiResponse<dynamic> result = null;
+
+            if (systemAdminDTO.RoleIds.Contains((int)Roles.SystemAdmin))
+            {
+                var result1 = await SetSystemAdminUser(systemAdminDTO);
+
+                result = new ApiResponse<dynamic>
+                {
+                    IsSuccess = result1.IsSuccess,
+                    Message = result1.Message
+                };
+
+                if (!result1.IsSuccess)
+                {                   
+                    return result;
+                }
+                else
+                {
+                    systemAdminDTO.Password = result1.Values.Password;
+                }
+            }
+
+            if (systemAdminDTO.RoleIds.Contains((int)Roles.TenantAdmin))
+            {
+                result = await SetTenantAdminUser(systemAdminDTO);
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region Tenant And System Admin User
+        private async Task<ApiResponse<dynamic>> TenantAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/TenantAdminDelete", Method.Post);
+                req.AddJsonBody(tenantAndSystemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> TenantAndSystemAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            ApiResponse<dynamic> result = null;
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.SystemAdmin))
+            {
+                var result1 = await SystemAdminDelete(new SystemAdminDTO { Id = tenantAndSystemAdminDTO.Id, UserId = tenantAndSystemAdminDTO.UserId });
+
+                result = new ApiResponse<dynamic>
+                {
+                    IsSuccess = result1.IsSuccess,
+                    Message = result1.Message
+                };
+
+                if (!result1.IsSuccess)
+                {
+                    return result;
+                }
+            }
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.TenantAdmin))
+            {
+                result = await TenantAdminDelete(tenantAndSystemAdminDTO);
+            }
+
+            return result;
+        }
+
+        private async Task<ApiResponse<dynamic>> TenantAdminActivePassive(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/TenantAdminActivePassive", Method.Post);
+                req.AddJsonBody(tenantAndSystemAdminDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
+
+        public async Task<ApiResponse<dynamic>> TenantAndSystemAdminActivePassive(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            ApiResponse<dynamic> result = null;
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.SystemAdmin))
+            {
+                var result1 = await SystemAdminActivePassive(new SystemAdminDTO { Id = tenantAndSystemAdminDTO.Id, UserId = tenantAndSystemAdminDTO.UserId });
+
+                result = new ApiResponse<dynamic>
+                {
+                    IsSuccess = result1.IsSuccess,
+                    Message = result1.Message
+                };
+
+                if (!result1.IsSuccess)
+                {
+                    return result;
+                }
+            }
+
+            if (tenantAndSystemAdminDTO.RoleIds.Contains((Int64)Roles.TenantAdmin))
+            {
+                result = await TenantAdminActivePassive(tenantAndSystemAdminDTO);
+            }
+
+            return result;
+        }
+        #endregion
+
         #region SSO
         public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
         {
@@ -675,6 +996,17 @@ namespace Helios.eCRF.Services
                 req.AddParameter("userId", userId);
                 var result = await client.ExecuteAsync<List<SSOUserStudyModel>>(req);
                 return result.Data;
+            }
+        }
+
+        public async Task<RestResponse<List<SystemUserModel>>> GetTenantAndSystemAdminUserList(Int64 id)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetTenantAndSystemAdminUserList", Method.Get);
+                req.AddParameter("id", id);
+                var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
+                return result;
             }
         }
         #endregion
