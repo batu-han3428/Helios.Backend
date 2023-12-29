@@ -244,7 +244,7 @@ const User = props => {
             responsiblePersons.unshift(selectAllOption);
             option[0].options.push(...responsiblePersons);
             setOptionGroupResponsiblePerson(option);
-        
+
             const timer = setTimeout(() => {
                 generateInfoLabel();
             }, 10)
@@ -252,6 +252,13 @@ const User = props => {
             dispatch(endloading());
 
             return () => clearTimeout(timer);
+        }
+        else if (!isLoading && error) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+            dispatch(endloading());
         }
     }, [usersData, error, isLoading, props.t, dropdownOpen]);
 
@@ -269,6 +276,11 @@ const User = props => {
             });
             option[0].options.push(...roles);
             setOptionGroupRoles(option);
+        } else if (!isLoadingRoles && isErrorRoles) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
         }
     }, [rolesData, isErrorRoles, isLoadingRoles]);
 
@@ -293,6 +305,11 @@ const User = props => {
             option[0].options.push(...sites);
             console.log(option)
             setOptionGroupSites(option);
+        } else if (!isLoadingSites && isErrorSites) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
         }
     }, [sitesData, isErrorSites, isLoadingSites]);
 

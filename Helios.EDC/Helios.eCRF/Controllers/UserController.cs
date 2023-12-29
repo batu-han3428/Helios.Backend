@@ -75,15 +75,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTenantList()
         {
-            try
-            {
-                var result = await _userService.GetTenantList();
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetTenantList();
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
         /// <summary>
@@ -93,15 +86,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAuthTenantList()
         {
-            try
-            {
-                var result = await _userService.GetAuthTenantList();
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetAuthTenantList();
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
         /// <summary>
@@ -112,15 +98,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet("{tenantId}")]
         public async Task<IActionResult> GetTenant(Int64 tenantId)
         {
-            try
-            {
-                var result = await _userService.GetTenant(tenantId);
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetTenant(tenantId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
         /// <summary>
@@ -146,15 +125,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet("{studyId}")]
         public async Task<IActionResult> GetPermissionRoleList(Int64 studyId)
         {
-            try
-            {
-                var result = await _userService.GetPermissionRoleList(studyId);
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetPermissionRoleList(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -167,7 +139,7 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> GetRoleList(Int64 studyId)
         {
             var result = await _userService.GetRoleList(studyId);
-            return Ok(result);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -180,7 +152,7 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> GetRoleUsers(Int64 roleId)
         {
             var result = await _userService.GetRoleUsers(roleId);
-            return Ok(result);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -192,16 +164,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet("{studyId}")]
         public async Task<IActionResult> GetStudyRoleUsers(Int64 studyId)
         {
-            try
-            {
-                var result = await _userService.GetStudyRoleUsers(studyId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetStudyRoleUsers(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -255,7 +219,7 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> GetStudyUserList(Int64 studyId)
         {
             var result = await _userService.GetStudyUserList(studyId);
-            return Ok(result);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -348,7 +312,7 @@ namespace Helios.eCRF.Controllers
         public async Task<IActionResult> GetTenantUserList(Int64 tenantId)
         {
             var result = await _userService.GetTenantUserList(tenantId);
-            return Ok(result);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
         /// <summary>
@@ -386,15 +350,8 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<IActionResult> GetSystemAdminUserList()
         {
-            try
-            {
-                var result = await _userService.GetSystemAdminUserList();
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetSystemAdminUserList();
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -451,22 +408,17 @@ namespace Helios.eCRF.Controllers
             return Ok(result);
         }
 
+
         /// <summary>
         /// tenant admin ve sistem admin kullanıcılarını listeler
         /// </summary>
+        /// <param name="id"></param>
         /// <returns>kullanıcılar</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetTenantAndSystemAdminUserList()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTenantAndSystemAdminUserList(Int64 id)
         {
-            try
-            {
-                var result = await _userService.GetTenantAndSystemAdminUserList();
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _userService.GetTenantAndSystemAdminUserList(id);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -481,7 +433,18 @@ namespace Helios.eCRF.Controllers
             var result = await _userService.TenantAndSystemAdminDelete(tenantAndSystemAdminDTO);
             return Ok(result);
         }
-        
+
+        /// <summary>
+        /// seçili tenant admin ve system adminlerin aktif/pasif durumunu ayarlar
+        /// </summary>
+        /// <param name="tenantAndSystemAdminDTO">kullanıcı bilgileri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        public async Task<IActionResult> TenantAndSystemAdminActivePassive(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
+        {
+            var result = await _userService.TenantAndSystemAdminActivePassive(tenantAndSystemAdminDTO);
+            return Ok(result);
+        }
         #endregion
 
         #region SSO

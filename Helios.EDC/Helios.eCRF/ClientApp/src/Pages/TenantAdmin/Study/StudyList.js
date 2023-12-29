@@ -159,10 +159,12 @@ const StudyList = props => {
             const timer = setTimeout(() => {
                 generateInfoLabel();
             }, 10)
-            
+
             dispatch(endloading());
 
             return () => clearTimeout(timer);
+        } else if (!isLoading && error) {
+            dispatch(endloading());
         }
     }, [studyData, error, isLoading, props.t]);
 

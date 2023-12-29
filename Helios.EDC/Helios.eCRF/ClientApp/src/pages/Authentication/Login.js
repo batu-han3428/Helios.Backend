@@ -76,7 +76,7 @@ const Login = props => {
 
             const response = await loginPost(formData);
 
-            if (response.data.isSuccess) {
+            if (response.data.isSuccess) {               
                 setLocalStorage("accessToken", response.data.values.accessToken);
                 let result = onLogin();
 
@@ -95,9 +95,14 @@ const Login = props => {
                 if (response.data.values !== null) {
                     if (response.data.values.hasOwnProperty("redirect")) {
                         navigate(response.data.values.redirect);
-                    } 
+                    }
                     toastRef.current.setToast({
                         message: response.data.values.hasOwnProperty("change") ? props.t(response.data.message).replace(/@Change/g, response.data.values.change) : props.t(response.data.message),
+                        stateToast: false
+                    });
+                } else {
+                    toastRef.current.setToast({
+                        message: props.t(response.data.message),
                         stateToast: false
                     });
                 }

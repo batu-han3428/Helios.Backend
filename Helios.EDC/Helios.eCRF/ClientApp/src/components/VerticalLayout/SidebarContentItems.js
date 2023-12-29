@@ -317,12 +317,12 @@
         {
             label: "Users",
             to: "/tenant-and-system-admins",
-            icon: "fa-solid fa-house"
+            icon: "fa-solid fa-user-plus"
         },
         {
             label: "Settings",
             to: "/settings",
-            icon: "fa-solid fa-house"
+            icon: "fa-solid fa-gear"
         }
     ]
 };

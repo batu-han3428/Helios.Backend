@@ -79,6 +79,8 @@ const TenantsList = props => {
             setTable(updatedTenantsData);
 
             dispatch(endloading());
+        } else if (!isLoading && error) {
+            dispatch(endloading());
         }
     }, [tenantsData, error, isLoading]);
 

@@ -124,7 +124,13 @@ const AddOrUpdateStudy = props => {
             setApiStudyData(studyData);
             setSkip(true);
             dispatch(endloading());
-        } else {
+        } else if (!isLoading && error) {
+            dispatch(endloading());
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+        }else {
             dispatch(endloading());
         }
     }, [studyData, error, isLoading]);

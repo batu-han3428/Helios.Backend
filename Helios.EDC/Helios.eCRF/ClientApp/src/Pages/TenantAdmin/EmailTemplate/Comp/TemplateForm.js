@@ -60,6 +60,7 @@ const TemplateForm = props => {
             dispatch(endloading());
         } else if (isError && !isLoading) {
             dispatch(endloading());
+            props.toast(props.t("An unexpected error occurred."), false);
         } else {
             dispatch(endloading());
         }

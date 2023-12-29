@@ -77,6 +77,8 @@ const PermissionShowUsersRole = props => {
             dispatch(endloading());
 
             return () => clearTimeout(timer);
+        } else if (!isLoading && isError) {
+            dispatch(endloading());
         }
     }, [resultData, isError, isLoading, props.t]);
 

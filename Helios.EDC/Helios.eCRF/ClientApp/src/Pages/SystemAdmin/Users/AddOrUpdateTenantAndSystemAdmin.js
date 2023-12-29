@@ -72,6 +72,8 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
             tenants.unshift(selectAllOption);
             option[0].options.push(...tenants);
             setOptionGroupTenants(option);
+        } else if (!isLoading && isError) {
+            props.toast(props.t("An unexpected error occurred."), false);
         }
     }, [tenantsData, isError, isLoading]);
 
@@ -105,7 +107,6 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
                 }),
         }),
         onSubmit: async (values) => {
-            console.log(values)
             try {
                 dispatch(startloading());
 
@@ -227,10 +228,8 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
                             const selectedValues = selectedOptions.map(option => option.value);
                             const selectAll = selectedValues.find(value => Array.isArray(value));
                             if (selectAll !== undefined) {
-                                console.log(["All", selectAll])
                                 validationType.setFieldValue('roleIds', ["All", selectAll]);
                             } else {
-                                console.log(selectedValues)
                                 validationType.setFieldValue('roleIds', selectedValues);
                             }
                         }}

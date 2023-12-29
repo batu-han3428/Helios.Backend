@@ -8,13 +8,12 @@ import ModalComp from "../../../components/Common/ModalComp/ModalComp";
 import AddOrUpdateTenantAndSystemAdmin from "./AddOrUpdateTenantAndSystemAdmin";
 import ToastComp from "../../../components/Common/ToastComp/ToastComp";
 import { useSelector, useDispatch } from 'react-redux';
-import { useSystemAdminListGetQuery, useSystemAdminActivePassiveMutation, useSystemAdminResetPasswordMutation, useSystemAdminDeleteMutation } from '../../../store/services/SystemAdmin/SystemAdmin';
-import { useUserListGetQuery } from '../../../store/services/SystemAdmin/Users/SystemUsers';
+import { useSystemAdminResetPasswordMutation } from '../../../store/services/SystemAdmin/SystemAdmin';
+import { useLazyUserListGetQuery } from '../../../store/services/SystemAdmin/Users/SystemUsers';
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2';
 import { countryNumber } from "../../../helpers/phonenumber_helper";
 import DeleteTenantAndSystemAdmin from "./DeleteTenantAndSystemAdmin";
-import ReactDOM from 'react-dom/client'
 import { createPortal } from 'react-dom'
 
 const ListTenantAndSystemAdmin = props => {
@@ -42,7 +41,7 @@ const ListTenantAndSystemAdmin = props => {
     }
 
     const addSystemAdmin = () => {
-        setModalTitle(props.t("Add a admin"));
+        setModalTitle(props.t("Add an admin"));
         setModalButtonText(props.t("Save"));
         modalRef.current.tog_backdrop();
     }
@@ -50,8 +49,8 @@ const ListTenantAndSystemAdmin = props => {
     const getActions = (item) => {
         const actions = (
             <div className="icon-container">
-                <div title={props.t("Active or passive")} className="icon icon-lock" onClick={() => { activePassiveUser(item) }}></div>
-                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteUser(item) }}></div>
+                <div title={props.t("Active or passive")} className="icon icon-lock" onClick={() => { deleteOrActivePassiveUser(item, false) }}></div>
+                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteOrActivePassiveUser(item, true) }}></div>
                 <div title={props.t("Send a new password")} className="icon icon-resetpassword" onClick={() => { resetPasswordUser(item) }}></div>
             </div>);
         return actions;
@@ -66,7 +65,7 @@ const ListTenantAndSystemAdmin = props => {
                 width: 150
             },
             {
-                label: props.t("Last Name"),
+                label: props.t("Last name"),
                 field: "lastName",
                 sort: "asc",
                 width: 150
@@ -165,12 +164,17 @@ const ListTenantAndSystemAdmin = props => {
         return tenantsDropdown;
     }
 
-    const { data: usersData, error, isLoading } = useUserListGetQuery();
+    const [trigger, { data: usersData, error, isLoading }] = useLazyUserListGetQuery();
+
+    useEffect(() => {
+        if (userInformation.userId) {
+            trigger(userInformation.userId);
+        }
+    }, [userInformation.userId]) 
 
     useEffect(() => {
         dispatch(startloading());
         if (!isLoading && !error && usersData) {
-            console.log(usersData);
             const updatedUsersData = usersData.map(item => {
                 return {
                     ...item,
@@ -184,59 +188,14 @@ const ListTenantAndSystemAdmin = props => {
             setTable(updatedUsersData);
 
             dispatch(endloading());
+        } else if (!isLoading && error) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+            dispatch(endloading());
         }
     }, [usersData, error, isLoading, dropdownOpen, dropdownTenantOpen]);
-
-    const [systemAdminActivePassive] = useSystemAdminActivePassiveMutation();
-
-    const activePassiveUser = (item) => {
-        Swal.fire({
-            title: props.t("User active/passive status will be changed."),
-            text: props.t("Do you confirm?"),
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3bbfad",
-            confirmButtonText: props.t("Yes"),
-            cancelButtonText: props.t("Cancel"),
-            closeOnConfirm: false
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    dispatch(startloading());
-                    const response = await systemAdminActivePassive({
-                        id: item.id,
-                        userId: userInformation.userId,
-                        email: item.email
-                    });
-                    if (response.data.isSuccess) {
-                        dispatch(endloading());
-                        Swal.fire({
-                            title: "",
-                            text: props.t(response.data.message),
-                            icon: "success",
-                            confirmButtonText: props.t("Ok"),
-                        });
-                    } else {
-                        dispatch(endloading());
-                        Swal.fire({
-                            title: "",
-                            text: response.data.message,
-                            icon: "error",
-                            confirmButtonText: props.t("OK"),
-                        });
-                    }
-                } catch (error) {
-                    dispatch(endloading());
-                    Swal.fire({
-                        title: "",
-                        text: props.t("An error occurred while processing your request."),
-                        icon: "error",
-                        confirmButtonText: props.t("OK"),
-                    });
-                }
-            }
-        });
-    }
 
     const [systemAdminResetPassword] = useSystemAdminResetPasswordMutation();
 
@@ -279,20 +238,20 @@ const ListTenantAndSystemAdmin = props => {
         }
     }
 
-    const [systemAdminDelete] = useSystemAdminDeleteMutation();
+    const [swalShown, setSwalShown] = useState({ show: false, value: null, isDropdown: true, isDelete: true })
+    const [deleteOrActivePassiveSubmit, setDeleteOrActivePassiveSubmit] = useState(false);
 
-    const [swalShown, setSwalShown] = useState({ show: false, value: null, isDropdown: true })
-    const [deleteSubmit, setDeleteSubmit] = useState(false);
+    const deleteOrActivePassiveUser = (item, isDelete) => {
 
-    const deleteUser = (item) => {
-        console.log('delete', item.roles)
+        const newItem = { ...item, userId: userInformation.userId };
+
         let isDropdown = true;
-        if ((item.roles && item.roles.length === 1 && item.roles[0].roleId === 2) || (item.roles && item.roles.length === 1 && item.roles[0].roleId === 3 && item.tenants && item.tenants.length === 1)) {
+        if ((newItem.roles && newItem.roles.length === 1 && newItem.roles[0].roleId === 2) || (newItem.roles && newItem.roles.length === 1 && newItem.roles[0].roleId === 3 && newItem.tenants && newItem.tenants.length === 1)) {
             isDropdown = false;
         }
 
         Swal.fire({
-            title: isDropdown ? props.t("Please select which account of the user you want to delete.") : props.t("You will not be able to recover this user!"),
+            title: isDropdown ? isDelete ? props.t("Please select which account of the user you want to delete.") : props.t("Please select which account of the user you want to active/passive.") : isDelete ? props.t("You will not be able to recover this user!") : props.t("User active/passive status will be changed."),
             icon: "warning",
             html: '<div id="custom-container"></div>',
             showCancelButton: true,
@@ -302,20 +261,44 @@ const ListTenantAndSystemAdmin = props => {
             didOpen: () => {
                 const customContainer = document.getElementById('custom-container');
                 if (customContainer) {
-                    const swalContrainer = document.getElementById('swal2-html-container');
-                    if (swalContrainer) {
-                        swalContrainer.style.overflowX = 'hidden'
+                    const swalContainer = document.getElementById('swal2-html-container');
+                    if (swalContainer) {
+                        swalContainer.style.overflowX = 'hidden';
                     }
                     customContainer.style.display = 'block';
-                    setSwalShown({ show: true, value: item, isDropdown: isDropdown });
+                    setSwalShown({ show: true, value: newItem, isDropdown: isDropdown, isDelete: isDelete });
                 }
             },
-            didClose: () => setSwalShown({ show: false, value: null, isDropdown: isDropdown }),
+            didClose: () => {
+                setSwalShown({ show: false, value: null, isDropdown: true, isDelete: true });
+                setDeleteOrActivePassiveSubmit(false);
+            },
             preConfirm: () => {
-                setDeleteSubmit(true);
+                setDeleteOrActivePassiveSubmit(true);
                 return false;
             },
-        })
+        });
+    }
+
+    const swalClose = (isSuccess, message) => {
+        setSwalShown({ show: false, value: null, isDropdown: true, isDelete: true });
+        setDeleteOrActivePassiveSubmit(false);
+        if (isSuccess) {
+            Swal.fire({
+                title: "",
+                text: message,
+                icon: "success",
+                confirmButtonText: props.t("Ok"),
+            });
+        } else {
+            dispatch(endloading());
+            Swal.fire({
+                title: "",
+                text: message,
+                icon: "error",
+                confirmButtonText: props.t("OK"),
+            });
+        }
     }
 
     return (
@@ -325,7 +308,7 @@ const ListTenantAndSystemAdmin = props => {
                     <div className="page-title-box">
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black", paddingBottom: "5px" }}>
                             <Col md={8}>
-                                <h6 className="page-title">{props.t("Add system admin")}</h6>
+                                <h6 className="page-title">{props.t("Add an admin")}</h6>
                             </Col>
                             <Col md="4">
                                 <div className="float-end d-none d-md-block" style={{ marginLeft: "10px" }}>
@@ -335,7 +318,7 @@ const ListTenantAndSystemAdmin = props => {
                                         type="button"
                                         onClick={addSystemAdmin}
                                     >
-                                        <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add a system admin")}
+                                        <FontAwesomeIcon icon="fa-solid fa-plus" /> {props.t("Add an admin")}
                                     </Button>
                                 </div>
                             </Col>
@@ -374,8 +357,8 @@ const ListTenantAndSystemAdmin = props => {
             />
             {swalShown.show &&
                 createPortal(
-                    <DeleteTenantAndSystemAdmin isDropdown={swalShown.isDropdown} data={swalShown.value} submit={deleteSubmit} setSubmit={setDeleteSubmit} />
-                    ,Swal.getHtmlContainer()
+                    <DeleteTenantAndSystemAdmin swalClose={swalClose} swalShown={swalShown} submit={deleteOrActivePassiveSubmit} />
+                    , document.getElementById('custom-container') || document.body
                 )
             }
         </>

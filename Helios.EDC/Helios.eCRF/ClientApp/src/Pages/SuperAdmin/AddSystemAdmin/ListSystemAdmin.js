@@ -112,6 +112,12 @@ const ListSystemAdmin = props => {
             setTable(updatedUsersData);
 
             dispatch(endloading());
+        } else if (!isLoading && error) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+            dispatch(endloading());
         }
     }, [usersData, error, isLoading]);
 

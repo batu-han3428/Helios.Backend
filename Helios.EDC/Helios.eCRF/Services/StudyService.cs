@@ -13,25 +13,25 @@ namespace Helios.eCRF.Services
         }
 
         #region Study
-        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
+        public async Task<RestResponse<List<StudyDTO>>> GetStudyList(bool isLock)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetStudyList", Method.Get);
                 req.AddParameter("isLock", isLock);
                 var result = await client.ExecuteAsync<List<StudyDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<StudyDTO> GetStudy(Int64 studyId)
+        public async Task<RestResponse<StudyDTO>> GetStudy(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetStudy", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<StudyDTO>(req);
-                return result.Data;
+                return result;
             }
         }
 
@@ -80,25 +80,25 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region Site
-        public async Task<List<SiteDTO>> GetSiteList(Int64 studyId)
+        public async Task<RestResponse<List<SiteDTO>>> GetSiteList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetSiteList", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<SiteDTO>>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<SiteDTO> GetSite(Int64 siteId)
+        public async Task<RestResponse<SiteDTO>> GetSite(Int64 siteId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetSite", Method.Get);
                 req.AddParameter("siteId", siteId);
                 var result = await client.ExecuteAsync<SiteDTO>(req);
-                return result.Data;
+                return result;
             }
         }
 
@@ -126,14 +126,14 @@ namespace Helios.eCRF.Services
         #endregion
 
         #region Mail Template
-        public async Task<List<EmailTemplateModel>> GetEmailTemplateList(Int64 studyId)
+        public async Task<RestResponse<List<EmailTemplateModel>>> GetEmailTemplateList(Int64 studyId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetEmailTemplateList", Method.Get);
                 req.AddParameter("studyId", studyId);
                 var result = await client.ExecuteAsync<List<EmailTemplateModel>>(req);
-                return result.Data;
+                return result;
             }
         }
 
@@ -148,18 +148,18 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<EmailTemplateModel> GetEmailTemplate(Int64 templateId)
+        public async Task<RestResponse<EmailTemplateModel>> GetEmailTemplate(Int64 templateId)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetEmailTemplate", Method.Get);
                 req.AddParameter("templateId", templateId);
                 var result = await client.ExecuteAsync<EmailTemplateModel>(req);
-                return result.Data;
+                return result;
             }
         }
 
-        public async Task<List<EmailTemplateTagModel>> GetEmailTemplateTagList(Int64 tenantId, int templateType)
+        public async Task<RestResponse<List<EmailTemplateTagModel>>> GetEmailTemplateTagList(Int64 tenantId, int templateType)
         {
             using (var client = CoreServiceClient)
             {
@@ -167,7 +167,7 @@ namespace Helios.eCRF.Services
                 req.AddParameter("tenantId", tenantId);
                 req.AddParameter("templateType", templateType);
                 var result = await client.ExecuteAsync<List<EmailTemplateTagModel>>(req);
-                return result.Data;
+                return result;
             }
         }
 

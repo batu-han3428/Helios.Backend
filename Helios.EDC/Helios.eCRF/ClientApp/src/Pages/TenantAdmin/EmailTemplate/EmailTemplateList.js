@@ -143,6 +143,10 @@ const EmailTemplateList = props => {
             return () => clearTimeout(timer);
         } else if (isError && !isLoading) {
             dispatch(endloading());
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
         }
     }, [emailTemplateData, isError, isLoading, props.t]);
 

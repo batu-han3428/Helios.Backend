@@ -238,6 +238,12 @@ const TenantUsers = props => {
             dispatch(endloading());
 
             return () => clearTimeout(timer);
+        } else if (!isLoading && error) {
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+            dispatch(endloading());
         }
     }, [tenantUsersData, error, isLoading, props.t]);
 

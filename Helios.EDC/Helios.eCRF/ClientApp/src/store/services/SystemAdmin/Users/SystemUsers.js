@@ -17,14 +17,9 @@ export const SystemUsersApi = createApi({
     }),
     endpoints: (builder) => ({
         userListGet: builder.query({
-            query: () => `/User/GetTenantAndSystemAdminUserList`,
+            query: (id) => `/User/GetTenantAndSystemAdminUserList/${id}`,
             providesTags: ['User'],
         }),
-        //userGet: builder.query({
-        //    query: (data) => `/User/GetStudyUser/${data.email}/${data.studyId}`,
-        //    refetchOnMountOrArgChange: true,
-        //    keepUnusedDataFor: 0,
-        //}),
         userSet: builder.mutation({
             query: (data) => ({
                 url: '/User/SetSystemAdminAndTenantAdminUser',
@@ -33,52 +28,32 @@ export const SystemUsersApi = createApi({
             }),
             invalidatesTags: ['User'],
         }),
-        //userActivePassive: builder.mutation({
-        //    query: (data) => ({
-        //        url: '/User/ActivePassiveStudyUser',
-        //        method: 'POST',
-        //        body: data,
-        //    }),
-        //    invalidatesTags: ['User'],
-        //}),
-        //usersActivePassive: builder.mutation({
-        //    query: (data) => ({
-        //        url: '/User/ActivePassiveStudyUsers',
-        //        method: 'POST',
-        //        body: data,
-        //    }),
-        //    invalidatesTags: ['User'],
-        //}),
-        //userDelete: builder.mutation({
-        //    query: (data) => ({
-        //        url: '/User/DeleteStudyUser',
-        //        method: 'POST',
-        //        body: data,
-        //    }),
-        //    invalidatesTags: ['User'],
-        //}),
-        //userResetPassword: builder.mutation({
-        //    query: (data) => ({
-        //        url: '/User/UserResetPassword',
-        //        method: 'POST',
-        //        body: data,
-        //    }),
-        //    invalidatesTags: ['User'],
-        //}),
+        userActivePassive: builder.mutation({
+            query: (data) => ({
+                url: '/User/TenantAndSystemAdminActivePassive',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['User'],
+        }),
+        userDelete: builder.mutation({
+            query: (data) => ({
+                url: '/User/TenantAndSystemAdminDelete',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['User'],
+        }),
     }),
 });
 
 
-export const { useUserListGetQuery } = SystemUsersApi;
+export const { useLazyUserListGetQuery } = SystemUsersApi;
 
-//export const { useUserGetQuery } = UsersApi;
 
 export const { useUserSetMutation } = SystemUsersApi;
 
-//export const { useUserActivePassiveMutation } = UsersApi;
+export const { useUserActivePassiveMutation } = SystemUsersApi;
 
-//export const { useUsersActivePassiveMutation } = UsersApi;
 
-//export const { useUserDeleteMutation } = UsersApi;
-
-//export const { useUserResetPasswordMutation } = UsersApi;
+export const { useUserDeleteMutation } = SystemUsersApi;

@@ -37,6 +37,7 @@ const TemplateTagList = props => {
             dispatch(endloading());
         } else if (isError && !isLoading) {
             dispatch(endloading());
+            props.toast(props.t("An unexpected error occurred."), false);
         }
     }, [emailTemplateTagData, isError, isLoading]);
 

@@ -28,16 +28,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetStudyList(bool isLock)
         {
-            try
-            {
-                var result = await _studyService.GetStudyList(isLock);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetStudyList(isLock);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -50,16 +42,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetStudy(Int64 studyId)
         {
-            try
-            {
-                var result = await _studyService.GetStudy(studyId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetStudy(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -105,16 +89,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetSiteList(Int64 studyId)
         {
-            try
-            {
-                var result = await _studyService.GetSiteList(studyId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetSiteList(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -127,16 +103,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetSite(Int64 siteId)
         {
-            try
-            {
-                var result = await _studyService.GetSite(siteId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetSite(siteId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -181,16 +149,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetEmailTemplateList(Int64 studyId)
         {
-            try
-            {
-                var result = await _studyService.GetEmailTemplateList(studyId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetEmailTemplateList(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -218,16 +178,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetEmailTemplate(Int64 templateId)
         {
-            try
-            {
-                var result = await _studyService.GetEmailTemplate(templateId);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetEmailTemplate(templateId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 
@@ -241,16 +193,8 @@ namespace Helios.eCRF.Controllers
         [Authorize(Roles = "TenantAdmin")]
         public async Task<IActionResult> GetEmailTemplateTagList(Int64 tenantId, int templateType)
         {
-            try
-            {
-                var result = await _studyService.GetEmailTemplateTagList(tenantId, templateType);
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500);
-            }
+            var result = await _studyService.GetEmailTemplateTagList(tenantId, templateType);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
 

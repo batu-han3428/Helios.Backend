@@ -102,7 +102,13 @@ const Sites = props => {
             setSkip(true);
             modalRef.current.tog_backdrop();
             dispatch(endloading());
-        } 
+        } else if (!apiIsLoading && apiError) {
+            dispatch(endloading());
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+        }
     }, [apiData, apiError, apiIsLoading]);
 
     const getActions = (id) => {
@@ -183,7 +189,13 @@ const Sites = props => {
             });
             setTableData(updatedSiteData);
             dispatch(endloading());
-        } else {
+        } else if (!isLoading && error) {
+            dispatch(endloading());
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+        }else {
             dispatch(endloading());
         }
     }, [siteData, error, isLoading]);

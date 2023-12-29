@@ -170,6 +170,10 @@ const AddOrUpdateTenant = props => {
             dispatch(endloading());
         } else if (isError && !isLoading) {
             dispatch(endloading());
+            toastRef.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
         }
     }, [tenantData, isError, isLoading]);
 

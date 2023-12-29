@@ -282,5 +282,7 @@
   "You will not be able to recover this site!": "Bu merkezi kurtaramayacaksınız!",
   "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.": "Aboneliğe @Change tane çalışma eklenmiştir. Bu sebeple daha küçük bir rakam giremezsiniz.",
   "Phone number": "Telefon numarası",
-  "Please select which account of the user you want to delete.": "Lütfen kullanıcının hangi hesabını silmek istediğinizi seçiniz."
+  "Please select which account of the user you want to delete.": "Lütfen kullanıcının hangi hesabını silmek istediğinizi seçiniz.",
+  "Add an admin": "Yönetici ekle",
+  "Please select which account of the user you want to active/passive.": "Lütfen kullanıcının hangi hesabını aktife/pasife almak istediğinizi seçiniz."
 }
