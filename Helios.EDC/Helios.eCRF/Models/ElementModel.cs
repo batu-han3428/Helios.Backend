@@ -36,7 +36,7 @@ namespace Helios.eCRF.Models
         //public string MetaDataTags { get; set; }
         //public int EProPageNumber { get; set; }
         //public string ButtonText { get; set; }
-        //public string DefaultValue { get; set; }
+        public string DefaultValue { get; set; } = "";
         public string Unit { get; set; } = "";
         public string Mask { get; set; } = "";
         public string LowerLimit { get; set; } = "";
@@ -50,7 +50,7 @@ namespace Helios.eCRF.Models
         //public int EndMonth { get; set; }
         //public int EndYear { get; set; }
         //public int StartYear { get; set; }
-        //public bool AddTodayDate { get; set; }
+        public bool AddTodayDate { get; set; }
 
         ////chkbox, radio, ddown vs
         public string ElementOptions { get; set; } //json text value

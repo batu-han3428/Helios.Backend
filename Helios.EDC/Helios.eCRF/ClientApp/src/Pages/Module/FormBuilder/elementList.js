@@ -47,16 +47,16 @@ const elements = [
 ];
 
 function ElementList(props) {
-
     const toastRef = useRef();
 
     const baseUrl = "https://localhost:7196";
-    const [moduleId, setModuleId] = useState(1);
+    const [moduleId, setModuleId] = useState(props.ModuleId);
     const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elementType, setElementType] = useState(0);
     const [modal_large, setmodal_large] = useState(false);
     const [activeTab, setActiveTab] = useState(false);
+    const [elementName, setElementName] = useState('');
     const dispatch = useDispatch();
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -65,8 +65,11 @@ function ElementList(props) {
     };
 
     const tog_large = (e, type, id, tabid) => {
+        getElementNameByKey(type);
+
         if (id != 0) {
             setElementId(id);
+            setElementType(0);
         }
         else {
             setElementType(type);
@@ -215,17 +218,23 @@ function ElementList(props) {
                 {item.elementType === 7 /*calculated*/ && (
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="fas fa-calculator"></i></Button>
                 )}
-                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="far fa-edit"></i></Button>
+                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
                 <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
             </div>
             {renderElementsSwitch(item)}
-            <label style={{ fontSize: "8pt", textDecoration:'none' }}>
+            <label style={{ fontSize: "8pt", textDecoration: 'none' }}>
                 {item.description}
             </label>
         </Row>
-        }
+    }
     );
+
+    const getElementNameByKey = (key) => {
+        const item = elements.find(item => item.key === key);
+        var name = item ? item.name : null;
+        setElementName(name + " properties");
+    };
 
     useEffect(() => {
         dispatch(startloading());
@@ -241,9 +250,9 @@ function ElementList(props) {
                 </div>
                 <Col sm={6} md={4} xl={3}>
                     <Modal isOpen={modal_large} toggle={tog_large} size="lg">
-                        <ModalHeader className="mt-0" toggle={tog_large}>Properties</ModalHeader>
+                        <ModalHeader className="mt-0" toggle={tog_large}>{elementName}</ModalHeader>
                         <ModalBody>
-                            <Properties Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab}></Properties>
+                            <Properties ModuleId={moduleId} Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab}></Properties>
                         </ModalBody>
                     </Modal>
                 </Col>

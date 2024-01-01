@@ -45,9 +45,13 @@ function ModuleList() {
             <div className="icon-container">
                 <div className="icon icon-update" onClick={e => tog_large(e, id)}></div>
                 <div className="icon icon-delete" onClick={() => { deleteModule(id) }}></div>
-                <div className="icon icon-demo" onClick={() => navigate("/formBuilder", { params: { moduleId: id } })}></div>
+                <div className="icon icon-demo" onClick={() => { navigateToFormBuilder(id) }}></div>
             </div>);
         return actions;
+    };
+
+    const navigateToFormBuilder = (id) => {
+        navigate(`/formBuilder/${id}`);
     };
 
     const handleNameChange = (e) => {

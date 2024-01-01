@@ -25,6 +25,8 @@ import TextElementProperties from '../Elements/TextElement/textElementProperties
 import NumericElementProperties from '../Elements/NumericElement/numericElementProperties.js';
 import ListElementsProperties from '../Elements/Common/listElementsProperties.js';
 import LabelElementProperties from "../Elements/LabelElement/labelElementProperties.js";
+import DateElementProperties from "../Elements/DateElement/dateElementProperties.js";
+import CalculationElementProperties from "../Elements/CalculationElement/calculationElementProperties.js";
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
@@ -34,7 +36,7 @@ const baseUrl = "https://localhost:7196";
 class Properties extends React.Component {
     constructor(props) {
         super(props);
-
+        
         this.state = {
             activeTab: props.ActiveTab,
             showWhereElementPropeties: 0,
@@ -43,7 +45,7 @@ class Properties extends React.Component {
             Id: props.Id,
             TenantId: props.TenantId,
             UserId: props.UserId,
-            ModuleId: 1,
+            ModuleId: props.ModuleId,
             ElementDetailId: 0,
             ElementType: props.Type,
             ElementName: '',
@@ -94,7 +96,8 @@ class Properties extends React.Component {
             UpperLimit: '',
             Layout: 0,
             SavedTagList: [],
-
+            DefaultValue:'',
+            AddTodayDate:false,
             // Validation
             RequiredError: 'This value is required',
             ElementNameInputClass: 'form-control',
@@ -127,6 +130,7 @@ class Properties extends React.Component {
             relationFieldsSelectedGroup: 0,
             fieldWidthsW: "",
         };
+        
         this.toastRef = React.createRef();
         this.fillDependentFieldList();
         this.getElementData();
@@ -163,6 +167,8 @@ class Properties extends React.Component {
         this.changeLayout.bind(this);
         this.changeSavedTagList.bind(this);
         this.changeLableTitle.bind(this);
+        this.changeDefaultValue.bind(this);
+        this.changeAddTodayDate.bind(this);
     }
 
     toggle(tab) {
@@ -195,6 +201,22 @@ class Properties extends React.Component {
                     changeMask={this.changeMask} Mask={this.state.Mask}
                     changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
+                />;
+                break;
+            case 6:
+                this.state.showWhereElementPropeties = 1;
+                this.state.fieldWidthsW = "col-md-10";
+                return <DateElementProperties
+                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
+                    changeAddTodayDate={this.changeAddTodayDate} AddTodayDate={this.state.AddTodayDate}
+                />;
+                break;
+            case 7:
+                this.state.showWhereElementPropeties = 0;
+                this.state.fieldWidthsW = "col-md-6";
+                return <CalculationElementProperties
+                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
+                    changeAddTodayDate={this.changeAddTodayDate} AddTodayDate={this.state.AddTodayDate}
                 />;
                 break;
             case 8:
@@ -279,6 +301,7 @@ class Properties extends React.Component {
     // #region dependent
     fillDependentFieldList() {
         var depFldOptionGroup = [];
+        
         fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
@@ -387,6 +410,14 @@ class Properties extends React.Component {
 
     changeLableTitle = (newValue) => {
         this.setState({ Title: newValue });
+    };
+
+    changeDefaultValue = (newValue) => {
+        this.setState({ DefaultValue: newValue });
+    };
+
+    changeAddTodayDate = (newValue) => {
+        this.setState({ AddTodayDate: newValue });
     };
 
     removeDependentFieldValueTag = (i) => {
@@ -547,7 +578,9 @@ class Properties extends React.Component {
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
                     Layout: this.state.Layout,
-                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : ""
+                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : "",
+                    DefaultValue: this.state.DefaultValue,
+                    AddTodayDate: this.state.AddTodayDate
                 })
             }).then(res => res.json())
                 .then(data => {
@@ -734,7 +767,7 @@ class Properties extends React.Component {
                                                         </Row>
                                                         {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                         <Row className="mb-3 ml-0">
-                                                            {this.state.showWhereElementPropeties !== 2 &&
+                                                            {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                                     <label className="form-check-label" htmlFor="isRequired">Is required</label>
@@ -745,7 +778,7 @@ class Properties extends React.Component {
                                                                 <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
                                                             </div>
                                                         </Row>
-                                                        {this.state.showWhereElementPropeties !== 2 &&
+                                                        {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
                                                             <Row className="mb-3 ml-0">
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />

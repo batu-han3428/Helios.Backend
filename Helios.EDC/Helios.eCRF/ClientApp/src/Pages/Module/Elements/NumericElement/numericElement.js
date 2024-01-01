@@ -36,13 +36,15 @@ class NumericElement extends Component {
 
     render() {
         return (
-            <input
+            <div style={{ marginRight: "20px" }} >
+                <input
                 className="form-control"
                 type="number"
                 disabled={this.state.isDisable}
                 value={this.state.Value}
                 onChange={this.handleChange}
-            />
+                />
+            </div>
         )
     }
 };

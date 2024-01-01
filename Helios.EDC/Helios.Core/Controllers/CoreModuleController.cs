@@ -156,7 +156,9 @@ namespace Helios.Core.Controllers
                    Layout = x.ElementDetail.Layout,
                    IsDependent = x.IsDependent,
                    IsRelated = x.IsRelated,
-                   ElementOptions = x.ElementDetail.ElementOptions
+                   ElementOptions = x.ElementDetail.ElementOptions,
+                   DefaultValue = x.ElementDetail.DefaultValue,
+                   AddTodayDate = x.ElementDetail.AddTodayDate
                }).FirstOrDefaultAsync();
 
             if (result.IsDependent)
@@ -233,6 +235,8 @@ namespace Helios.Core.Controllers
                         Layout = model.Layout,
                         ElementOptions = model.ElementOptions,
                         MetaDataTags = model.ElementName,
+                        DefaultValue = model.DefaultValue,
+                        AddTodayDate = model.AddTodayDate,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -308,6 +312,8 @@ namespace Helios.Core.Controllers
                 elementDetail.UpperLimit = model.UpperLimit;
                 elementDetail.Layout = model.Layout;
                 elementDetail.ElementOptions = model.ElementOptions;
+                elementDetail.DefaultValue = model.DefaultValue;
+                elementDetail.AddTodayDate = model.AddTodayDate;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 
