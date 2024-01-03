@@ -1,6 +1,5 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Model;
-using Helios.Core.Domains.Entities;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Base;
 using Helios.eCRF.Services.Interfaces;

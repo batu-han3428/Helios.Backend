@@ -55,7 +55,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Helios.Common\Helios.Common.csproj" />
-    <ProjectReference Include="..\Helios.Core\Helios.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

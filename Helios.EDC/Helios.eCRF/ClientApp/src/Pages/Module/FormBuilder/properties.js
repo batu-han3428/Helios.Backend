@@ -31,7 +31,7 @@ import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
 
-const baseUrl = "https://localhost:7196";
+const baseUrl = "https://localhost:5201";
 
 class Properties extends React.Component {
     constructor(props) {

@@ -27,7 +27,7 @@ function ModuleList() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const baseUrl = "https://localhost:7196";
+    const baseUrl = "https://localhost:5201";
 
     const [Name, setName] = useState('');
     const [Id, setId] = useState(0);

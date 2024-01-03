@@ -2,7 +2,7 @@
 
 export const ContactUsApi = createApi({
     reducerPath: 'contactUsApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:7196/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:5201/' }),
     endpoints: (builder) => ({
         contactUsPost: builder.mutation({
             query: (data) => ({

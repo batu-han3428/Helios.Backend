@@ -4,7 +4,7 @@ import { getLocalStorage } from '../../helpers/local-storage/localStorageProcess
 export const UsersApi = createApi({
     reducerPath: 'usersApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'https://localhost:7196/',
+        baseUrl: 'https://localhost:5201/',
         prepareHeaders: (headers, { getState }) => {
             let token = getLocalStorage("accessToken");
 

@@ -49,7 +49,7 @@ const elements = [
 function ElementList(props) {
     const toastRef = useRef();
 
-    const baseUrl = "https://localhost:7196";
+    const baseUrl = "https://localhost:5201";
     const [moduleId, setModuleId] = useState(props.ModuleId);
     const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);

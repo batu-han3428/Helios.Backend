@@ -7,7 +7,7 @@ import { PermissionsApi } from './Permissions';
 export const StudyApi = createApi({
     reducerPath: 'studyApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'https://localhost:7196/',
+        baseUrl: 'https://localhost:5201/',
         prepareHeaders: (headers, { getState }) => {
             let token = getLocalStorage("accessToken");
 
