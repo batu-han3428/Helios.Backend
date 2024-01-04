@@ -1,7 +1,7 @@
 import React, { Component, useState, useContext, Form, FormField, TextBox, ComboBox, CheckBox, LinkButton } from 'react';
 
 function AddOrUpdateModule() {
-    const baseUrl = "https://localhost:5201";
+    const baseUrl = "https://localhost:7196";
 
     const [Name, setName] = useState('');
 

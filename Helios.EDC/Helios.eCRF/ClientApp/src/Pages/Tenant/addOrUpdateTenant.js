@@ -10,7 +10,7 @@ function AddOrUpdateTenant() {
         setName(e.target.value);
     };
 
-    const baseUrl = "https://localhost:5201";
+    const baseUrl = "https://localhost:7196";
 
     const handleSubmit = (event) => {
         debugger;

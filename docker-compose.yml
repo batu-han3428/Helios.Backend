@@ -1,29 +1,29 @@
 version: '3.4'
 
 services:
-  helios.authentication:
-    image: ${DOCKER_REGISTRY-}heliosauthentication
-    build:
-      context: .
-      dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
-    ports:
-     - 5200:80
-     - 5201:443
-    networks:
-        v3network:
-            ipv4_address: 10.7.0.5
+  # helios.authentication:
+  #   image: ${DOCKER_REGISTRY-}heliosauthentication
+  #   build:
+  #     context: .
+  #     dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
+  #   ports:
+  #    - 5200:80
+  #    - 5201:443
+  #   networks:
+  #       v3network:
+  #           ipv4_address: 10.7.0.5
 
-  helios.core:
-    image: ${DOCKER_REGISTRY-}helioscore
-    build:
-      context: .
-      dockerfile: Helios.EDC/Helios.Core/Dockerfile
-    ports:
-     - 4200:80
-     - 4201:443
-    networks:
-        v3network:
-            ipv4_address: 10.7.0.4
+  # helios.core:
+  #   image: ${DOCKER_REGISTRY-}helioscore
+  #   build:
+  #     context: .
+  #     dockerfile: Helios.EDC/Helios.Core/Dockerfile
+  #   ports:
+  #    - 4200:80
+  #    - 4201:443
+  #   networks:
+  #       v3network:
+  #           ipv4_address: 10.7.0.4
 
 
 

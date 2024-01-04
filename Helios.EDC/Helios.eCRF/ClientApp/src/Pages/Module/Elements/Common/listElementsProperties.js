@@ -25,7 +25,7 @@ import AccordionComp from '../../../../components/Common/AccordionComp/Accordion
 import Select from "react-select";
 import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
 
-const baseUrl = "https://localhost:5201";
+const baseUrl = "https://localhost:7196";
 
 class ListElementsProperties extends Component {
     constructor(props) {

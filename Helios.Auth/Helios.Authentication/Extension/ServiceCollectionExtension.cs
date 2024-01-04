@@ -128,17 +128,19 @@ namespace Helios.Authentication.Extension
         {
             try
             {
-                var rabbitMQUrl = Configuration["AppConfig:RabbitMQCrf"];
-                var rabbitMQUserName = Configuration["AppConfig:RabbitMQUserName"];
-                var rabbitMQPassword = Configuration["AppConfig:RabbitMQPassword"];
                 string qPrefix = "";
-
                 if (env.IsDevelopment())
                 {
                     qPrefix = "localhost_";
                 }
 
                 qPrefix = qPrefix + Configuration["AppConfig:QueuePrefix"] + "_activesql_" + Configuration["AppConfig:ActiveSql"];
+
+
+                var rabbitMQUrl = Configuration["AppConfig:RabbitMQCrf"];
+                var rabbitMQUserName = Configuration["AppConfig:RabbitMQUserName"];
+                var rabbitMQPassword = Configuration["AppConfig:RabbitMQPassword"];
+
 
                 var termofUseSignedConsumer = qPrefix + Configuration["AppConfig:RabbitTermOfUseSignedQueueName"];
 
@@ -207,8 +209,7 @@ namespace Helios.Authentication.Extension
                     
                     c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                     {
-                        //cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
-                        cfg.Host(rabbitMQUrl,
+                        cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
                               b => { b.Username(rabbitMQUserName); b.Password(rabbitMQPassword); });
 
                         cfg.ReceiveEndpoint(rabbitMQueueName_UserConsumer, ep =>

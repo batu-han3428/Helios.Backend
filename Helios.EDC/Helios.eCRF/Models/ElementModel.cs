@@ -1,5 +1,5 @@
-﻿
-using Helios.Common.Enums;
+﻿using Helios.Core.enums;
+using Helios.Core.Enums;
 
 namespace Helios.eCRF.Models
 {

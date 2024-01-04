@@ -27,7 +27,7 @@ function FormBuilder() {
                     <div className="page-title-box">
                         <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
                             <Col md={8}>
-                                <h6 className="page-title">Form Builder</h6>
+                                <h6 className="page-title">Form Builder {moduleId}</h6>
                             </Col>
                         </Row>
                     </div>

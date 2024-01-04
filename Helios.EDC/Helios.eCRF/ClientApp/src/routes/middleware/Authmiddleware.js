@@ -22,7 +22,7 @@ const AuthMiddleware = (props) => {
 
     const fetchData = async (token) => {
         
-        const apiUrl = `https://localhost:5201/Study/GetStudy/${studyId}`;
+        const apiUrl = `https://localhost:7196/Study/GetStudy/${studyId}`;
 
         fetch(apiUrl, {
             method: 'GET',
