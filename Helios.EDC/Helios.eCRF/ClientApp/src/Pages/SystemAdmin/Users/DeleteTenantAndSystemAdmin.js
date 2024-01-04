@@ -56,7 +56,7 @@ const DeleteTenantAndSystemAdmin = props => {
     useEffect(() => {
         if (props.swalShown.value.tenants && props.swalShown.value.tenants.length > 0) {
             if (!props.swalShown.isDropdown) {
-                validationType.setFieldValue("tenantIds", props.swalShown.value.tenants.map(x => x.tenantId));
+                validationType.setFieldValue("tenantIds", props.swalShown.value.tenants.map(x => x.id));
             } else {
                 let optionTenants = [
                     {
@@ -66,7 +66,7 @@ const DeleteTenantAndSystemAdmin = props => {
                                 label: props.t("Select all"),
                                 value: [
                                     "All",
-                                    props.swalShown.value.tenants.map(x => x.tenantId)
+                                    props.swalShown.value.tenants.map(x => x.id)
                                 ]
                             }
                         ]
@@ -75,8 +75,8 @@ const DeleteTenantAndSystemAdmin = props => {
 
                 const tenantsData = props.swalShown.value.tenants.map(item => {
                     return {
-                        label: item.tenantName,
-                        value: item.tenantId
+                        label: item.name,
+                        value: item.id
                     };
                 });
 

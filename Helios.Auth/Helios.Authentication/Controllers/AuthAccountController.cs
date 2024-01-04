@@ -1,11 +1,9 @@
 ﻿using Helios.Authentication.Contexts;
 using Helios.Authentication.Entities;
-using Helios.Authentication.Enums;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
 using Helios.Common.DTO;
-using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,25 +20,23 @@ namespace Helios.Authentication.Controllers
         private AuthenticationContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
-        private readonly IBus _backgorundWorker;       
+        private readonly RoleManager<ApplicationRole> _roleManager;     
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
-        private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ITokenHandler _tokenHandler;
-        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IBus _bus, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration configuration, IEmailService emailService, ITokenHandler tokenHandler)
+        private readonly ICoreService _coreService;
+        public AuthAccountController(AuthenticationContext context, UserManager<ApplicationUser> userManager, IHttpContextAccessor contextAccessor, IBaseService baseService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IEmailService emailService, ITokenHandler tokenHandler, ICoreService coreService)
         {
             _context = context;
             _userManager = userManager;
-            _backgorundWorker = _bus;
             _contextAccessor = contextAccessor;
             _baseService = baseService;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            _configuration = configuration;
             _emailService = emailService;
             _tokenHandler = tokenHandler;
+            _coreService = coreService;
         }
 
         [HttpPost]
@@ -211,7 +207,16 @@ namespace Helios.Authentication.Controllers
 
                     if (result.Succeeded)
                     {
-                        Token token = _tokenHandler.CreateAccessToken(user);
+                        List<Int64> tenantIds = null;
+                        List<Int64> studyIds = null;
+
+                        if (user.UserRoles.Any(x=>x.Role.Name == Roles.TenantAdmin.ToString() || x.Role.Name == Roles.StudyUser.ToString()))
+                        {
+                            tenantIds = await GetUserTenantIds(user.Id);
+                            studyIds = await _coreService.GetUserStudyIds(user.Id);
+                        }
+
+                        Token token = _tokenHandler.CreateAccessToken(user, tenantIds, studyIds);
                         user.RefreshToken = token.RefreshToken;
                         user.RefrestTokenEndDate = token.Expiration.AddMinutes(3);
                         int tokenResult = await _context.SaveChangesAsync();
@@ -247,7 +252,18 @@ namespace Helios.Authentication.Controllers
 
                 throw;
             }
+        }
 
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SSOLogin(SSOLoginDTO sSOLoginDTO)
+        {
+            Token token = _tokenHandler.CreateAccessTokenFromOldJwt(sSOLoginDTO);
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = true,
+                Message = "",
+                Values = new { accessToken = token.AccessToken }
+            };
         }
 
         [HttpPost]
@@ -404,7 +420,6 @@ namespace Helios.Authentication.Controllers
             return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
         }
 
-
         [HttpGet]
         public async Task<dynamic> UserProfileSetting(string email)
         {
@@ -521,20 +536,51 @@ namespace Helios.Authentication.Controllers
 
         #region SSO
         [HttpGet]
-        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
+        public async Task<List<Int64>> GetUserTenantIds(Int64 userId)
+        {
+            return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x=>x.TenantId).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<int> GetUserTenantCount(Int64 userId)
+        {
+            return await _context.TenantAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
+        }
+
+        [HttpGet]
+        public async Task<List<SSOUserTenantModel>> GetUserTenantList(Int64 userId)
         {
             if (userId != 0)
             {
-                return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new TenantUserModel
+                return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Include(x => x.Tenant).Select(x => new SSOUserTenantModel
                 {
-                    TenantId = x.Tenant.Id,
-                    Name = x.Tenant.Name
+                    Id = x.Tenant.Id,
+                    TenantName = x.Tenant.Name
                 }).ToListAsync();
             }
             else
             {
-                return new List<TenantUserModel>();
+                return new List<SSOUserTenantModel>();
             }
+        }
+
+        [HttpGet]
+        public async Task<List<SSOUserTenantModel>> GetTenantList(string tenantIds)
+        {
+            string[] tenantIdsArray = tenantIds.Split(',');
+            List<Int64> tenantIdsInt = new List<Int64>();
+            foreach (string id in tenantIdsArray)
+            {
+                if (Int64.TryParse(id, out Int64 guid))
+                {
+                    tenantIdsInt.Add(guid);
+                }
+            }
+            return await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && tenantIdsInt.Contains(x.Id)).Select(x => new SSOUserTenantModel()
+            {
+                Id = x.Id,
+                TenantName = x.Name
+            }).ToListAsync();
         }
         #endregion
     }

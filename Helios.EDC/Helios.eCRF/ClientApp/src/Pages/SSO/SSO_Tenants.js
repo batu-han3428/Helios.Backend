@@ -1,15 +1,17 @@
 ﻿import PropTypes from 'prop-types';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { withTranslation } from "react-i18next";
-import {
-    Row, Col, CardHeader, Card, CardBody, Alert
-} from "reactstrap";
+import { Row, Col, CardHeader, Card, CardBody, Alert } from "reactstrap";
 import "./sso.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useLazyTenantListGetQuery } from '../../../store/services/SSO/SSO_Api';
+import { useLazyTenantListGetQuery, useSsoLoginPostMutation } from '../../store/services/SSO/SSO_Api';
 import { useSelector, useDispatch } from 'react-redux';
-import { startloading, endloading } from '../../../store/loader/actions';
-import { useNavigate, Link } from "react-router-dom";
+import { startloading, endloading } from '../../store/loader/actions';
+import { useNavigate, Link, useParams } from "react-router-dom";
+import { setLocalStorage } from '../../helpers/local-storage/localStorageProcess';
+import { onLogin } from '../../helpers/Auth/useAuth';
+import { loginuser } from '../../store/actions';
+import ToastComp from '../../components/Common/ToastComp/ToastComp';
 
 
 const SSO_Tenants = props => {
@@ -20,25 +22,30 @@ const SSO_Tenants = props => {
 
     const navigate = useNavigate();
 
+    const toastRef = useRef();
+
     const [data, setData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-
 
     const searchFilter = (event) => {
         setSearchTerm(event.target.value.toLowerCase());
     };
 
     const filteredData = data.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm)
+        item.tenantName.toLowerCase().includes(searchTerm)
     );
 
     const [triggerTenants, { data: tenantsData, isLoadingTenants, isErrorTenants }] = useLazyTenantListGetQuery();
 
+
+    const { role } = useParams();
+
+
     useEffect(() => {
-        if (userInformation.userId) {
-            triggerTenants(userInformation.userId);
+        if (userInformation.userId && role) {
+            triggerTenants({ userId: userInformation.userId, role: role });
         }
-    }, [userInformation.userId])
+    }, [userInformation.userId, role])
 
     useEffect(() => {
         dispatch(startloading());
@@ -50,11 +57,41 @@ const SSO_Tenants = props => {
         }
     }, [tenantsData, isErrorTenants, isLoadingTenants]);
 
-    const goToStudies = (tenantId) => {
-        navigate(`/SSO-studies/${tenantId}`);
+    const [ssoLoginPost] = useSsoLoginPostMutation();
+
+    const goToStudies = async (tenantId) => {
+        if (role === "3") {
+            dispatch(startloading())
+            const response = await ssoLoginPost({ tenantId: tenantId });
+
+            if (response.data.isSuccess) {
+                setLocalStorage("accessToken", response.data.values.accessToken);
+                let result = onLogin();
+
+                dispatch(endloading())
+                if (result === false) {
+                    toastRef.current.setToast({
+                        message: props.t("An unexpected error occurred."),
+                        stateToast: false
+                    });
+                } else {
+                    dispatch(loginuser(result));
+                    navigate("/");
+                }
+            } else {
+                toastRef.current.setToast({
+                    message: props.t("An unexpected error occurred."),
+                    stateToast: false
+                });
+            }
+           
+        } else if (role === "4") {
+            navigate(`/SSO-studies/${tenantId}`);
+        }
     }
 
     return (
+        <>
         <div className="page-content">
             <div className="container-fluid">
                 <Row style={{ marginTop: "10px" }}>
@@ -101,10 +138,10 @@ const SSO_Tenants = props => {
                                                 <div className="ibox-content" style={{ padding: "0" }} >
                                                     <div>
                                                         <div style={{ width: "90%" }} >
-                                                            {item.name}
+                                                            {item.tenantName}
                                                         </div>
                                                         <div style={{ width: "10%" }} >
-                                                            <FontAwesomeIcon onClick={() => goToStudies(item.tenantId) } style={{ cursor: "pointer", color: "#868686" }} icon="fa-solid fa-caret-right" />
+                                                            <FontAwesomeIcon onClick={() => goToStudies(item.id) } style={{ cursor: "pointer", color: "#868686" }} icon="fa-solid fa-caret-right" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -117,7 +154,11 @@ const SSO_Tenants = props => {
                     </Col>
                 </Row>
             </div>
-        </div>
+            </div>
+        <ToastComp
+            required={toastRef}
+        />
+        </>
     );
 };
 

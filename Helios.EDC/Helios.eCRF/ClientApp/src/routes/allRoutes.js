@@ -107,8 +107,9 @@ import User from "../Pages/TenantAdmin/Users/User";
 import TenantUsers from "../Pages/TenantAdmin/TenantUsers/TenantUsers";
 
 //SSO
-import SSO_Studies from "../Pages/StudyUser/SSO/SSO_Studies";
-import SSO_Tenants from "../Pages/StudyUser/SSO/SSO_Tenants";
+import SSO_TenantsOrStudies from "../Pages/SSO/SSO_TenantsOrStudies";
+import SSO_Studies from "../Pages/SSO/SSO_Studies";
+import SSO_Tenants from "../Pages/SSO/SSO_Tenants";
 
 //E-mail template
 import EmailTemplateList from "../Pages/TenantAdmin/EmailTemplate/EmailTemplateList";
@@ -151,8 +152,9 @@ const userRoutes = [
     { path: "/tenantusers", component: <TenantUsers />, menuType: "admin", roles: ['TenantAdmin'] },
 
     //SSO
-    { path: "/SSO-tenants", component: <SSO_Tenants />, menuType: "sso", roles: ['StudyUser'] },
-    { path: "/SSO-studies/:tenantId", component: <SSO_Studies />, menuType: "sso", roles: ['StudyUser'] },
+    { path: "/SSO-tenants-or-studies", component: <SSO_TenantsOrStudies />, menuType: "sso", roles: ['StudyUser', 'TenantAdmin'] },
+    { path: "/SSO-tenants/:role", component: <SSO_Tenants />, menuType: "sso", roles: ['StudyUser', 'TenantAdmin'] },
+    { path: "/SSO-studies/:tenantId", component: <SSO_Studies />, menuType: "sso", roles: ['StudyUser', 'TenantAdmin'] },
 
     //E-mail template
     { path: "/email-templates/:studyId", component: <EmailTemplateList />, menuType: "study", roles: ['TenantAdmin'] },
@@ -232,7 +234,7 @@ const userRoutes = [
 
     // this route should be at the end of all other routes
     { path: "/", roles: ["TenantAdmin"], redirect: "/studylist", menuType: "admin" },
-    { path: "/", roles: ["StudyUser"], redirect: "/SSO-tenants", menuType: "sso" },
+    { path: "/", roles: ["StudyUser"], redirect: "/UnderConstruction", menuType: "sso" },
     { path: "/", roles: ["SuperAdmin"], redirect: "/add-system-admin", menuType: "superadmin" },
     { path: "/", roles: ["SystemAdmin"], redirect: "/tenants", menuType: "systemadmin" },
 ];

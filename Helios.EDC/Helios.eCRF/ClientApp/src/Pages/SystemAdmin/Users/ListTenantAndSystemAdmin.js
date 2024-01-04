@@ -156,7 +156,7 @@ const ListTenantAndSystemAdmin = props => {
                 </DropdownToggle>
                 <DropdownMenu>
                     {tenants.map((item, index) => (
-                        <DropdownItem key={index} disabled>{item.tenantName}</DropdownItem>
+                        <DropdownItem key={index} disabled>{item.name}</DropdownItem>
                     ))}
                 </DropdownMenu>
             </Dropdown>

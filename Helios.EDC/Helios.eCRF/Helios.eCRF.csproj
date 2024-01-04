@@ -59,6 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientApp\src\Pages\StudyUser\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
