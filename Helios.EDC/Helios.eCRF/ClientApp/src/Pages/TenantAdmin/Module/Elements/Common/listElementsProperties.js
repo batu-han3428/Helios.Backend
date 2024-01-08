@@ -21,9 +21,9 @@ import {
     TabPane,
     Label
 } from "reactstrap";
-import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
+import AccordionComp from '../../../../../components/Common/AccordionComp/AccordionComp';
 import Select from "react-select";
-import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
+import ToastComp from '../../../../../components/Common/ToastComp/ToastComp';
 
 const baseUrl = "https://localhost:7196";
 
