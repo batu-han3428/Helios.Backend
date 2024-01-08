@@ -130,7 +130,7 @@ const userRoutes = [
     //Module
     { path: "/moduleList", component: <Module />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin", roles: ['TenantAdmin'] },
-    { path: "/formBuilder", component: <FormBuilder />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/formBuilder/:moduleId", component: <FormBuilder />, menuType: "admin", roles: ['TenantAdmin'] },
 
     //study
     { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },

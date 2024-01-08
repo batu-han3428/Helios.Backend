@@ -21,14 +21,15 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import classnames from "classnames";
-import TextElementProperties from '../Elements/textElementProperties.js'
-import NumericElementProperties from '../Elements/numericElementProperties.js'
-import ListElementProperties from '../Elements/listElementProperties.js';
-import LabelElementProperties from "../Elements/labelElementProperties.js";
+import TextElementProperties from '../Elements/TextElement/textElementProperties.js';
+import NumericElementProperties from '../Elements/NumericElement/numericElementProperties.js';
+import ListElementsProperties from '../Elements/Common/listElementsProperties.js';
+import LabelElementProperties from "../Elements/LabelElement/labelElementProperties.js";
+import DateElementProperties from "../Elements/DateElement/dateElementProperties.js";
+import CalculationElementProperties from "../Elements/CalculationElement/calculationElementProperties.js";
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../components/Common/AccordionComp/AccordionComp';
-import TagInput from '../../../components/Common/TagComp/TagInput.js';
 
 const baseUrl = "https://localhost:7196";
 
@@ -44,7 +45,7 @@ class Properties extends React.Component {
             Id: props.Id,
             TenantId: props.TenantId,
             UserId: props.UserId,
-            ModuleId: 1,
+            ModuleId: props.ModuleId,
             ElementDetailId: 0,
             ElementType: props.Type,
             ElementName: '',
@@ -95,7 +96,8 @@ class Properties extends React.Component {
             UpperLimit: '',
             Layout: 0,
             SavedTagList: [],
-
+            DefaultValue: '',
+            AddTodayDate: false,
             // Validation
             RequiredError: 'This value is required',
             ElementNameInputClass: 'form-control',
@@ -128,6 +130,7 @@ class Properties extends React.Component {
             relationFieldsSelectedGroup: 0,
             fieldWidthsW: "",
         };
+
         this.toastRef = React.createRef();
         this.fillDependentFieldList();
         this.getElementData();
@@ -164,6 +167,8 @@ class Properties extends React.Component {
         this.changeLayout.bind(this);
         this.changeSavedTagList.bind(this);
         this.changeLableTitle.bind(this);
+        this.changeDefaultValue.bind(this);
+        this.changeAddTodayDate.bind(this);
     }
 
     toggle(tab) {
@@ -198,13 +203,28 @@ class Properties extends React.Component {
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
                 />;
                 break;
+            case 6:
+                this.state.showWhereElementPropeties = 1;
+                this.state.fieldWidthsW = "col-md-10";
+                return <DateElementProperties
+                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
+                    changeAddTodayDate={this.changeAddTodayDate} AddTodayDate={this.state.AddTodayDate}
+                />;
+                break;
+            case 7:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-6";
+                return <CalculationElementProperties
+                    ModuleId={this.state.ModuleId}
+                />;
+                break;
             case 8:
             case 9:
             case 10:
             case 11:
                 this.state.showWhereElementPropeties = 1;
                 this.state.fieldWidthsW = "col-md-10";
-                return <ListElementProperties
+                return <ListElementsProperties
                     changeLayout={this.changeLayout} Layout={this.state.Layout}
                     changeSavedTagList={this.changeSavedTagList} SavedTagList={this.state.SavedTagList}
                 />;
@@ -280,14 +300,16 @@ class Properties extends React.Component {
     // #region dependent
     fillDependentFieldList() {
         var depFldOptionGroup = [];
+
         fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())
             .then(data => {
                 data.map(item => {
+                    var itm = { label: item.title, value: item.id };
+
                     if (item.id != this.state.Id) {
-                        var itm = { label: item.title, value: item.id };
                         depFldOptionGroup.push(itm);
                     }
                 });
@@ -388,6 +410,14 @@ class Properties extends React.Component {
 
     changeLableTitle = (newValue) => {
         this.setState({ Title: newValue });
+    };
+
+    changeDefaultValue = (newValue) => {
+        this.setState({ DefaultValue: newValue });
+    };
+
+    changeAddTodayDate = (newValue) => {
+        this.setState({ AddTodayDate: newValue });
     };
 
     removeDependentFieldValueTag = (i) => {
@@ -548,7 +578,9 @@ class Properties extends React.Component {
                     LowerLimit: this.state.LowerLimit,
                     UpperLimit: this.state.UpperLimit,
                     Layout: this.state.Layout,
-                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : ""
+                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : "",
+                    DefaultValue: this.state.DefaultValue,
+                    AddTodayDate: this.state.AddTodayDate
                 })
             }).then(res => res.json())
                 .then(data => {
@@ -715,7 +747,8 @@ class Properties extends React.Component {
                                                     </Row>
                                                 }
                                                 <AccordionComp title="Advanced options" body={
-                                                    <div>
+                                                    <>
+                                                        <div>
                                                         {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
                                                         <Row className="mb-3">
                                                             <label
@@ -724,37 +757,38 @@ class Properties extends React.Component {
                                                             >
                                                                 Field width
                                                             </label>
-                                                            <div className={this.state.fieldWidthsW} >
+                                                            <div className={this.state.fieldWidthsW}>
                                                                 <Select
                                                                     value={this.state.widthSelectedGroup}
                                                                     onChange={this.handleWidthChange}
                                                                     options={this.state.widthOptionGroup}
-                                                                    classNamePrefix="select2-selection"
-                                                                />
+                                                                    classNamePrefix="select2-selection" />
                                                             </div>
                                                         </Row>
                                                         {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                         <Row className="mb-3 ml-0">
-                                                            {this.state.showWhereElementPropeties !== 2 &&
+                                                            {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                                     <label className="form-check-label" htmlFor="isRequired">Is required</label>
-                                                                </div>
-                                                            }
+                                                                </div>}
                                                             <div className="form-check col-md-6">
                                                                 <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
                                                                 <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
                                                             </div>
                                                         </Row>
-                                                        {this.state.showWhereElementPropeties !== 2 &&
+                                                        {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
                                                             <Row className="mb-3 ml-0">
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
                                                                     <label className="form-check-label" htmlFor="canMissing">Can missing</label>
                                                                 </div>
-                                                            </Row>
-                                                        }
-                                                    </div>
+                                                            </Row>}
+                                                        </div>
+                                                        <div>
+                                                            {this.state.showWhereElementPropeties === 3 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                        </div>
+                                                    </>
                                                 } />
                                                 <div>
                                                     {this.state.showWhereElementPropeties === 1 && this.renderElementPropertiesSwitch(this.state.ElementType)}
