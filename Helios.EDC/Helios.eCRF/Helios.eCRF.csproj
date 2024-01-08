@@ -59,6 +59,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientApp\src\Pages\Module\Elements\DatagridElement\" />
+    <Folder Include="ClientApp\src\Pages\Module\Elements\TableElement\" />
+    <Folder Include="ClientApp\src\Pages\Module\Elements\RangeSliderElement\" />
+    <Folder Include="ClientApp\src\Pages\Module\Elements\FileUploaderElement\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

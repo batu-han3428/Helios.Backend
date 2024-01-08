@@ -36,7 +36,7 @@ const baseUrl = "https://localhost:7196";
 class Properties extends React.Component {
     constructor(props) {
         super(props);
-        
+
         this.state = {
             activeTab: props.ActiveTab,
             showWhereElementPropeties: 0,
@@ -96,8 +96,8 @@ class Properties extends React.Component {
             UpperLimit: '',
             Layout: 0,
             SavedTagList: [],
-            DefaultValue:'',
-            AddTodayDate:false,
+            DefaultValue: '',
+            AddTodayDate: false,
             // Validation
             RequiredError: 'This value is required',
             ElementNameInputClass: 'form-control',
@@ -130,7 +130,7 @@ class Properties extends React.Component {
             relationFieldsSelectedGroup: 0,
             fieldWidthsW: "",
         };
-        
+
         this.toastRef = React.createRef();
         this.fillDependentFieldList();
         this.getElementData();
@@ -212,11 +212,10 @@ class Properties extends React.Component {
                 />;
                 break;
             case 7:
-                this.state.showWhereElementPropeties = 0;
+                this.state.showWhereElementPropeties = 3;
                 this.state.fieldWidthsW = "col-md-6";
                 return <CalculationElementProperties
-                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
-                    changeAddTodayDate={this.changeAddTodayDate} AddTodayDate={this.state.AddTodayDate}
+                    ModuleId={this.state.ModuleId}
                 />;
                 break;
             case 8:
@@ -301,15 +300,16 @@ class Properties extends React.Component {
     // #region dependent
     fillDependentFieldList() {
         var depFldOptionGroup = [];
-        
+
         fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())
             .then(data => {
                 data.map(item => {
+                    var itm = { label: item.title, value: item.id };
+
                     if (item.id != this.state.Id) {
-                        var itm = { label: item.title, value: item.id };
                         depFldOptionGroup.push(itm);
                     }
                 });
@@ -747,7 +747,8 @@ class Properties extends React.Component {
                                                     </Row>
                                                 }
                                                 <AccordionComp title="Advanced options" body={
-                                                    <div>
+                                                    <>
+                                                        <div>
                                                         {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
                                                         <Row className="mb-3">
                                                             <label
@@ -756,13 +757,12 @@ class Properties extends React.Component {
                                                             >
                                                                 Field width
                                                             </label>
-                                                            <div className={this.state.fieldWidthsW} >
+                                                            <div className={this.state.fieldWidthsW}>
                                                                 <Select
                                                                     value={this.state.widthSelectedGroup}
                                                                     onChange={this.handleWidthChange}
                                                                     options={this.state.widthOptionGroup}
-                                                                    classNamePrefix="select2-selection"
-                                                                />
+                                                                    classNamePrefix="select2-selection" />
                                                             </div>
                                                         </Row>
                                                         {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
@@ -771,8 +771,7 @@ class Properties extends React.Component {
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                                     <label className="form-check-label" htmlFor="isRequired">Is required</label>
-                                                                </div>
-                                                            }
+                                                                </div>}
                                                             <div className="form-check col-md-6">
                                                                 <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
                                                                 <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
@@ -784,9 +783,12 @@ class Properties extends React.Component {
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
                                                                     <label className="form-check-label" htmlFor="canMissing">Can missing</label>
                                                                 </div>
-                                                            </Row>
-                                                        }
-                                                    </div>
+                                                            </Row>}
+                                                        </div>
+                                                        <div>
+                                                            {this.state.showWhereElementPropeties === 3 && this.renderElementPropertiesSwitch(this.state.ElementType)}
+                                                        </div>
+                                                    </>
                                                 } />
                                                 <div>
                                                     {this.state.showWhereElementPropeties === 1 && this.renderElementPropertiesSwitch(this.state.ElementType)}

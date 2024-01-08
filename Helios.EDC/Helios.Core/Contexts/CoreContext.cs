@@ -1,5 +1,4 @@
 ﻿using Helios.Core.Contexts.Base;
-using Helios.Core.Controllers.Base;
 using Helios.Core.Domains.Base;
 using Helios.Core.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
