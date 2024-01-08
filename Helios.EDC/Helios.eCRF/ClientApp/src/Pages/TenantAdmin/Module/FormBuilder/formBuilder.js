@@ -12,24 +12,28 @@ import {
     ModalFooter,
     Button,
 } from "reactstrap";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-//Import Breadcrumb
-import Breadcrumbs from "../../../../components/Common/Breadcrumb";
+import ElementList from './elementList.js';
+import './formBuilder.css';
 
-import ElementList from './elementList.js'
-import './formBuilder.css'
-//import Properties from './properties.js';
-
-function FormBuilder(props) {
+function FormBuilder() {
+    const {moduleId} = useParams();
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
-            <div id="page-wrap" style={{ padding: "15px", width: '100%', marginTop: '70px' }}>
-                <div><h3>FormBuilder</h3>
-                </div>
-                <hr />
-                <div>
-                    <ElementList />
+            <div className="page-content">
+                <div className="container-fluid">
+                    <div className="page-title-box">
+                        <Row className="align-items-center" style={{ borderBottom: "1px solid black" }}>
+                            <Col md={8}>
+                                <h6 className="page-title">Form Builder</h6>
+                            </Col>
+                        </Row>
+                    </div>
+                    <div>
+                        <ElementList ModuleId={moduleId} />
+                    </div>
                 </div>
             </div>
         </div>
