@@ -28,6 +28,7 @@ export const onLogin = () => {
             mail: auth.mail,
             userId: auth.userId,
             tenantId: auth.tenantId,
+            studyId: auth.studyId
         };
     }
     return false;

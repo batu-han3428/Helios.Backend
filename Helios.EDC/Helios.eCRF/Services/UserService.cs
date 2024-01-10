@@ -118,7 +118,7 @@ namespace Helios.eCRF.Services
 
             if (authTenants.Data.Count > 0)
             {
-                var counts = await GetTenantsStudyCount(authTenants.Data.Select(x=>x.Id).ToList());
+                var counts = await GetTenantsStudyCount(authTenants.Data.Select(x => x.Id).ToList());
 
                 if (!counts.IsSuccessful && counts.Data == null)
                 {
@@ -193,17 +193,20 @@ namespace Helios.eCRF.Services
             {
                 int studyCount = await GetStudyCount(tenantDTO.Id);
 
-                if (studyCount > Convert.ToInt32(tenantDTO.StudyLimit))
+                if (!string.IsNullOrEmpty(tenantDTO.StudyLimit) && int.TryParse(tenantDTO.StudyLimit, out int studyLimitValue))
                 {
-                    return new ApiResponse<dynamic>
+                    if (studyCount > studyLimitValue)
                     {
-                        IsSuccess = false,
-                        Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.",
-                        Values = new {Change= studyCount }
-                    };
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "@Change studies have been added to the tenant. For this reason, you cannot enter a smaller number.",
+                            Values = new { Change = studyCount }
+                        };
+                    }
                 }
             }
-           
+
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AdminUser/SetTenant", Method.Post);
@@ -676,15 +679,38 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<ApiResponse<dynamic>> DeleteStudyUser(StudyUserModel studyUserModel)
+        private async Task<ApiResponse<DeleteStudyUserDTO>> DeleteCoreStudyUser(StudyUserModel studyUserModel)
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreUser/DeleteStudyUser", Method.Post);
                 req.AddJsonBody(studyUserModel);
-                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                var result = await client.ExecuteAsync<ApiResponse<DeleteStudyUserDTO>>(req);
                 return result.Data;
             }
+        }
+
+        private async Task<ApiResponse<DeleteStudyUserDTO>> DeleteAuthStudyUser(StudyUserModel studyUserModel)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/DeleteStudyUser", Method.Post);
+                req.AddJsonBody(studyUserModel);
+                var result = await client.ExecuteAsync<ApiResponse<DeleteStudyUserDTO>>(req);
+                return result.Data;
+            }
+        }
+        
+        public async Task<ApiResponse<DeleteStudyUserDTO>> DeleteStudyUser(StudyUserModel studyUserModel)
+        {
+            var result = await DeleteCoreStudyUser(studyUserModel);
+
+            if (result.IsSuccess && result.Values.AuthDelete)
+            {
+                return await DeleteAuthStudyUser(studyUserModel);
+            }
+
+            return result;
         }
 
         public async Task<ApiResponse<dynamic>> UserResetPassword(StudyUserModel model)
@@ -973,17 +999,130 @@ namespace Helios.eCRF.Services
 
             return result;
         }
+
+        public async Task<RestResponse<List<SystemUserModel>>> GetTenantAndSystemAdminUserList(Int64 id)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/GetTenantAndSystemAdminUserList", Method.Get);
+                req.AddParameter("id", id);
+                var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
+                return result;
+            }
+        }
         #endregion
 
         #region SSO
-        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
+        private async Task<RestResponse<int>> GetUserTenantCount(Int64 userId)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/GetUserTenantCount", Method.Get);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync<int>(req);
+                return result;
+            }
+        }
+
+        private async Task<RestResponse<int>> GetUserStudyCount(Int64 userId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetUserStudyCount", Method.Get);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync<int>(req);
+                return result;
+            }
+        }
+
+        public async Task<RestResponse<SSOModel>> GetTenantOrStudy(Int64 userId)
+        {
+            RestRequest restRequest = new RestRequest();
+
+            var tenantCount = await GetUserTenantCount(userId);
+
+            if (!tenantCount.IsSuccessful && tenantCount.Data == null)
+            {
+                return new RestResponse<SSOModel>(restRequest)
+                {
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+
+            var studyCount = await GetUserStudyCount(userId);
+
+            if (!studyCount.IsSuccessful && studyCount.Data == null)
+            {
+                return new RestResponse<SSOModel>(restRequest)
+                {
+                    Data = null,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+            }
+
+            return new RestResponse<SSOModel>(restRequest)
+            {
+                Data = new SSOModel { TenantCount = tenantCount.Data, StudyCount = studyCount.Data},
+                StatusCode = HttpStatusCode.OK
+            };
+        }
+
+        private async Task<List<SSOUserTenantModel>> GetAuthUserTenantList(Int64 userId)
         {
             using (var client = AuthServiceClient)
             {
                 var req = new RestRequest("AuthAccount/GetUserTenantList", Method.Get);
                 req.AddParameter("userId", userId);
-                var result = await client.ExecuteAsync<List<TenantUserModel>>(req);
+                var result = await client.ExecuteAsync<List<SSOUserTenantModel>>(req);
                 return result.Data;
+            }
+        }
+
+        private async Task<List<SSOUserTenantModel>> GetTenantsList(List<Int64> tenantIds)
+        {
+            using (var client = AuthServiceClient)
+            {
+                string tenantIdsString = string.Join(",", tenantIds);
+                var req = new RestRequest("AuthAccount/GetTenantList", Method.Get);
+                req.AddParameter("tenantIds", tenantIdsString);
+                var result = await client.ExecuteAsync<List<SSOUserTenantModel>>(req);
+                return result.Data;
+            }
+        }
+
+        private async Task<List<SSOUserTenantModel>> GetCoreUserTenantList(Int64 userId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/GetUserTenantList", Method.Get);
+                req.AddParameter("userId", userId);
+                var result = await client.ExecuteAsync<List<Int64>>(req);
+                
+                if (result.IsSuccessful)
+                {
+                    return await GetTenantsList(result.Data);
+                }
+                else
+                {
+                    return new List<SSOUserTenantModel>();
+                }
+            }
+        }
+
+        public async Task<List<SSOUserTenantModel>> GetUserTenantList(Int64 userId, Roles role)
+        {
+            if (Roles.TenantAdmin == role)
+            {
+                return await GetAuthUserTenantList(userId);
+            }
+            else if (Roles.StudyUser == role)
+            {
+                return await GetCoreUserTenantList(userId);
+            }
+            else
+            {
+                return new List<SSOUserTenantModel>();
             }
         }
 
@@ -999,14 +1138,14 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<RestResponse<List<SystemUserModel>>> GetTenantAndSystemAdminUserList(Int64 id)
+        public async Task<ApiResponse<dynamic>> SSOLogin(SSOLoginDTO sSOLoginDTO)
         {
             using (var client = AuthServiceClient)
             {
-                var req = new RestRequest("AdminUser/GetTenantAndSystemAdminUserList", Method.Get);
-                req.AddParameter("id", id);
-                var result = await client.ExecuteAsync<List<SystemUserModel>>(req);
-                return result;
+                var req = new RestRequest("AuthAccount/SSOLogin", Method.Post);
+                req.AddJsonBody(sSOLoginDTO);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
             }
         }
         #endregion

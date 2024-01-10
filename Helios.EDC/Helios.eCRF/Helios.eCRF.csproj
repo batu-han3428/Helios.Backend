@@ -63,6 +63,7 @@
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\TableElement\" />
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\RangeSliderElement\" />
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\FileUploaderElement\" />
+    <Folder Include="ClientApp\src\Pages\StudyUser\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

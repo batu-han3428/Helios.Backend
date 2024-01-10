@@ -622,6 +622,42 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<DeleteStudyUserDTO>> DeleteStudyUser(StudyUserModel model)
+        {
+            var aspNetUser = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
+
+            if (aspNetUser != null)
+            {
+                var aspNetResult = await _userManager.RemoveFromRoleAsync(aspNetUser, Roles.StudyUser.ToString());
+
+                if (aspNetResult.Succeeded)
+                {                        
+                    return new ApiResponse<DeleteStudyUserDTO>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<DeleteStudyUserDTO>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<DeleteStudyUserDTO>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            } 
+        }
+
+        [HttpPost]
         public async Task<ApiResponse<dynamic>> UserResetPassword(StudyUserModel model)
         {
             if (model.AuthUserId != 0)
@@ -1247,7 +1283,7 @@ namespace Helios.Authentication.Controllers
         [HttpGet]
         public async Task<List<SystemUserModel>> GetTenantAndSystemAdminUserList(Int64 id)
         {
-            var emptyTenantsList = new List<object>();
+            List<Tenant> emptyTenantList = new List<Tenant>();
 
             var result = await (
                 from userManagerUser in _userManager.Users
@@ -1274,19 +1310,38 @@ namespace Helios.Authentication.Controllers
                         RoleId = ur.RoleId,
                         RoleName = ur.Role.Name
                     }).ToList(),
-                    Tenants = tenAdmin != null && tenAdmin.IsDeleted == false
-                        ? tenants
-                            .Select(t => new
-                            {
-                                TenantId = t.Id,
-                                TenantName = t.Name
-                            })
-                            .ToList()
-                        : emptyTenantsList
+                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ? 
+                        tenants.Where(t => !t.IsDeleted)
+                                .Select(t => new
+                                {
+                                    TenantId = t.Id,
+                                    TenantName = t.Name
+                                }).ToList()
+                    : emptyTenantList
                 }
             ).ToListAsync();
 
-            var distinctResult = result.GroupBy(x => x.Id).Select(group => group.First()).ToList();
+            var distinctResult = result
+                .GroupBy(x => x.Id)
+                .Select(group => new SystemUserModel
+                {
+                    Id = group.Key,
+                    Name = group.First().Name,
+                    LastName = group.First().LastName,
+                    Email = group.First().Email,
+                    PhoneNumber = group.First().PhoneNumber,
+                    IsActive = group.First().IsActive,
+                    Roles = group.First().Roles,
+                    Tenants = group.SelectMany(x => x.Tenants)
+                      .GroupBy(t => t.TenantId)
+                      .Select(tGroup => new Tenant
+                      {
+                          Id = tGroup.First().TenantId,
+                          Name = tGroup.First().TenantName
+                      })
+                      .ToList()
+                })
+                .ToList();
 
             return distinctResult;
         }

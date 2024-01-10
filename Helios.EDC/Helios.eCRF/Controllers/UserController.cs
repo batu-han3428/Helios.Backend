@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Model;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
@@ -449,30 +450,61 @@ namespace Helios.eCRF.Controllers
 
         #region SSO
 
-
         /// <summary>
-        /// kullanıcının bulunduğu tenantları listeler
+        /// kullanıcının tenant ve studylerini kontrol eder
         /// </summary>
         /// <param name="userId">kullanıcı id</param>
-        /// <returns>tenant listesi</returns>
+        /// <returns>tenant ve study sayısı</returns>
         [HttpGet("{userId}")]
-        [Authorize(Roles = "StudyUser")]
-        public async Task<List<TenantUserModel>> GetUserTenantList(Int64 userId)
+        [Authorize(Roles = "StudyUser, TenantAdmin")]
+        public async Task<IActionResult> GetTenantOrStudy(Int64 userId)
         {
-            return await _userService.GetUserTenantList(userId);
+            var result = await _userService.GetTenantOrStudy(userId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 
-
         /// <summary>
         /// kullanıcının bulunduğu tenantları listeler
         /// </summary>
         /// <param name="userId">kullanıcı id</param>
+        /// <param name="role">kullanıcı seçtiği rol</param>
         /// <returns>tenant listesi</returns>
+        [HttpGet("{userId}/{role}")]
+        [Authorize(Roles = "StudyUser, TenantAdmin")]
+        public async Task<List<SSOUserTenantModel>> GetUserTenantList(Int64 userId, Roles role)
+        {
+            return await _userService.GetUserTenantList(userId, role);
+        }
+
+        /// <summary>
+        /// kullanıcının bulunduğu çalışmaları listeler
+        /// </summary>
+        /// <param name="tenantId">çalışmaların bulunduğu tenant</param>
+        /// <param name="userId">kullanıcı id</param>
+        /// <returns>çalışma listesi</returns>
         [HttpGet("{tenantId}/{userId}")]
-        [Authorize(Roles = "StudyUser")]
+        [Authorize(Roles = "StudyUser, TenantAdmin")]
         public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Int64 tenantId, Int64 userId)
         {
             return await _userService.GetUserStudiesList(tenantId, userId);
+        }
+
+        /// <summary>
+        /// SSO ile login olur
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Authorize(Roles = "StudyUser, TenantAdmin")]
+        public async Task<IActionResult> SSOLogin(SSOLoginDTO sSOLoginDTO)
+        {
+            var jwt = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            sSOLoginDTO.Jwt = jwt;
+
+            var result = await _userService.SSOLogin(sSOLoginDTO);
+
+            return Ok(result);
         }
         #endregion
     }

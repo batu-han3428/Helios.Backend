@@ -80,9 +80,13 @@ const AuthMiddleware = (props) => {
                 );
             }
             if (Path === "/") {
-                const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)) && route.path === "/");
-                if (matchedRoute1) {
-                    matchedRoute = matchedRoute1.redirect;
+                if (Array.isArray(result.tenantId) && Array.isArray(result.studyId) && ((result.tenantId.length > 1 || result.studyId.length > 1) || (result.tenantId.length > 0 && result.studyId.length > 0))) {
+                    matchedRoute = "/SSO-tenants-or-studies";
+                }else{
+                    const matchedRoute1 = userRoutes.find(route => route.roles && route.roles.some(role => result.roles.includes(role)) && route.path === "/");
+                    if (matchedRoute1) {
+                        matchedRoute = matchedRoute1.redirect;
+                    }
                 }
             }
             if (pageType === "study") {

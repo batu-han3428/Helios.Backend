@@ -582,6 +582,8 @@ namespace Helios.Authentication.Extension
         {
             services.AddScoped<IBaseService, BaseService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IApiBaseService, ApiBaseService>();
+            services.AddScoped<ICoreService, CoreService>();
             services.AddScoped<IFileStorageHelper, AzureBlobHelper>();
             services.AddScoped<ITokenHandler, TokenHandler>();
             services.AddScoped<ITimeZoneHelper, TimeZoneHelper>();

@@ -360,6 +360,17 @@ namespace Helios.Core.Controllers
                 };
                 await _context.StudyUsers.AddAsync(user);
 
+                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
+
+                if (!result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+
                 var userSites = studyUserModel.SiteIds.Select(x => new StudyUserSite
                 {
                     StudyUserId = user.Id,
@@ -371,9 +382,9 @@ namespace Helios.Core.Controllers
                     await _context.StudyUserSites.AddRangeAsync(userSites);
                 }
 
-                var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
+                var result1 = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
 
-                if (result)
+                if (result1)
                 {
                     return new ApiResponse<dynamic>
                     {
@@ -568,7 +579,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteStudyUser(StudyUserModel studyUserModel)
+        public async Task<ApiResponse<DeleteStudyUserDTO>> DeleteStudyUser(StudyUserModel studyUserModel)
         {
             if (studyUserModel.StudyUserId != 0)
             {
@@ -584,15 +595,18 @@ namespace Helios.Core.Controllers
 
                 if (result > 0)
                 {
-                    return new ApiResponse<dynamic>
+                    bool count = await _context.StudyUsers.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == studyUserModel.AuthUserId);
+
+                    return new ApiResponse<DeleteStudyUserDTO>
                     {
                         IsSuccess = true,
-                        Message = "Successful"
+                        Message = "Successful",
+                        Values = new DeleteStudyUserDTO { AuthDelete = !count }
                     };
                 }
                 else
                 {
-                    return new ApiResponse<dynamic>
+                    return new ApiResponse<DeleteStudyUserDTO>
                     {
                         IsSuccess = false,
                         Message = "Unsuccessful"
@@ -601,7 +615,7 @@ namespace Helios.Core.Controllers
             }
             else
             {
-                return new ApiResponse<dynamic>
+                return new ApiResponse<DeleteStudyUserDTO>
                 {
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
@@ -629,6 +643,24 @@ namespace Helios.Core.Controllers
         #endregion
 
         #region SSO
+        [HttpGet]
+        public async Task<List<Int64>> GetUserStudyIds(Int64 userId)
+        {
+            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x=>x.StudyId).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<int> GetUserStudyCount(Int64 userId)
+        {
+            return await _context.StudyUsers.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
+        }
+
+        [HttpGet]
+        public async Task<List<Int64>> GetUserTenantList(Int64 userId)
+        {
+            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x => x.TenantId).ToListAsync();
+        }
+
         [HttpGet]
         public async Task<List<SSOUserStudyModel>> GetUserStudiesList(Int64 tenantId, Int64 userId)
         {

@@ -21,6 +21,7 @@ import NonAuthLayout from "./components/NonAuthLayout"
 import NotFound from './Pages/Common/NotFound/NotFound'
 import AccessDeniend from './Pages/Common/AccessDenied/AccessDenied'
 import ContactUs from './Pages/Common/ContactUs/ContactUs'
+import UnderConstruction from './Pages/Common/UnderConstruction/UnderConstruction'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCheckSquare, faCoffee, faPlus, faFilePen, faPerson, faMarker, faTrashCan, faLeftLong, faCaretDown, faCaretRight, faCheck, faEyeSlash, faEye, faDownload, faLocationDot, faUserPlus, faUserGear, faShuffle, faToggleOn, faToggleOff, faHouse, faEnvelope, faMicroscope, faTableCellsLarge, faFlask, faFolderOpen, faClockRotateLeft, faFolderTree, faLockOpen, faLock, faPuzzlePiece, faListUl, faX, faGear } from '@fortawesome/free-solid-svg-icons'
@@ -63,6 +64,7 @@ const App = () => {
 
          <Route path="/ContactUs" element={<ContactUs />} />
          <Route path="/AccessDenied" element={<AccessDeniend />} />
+         <Route path="/UnderConstruction" element={<UnderConstruction />} />
          <Route path="*" element={<NotFound />} />
 
       </Routes>

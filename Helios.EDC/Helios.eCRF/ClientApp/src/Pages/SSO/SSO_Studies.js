@@ -1,15 +1,13 @@
 ﻿import PropTypes from 'prop-types';
 import React, { useState, useEffect } from "react";
 import { withTranslation } from "react-i18next";
-import {
-    Row, Col, CardHeader, Alert, Card, CardBody
-} from "reactstrap";
+import { Row, Col, CardHeader, Alert, Card, CardBody } from "reactstrap";
 import "./sso.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useParams, Link } from "react-router-dom";
-import { useLazyStudiesListGetQuery } from '../../../store/services/SSO/SSO_Api';
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useLazyStudiesListGetQuery } from '../../store/services/SSO/SSO_Api';
 import { useSelector, useDispatch } from 'react-redux';
-import { startloading, endloading } from '../../../store/loader/actions';
+import { startloading, endloading } from '../../store/loader/actions';
 
 
 const SSO_Studies = props => {
@@ -17,6 +15,8 @@ const SSO_Studies = props => {
     const userInformation = useSelector(state => state.rootReducer.Login);
 
     const dispatch = useDispatch();
+
+    const navigate = useNavigate();
 
     const { tenantId } = useParams();
 
@@ -28,10 +28,10 @@ const SSO_Studies = props => {
     const [triggerStudies, { data: studiesData, isLoading: isLoadingStudies, isError: isErrorStudies } ] = useLazyStudiesListGetQuery();
 
     useEffect(() => {
-        if (userInformation.userId) {
+        if (userInformation.userId && tenantId) {
             triggerStudies({ tenantId: tenantId, userId: userInformation.userId });
         }
-    }, [userInformation.userId, studiesData])
+    }, [userInformation.userId, tenantId])
 
     useEffect(() => {
         dispatch(startloading());
@@ -64,6 +64,10 @@ const SSO_Studies = props => {
 
         return isStatusMatched && (isStudyNameMatched || isUserRoleNameMatched);
     });
+
+    const goToStudy = () => {
+        navigate("/UnderConstruction");
+    }
 
     return (
         <div className="page-content">
@@ -128,7 +132,7 @@ const SSO_Studies = props => {
                                                             { item.userRoleName }
                                                         </div>
                                                         <div style={{ width: "10%" }} >
-                                                            <FontAwesomeIcon style={{ cursor: "pointer", color:"#868686"}} icon="fa-solid fa-caret-right" />
+                                                            <FontAwesomeIcon onClick={()=> goToStudy()} style={{ cursor: "pointer", color:"#868686"}} icon="fa-solid fa-caret-right" />
                                                         </div>
                                                     </div>
                                                 </div>
