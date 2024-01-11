@@ -92,9 +92,9 @@ namespace Helios.eCRF.Controllers
         /// </summary>
         /// <returns>modüller</returns>
         [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList()
+        public async Task<List<ModuleModel>> GetModuleList(Int64 tenantId)
         {
-            var result = await _moduleService.GetModuleList();
+            var result = await _moduleService.GetModuleList(tenantId);
 
             return result;
         }

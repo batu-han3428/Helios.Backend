@@ -24,38 +24,27 @@ const baseUrl = "https://localhost:7196";
 class CalculationElementProperties extends Component {
     constructor(props) {
         super(props);
+        
+        var inps = props.CalculationSourceInputs !== "" ? JSON.parse(props.CalculationSourceInputs) : [];
+        var inpsCount = props.CalculationSourceInputs !== "" ? JSON.parse(props.CalculationSourceInputs).length : 0;
 
         this.state = {
             elementListOptionGroup: [],
             ModuleId: props.ModuleId,
-            Code: "console.log('simple code Editor!');",
-
-            elementRows: [{
-                elementFieldSelectedGroup: 0,
-                variableName: ''
-            }]
+            Code: props.MainJs,
+            inputCounter: inpsCount,
+            elementRows: inps,
         }
 
-        this.handleElementListChange = this.handleElementListChange.bind(this);
-        this.handleVariableNameChange = this.handleVariableNameChange.bind(this);
         this.removeRow = this.removeRow.bind(this);
         this.addRow = this.addRow.bind(this);
         this.fillAllElementList = this.fillAllElementList.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.setCode = this.setCode.bind(this);
+        this.getFirstElement = this.getFirstElement.bind(this);
 
         this.fillAllElementList();
     }
-
-    handleElementListChange(e) {
-        debugger;
-        //this.state.dependentFieldsSelectedGroup = e;
-    };
-
-    handleVariableNameChange(e) {
-        debugger;
-        //this.state.dependentFieldsSelectedGroup = e;
-    };
 
     removeRow = (index) => {
         this.setState((prevState) => {
@@ -66,33 +55,41 @@ class CalculationElementProperties extends Component {
     };
 
     addRow = () => {
+        this.state.inputCounter = this.state.inputCounter + 1;
+
         this.setState((prevState) => ({
             elementRows: [...prevState.elementRows, {
-                tagKey: '', tagName: '', tagValue: '',
-                tagNameInpCls: 'form-control',
-                tagValueInpCls: 'form-control',
+                elementFieldSelectedGroup: this.getFirstElement(), variableName: 'A' + this.state.inputCounter
             }],
         }));
     };
 
     fillAllElementList() {
-        var allElements = [];
-
         fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())
             .then(data => {
-                data.map(item => {
-                    var itm = { label: item.title, value: item.id };
-                    allElements.push(itm);
-                });
+                const allElements = data.map(item => ({
+                    label: item.type !== 1 ? item.title + ' (' + item.elementName + ')' : item.title,
+                    value: item.id,
+                }));
 
                 this.state.elementListOptionGroup = allElements;
+
+                if (this.state.inputCounter === 0) {
+                    this.addRow();
+
+                    var l = this.getFirstElement();
+
+                    this.state.elementRows[0].elementFieldSelectedGroup = l;
+                }
             })
             .catch(error => {
-                //console.error('Error:', error);
+                // Handle errors
+                console.error('Error:', error);
             });
+
     }
 
     handleInputChange = (index, fieldName, value) => {
@@ -100,12 +97,27 @@ class CalculationElementProperties extends Component {
             const newRows = [...prevState.elementRows];
             newRows[index][fieldName] = value;
             return { elementRows: newRows };
+        }, () => {
+            this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
         });
     };
 
     setCode = (val) => {
         this.state.Code = val;
+        this.props.changeMainJs(val);
     };
+
+    getFirstElement() {
+        var c = 1;
+        var l = this.state.elementListOptionGroup.filter(function (e) {
+            if (c === 1) {
+                c++;
+                return e;
+            }
+        });
+
+        return l;
+    }
 
     render() {
         return (

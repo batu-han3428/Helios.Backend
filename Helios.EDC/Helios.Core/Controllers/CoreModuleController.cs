@@ -97,9 +97,9 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList()
+        public async Task<List<ModuleModel>> GetModuleList(Int64 tenantId)
         {
-            var result = await _context.Modules.Where(x => x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
+            var result = await _context.Modules.Where(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
             {
                 Id = x.Id,
                 Name = x.Name
@@ -125,7 +125,22 @@ namespace Helios.Core.Controllers
                     IsDependent = x.IsDependent,
                     IsRelated = x.IsRelated,
                     ElementOptions = x.ElementDetail.ElementOptions,
-                    Width = x.Width
+                    Width = x.Width,
+                    Unit = x.ElementDetail.Unit,
+                    Mask = x.ElementDetail.Mask,
+                    LowerLimit = x.ElementDetail.LowerLimit,
+                    UpperLimit = x.ElementDetail.UpperLimit,
+                    Layout = x.ElementDetail.Layout,
+                    DefaultValue = x.ElementDetail.DefaultValue,
+                    AddTodayDate = x.ElementDetail.AddTodayDate,
+                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                    MainJs = x.ElementDetail.MainJs,
+                    StartDay = x.ElementDetail.StartDay,
+                    EndDay = x.ElementDetail.EndDay,
+                    StartMonth = x.ElementDetail.StartMonth,
+                    EndMonth = x.ElementDetail.EndMonth,
+                    StartYear = x.ElementDetail.StartYear,
+                    EndYear = x.ElementDetail.EndYear,
                 }).OrderBy(x => x.Order).ToListAsync();
 
             return result;
@@ -158,7 +173,15 @@ namespace Helios.Core.Controllers
                    IsRelated = x.IsRelated,
                    ElementOptions = x.ElementDetail.ElementOptions,
                    DefaultValue = x.ElementDetail.DefaultValue,
-                   AddTodayDate = x.ElementDetail.AddTodayDate
+                   AddTodayDate = x.ElementDetail.AddTodayDate,
+                   CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                   MainJs = x.ElementDetail.MainJs,
+                   StartDay = x.ElementDetail.StartDay,
+                   EndDay = x.ElementDetail.EndDay,
+                   StartMonth = x.ElementDetail.StartMonth,
+                   EndMonth = x.ElementDetail.EndMonth,
+                   StartYear = x.ElementDetail.StartYear,
+                   EndYear = x.ElementDetail.EndYear,
                }).FirstOrDefaultAsync();
 
             if (result.IsDependent)
@@ -237,6 +260,14 @@ namespace Helios.Core.Controllers
                         MetaDataTags = model.ElementName,
                         DefaultValue = model.DefaultValue,
                         AddTodayDate = model.AddTodayDate,
+                        CalculationSourceInputs = model.CalculationSourceInputs,
+                        MainJs = model.MainJs,
+                        StartDay = model.StartDay,
+                        EndDay = model.EndDay,
+                        StartMonth = model.StartMonth,
+                        EndMonth = model.EndMonth,
+                        StartYear = model.StartYear,
+                        EndYear = model.EndYear,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -314,6 +345,14 @@ namespace Helios.Core.Controllers
                 elementDetail.ElementOptions = model.ElementOptions;
                 elementDetail.DefaultValue = model.DefaultValue;
                 elementDetail.AddTodayDate = model.AddTodayDate;
+                elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
+                elementDetail.MainJs = model.MainJs;
+                elementDetail.StartDay = model.StartDay;
+                elementDetail.EndDay = model.EndDay;
+                elementDetail.StartMonth = model.StartMonth;
+                elementDetail.EndMonth = model.EndMonth;
+                elementDetail.StartYear = model.StartYear;
+                elementDetail.EndYear = model.EndYear;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 

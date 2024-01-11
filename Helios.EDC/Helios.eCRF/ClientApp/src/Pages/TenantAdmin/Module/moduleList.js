@@ -124,10 +124,7 @@ function ModuleList() {
                 //console.error('Error:', error);
             });
     };
-
-    const goToModule = (event, id) => {
-    };
-
+    
     const data = {
         columns: [
             {
@@ -147,7 +144,7 @@ function ModuleList() {
     }
 
     const fetchData = () => {
-        fetch(baseUrl + '/Module/GetModuleList', {
+        fetch(baseUrl + '/Module/GetModuleList?tenantId=' + 2, {
             method: 'GET',
         })
             .then(response => response.json())
