@@ -11,6 +11,7 @@ using Helios.Common.Model;
 using MassTransit.Initializers;
 using Azure.Storage.Blobs;
 using Helios.Common.Enums;
+using System.Data;
 
 namespace Helios.Authentication.Controllers
 {
@@ -711,6 +712,65 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetAspNetUser(AspNetUserDTO model)
+        {
+            ApplicationUser user = await _userManager.FindByIdAsync(model.Id.ToString());
+            string oldEmail = user.Email;
+
+            if (user.Email != model.Email)
+            {
+                var usr = await _userManager.FindByEmailAsync(model.Email);
+                if (usr != null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "The e-mail address you entered is registered. Please try again."
+                    };
+                }
+                user.Email = user.Email != model.Email ? model.Email : user.Email;
+                user.ChangePassword = false;
+            }
+
+            user.Name = user.Name != model.Name ? model.Name : user.Name;
+            user.LastName = user.LastName != model.LastName ? model.LastName : user.LastName;
+            user.PhoneNumber = user.PhoneNumber != model.PhoneNumber ? model.PhoneNumber : user.PhoneNumber;
+
+            IdentityResult result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+
+            if (oldEmail != model.Email)
+            {
+                string password = StringExtensionsHelper.GenerateRandomPassword();
+
+                var removeResult = await _userManager.RemovePasswordAsync(user);
+
+                if (removeResult.Succeeded)
+                {
+                    var passResult = await _userManager.AddPasswordAsync(user, password);
+                    if (passResult.Succeeded)
+                    {
+                        await _emailService.SystemAdminUserMail(new SystemAdminDTO { Name = user.Name, LastName = user.LastName, Email = user.Email, Password = password });
+                    }
+                }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = true,
+                Message = "Successful"
+            };
+        }
+
+        [HttpPost]
         public async Task<ApiResponse<SystemAdminDTO>> SetSystemAdminUser(SystemAdminDTO model)
         {
             if (model.Id == 0)
@@ -845,12 +905,42 @@ namespace Helios.Authentication.Controllers
                 };
                 
             }
-
-            return new ApiResponse<SystemAdminDTO>
+            else
             {
-                IsSuccess = false,
-                Message = "This user is already registered in the system.",
-            };
+                var user = await _context.SystemAdmins.FirstOrDefaultAsync(x => !x.IsDeleted && x.AuthUserId == model.Id);
+
+                var role = model.RoleIds.FirstOrDefault(x => x == (Int64)Roles.SystemAdmin);
+
+                if (user == null && role != null)
+                {
+                    var usr = await _userManager.FindByIdAsync(model.Id.ToString());
+                    var result = await AddSystemAdmins(usr, "1", false);
+
+                    return new ApiResponse<SystemAdminDTO>
+                    {
+                        IsSuccess = result,
+                        Message = result ? "Successful" : "Unsuccessful"
+                    };
+                }
+                else if (user != null && role == null)
+                {
+                    var usr = await _userManager.FindByIdAsync(model.Id.ToString());
+                    var result = await DeleteSystemAdmin(usr, user);
+
+                    return new ApiResponse<SystemAdminDTO>
+                    {
+                        IsSuccess = result,
+                        Message = result ? "Successful" : "Unsuccessful"
+                    };
+                }
+                else {
+                    return new ApiResponse<SystemAdminDTO>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful",
+                    };
+                }
+            }
 
             async Task<bool> AddSystemAdmins(ApplicationUser? usr, string password, bool isRole)
             {
@@ -901,6 +991,46 @@ namespace Helios.Authentication.Controllers
                     return false;
                 }
             }
+
+            async Task<bool> DeleteSystemAdmin(ApplicationUser? usr, SystemAdmin? systemAdmin)
+            {
+                try
+                {
+                    var aspNetResult = await _userManager.RemoveFromRoleAsync(usr, Roles.SystemAdmin.ToString());
+
+                    if (aspNetResult.Succeeded)
+                    {
+                        _context.SystemAdmins.Remove(systemAdmin);
+
+                        var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            var userRoles = await _userManager.GetRolesAsync(usr);
+
+                            if (!userRoles.Any())
+                            {
+                                usr.IsActive = false;
+                                usr.ChangePassword = false;
+                                var resultAspNetUser = await _userManager.UpdateAsync(usr);
+
+                                if (!resultAspNetUser.Succeeded)
+                                {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        }
+                    }
+
+                   return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
         }
 
         [HttpGet]
@@ -925,7 +1055,7 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SystemAdminActivePassive(SystemAdminDTO model)
         {
-            var user = await _context.SystemAdmins.FirstOrDefaultAsync(x => x.AuthUserId == model.Id);
+            var user = await _context.SystemAdmins.FirstOrDefaultAsync(x => !x.IsDeleted && x.AuthUserId == model.Id);
 
             if (user != null)
             {
@@ -1216,6 +1346,103 @@ namespace Helios.Authentication.Controllers
                     Message = "This user is already registered in the system.",
                 };
             }
+            else
+            {
+                var user = await _context.TenantAdmins.Where(x => !x.IsDeleted && x.AuthUserId == model.Id).ToListAsync();
+
+                var areEqual = AreArraysEqual(user.Select(x => x.TenantId), model.TenantIds);
+
+                if (areEqual)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+
+                foreach (var userItem in user)
+                {
+                    if (!model.TenantIds.Contains(userItem.TenantId))
+                    {
+                        _context.TenantAdmins.Remove(userItem);
+                    }
+                }
+
+                foreach (var tenantId in model.TenantIds)
+                {
+                    if (!user.Any(x => x.TenantId == tenantId))
+                    {
+                        var newUser = new TenantAdmin { AuthUserId = model.Id, TenantId = tenantId };
+                        _context.TenantAdmins.Add(newUser);
+                    }
+                }
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    user = await _context.TenantAdmins.Where(x => !x.IsDeleted && x.AuthUserId == model.Id).ToListAsync();
+                    var usr = await _userManager.FindByIdAsync(model.Id.ToString());
+
+                    if (user.Count == 0)
+                    {
+                        var aspNetResult = await _userManager.RemoveFromRoleAsync(usr, Roles.TenantAdmin.ToString());
+
+                        if (aspNetResult.Succeeded)
+                        {
+                            var userRoles = await _userManager.GetRolesAsync(usr);
+
+                            if (!userRoles.Any())
+                            {
+                                usr.IsActive = false;
+                                usr.ChangePassword = false;
+                                var resultAspNetUser = await _userManager.UpdateAsync(usr);
+
+                                if (!resultAspNetUser.Succeeded)
+                                {
+                                    return new ApiResponse<dynamic>
+                                    {
+                                        IsSuccess = false,
+                                        Message = "Unsuccessful"
+                                    };
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        bool isTenantAdmin = await _userManager.IsInRoleAsync(usr, Roles.TenantAdmin.ToString());
+
+                        if (!isTenantAdmin)
+                        {
+                            var r = await _userManager.AddToRoleAsync(usr, Roles.TenantAdmin.ToString());
+
+                            if (!r.Succeeded) {
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = false,
+                                    Message = "Unsuccessful"
+                                };
+                            }
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+            }
 
             return new ApiResponse<dynamic>
             {
@@ -1278,6 +1505,21 @@ namespace Helios.Authentication.Controllers
                     return false;
                 }              
             }
+
+            bool AreArraysEqual<T>(IEnumerable<T> array1, IEnumerable<T> array2)
+            {
+                if (array1 == null && array2 == null)
+                {
+                    return true;
+                }
+
+                if (array1 == null || array2 == null)
+                {
+                    return false;
+                }
+
+                return array1.OrderBy(x => x).SequenceEqual(array2.OrderBy(x => x));
+            }
         }
 
         [HttpGet]
@@ -1295,8 +1537,8 @@ namespace Helios.Authentication.Controllers
                 where
                     userManagerUser.IsActive &&
                     userManagerUser.Id != id &&
-                    (sysAdmin != null && sysAdmin.IsActive && !sysAdmin.IsDeleted) ||
-                    (tenAdmin != null && tenAdmin.IsActive && !tenAdmin.IsDeleted)
+                    (sysAdmin != null && !sysAdmin.IsDeleted) ||
+                    (tenAdmin != null && !tenAdmin.IsDeleted)
                 select new SystemUserModel
                 {
                     Id = userManagerUser.Id,
@@ -1304,7 +1546,7 @@ namespace Helios.Authentication.Controllers
                     LastName = userManagerUser.LastName,
                     Email = userManagerUser.Email,
                     PhoneNumber = userManagerUser.PhoneNumber,
-                    IsActive = userManagerUser.IsActive,
+                    IsActive = (sysAdmin != null && sysAdmin.IsActive) || (tenAdmin != null && tenAdmin.IsActive) || userManagerUser.IsActive,
                     Roles = userManagerUser.UserRoles.Select(ur => new
                     {
                         RoleId = ur.RoleId,
@@ -1431,7 +1673,7 @@ namespace Helios.Authentication.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> TenantAdminActivePassive(TenantAndSystemAdminDTO model)
         {
-            var user = await _context.TenantAdmins.Where(x => x.AuthUserId == model.Id && model.TenantIds.Contains(x.TenantId)).ToListAsync();
+            var user = await _context.TenantAdmins.Where(x => !x.IsDeleted && x.AuthUserId == model.Id && model.TenantIds.Contains(x.TenantId)).ToListAsync();
 
             if (user.Count > 0)
             {

@@ -43,7 +43,7 @@ export const TenantsApi = createApi({
 
 export const { useTenantListGetQuery } = TenantsApi;
 
-export const { useTenantListAuthGetQuery } = TenantsApi;
+export const { useLazyTenantListAuthGetQuery } = TenantsApi;
 
 export const { useLazyTenantGetQuery } = TenantsApi;
 

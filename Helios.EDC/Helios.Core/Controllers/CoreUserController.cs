@@ -622,6 +622,12 @@ namespace Helios.Core.Controllers
                 };
             }
         }
+
+        [HttpGet]
+        public async Task<bool> StudyUserActiveControl(Int64 authUserId)
+        {
+            return await _context.StudyUsers.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == authUserId);
+        }
         #endregion
 
         #region Tenant User

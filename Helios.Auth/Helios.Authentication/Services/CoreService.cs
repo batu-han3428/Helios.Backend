@@ -19,5 +19,16 @@ namespace Helios.Authentication.Services
                 return result.Data;
             }
         }
+
+        public async Task<bool> StudyUserActiveControl(Int64 authUserId)
+        {
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreUser/StudyUserActiveControl", Method.Get);
+                req.AddParameter("authUserId", authUserId);
+                var result = await client.ExecuteAsync<bool>(req);
+                return result.Data;
+            }
+        }
     }
 }

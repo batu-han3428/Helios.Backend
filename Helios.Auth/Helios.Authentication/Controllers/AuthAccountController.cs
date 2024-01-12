@@ -107,6 +107,30 @@ namespace Helios.Authentication.Controllers
           
         }
 
+        private async Task<bool> UserActiveControl(ApplicationUser user)
+        {
+            if (user.UserRoles.Any(x => x.Role.Name == Roles.SuperAdmin.ToString()))
+            {
+                return true;
+            }
+            else if (user.UserRoles.Any(x => x.Role.Name == Roles.SystemAdmin.ToString()))
+            {
+                return await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+            }
+            else if (user.UserRoles.Any(x => x.Role.Name == Roles.TenantAdmin.ToString()))
+            {
+                return await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+            }
+            else if (user.UserRoles.Any(x => x.Role.Name == Roles.StudyUser.ToString()))
+            {
+                return await _coreService.StudyUserActiveControl(user.Id);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> Login(AccountModel model)
         {
@@ -136,6 +160,17 @@ namespace Helios.Authentication.Controllers
                                 Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account."
                             };
                         }
+                    }
+
+                    bool isActive = await UserActiveControl(user);
+
+                    if (!isActive)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Please contact the system administrator to open your account."
+                        };
                     }
 
                     var checkPassword = await _userManager.CheckPasswordAsync(user, model.Password);

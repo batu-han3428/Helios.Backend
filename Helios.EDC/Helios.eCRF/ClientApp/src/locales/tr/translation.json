@@ -284,5 +284,6 @@
   "Phone number": "Telefon numarası",
   "Please select which account of the user you want to delete.": "Lütfen kullanıcının hangi hesabını silmek istediğinizi seçiniz.",
   "Add an admin": "Yönetici ekle",
-  "Please select which account of the user you want to active/passive.": "Lütfen kullanıcının hangi hesabını aktife/pasife almak istediğinizi seçiniz."
+  "Please select which account of the user you want to active/passive.": "Lütfen kullanıcının hangi hesabını aktife/pasife almak istediğinizi seçiniz.",
+  "It is not possible to update without making changes.": "Değişiklik yapmadan güncelleme yapılamaz."
 }

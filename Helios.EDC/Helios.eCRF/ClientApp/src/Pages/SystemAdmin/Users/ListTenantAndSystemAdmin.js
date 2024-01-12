@@ -9,7 +9,7 @@ import AddOrUpdateTenantAndSystemAdmin from "./AddOrUpdateTenantAndSystemAdmin";
 import ToastComp from "../../../components/Common/ToastComp/ToastComp";
 import { useSelector, useDispatch } from 'react-redux';
 import { useSystemAdminResetPasswordMutation } from '../../../store/services/SystemAdmin/SystemAdmin';
-import { useLazyUserListGetQuery } from '../../../store/services/SystemAdmin/Users/SystemUsers';
+import { useLazyUserListGetQuery, useUserActivePassiveMutation } from '../../../store/services/SystemAdmin/Users/SystemUsers';
 import { startloading, endloading } from '../../../store/loader/actions';
 import Swal from 'sweetalert2';
 import { countryNumber } from "../../../helpers/phonenumber_helper";
@@ -30,8 +30,8 @@ const ListTenantAndSystemAdmin = props => {
 
     const [modalTitle, setModalTitle] = useState("");
     const [modalButtonText, setModalButtonText] = useState("");
-    const [adminId, setAdminId] = useState(0);
     const [table, setTable] = useState([]);
+    const [modalContent, setModalContent] = useState(null);
 
     const toastHandle = (message, state) => {
         toastRef.current.setToast({
@@ -41,16 +41,32 @@ const ListTenantAndSystemAdmin = props => {
     }
 
     const addSystemAdmin = () => {
+        setModalContent(<AddOrUpdateTenantAndSystemAdmin isAdd={true} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />);
         setModalTitle(props.t("Add an admin"));
         setModalButtonText(props.t("Save"));
         modalRef.current.tog_backdrop();
     }
 
+    const updateUser = (item) => {
+        if (!item.isActive) {
+            toastRef.current.setToast({
+                message: props.t("Please activate the account first and then try this process again."),
+                stateToast: false
+            });
+            return;
+        }
+        setModalContent(<AddOrUpdateTenantAndSystemAdmin isAdd={false} userData={item} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />);
+        setModalTitle(props.t("Update"));
+        setModalButtonText(props.t("Update"));
+        modalRef.current.tog_backdrop();
+    };
+
     const getActions = (item) => {
         const actions = (
             <div className="icon-container">
-                <div title={props.t("Active or passive")} className="icon icon-lock" onClick={() => { deleteOrActivePassiveUser(item, false) }}></div>
-                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteOrActivePassiveUser(item, true) }}></div>
+                <div title={props.t("Update")} className="icon icon-update" onClick={() => { updateUser(item) }}></div>
+                <div title={props.t("Active or passive")} className="icon icon-lock" onClick={() => { activePassiveUser(item) }}></div>
+{/*                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteOrActivePassiveUser(item, true) }}></div>*/}
                 <div title={props.t("Send a new password")} className="icon icon-resetpassword" onClick={() => { resetPasswordUser(item) }}></div>
             </div>);
         return actions;
@@ -238,6 +254,43 @@ const ListTenantAndSystemAdmin = props => {
         }
     }
 
+    const [userActivePassive] = useUserActivePassiveMutation();
+
+    const activePassiveUser = (item) => {
+        console.log(item)
+        Swal.fire({
+            title: props.t("You will not be able to recover this site!"),
+            text: props.t("Do you confirm?"),
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3bbfad",
+            confirmButtonText: "Yes",
+            cancelButtonText: "Cancel",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    dispatch(startloading());
+                    const response = await userActivePassive({
+                        id: item.id,
+                        userId: userInformation.userId,
+                        roleIds: item.roles.length > 0 ? item.roles.map(x => x.roleId) : [],
+                        tenantIds: item.tenants.length > 0 ? item.tenants.map(x=> x.id) : []
+                    });
+                    if (response.data.isSuccess) {
+                        dispatch(endloading());
+                        Swal.fire(response.data.message, '', 'success');
+                    } else {
+                        dispatch(endloading());
+                        Swal.fire(response.data.message, '', 'error');
+                    }
+                } catch (error) {
+                    dispatch(endloading());
+                    Swal.fire('An error occurred', '', 'error');
+                }
+            }
+        });
+    }
+
     const [swalShown, setSwalShown] = useState({ show: false, value: null, isDropdown: true, isDelete: true })
     const [deleteOrActivePassiveSubmit, setDeleteOrActivePassiveSubmit] = useState(false);
 
@@ -348,7 +401,7 @@ const ListTenantAndSystemAdmin = props => {
             <ModalComp
                 refs={modalRef}
                 title={modalTitle}
-                body={<AddOrUpdateTenantAndSystemAdmin id={adminId} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />}
+                body={modalContent}
                 buttonText={modalButtonText}
                 isButton={true}
             />

@@ -20,13 +20,14 @@ const AddOrUpdateSystemAdmin = props => {
     const validationType = useFormik({
         enableReinitialize: true,
         initialValues: {
-            id: props.id,
+            id: props.userData ? props.userData.id : 0,
             userid: props.userId,
             language: props.i18n.language,
-            name: props.name || "",
-            lastName: props.lastName || "",
-            email: props.email || "",
-            phonenumber: props.phonenumber || "",
+            isAdd: props.isAdd,
+            name: props.userData ? props.userData.name : "",
+            lastName: props.userData ? props.userData.lastName : "",
+            email: props.userData ? props.userData.email : "",
+            phonenumber: props.userData ? props.userData.phoneNumber : "",
         },
         validationSchema: Yup.object().shape({
             name: Yup.string().required(props.t("This field is required")),
@@ -41,6 +42,19 @@ const AddOrUpdateSystemAdmin = props => {
         onSubmit: async (values) => {
             try {
                 dispatch(startloading());
+
+                if (!props.isAdd) {
+                    const formHasChanges = Object.keys(values).some(
+                        (key) => values[key] !== validationType.initialValues[key]
+                    );
+
+                    if (!formHasChanges) {
+                        props.toast(props.t("It is not possible to update without making changes."), false);
+                        dispatch(endloading());
+                        return false;
+                    }
+                }
+
                 const response = await systemAdminSet(values);
                 if (response.data.isSuccess) {
                     props.onToggleModal();

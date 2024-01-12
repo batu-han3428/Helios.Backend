@@ -28,7 +28,7 @@ const ListSystemAdmin = props => {
 
     const [modalTitle, setModalTitle] = useState("");
     const [modalButtonText, setModalButtonText] = useState("");
-    const [systemAdminId, setSystemAdminId] = useState(0);
+    const [modalContent, setModalContent] = useState(null);
     const [table, setTable] = useState([]);
 
     const toastHandle = (message, state) => {
@@ -39,16 +39,32 @@ const ListSystemAdmin = props => {
     }
 
     const addSystemAdmin = () => {
+        setModalContent(<AddOrUpdateSystemAdmin isAdd={true} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />);
         setModalTitle(props.t("Add a system admin"));
         setModalButtonText(props.t("Save"));
         modalRef.current.tog_backdrop();
     }
 
+    const updateSystemAdmin = (item) => {
+        if (!item.isActive) {
+            toastRef.current.setToast({
+                message: props.t("Please activate the account first and then try this process again."),
+                stateToast: false
+            });
+            return;
+        }       
+        setModalContent(<AddOrUpdateSystemAdmin isAdd={false} userData={item} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />);
+        setModalTitle(props.t("Update"));
+        setModalButtonText(props.t("Update"));
+        modalRef.current.tog_backdrop();
+    };
+
     const getActions = (item) => {
         const actions = (
             <div className="icon-container">
+                <div title={props.t("Update")} className="icon icon-update" onClick={() => { updateSystemAdmin(item) }}></div>
                 <div title={props.t("Active or passive")} className="icon icon-lock" onClick={() => { activePassiveUser(item) }}></div>
-                <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteUser(item) }}></div>
+      {/*          <div title={props.t("Delete")} className="icon icon-delete" onClick={() => { deleteUser(item) }}></div>*/}
                 <div title={props.t("Send a new password")} className="icon icon-resetpassword" onClick={() => { resetPasswordUser(item) }}></div>
             </div>);
         return actions;
@@ -311,7 +327,7 @@ const ListSystemAdmin = props => {
             <ModalComp
                 refs={modalRef}
                 title={modalTitle}
-                body={<AddOrUpdateSystemAdmin id={systemAdminId} userId={userInformation.userId} refs={modalContentRef} toast={toastHandle} />}
+                body={modalContent}
                 buttonText={modalButtonText}
                 isButton={true}
                 size="lg"
