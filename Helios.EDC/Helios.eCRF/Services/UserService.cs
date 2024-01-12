@@ -887,41 +887,79 @@ namespace Helios.eCRF.Services
                 return result.Data;
             }
         }
+        #endregion
+
+        #region Tenant And System Admin User
+        public async Task<ApiResponse<dynamic>> SetAspNetUser(AspNetUserDTO model)
+        {
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AdminUser/SetAspNetUser", Method.Post);
+                req.AddJsonBody(model);
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+        }
 
         public async Task<ApiResponse<dynamic>> SetSystemAdminAndTenantAdminUser(SystemAdminDTO systemAdminDTO)
         {
             ApiResponse<dynamic> result = null;
 
-            if (systemAdminDTO.RoleIds.Contains((int)Roles.SystemAdmin))
+            if (!systemAdminDTO.isAdd.Value)
             {
-                var result1 = await SetSystemAdminUser(systemAdminDTO);
+                var result1 = await SetAspNetUser(new AspNetUserDTO { Id = systemAdminDTO.Id, Email = systemAdminDTO.Email, Name = systemAdminDTO.Name, LastName = systemAdminDTO.LastName, PhoneNumber = systemAdminDTO.PhoneNumber });
+
+                if (!result1.IsSuccess)
+                {
+                    return result1;
+                }
+
+                var result2 = await SetSystemAdminUser(systemAdminDTO);
 
                 result = new ApiResponse<dynamic>
                 {
-                    IsSuccess = result1.IsSuccess,
-                    Message = result1.Message
+                    IsSuccess = result2.IsSuccess,
+                    Message = result2.Message
                 };
 
-                if (!result1.IsSuccess)
-                {                   
+                if (!result2.IsSuccess)
+                {
                     return result;
                 }
-                else
-                {
-                    systemAdminDTO.Password = result1.Values.Password;
-                }
-            }
 
-            if (systemAdminDTO.RoleIds.Contains((int)Roles.TenantAdmin))
-            {
                 result = await SetTenantAdminUser(systemAdminDTO);
+            }
+            else
+            {
+                if (systemAdminDTO.RoleIds.Contains((int)Roles.SystemAdmin))
+                {
+                    var result1 = await SetSystemAdminUser(systemAdminDTO);
+
+                    result = new ApiResponse<dynamic>
+                    {
+                        IsSuccess = result1.IsSuccess,
+                        Message = result1.Message
+                    };
+
+                    if (!result1.IsSuccess)
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        systemAdminDTO.Password = result1.Values.Password;
+                    }
+                }
+
+                if (systemAdminDTO.RoleIds.Contains((int)Roles.TenantAdmin))
+                {
+                    result = await SetTenantAdminUser(systemAdminDTO);
+                }
             }
 
             return result;
         }
-        #endregion
 
-        #region Tenant And System Admin User
         private async Task<ApiResponse<dynamic>> TenantAdminDelete(TenantAndSystemAdminDTO tenantAndSystemAdminDTO)
         {
             using (var client = AuthServiceClient)

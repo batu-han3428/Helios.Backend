@@ -14,7 +14,7 @@ import { arraysHaveSameItems } from '../../../helpers/General/index';
 import makeAnimated from "react-select/animated";
 import Select from "react-select";
 import "../../../assets/css/PhoneInput.css";
-import { useTenantListAuthGetQuery } from '../../../store/services/Tenants';
+import { useLazyTenantListAuthGetQuery } from '../../../store/services/Tenants';
 
 const AddOrUpdateTenantAndSystemAdmin = props => {
 
@@ -50,7 +50,19 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
     ]);
     const [optionGroupTenants, setOptionGroupTenants] = useState([]);
 
-    const { data: tenantsData, isError, isLoading } = useTenantListAuthGetQuery();
+    const [trigger, { data: tenantsData, isError, isLoading }] = useLazyTenantListAuthGetQuery();
+
+    useEffect(() => {
+        trigger();
+        if (!props.isAdd) {
+            const allRoleIds = props.userData.roles.map(item => item.roleId);
+            validationType.setFieldValue('roleIds', allRoleIds);
+            if (props.userData.tenants.length > 0) {
+                const allTenantsIds = props.userData.tenants.map(item => item.id);
+                validationType.setFieldValue('tenantIds', allTenantsIds);
+            }
+        }
+    }, [props.isAdd])
 
     useEffect(() => {
         if (tenantsData && !isLoading && !isError) {
@@ -66,7 +78,7 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
             });
             const allTenantsIds = tenantsData.map(item => item.id);
             const selectAllOption = {
-                label: props.t("Select All"),
+                label: props.t("Select all"),
                 value: ["All", allTenantsIds]
             };
             tenants.unshift(selectAllOption);
@@ -80,13 +92,14 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
     const validationType = useFormik({
         enableReinitialize: true,
         initialValues: {
-            id: props.id,
+            id: props.userData ? props.userData.id : 0,
             userid: props.userId,
             language: props.i18n.language,
-            name: props.name || "",
-            lastName: props.lastName || "",
-            email: props.email || "",
-            phonenumber: props.phonenumber || "",
+            isAdd: props.isAdd,
+            name: props.userData ? props.userData.name : "",
+            lastName: props.userData ? props.userData.lastName : "",
+            email: props.userData ? props.userData.email : "",
+            phonenumber: props.userData ? props.userData.phoneNumber : "",
             roleIds: [],
             tenantIds: []
         },
@@ -109,6 +122,18 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
         onSubmit: async (values) => {
             try {
                 dispatch(startloading());
+
+                if (!props.isAdd) {
+                    const formHasChanges = Object.keys(values).some(
+                        (key) => values[key] !== validationType.initialValues[key]
+                    );
+
+                    if (!formHasChanges) {
+                        props.toast(props.t("It is not possible to update without making changes."), false);
+                        dispatch(endloading());
+                        return false;
+                    }
+                }
 
                 const response = await userSet({
                     ...values,
@@ -231,6 +256,9 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
                                 validationType.setFieldValue('roleIds', ["All", selectAll]);
                             } else {
                                 validationType.setFieldValue('roleIds', selectedValues);
+                                if (!selectedValues.includes(3)) {
+                                    validationType.setFieldValue('tenantIds', []);
+                                }
                             }
                         }}
                         options={(function () {
@@ -268,7 +296,7 @@ const AddOrUpdateTenantAndSystemAdmin = props => {
                     <div className="mb-3 col-md-6">
                         <Label className="form-label">{props.t("Tenants")}</Label>
                         <Select
-                            value={validationType.values.tenantIds.length > 0 ? validationType.values.tenantIds[0] === "All" ? { label: props.t("Select all"), value: validationType.values.tenantIds[1] } : optionGroupTenants[0].options.filter(option => validationType.values.tenantIds.includes(option.value)) : []}
+                            value={validationType.values.tenantIds.length > 0 ? validationType.values.tenantIds[0] === "All" ? { label: props.t("Select all"), value: validationType.values.tenantIds[1] } : optionGroupTenants.length > 0 ? optionGroupTenants[0].options.filter(option => validationType.values.tenantIds.includes(option.value)) : [] : []}
                             name="tenantIds"
                             onChange={(selectedOptions) => {
                                 const selectedValues = selectedOptions.map(option => option.value);

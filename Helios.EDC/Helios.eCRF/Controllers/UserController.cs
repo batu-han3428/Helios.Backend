@@ -339,8 +339,16 @@ namespace Helios.eCRF.Controllers
         [HttpPost]
         public async Task<IActionResult> SetSystemAdminUser(SystemAdminDTO systemAdminDTO)
         {
-            var result = await _userService.SetSystemAdminUser(systemAdminDTO);
-            return Ok(result);
+            if (systemAdminDTO.isAdd.Value)
+            {
+                var result = await _userService.SetSystemAdminUser(systemAdminDTO);
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _userService.SetAspNetUser(new AspNetUserDTO { Id = systemAdminDTO.Id, Email = systemAdminDTO.Email, Name = systemAdminDTO.Name, LastName = systemAdminDTO.LastName, PhoneNumber = systemAdminDTO.PhoneNumber });
+                return Ok(result);
+            }
         }
 
 

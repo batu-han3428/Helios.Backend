@@ -437,5 +437,6 @@
   "Phone number": "Phone number",
   "Please select which account of the user you want to delete.": "Please select which account of the user you want to delete.",
   "Add an admin": "Add an admin",
-  "Please select which account of the user you want to active/passive.": "Please select which account of the user you want to active/passive."
+  "Please select which account of the user you want to active/passive.": "Please select which account of the user you want to active/passive.",
+  "It is not possible to update without making changes.": "It is not possible to update without making changes."
 }

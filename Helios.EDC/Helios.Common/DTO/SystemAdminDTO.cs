@@ -19,5 +19,6 @@ namespace Helios.Common.DTO
         public string? Password { get; set; }
         public string? Language { get; set; }
         public bool? isAddUser { get; set; }
+        public bool? isAdd { get; set; }
     }
 }
