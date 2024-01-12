@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Helios.Core.Controllers
 {
@@ -207,6 +208,11 @@ namespace Helios.Core.Controllers
             var result = new ApiResponse<dynamic>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if(model.ElementType == ElementType.Calculated)
+            {
+                var a = JsonSerializer.Deserialize<CalculationModel>(model.CalculationSourceInputs);
+            }
 
             if (element == null)
             {

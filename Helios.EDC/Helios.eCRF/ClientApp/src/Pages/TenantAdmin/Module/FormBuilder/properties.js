@@ -30,6 +30,7 @@ import CalculationElementProperties from "../Elements/CalculationElement/calcula
 import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
+import TextareaElementProperties from "../Elements/TextareaElement/textareaElementProperties.js";
 
 const baseUrl = "https://localhost:7196";
 
@@ -219,6 +220,13 @@ class Properties extends React.Component {
                     changeMask={this.changeMask} Mask={this.state.Mask}
                     changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
+                />;
+                break;
+            case 5:
+                this.state.showWhereElementPropeties = 0;
+                this.state.fieldWidthsW = "col-md-10";
+                return <TextareaElementProperties
+                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
                 />;
                 break;
             case 6:

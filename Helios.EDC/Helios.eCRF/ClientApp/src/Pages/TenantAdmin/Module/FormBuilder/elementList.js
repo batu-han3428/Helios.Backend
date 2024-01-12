@@ -26,6 +26,7 @@ import DropdownElement from '../Elements/DropdownElement/dropdownElement.js';
 import DropdownCheckListElement from '../Elements/DropdownCheckListElement/dropdownCheckListElement.js';
 import LabelElement from '../Elements/LabelElement/labelElement.js';
 import DateElement from '../Elements/DateElement/dateElement.js';
+import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -178,6 +179,11 @@ function ElementList(props) {
                     LowerLimit={0}
                     UpperLimit={0}
                 />;
+            case 5:
+                return <TextareaElement
+                    IsDisable={true}
+                    DefaultValue={param.defaultValue}
+                />
             case 6:
                 return <DateElement
                     IsDisable={true}

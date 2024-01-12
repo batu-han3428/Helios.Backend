@@ -19,22 +19,11 @@ class TextareaElementProperties extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            AddTodayDate: props.AddTodayDate,
-        }
-
         this.handleDefaultValueChange = this.handleDefaultValueChange.bind(this);
-        this.handleAddTodayDateChange = this.handleAddTodayDateChange.bind(this);
     }
 
     handleDefaultValueChange(e) {
         this.props.changeDefaultValue(e.target.value);
-    };
-
-    handleAddTodayDateChange(e) {
-        debugger;
-        this.props.changeAddTodayDate(e.target.value);
-        this.props.AddTodayDate = e.target.value;
     };
 
     render() {
@@ -54,13 +43,6 @@ class TextareaElementProperties extends Component {
                             className="form-control"
                             type="text"
                             placeholder="Default value" />
-                    </div>
-                    <div className="form-check col-md-4" style={{ marginTop:'7px' }}>
-                        <input type="checkbox"
-                            className="form-check-input"
-                            checked={this.state.AddTodayDate}
-                            onChange={this.handleAddTodayDateChange} id="addTodayDate" />
-                        <label className="form-check-label" htmlFor="addTodayDate">Show "Today" button</label>
                     </div>
                 </Row>
             </>
