@@ -41,7 +41,6 @@ class CalculationElementProperties extends Component {
         this.fillAllElementList = this.fillAllElementList.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.setCode = this.setCode.bind(this);
-        this.getFirstElement = this.getFirstElement.bind(this);
 
         this.fillAllElementList();
     }
@@ -59,7 +58,7 @@ class CalculationElementProperties extends Component {
 
         this.setState((prevState) => ({
             elementRows: [...prevState.elementRows, {
-                elementFieldSelectedGroup: this.getFirstElement(), variableName: 'A' + this.state.inputCounter
+                elementFieldSelectedGroup: this.state.elementListOptionGroup[0], variableName: 'A' + this.state.inputCounter
             }],
         }));
     };
@@ -79,10 +78,6 @@ class CalculationElementProperties extends Component {
 
                 if (this.state.inputCounter === 0) {
                     this.addRow();
-
-                    var l = this.getFirstElement();
-
-                    this.state.elementRows[0].elementFieldSelectedGroup = l;
                 }
             })
             .catch(error => {
@@ -106,18 +101,6 @@ class CalculationElementProperties extends Component {
         this.state.Code = val;
         this.props.changeMainJs(val);
     };
-
-    getFirstElement() {
-        var c = 1;
-        var l = this.state.elementListOptionGroup.filter(function (e) {
-            if (c === 1) {
-                c++;
-                return e;
-            }
-        });
-
-        return l;
-    }
 
     render() {
         return (

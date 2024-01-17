@@ -9,7 +9,7 @@
     public class ElementFieldSelectedGroup
     {
         public string label { get; set; }
-        public string value { get; set; }
+        public Int64 value { get; set; }
 
     }
 }

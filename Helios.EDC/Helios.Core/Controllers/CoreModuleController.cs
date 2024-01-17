@@ -104,7 +104,7 @@ namespace Helios.Core.Controllers
             {
                 Id = x.Id,
                 Name = x.Name
-            }).ToListAsync();
+            }).AsNoTracking().ToListAsync();
 
             return result;
         }
@@ -142,7 +142,7 @@ namespace Helios.Core.Controllers
                     EndMonth = x.ElementDetail.EndMonth,
                     StartYear = x.ElementDetail.StartYear,
                     EndYear = x.ElementDetail.EndYear,
-                }).OrderBy(x => x.Order).ToListAsync();
+                }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             return result;
         }
@@ -183,7 +183,7 @@ namespace Helios.Core.Controllers
                    EndMonth = x.ElementDetail.EndMonth,
                    StartYear = x.ElementDetail.StartYear,
                    EndYear = x.ElementDetail.EndYear,
-               }).FirstOrDefaultAsync();
+               }).AsNoTracking().FirstOrDefaultAsync();
 
             if (result.IsDependent)
             {
@@ -206,12 +206,13 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
             var result = new ApiResponse<dynamic>();
+            var calcList = new List<CalculationModel>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            if(model.ElementType == ElementType.Calculated)
+            if (model.ElementType == ElementType.Calculated)
             {
-                var a = JsonSerializer.Deserialize<CalculationModel>(model.CalculationSourceInputs);
+                calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
             }
 
             if (element == null)
@@ -274,6 +275,7 @@ namespace Helios.Core.Controllers
                         EndMonth = model.EndMonth,
                         StartYear = model.StartYear,
                         EndYear = model.EndYear,
+                        IsInCalculation = model.ElementType == ElementType.Calculated
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -300,6 +302,32 @@ namespace Helios.Core.Controllers
                         _context.ModuleElementEvents.Add(elementEvent);
                     }
 
+                    if (model.ElementType == ElementType.Calculated)
+                    {
+                        var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                        var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId)).ToListAsync();
+
+                        foreach (var item in calcList)
+                        {
+                            var calcDtil = new CalculatationElementDetail()
+                            {
+                                TenantId = model.TenantId,
+                                ModuleId = model.ModuleId,
+                                CalculationElementId = elm.Id,
+                                TargetElementId = item.elementFieldSelectedGroup.value,
+                            };
+
+                            _context.CalculatationElementDetails.Add(calcDtil);
+                        }
+
+                        foreach (var item in elementInCalList)
+                        {
+                            item.IsInCalculation = true;
+
+                            _context.ElementDetails.Update(item);
+                        }
+                    }
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                     //control for both of element and elementDetail saved
@@ -314,8 +342,21 @@ namespace Helios.Core.Controllers
                         result.IsSuccess = false;
                         result.Message = "Operation failed. Please try again.";
                     }
-                    else
-                        result.Message = result.IsSuccess ? "Successful" : "Error";
+                    else if (!result.IsSuccess)//if dependent or calculation didn't save
+                    {
+                        elm.IsActive = false;
+                        elm.IsDeleted = true;
+                        _context.Elements.Update(elm);
+
+                        elmDtl.IsActive = false;
+                        elmDtl.IsDeleted = true;
+                        _context.ElementDetails.Update(elmDtl);
+
+                        var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        result.IsSuccess = false;
+                        result.Message = "Operation failed. Please try again.";
+                    }
                 }
                 else
                 {
@@ -392,6 +433,61 @@ namespace Helios.Core.Controllers
                         dep.ModuleId = element.ModuleId;
 
                         _context.ModuleElementEvents.Update(dep);
+                    }
+                }
+
+                if (model.ElementType == ElementType.Calculated)
+                {
+                    var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
+                    var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    //change elementDetail first
+                    foreach (var item in elementInExistCalList)
+                    {
+                        item.IsInCalculation = false;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    //then change new elementDetail flags
+                    foreach (var item in elementInCalList)
+                    {
+                        item.IsInCalculation = true;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    //add new calcElementDetails
+                    foreach (var item in calcList)
+                    {
+                        if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
+                        {
+                            var calcDtil = new CalculatationElementDetail()
+                            {
+                                TenantId = model.TenantId,
+                                ModuleId = model.ModuleId,
+                                CalculationElementId = element.Id,
+                                TargetElementId = item.elementFieldSelectedGroup.value,
+                            };
+
+                            _context.CalculatationElementDetails.Add(calcDtil);
+                        }
+                    }
+
+                    //remove deleted items from calc
+                    foreach (var item in existCalDtil)
+                    {
+                        if (!calcElmIds.Contains(item.TargetElementId))
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.Update(item);
+                        }
                     }
                 }
 

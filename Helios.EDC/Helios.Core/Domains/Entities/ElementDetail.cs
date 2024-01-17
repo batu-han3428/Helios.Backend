@@ -50,8 +50,8 @@ namespace Helios.Core.Domains.Entities
 
         //calculation
         public string CalculationSourceInputs { get; set; }
-        public bool IsCalculated { get; set; }
-        public string MainJs { get; set; }
+        public bool IsInCalculation { get; set; }
+        public string? MainJs { get; set; }
 
         public Element Element { get; set; }
 
