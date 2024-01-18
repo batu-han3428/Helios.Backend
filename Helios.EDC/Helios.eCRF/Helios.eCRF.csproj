@@ -62,7 +62,6 @@
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\DatagridElement\" />
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\TableElement\" />
     <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\RangeSliderElement\" />
-    <Folder Include="ClientApp\src\Pages\TenantAdmin\Module\Elements\FileUploaderElement\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

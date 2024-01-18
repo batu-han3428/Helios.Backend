@@ -27,6 +27,7 @@ import DropdownCheckListElement from '../Elements/DropdownCheckListElement/dropd
 import LabelElement from '../Elements/LabelElement/labelElement.js';
 import DateElement from '../Elements/DateElement/dateElement.js';
 import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
+import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -213,6 +214,10 @@ function ElementList(props) {
                 return <DropdownCheckListElement
                     IsDisable={true}
                     ElementOptions={param.elementOptions}
+                />
+            case 12:
+                return <FileUploaderElement
+                    IsDisable={true}
                 />
             default:
                 return <TextElement IsDisable={"disabled"}

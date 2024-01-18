@@ -31,6 +31,7 @@ import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2'
 import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import TextareaElementProperties from "../Elements/TextareaElement/textareaElementProperties.js";
+import FileUploaderElementProperties from "../Elements/FileUploaderElement/fileUploaderElementProperties.js";
 
 const baseUrl = "https://localhost:7196";
 
@@ -206,12 +207,10 @@ class Properties extends React.Component {
                 return <LabelElementProperties
                     changeLableTitle={this.changeLableTitle} Title={this.state.Title}
                 />;
-                break;
             case 2:
                 this.state.showWhereElementPropeties = 0;
                 this.state.fieldWidthsW = "col-md-10";
                 return <TextElementProperties changeUnit={this.changeUnit} Unit={this.state.Unit} />;
-                break;
             case 4:
                 this.state.showWhereElementPropeties = 0;
                 this.state.fieldWidthsW = "col-md-10";
@@ -221,14 +220,12 @@ class Properties extends React.Component {
                     changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
                 />;
-                break;
             case 5:
                 this.state.showWhereElementPropeties = 0;
                 this.state.fieldWidthsW = "col-md-10";
                 return <TextareaElementProperties
                     changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
                 />;
-                break;
             case 6:
                 this.state.showWhereElementPropeties = 3;
                 this.state.fieldWidthsW = "col-md-10";
@@ -242,7 +239,6 @@ class Properties extends React.Component {
                     changeStartYear={this.changeStartYear} StartYear={this.state.StartYear}
                     changeEndYear={this.changeEndYear} EndYear={this.state.EndYear}
                 />;
-                break;
             case 7:
                 this.state.showWhereElementPropeties = 3;
                 this.state.fieldWidthsW = "col-md-6";
@@ -251,7 +247,6 @@ class Properties extends React.Component {
                     changeMainJs={this.changeMainJs} MainJs={this.state.MainJs}
                     changeCalculationSourceInputs={this.changeCalculationSourceInputs} CalculationSourceInputs={this.state.CalculationSourceInputs}
                 />;
-                break;
             case 8:
             case 9:
             case 10:
@@ -262,7 +257,11 @@ class Properties extends React.Component {
                     changeLayout={this.changeLayout} Layout={this.state.Layout}
                     changeSavedTagList={this.changeSavedTagList} SavedTagList={this.state.SavedTagList}
                 />;
-                break;
+            case 12:
+                this.state.showWhereElementPropeties = 1;
+                this.state.fieldWidthsW = "col-md-10";
+                return <FileUploaderElementProperties
+                />;
             default:
                 this.state.showWhereElementPropeties = 0;
                 this.state.fieldWidthsW = "col-md-10";
@@ -851,7 +850,7 @@ class Properties extends React.Component {
                                                             </Row>
                                                             {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                             <Row className="mb-3 ml-0">
-                                                                {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
+                                                                {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7 && this.state.ElementType !== 12) &&
                                                                     <div className="form-check col-md-6">
                                                                         <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                                         <label className="form-check-label" htmlFor="isRequired">Is required</label>
