@@ -88,11 +88,15 @@ namespace Helios.Core.Contexts
             }
         }
 
+        public DbSet<CalculatationElementDetail> CalculatationElementDetails { get; set; }
         public DbSet<ElementDetail> ElementDetails { get; set; }
         public DbSet<Element> Elements { get; set; }
+        public DbSet<MailTemplate> MailTemplates { get; set; }
+        public DbSet<MailTemplateTag> MailTemplateTags { get; set; }
+        public DbSet<MailTemplatesRole> MailTemplatesRoles { get; set; }
+        public DbSet<Module> Modules { get; set; }
         public DbSet<ModuleElementEvent> ModuleElementEvents { get; set; }
         public DbSet<MultipleChoiceTag> MultipleChoiceTag { get; set; }
-        public DbSet<Module> Modules { get; set; }
         public DbSet<Site> Sites { get; set; }
         public DbSet<Study> Studies { get; set; }
         public DbSet<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
@@ -101,7 +105,7 @@ namespace Helios.Core.Contexts
         public DbSet<StudyUserSite> StudyUserSites { get; set; }
         public DbSet<StudyVisit> StudyVisits { get; set; }
         public DbSet<StudyVisitPageModuleElementDetail> StudyVisitPageModuleElementDetails { get; set; }
-        public DbSet<StudyVisitPageModuleElementEvents> StudyVisitPageModuleElementEvents { get; set; }
+        public DbSet<StudyVisitPageModuleElementEvent> StudyVisitPageModuleElementEvents { get; set; }
         public DbSet<StudyVisitPageModuleElement> StudyVisitPageModuleElements { get; set; }
         public DbSet<StudyVisitPageModule> StudyVisitPageModules { get; set; }
         public DbSet<StudyVisitPage> StudyVisitPages { get; set; }
@@ -110,10 +114,7 @@ namespace Helios.Core.Contexts
         public DbSet<SubjectVisitPageModule> SubjectVisitPageModules { get; set; }
         public DbSet<SubjectVisitPage> SubjectVisitPages { get; set; }
         public DbSet<SubjectVisit> SubjectVisits { get; set; }
-        public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }
-        public DbSet<MailTemplates> MailTemplates { get; set; }
-        public DbSet<MailTemplateTags> MailTemplateTags { get; set; }
-        public DbSet<MailTemplatesRoles> MailTemplatesRoles { get; set; }
+        public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }        
 
     }
 }

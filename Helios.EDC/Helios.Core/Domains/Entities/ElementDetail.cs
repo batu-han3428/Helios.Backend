@@ -48,6 +48,11 @@ namespace Helios.Core.Domains.Entities
         public string? LeftText { get; set; }
         public string? RightText { get; set; }
 
+        //calculation
+        public string CalculationSourceInputs { get; set; }
+        public bool IsInCalculation { get; set; }
+        public string? MainJs { get; set; }
+
         public Element Element { get; set; }
 
     }

@@ -564,7 +564,7 @@ namespace Helios.Core.Controllers
                     };
                 }
 
-                await _context.MailTemplateTags.AddAsync(new MailTemplateTags
+                await _context.MailTemplateTags.AddAsync(new MailTemplateTag
                 {
                     TenantId = emailTemplateTagDTO.TenantId,
                     Tag = emailTemplateTagDTO.Tag.Trim(),
@@ -654,7 +654,7 @@ namespace Helios.Core.Controllers
                     };
                 }
 
-                var mailTemplate = new MailTemplates()
+                var mailTemplate = new MailTemplate()
                 {
                     TenantId = emailTemplateDTO.TenantId,
                     TemplateType = emailTemplateDTO.TemplateType,
@@ -664,7 +664,7 @@ namespace Helios.Core.Controllers
                     ExternalMails = emailTemplateDTO.ExternalMails.Count > 0 ? JsonConvert.SerializeObject(emailTemplateDTO.ExternalMails) : "",
                 };
 
-                var roles = emailTemplateDTO.Roles.Select(x => new MailTemplatesRoles
+                var roles = emailTemplateDTO.Roles.Select(x => new MailTemplatesRole
                 {
                     RoleId = x,
                     TenantId = emailTemplateDTO.TenantId
@@ -739,7 +739,7 @@ namespace Helios.Core.Controllers
 
                     foreach (var roleId in newRoleIds)
                     {
-                        var newUserSite = new MailTemplatesRoles
+                        var newUserSite = new MailTemplatesRole
                         {
                             TenantId = data.TenantId,
                             RoleId = roleId,

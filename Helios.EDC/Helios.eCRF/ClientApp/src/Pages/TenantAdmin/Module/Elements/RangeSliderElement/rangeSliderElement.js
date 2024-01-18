@@ -16,7 +16,7 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 
-class DateElement extends Component {
+class RangeSliderElement extends Component {
     constructor(props) {
         super(props);
         
@@ -137,4 +137,4 @@ class DateElement extends Component {
         )
     }
 };
-export default DateElement;
+export default RangeSliderElement;

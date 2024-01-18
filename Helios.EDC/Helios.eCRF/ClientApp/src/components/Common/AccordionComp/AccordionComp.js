@@ -6,9 +6,9 @@ import { withTranslation } from "react-i18next";
 import PropTypes from 'prop-types';
 
 
-const AccordionComp = ({ title, body, t}) => {
-
-    const [isOpen, setIsOpen] = useState(false);
+const AccordionComp = ({ title, body, t, isOpened=false }) => {
+    
+    const [isOpen, setIsOpen] = useState(isOpened);
 
     const toggleAccordion = () => {
         setIsOpen(!isOpen);

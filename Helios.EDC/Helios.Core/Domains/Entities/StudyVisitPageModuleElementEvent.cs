@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
 {
-    public class StudyVisitPageModuleElementEvents : EntityBase
+    public class StudyVisitPageModuleElementEvent : EntityBase
     {
         public Int64 StudyVisitPageModuleElementId { get; set; }
         public ActionType ActionType { get; set; }

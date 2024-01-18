@@ -25,6 +25,9 @@ import CheckElement from '../Elements/CheckElement/checkElement.js';
 import DropdownElement from '../Elements/DropdownElement/dropdownElement.js';
 import DropdownCheckListElement from '../Elements/DropdownCheckListElement/dropdownCheckListElement.js';
 import LabelElement from '../Elements/LabelElement/labelElement.js';
+import DateElement from '../Elements/DateElement/dateElement.js';
+import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
+import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -57,6 +60,7 @@ function ElementList(props) {
     const [modal_large, setmodal_large] = useState(false);
     const [activeTab, setActiveTab] = useState(false);
     const [elementName, setElementName] = useState('');
+    const [isCalcBtn, setIsCalcBtn] = useState('');
     const dispatch = useDispatch();
     const userInformation = useSelector(state => state.rootReducer.Login);
 
@@ -64,10 +68,11 @@ function ElementList(props) {
         document.body.classList.add("no_padding");
     };
 
-    const tog_large = (e, type, id, tabid) => {
+    const tog_large = (e, type, id, tabid, isCalc = false) => {
+        setIsCalcBtn(isCalc);
         getElementNameByKey(type);
-
-        if (id != 0) {
+        
+        if (id !== 0) {
             setElementId(id);
             setElementType(0);
         }
@@ -175,6 +180,21 @@ function ElementList(props) {
                     LowerLimit={0}
                     UpperLimit={0}
                 />;
+            case 5:
+                return <TextareaElement
+                    IsDisable={true}
+                    DefaultValue={param.defaultValue}
+                />
+            case 6:
+                return <DateElement
+                    IsDisable={true}
+                    StartDay={param.startDay}
+                    EndDay={param.endDay}
+                    StartMonth={param.startMonth}
+                    EndMonth={param.endMonth}
+                    StartYear={param.startYear}
+                    EndYear={param.endYear}
+                />
             case 8:
                 return <RadioElement
                     IsDisable={"disabled"}
@@ -195,6 +215,10 @@ function ElementList(props) {
                     IsDisable={true}
                     ElementOptions={param.elementOptions}
                 />
+            case 12:
+                return <FileUploaderElement
+                    IsDisable={true}
+                />
             default:
                 return <TextElement IsDisable={"disabled"}
                 />;
@@ -204,6 +228,7 @@ function ElementList(props) {
     const content = moduleElementList.map((item) => {
         var w = item.width === 0 ? 12 : item.width;
         var cls = "mb-6 col-md-" + w;
+
         return <Row className={cls} key={item.id}>
             <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
@@ -216,7 +241,7 @@ function ElementList(props) {
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
                 )}
                 {item.elementType === 7 /*calculated*/ && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1")}><i className="fas fa-calculator"></i></Button>
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
                 )}
                 <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
                 <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
@@ -252,7 +277,7 @@ function ElementList(props) {
                     <Modal isOpen={modal_large} toggle={tog_large} size="lg">
                         <ModalHeader className="mt-0" toggle={tog_large}>{elementName}</ModalHeader>
                         <ModalBody>
-                            <Properties ModuleId={moduleId} Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab}></Properties>
+                            <Properties ModuleId={moduleId} Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab} isCalcBtn={isCalcBtn}></Properties>
                         </ModalBody>
                     </Modal>
                 </Col>

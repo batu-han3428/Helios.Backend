@@ -43,12 +43,12 @@ namespace Helios.Core.Models
         public string UpperLimit { get; set; } = "";
         public AlignLayout Layout { get; set; }
         //public string Extension { get; set; } //numeric description
-        //public int StartDay { get; set; }
-        //public int EndDay { get; set; }
-        //public int StartMonth { get; set; }
-        //public int EndMonth { get; set; }
-        //public int EndYear { get; set; }
-        //public int StartYear { get; set; }
+        public int StartDay { get; set; }
+        public int EndDay { get; set; }
+        public int StartMonth { get; set; }
+        public int EndMonth { get; set; }
+        public int StartYear { get; set; }
+        public int EndYear { get; set; }
         public bool AddTodayDate { get; set; }
 
         ////chkbox, radio, ddown vs
@@ -57,9 +57,12 @@ namespace Helios.Core.Models
         ////hidden
         //public string TargetElementId { get; set; }
 
-        ////rangeslider
-        //public string LeftText { get; set; }
-        //public string RightText { get; set; }
+        //rangeslider
+        public string LeftText { get; set; }
+        public string RightText { get; set; }
+
+        public string CalculationSourceInputs { get; set; }
+        public string MainJs { get; set; }
 
         ////dependent
         public Int64 DependentSourceFieldId { get; set; }

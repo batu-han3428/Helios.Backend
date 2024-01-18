@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Helios.Core.Controllers
 {
@@ -97,13 +98,13 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList()
+        public async Task<List<ModuleModel>> GetModuleList(Int64 tenantId)
         {
-            var result = await _context.Modules.Where(x => x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
+            var result = await _context.Modules.Where(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
             {
                 Id = x.Id,
                 Name = x.Name
-            }).ToListAsync();
+            }).AsNoTracking().ToListAsync();
 
             return result;
         }
@@ -125,8 +126,25 @@ namespace Helios.Core.Controllers
                     IsDependent = x.IsDependent,
                     IsRelated = x.IsRelated,
                     ElementOptions = x.ElementDetail.ElementOptions,
-                    Width = x.Width
-                }).OrderBy(x => x.Order).ToListAsync();
+                    Width = x.Width,
+                    Unit = x.ElementDetail.Unit,
+                    Mask = x.ElementDetail.Mask,
+                    LowerLimit = x.ElementDetail.LowerLimit,
+                    UpperLimit = x.ElementDetail.UpperLimit,
+                    Layout = x.ElementDetail.Layout,
+                    DefaultValue = x.ElementDetail.DefaultValue,
+                    AddTodayDate = x.ElementDetail.AddTodayDate,
+                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                    MainJs = x.ElementDetail.MainJs,
+                    StartDay = x.ElementDetail.StartDay,
+                    EndDay = x.ElementDetail.EndDay,
+                    StartMonth = x.ElementDetail.StartMonth,
+                    EndMonth = x.ElementDetail.EndMonth,
+                    StartYear = x.ElementDetail.StartYear,
+                    EndYear = x.ElementDetail.EndYear,
+                    LeftText = x.ElementDetail.LeftText,
+                    RightText = x.ElementDetail.RightText
+                }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             return result;
         }
@@ -158,8 +176,18 @@ namespace Helios.Core.Controllers
                    IsRelated = x.IsRelated,
                    ElementOptions = x.ElementDetail.ElementOptions,
                    DefaultValue = x.ElementDetail.DefaultValue,
-                   AddTodayDate = x.ElementDetail.AddTodayDate
-               }).FirstOrDefaultAsync();
+                   AddTodayDate = x.ElementDetail.AddTodayDate,
+                   CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                   MainJs = x.ElementDetail.MainJs,
+                   StartDay = x.ElementDetail.StartDay,
+                   EndDay = x.ElementDetail.EndDay,
+                   StartMonth = x.ElementDetail.StartMonth,
+                   EndMonth = x.ElementDetail.EndMonth,
+                   StartYear = x.ElementDetail.StartYear,
+                   EndYear = x.ElementDetail.EndYear,
+                   LeftText = x.ElementDetail.LeftText,
+                   RightText = x.ElementDetail.RightText
+               }).AsNoTracking().FirstOrDefaultAsync();
 
             if (result.IsDependent)
             {
@@ -182,8 +210,14 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
             var result = new ApiResponse<dynamic>();
+            var calcList = new List<CalculationModel>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (model.ElementType == ElementType.Calculated)
+            {
+                calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
+            }
 
             if (element == null)
             {
@@ -237,6 +271,17 @@ namespace Helios.Core.Controllers
                         MetaDataTags = model.ElementName,
                         DefaultValue = model.DefaultValue,
                         AddTodayDate = model.AddTodayDate,
+                        CalculationSourceInputs = model.CalculationSourceInputs,
+                        MainJs = model.MainJs,
+                        StartDay = model.StartDay,
+                        EndDay = model.EndDay,
+                        StartMonth = model.StartMonth,
+                        EndMonth = model.EndMonth,
+                        StartYear = model.StartYear,
+                        EndYear = model.EndYear,
+                        IsInCalculation = model.ElementType == ElementType.Calculated,
+                        LeftText = model.LeftText,
+                        RightText = model.RightText,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -263,6 +308,32 @@ namespace Helios.Core.Controllers
                         _context.ModuleElementEvents.Add(elementEvent);
                     }
 
+                    if (model.ElementType == ElementType.Calculated)
+                    {
+                        var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                        var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId)).ToListAsync();
+
+                        foreach (var item in calcList)
+                        {
+                            var calcDtil = new CalculatationElementDetail()
+                            {
+                                TenantId = model.TenantId,
+                                ModuleId = model.ModuleId,
+                                CalculationElementId = elm.Id,
+                                TargetElementId = item.elementFieldSelectedGroup.value,
+                            };
+
+                            _context.CalculatationElementDetails.Add(calcDtil);
+                        }
+
+                        foreach (var item in elementInCalList)
+                        {
+                            item.IsInCalculation = true;
+
+                            _context.ElementDetails.Update(item);
+                        }
+                    }
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                     //control for both of element and elementDetail saved
@@ -277,8 +348,21 @@ namespace Helios.Core.Controllers
                         result.IsSuccess = false;
                         result.Message = "Operation failed. Please try again.";
                     }
-                    else
-                        result.Message = result.IsSuccess ? "Successful" : "Error";
+                    else if (!result.IsSuccess)//if dependent or calculation didn't save
+                    {
+                        elm.IsActive = false;
+                        elm.IsDeleted = true;
+                        _context.Elements.Update(elm);
+
+                        elmDtl.IsActive = false;
+                        elmDtl.IsDeleted = true;
+                        _context.ElementDetails.Update(elmDtl);
+
+                        var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        result.IsSuccess = false;
+                        result.Message = "Operation failed. Please try again.";
+                    }
                 }
                 else
                 {
@@ -314,6 +398,16 @@ namespace Helios.Core.Controllers
                 elementDetail.ElementOptions = model.ElementOptions;
                 elementDetail.DefaultValue = model.DefaultValue;
                 elementDetail.AddTodayDate = model.AddTodayDate;
+                elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
+                elementDetail.MainJs = model.MainJs;
+                elementDetail.StartDay = model.StartDay;
+                elementDetail.EndDay = model.EndDay;
+                elementDetail.StartMonth = model.StartMonth;
+                elementDetail.EndMonth = model.EndMonth;
+                elementDetail.StartYear = model.StartYear;
+                elementDetail.EndYear = model.EndYear;
+                elementDetail.LeftText = model.LeftText;
+                elementDetail.RightText = model.RightText;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 
@@ -347,6 +441,61 @@ namespace Helios.Core.Controllers
                         dep.ModuleId = element.ModuleId;
 
                         _context.ModuleElementEvents.Update(dep);
+                    }
+                }
+
+                if (model.ElementType == ElementType.Calculated)
+                {
+                    var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
+                    var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    //change elementDetail first
+                    foreach (var item in elementInExistCalList)
+                    {
+                        item.IsInCalculation = false;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    //then change new elementDetail flags
+                    foreach (var item in elementInCalList)
+                    {
+                        item.IsInCalculation = true;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    //add new calcElementDetails
+                    foreach (var item in calcList)
+                    {
+                        if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
+                        {
+                            var calcDtil = new CalculatationElementDetail()
+                            {
+                                TenantId = model.TenantId,
+                                ModuleId = model.ModuleId,
+                                CalculationElementId = element.Id,
+                                TargetElementId = item.elementFieldSelectedGroup.value,
+                            };
+
+                            _context.CalculatationElementDetails.Add(calcDtil);
+                        }
+                    }
+
+                    //remove deleted items from calc
+                    foreach (var item in existCalDtil)
+                    {
+                        if (!calcElmIds.Contains(item.TargetElementId))
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.Update(item);
+                        }
                     }
                 }
 
