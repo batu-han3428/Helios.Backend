@@ -81,7 +81,7 @@ class DateElementProperties extends Component {
                             value={this.props.StartDay}
                             onChange={this.handleStartDayChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="Start day" />
                     </div>
                     <label
@@ -94,7 +94,7 @@ class DateElementProperties extends Component {
                             value={this.props.EndDay}
                             onChange={this.handleEndDayChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="End day" />
                     </div>
                 </Row>
@@ -109,7 +109,7 @@ class DateElementProperties extends Component {
                             value={this.props.StartMonth}
                             onChange={this.handleStartMonthChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="Start month" />
                     </div>
                     <label
@@ -122,7 +122,7 @@ class DateElementProperties extends Component {
                             value={this.props.EndMonth}
                             onChange={this.handleEndMonthChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="End month" />
                     </div>
                 </Row>
@@ -137,7 +137,7 @@ class DateElementProperties extends Component {
                             value={this.props.StartYear}
                             onChange={this.handleStartYearChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="Start year" />
                     </div>
                     <label
@@ -150,7 +150,7 @@ class DateElementProperties extends Component {
                             value={this.props.EndYear}
                             onChange={this.handleEndYearChange}
                             className="form-control"
-                            type="text"
+                            type="number"
                             placeholder="End year" />
                     </div>
                 </Row>

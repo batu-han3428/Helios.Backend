@@ -58,9 +58,9 @@ namespace Helios.eCRF.Models
         ////hidden
         //public string TargetElementId { get; set; }
 
-        ////rangeslider
-        //public string LeftText { get; set; }
-        //public string RightText { get; set; }
+        //rangeslider
+        public string LeftText { get; set; }
+        public string RightText { get; set; }
 
         public string CalculationSourceInputs { get; set; }
         public string MainJs { get; set; }

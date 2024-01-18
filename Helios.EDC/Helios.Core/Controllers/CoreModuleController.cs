@@ -142,6 +142,8 @@ namespace Helios.Core.Controllers
                     EndMonth = x.ElementDetail.EndMonth,
                     StartYear = x.ElementDetail.StartYear,
                     EndYear = x.ElementDetail.EndYear,
+                    LeftText = x.ElementDetail.LeftText,
+                    RightText = x.ElementDetail.RightText
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             return result;
@@ -183,6 +185,8 @@ namespace Helios.Core.Controllers
                    EndMonth = x.ElementDetail.EndMonth,
                    StartYear = x.ElementDetail.StartYear,
                    EndYear = x.ElementDetail.EndYear,
+                   LeftText = x.ElementDetail.LeftText,
+                   RightText = x.ElementDetail.RightText
                }).AsNoTracking().FirstOrDefaultAsync();
 
             if (result.IsDependent)
@@ -275,7 +279,9 @@ namespace Helios.Core.Controllers
                         EndMonth = model.EndMonth,
                         StartYear = model.StartYear,
                         EndYear = model.EndYear,
-                        IsInCalculation = model.ElementType == ElementType.Calculated
+                        IsInCalculation = model.ElementType == ElementType.Calculated,
+                        LeftText = model.LeftText,
+                        RightText = model.RightText,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                         //ButtonText = model.buttonText
@@ -400,6 +406,8 @@ namespace Helios.Core.Controllers
                 elementDetail.EndMonth = model.EndMonth;
                 elementDetail.StartYear = model.StartYear;
                 elementDetail.EndYear = model.EndYear;
+                elementDetail.LeftText = model.LeftText;
+                elementDetail.RightText = model.RightText;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 

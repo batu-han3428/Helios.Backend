@@ -21,17 +21,18 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import classnames from "classnames";
+import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
+import Swal from 'sweetalert2';
+import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import TextElementProperties from '../Elements/TextElement/textElementProperties.js';
 import NumericElementProperties from '../Elements/NumericElement/numericElementProperties.js';
 import ListElementsProperties from '../Elements/Common/listElementsProperties.js';
 import LabelElementProperties from "../Elements/LabelElement/labelElementProperties.js";
 import DateElementProperties from "../Elements/DateElement/dateElementProperties.js";
 import CalculationElementProperties from "../Elements/CalculationElement/calculationElementProperties.js";
-import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
-import Swal from 'sweetalert2'
-import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import TextareaElementProperties from "../Elements/TextareaElement/textareaElementProperties.js";
 import FileUploaderElementProperties from "../Elements/FileUploaderElement/fileUploaderElementProperties.js";
+import RangeSliderElementProperties from "../Elements/RangeSliderElement/rangeSliderElementProperties.js";
 
 const baseUrl = "https://localhost:7196";
 
@@ -109,6 +110,8 @@ class Properties extends React.Component {
             EndYear: 2026,
             CalculationSourceInputs: '',
             MainJs: '',
+            LeftText: '',
+            RightText:'',
 
             // Validation
             RequiredError: 'This value is required',
@@ -189,6 +192,8 @@ class Properties extends React.Component {
         this.changeEndYear.bind(this);
         this.changeCalculationSourceInputs.bind(this);
         this.changeMainJs.bind(this);
+        this.changeLeftText.bind(this);
+        this.changeRightText.bind(this);
     }
 
     toggle(tab) {
@@ -261,6 +266,16 @@ class Properties extends React.Component {
                 this.state.showWhereElementPropeties = 1;
                 this.state.fieldWidthsW = "col-md-10";
                 return <FileUploaderElementProperties
+                />;
+            case 13:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-10";
+                return <RangeSliderElementProperties
+                    changeDefaultValue={this.changeDefaultValue} DefaultValue={this.state.DefaultValue}
+                    changeLowerLimit={this.changeLowerLimit} LowerLimit={this.state.LowerLimit}
+                    changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
+                    changeLeftText={this.changeLeftText} LeftText={this.state.LeftText}
+                    changeRightText={this.changeRightText} RightText={this.state.RightText}
                 />;
             default:
                 this.state.showWhereElementPropeties = 0;
@@ -485,6 +500,14 @@ class Properties extends React.Component {
         this.setState({ MainJs: newValue });
     };
 
+    changeLeftText = (newValue) => {
+        this.setState({ LeftText: newValue });
+    };
+
+    changeRightText = (newValue) => {
+        this.setState({ RightText: newValue });
+    };
+
     removeDependentFieldValueTag = (i) => {
         const newTags = [...this.state.DependentFieldValue];
         newTags.splice(i, 1);
@@ -663,7 +686,9 @@ class Properties extends React.Component {
                     StartMonth: this.state.StartMonth,
                     EndMonth: this.state.EndMonth,
                     StartYear: this.state.StartYear,
-                    EndYear: this.state.EndYear
+                    EndYear: this.state.EndYear,
+                    LeftText: this.state.LeftText,
+                    RightText: this.state.RightText
                 })
             }).then(res => res.json())
                 .then(data => {
