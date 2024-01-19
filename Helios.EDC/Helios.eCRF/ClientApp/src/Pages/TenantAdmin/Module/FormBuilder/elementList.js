@@ -28,6 +28,7 @@ import LabelElement from '../Elements/LabelElement/labelElement.js';
 import DateElement from '../Elements/DateElement/dateElement.js';
 import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
+import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -219,8 +220,19 @@ function ElementList(props) {
                 return <FileUploaderElement
                     IsDisable={true}
                 />
+            case 13:
+                return <RangeSliderElement
+                    IsDisable={true}
+                    LowerLimit={param.lowerLimit}
+                    UpperLimit={param.upperLimit}
+                    LeftText={param.leftText}
+                    RightText={param.rightText}
+                    DefaultValue={param.defaultValue}
+                />
             default:
-                return <TextElement IsDisable={"disabled"}
+                return <TextElement
+                    IsDisable={"disabled"}
+                    
                 />;
         }
     }
