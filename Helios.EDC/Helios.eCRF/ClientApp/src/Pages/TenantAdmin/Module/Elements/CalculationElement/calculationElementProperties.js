@@ -18,13 +18,14 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import CodeMirror from "@uiw/react-codemirror";
+import { withTranslation } from "react-i18next";
 
 const baseUrl = "https://localhost:7196";
 
 class CalculationElementProperties extends Component {
     constructor(props) {
         super(props);
-        
+
         var inps = props.CalculationSourceInputs !== "" ? JSON.parse(props.CalculationSourceInputs) : [];
         var inpsCount = props.CalculationSourceInputs !== "" ? JSON.parse(props.CalculationSourceInputs).length : 0;
 
@@ -109,9 +110,9 @@ class CalculationElementProperties extends Component {
                     <Table className="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Source input name</th>
-                                <th>Variable name</th>
-                                <th>Action</th>
+                                <th>{this.props.t("Source input name")}</th>
+                                <th>{this.props.t("Variable name")}</th>
+                                <th>{this.props.t("Action")}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,6 +125,7 @@ class CalculationElementProperties extends Component {
                                             options={this.state.elementListOptionGroup}
                                             classNamePrefix="select2-selection"
                                             className="form-control"
+                                            placeholder={this.props.t("Select")}
                                         />
                                     </td>
                                     <td>
@@ -146,13 +148,13 @@ class CalculationElementProperties extends Component {
                         </tbody>
                     </Table>
                     <Button color="success" onClick={this.addRow} className='mt-1'>
-                        Add another
+                        {this.props.t("Add another")}
                     </Button>
                 </div>
                 <div style={{ border: "#eee 1px solid", borderRadius: '5px' }}>
                     <div style={{ borderBottom: '#eee 1px solid' }}>
                         <label>
-                            Javascript editor
+                            {this.props.t("Javascript editor")}
                         </label>
                     </div>
                     <CodeMirror
@@ -166,4 +168,4 @@ class CalculationElementProperties extends Component {
     }
 };
 
-export default CalculationElementProperties;
+export default withTranslation()(CalculationElementProperties);
