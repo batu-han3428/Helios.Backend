@@ -4,6 +4,7 @@ import { EditorState, ContentState, convertToRaw } from 'draft-js';
 import "./editor.css";
 import draftToHtml from 'draftjs-to-html';
 import htmlToDraft from 'html-to-draftjs';
+import { withTranslation } from "react-i18next";
 
 class LabelElementProperties extends Component {
     constructor(props) {
@@ -60,7 +61,7 @@ class LabelElementProperties extends Component {
                     htmlFor="example-text-input"
                     className="col-md-2 col-form-label"
                 >
-                    Title
+                    {this.props.t("Title")}
                 </label>
                 <Editor
                     editorState={this.state.editorState}
@@ -106,4 +107,4 @@ class LabelElementProperties extends Component {
     }
 };
 
-export default LabelElementProperties;
+export default withTranslation()(LabelElementProperties);

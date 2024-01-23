@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class RangeSliderElementProperties extends Component {
     constructor(props) {
@@ -54,7 +55,7 @@ class RangeSliderElementProperties extends Component {
                         htmlFor="example-text-input"
                         style={{ fontSize:'10pt' }}
                         className="col-md-2 col-form-label">
-                        Minimum value
+                        {this.props.t("Minimum value")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -62,13 +63,13 @@ class RangeSliderElementProperties extends Component {
                             onChange={this.handleLowerLimitChange}
                             className="form-control"
                             type="number"
-                            placeholder="Minimum value" />
+                            placeholder={this.props.t("Minimum value")}/>
                     </div>
                     <label
                         htmlFor="example-text-input"
                         style={{ fontSize:'10pt' }}
                         className="col-md-2 col-form-label">
-                        Maximum value
+                        {this.props.t("Maximum value")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -76,14 +77,14 @@ class RangeSliderElementProperties extends Component {
                             onChange={this.handleUpperLimitChange}
                             className="form-control"
                             type="number"
-                            placeholder="Maximum value" />
+                            placeholder={this.props.t("Maximum value")}/>
                     </div>
                 </Row>
                 <Row className="mb-3">
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        Left text
+                        {this.props.t("Left text")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -91,12 +92,12 @@ class RangeSliderElementProperties extends Component {
                             onChange={this.handleLeftTextChange}
                             className="form-control"
                             type="text"
-                            placeholder="Left text" />
+                            placeholder={this.props.t("Left text")}/>
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        Right text
+                        {this.props.t("Right text")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -104,7 +105,7 @@ class RangeSliderElementProperties extends Component {
                             onChange={this.handleRightTextChange}
                             className="form-control"
                             type="text"
-                            placeholder="Right text" />
+                            placeholder={this.props.t("Right text")} />
                     </div>
                 </Row>
                 <Row className="mb-3">
@@ -112,7 +113,7 @@ class RangeSliderElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Default value
+                        {this.props.t("Default value")}
                     </label>
                     <div className="col-md-6" style={{ marginRight: '6px' }}>
                         <input
@@ -120,7 +121,7 @@ class RangeSliderElementProperties extends Component {
                             onChange={this.handleDefaultValueChange}
                             className="form-control"
                             type="text"
-                            placeholder="Default value" />
+                            placeholder={this.props.t("Default value")}/>
                     </div>
                 </Row>
             </>
@@ -128,4 +129,4 @@ class RangeSliderElementProperties extends Component {
     }
 };
 
-export default RangeSliderElementProperties;
+export default withTranslation()(RangeSliderElementProperties);

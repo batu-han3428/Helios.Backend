@@ -1,4 +1,4 @@
-import React, { Component} from 'react';
+import React, { Component } from 'react';
 import {
     Button,
     Card,
@@ -24,6 +24,7 @@ import {
 import AccordionComp from '../../../../../components/Common/AccordionComp/AccordionComp';
 import Select from "react-select";
 import ToastComp from '../../../../../components/Common/ToastComp/ToastComp';
+import { withTranslation } from "react-i18next";
 
 const baseUrl = "https://localhost:7196";
 
@@ -393,13 +394,14 @@ class ListElementsProperties extends Component {
                                 htmlFor="example-text-input"
                                 className="col-md-2 col-form-label"
                             >
-                                Layout
+                                {this.props.t("Layout")}
                             </label>
                             <div className="col-md-10">
                                 <Select
                                     value={this.state.layoutSelectedGroup}
                                     onChange={this.handleLayoutChange}
                                     options={this.state.layoutOptionGroup}
+                                    placeholder={this.props.t("Select")}
                                     classNamePrefix="select2-selection" />
                             </div>
                         </Row>
@@ -408,13 +410,14 @@ class ListElementsProperties extends Component {
                                 htmlFor="example-text-input"
                                 className="col-md-2 col-form-label"
                             >
-                                Tag list
+                                {this.props.t("Tag list")}
                             </label>
                             <div className="col-md-10">
                                 <Select
                                     value={this.state.TagListSelectedGroup}
                                     onChange={this.handleTagListChange}
                                     options={this.state.TagListOptionGroup}
+                                    placeholder={this.props.t("Select")}
                                     classNamePrefix="select2-selection" />
                             </div>
                         </Row>
@@ -423,9 +426,9 @@ class ListElementsProperties extends Component {
                                 <Table className="table table-hover mb-0">
                                     <thead>
                                         <tr>
-                                            <th>Text to be shown to the user</th>
-                                            <th>Data to be saved to database</th>
-                                            <th>Action</th>
+                                            <th>{this.props.t("Text to be shown to the user")}</th>
+                                            <th>{this.props.t("Data to be saved to database")}</th>
+                                            <th>{this.props.t("Action")}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -450,12 +453,12 @@ class ListElementsProperties extends Component {
                             </div>
                         </Row>
                         <Row className="mb-3">
-                            <input className="btn btn-primary col-md-3 ml-5" type="button" value="Add another" onClick={() => this.toggleNewTagModal(0, false)} />
-                            <input className="btn btn-success col-md-3 ml-5" type="button" value="Add a tag" onClick={() => this.toggleNewTagModal(1, false)} />
+                            <input className="btn btn-primary col-md-3 ml-5" type="button" value={this.props.t("Add another")} onClick={() => this.toggleNewTagModal(0, false)} />
+                            <input className="btn btn-success col-md-3 ml-5" type="button" value={this.props.t("Add a tag")} onClick={() => this.toggleNewTagModal(1, false)} />
                         </Row>
                         <Col sm={6} md={4} xl={3}>
                             <Modal isOpen={this.state.modalState} toggle={this.toggleNewTagModal} size="lg">
-                                <ModalHeader className="mt-0" toggle={this.toggleNewTagModal}>Add new tag</ModalHeader>
+                                <ModalHeader className="mt-0" toggle={this.toggleNewTagModal}>{this.props.t("Add new tag")}</ModalHeader>
                                 <ModalBody>
                                     <div>
                                         <Row className="mb-3">
@@ -464,7 +467,7 @@ class ListElementsProperties extends Component {
                                                 className="col-md-2 col-form-label"
                                                 style={{ display: this.state.tagKeyDisableStatus ? 'none' : 'block' }}
                                             >
-                                                Tag name
+                                                {this.props.t("Tag name")}
                                             </label>
                                             <div className="col-md-10">
                                                 <input
@@ -482,9 +485,9 @@ class ListElementsProperties extends Component {
                                                 <Table className="table table-hover mb-0">
                                                     <thead>
                                                         <tr>
-                                                            <th>Text to be shown to the user</th>
-                                                            <th>Data to be saved to database</th>
-                                                            <th>Action</th>
+                                                            <th>{this.props.t("Text to be shown to the user")}</th>
+                                                            <th>{this.props.t("Data to be saved to database")}</th>
+                                                            <th>{this.props.t("Action")}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -516,7 +519,7 @@ class ListElementsProperties extends Component {
                                                     </tbody>
                                                 </Table>
                                                 <Button color="success" onClick={this.addRow} className='mt-1' disabled={this.state.tagAddDisableStatus}>
-                                                    Add another
+                                                    {this.props.t("Add another")}
                                                 </Button>
                                             </div>
                                         </Row>
@@ -527,15 +530,15 @@ class ListElementsProperties extends Component {
                                     {/*    Close*/}
                                     {/*</Button>*/}
                                     <Button color="success" onClick={this.handleSaveTag}>
-                                        Save
+                                        {this.props.t("Save")}
                                     </Button>
                                 </ModalFooter>
                             </Modal>
                         </Col>
-                {/* } />*/}
-                <ToastComp
-                    ref={this.toastRef}
-                />
+                        {/* } />*/}
+                        <ToastComp
+                            ref={this.toastRef}
+                        />
                     </div>
                 } />
             </div>
@@ -543,4 +546,4 @@ class ListElementsProperties extends Component {
     }
 };
 
-export default ListElementsProperties;
+export default withTranslation()(ListElementsProperties);

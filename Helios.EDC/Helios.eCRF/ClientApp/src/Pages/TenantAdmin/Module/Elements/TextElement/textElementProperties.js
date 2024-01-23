@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class TextElementProperties extends Component {
     constructor(props) {
@@ -33,7 +34,7 @@ class TextElementProperties extends Component {
                     htmlFor="example-text-input"
                     className="col-md-2 col-form-label"
                 >
-                    Unit
+                    {this.props.t("Unit")}
                 </label>
                 <div className="col-md-10">
                     <input
@@ -41,7 +42,7 @@ class TextElementProperties extends Component {
                         onChange={this.handleUnitChange}
                         className="form-control"
                         type="text"
-                        placeholder="Unit"
+                        placeholder={this.props.t("Unit")}
                     />
                 </div>
             </Row>
@@ -49,4 +50,4 @@ class TextElementProperties extends Component {
     }
 };
 
-export default TextElementProperties;
+export default withTranslation()(TextElementProperties);

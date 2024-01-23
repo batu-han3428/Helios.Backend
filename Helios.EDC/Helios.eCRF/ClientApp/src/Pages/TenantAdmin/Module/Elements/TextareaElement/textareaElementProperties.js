@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class TextareaElementProperties extends Component {
     constructor(props) {
@@ -34,7 +35,7 @@ class TextareaElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Default value
+                        {this.props.t("Default value")}
                     </label>
                     <div className="col-md-4" style={{ marginRight:'6px' }}>
                         <input
@@ -42,7 +43,7 @@ class TextareaElementProperties extends Component {
                             onChange={this.handleDefaultValueChange}
                             className="form-control"
                             type="text"
-                            placeholder="Default value" />
+                            placeholder={this.props.t("Default value")} />
                     </div>
                 </Row>
             </>
@@ -50,4 +51,4 @@ class TextareaElementProperties extends Component {
     }
 };
 
-export default TextareaElementProperties;
+export default withTranslation()(TextareaElementProperties);

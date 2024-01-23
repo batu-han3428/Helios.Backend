@@ -29,6 +29,7 @@ import DateElement from '../Elements/DateElement/dateElement.js';
 import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
+import { withTranslation } from "react-i18next";
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -38,8 +39,8 @@ const elements = [
     { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
     { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
     { key: 7, name: 'Calculation', icon: 'fas fa-calculator' },
-    { key: 8, name: 'Radio Button', icon: 'ion ion-md-radio-button-on' },
-    { key: 9, name: 'CheckList', icon: 'fas fa-check-square' },
+    { key: 8, name: 'Radio List', icon: 'ion ion-md-radio-button-on' },
+    { key: 9, name: 'Check List', icon: 'fas fa-check-square' },
     { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
     { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
     { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
@@ -71,7 +72,8 @@ function ElementList(props) {
 
     const tog_large = (e, type, id, tabid, isCalc = false) => {
         setIsCalcBtn(isCalc);
-        getElementNameByKey(type);
+        
+        setElementName(getElementNameByKey(type) + " "+ props.t("Properties"));
         
         if (id !== 0) {
             setElementId(id);
@@ -148,10 +150,6 @@ function ElementList(props) {
             }
         })
     }
-
-    const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp;{l.name} </Button>
-    );
 
     const fetchData = () => {
         fetch(baseUrl + '/Module/GetModuleElements?id=' + moduleId, {
@@ -268,10 +266,48 @@ function ElementList(props) {
     );
 
     const getElementNameByKey = (key) => {
-        const item = elements.find(item => item.key === key);
-        var name = item ? item.name : null;
-        setElementName(name + " properties");
+        switch (key) {
+            case 1:
+                return props.t("Label");
+            case 2:
+                return props.t("Text");
+            case 3:
+                return props.t("Hidden");
+            case 4:
+                return props.t("Numeric");
+            case 5:
+                return props.t("Textarea");
+            case 6:
+                return props.t("Date");
+            case 7:
+                return props.t("Calculation");
+            case 8:
+                return props.t("Radio list");
+            case 9:
+                return props.t("Check list");
+            case 10:
+                return props.t("Dropdown");
+            case 11:
+                return props.t("Dropdown checklist");
+            case 12:
+                return props.t("File attachmen");
+            case 13:
+                return props.t("Range slider");
+            case 14:
+                return props.t("Concomitant medication");
+            case 15:
+                return props.t("Table");
+            case 16:
+                return props.t("Datagrid");
+            case 17:
+                return props.t("Adverse Event");
+            default:
+        }
     };
+
+    const elmementItems = elements.map((l) =>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {getElementNameByKey(l.key)} </Button>
+    );
 
     useEffect(() => {
         dispatch(startloading());
@@ -305,4 +341,4 @@ function ElementList(props) {
     );
 }
 
-export default ElementList;
+export default withTranslation() (ElementList);

@@ -21,6 +21,7 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import classnames from "classnames";
+import { withTranslation } from "react-i18next";
 import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
 import Swal from 'sweetalert2';
 import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
@@ -39,7 +40,7 @@ const baseUrl = "https://localhost:7196";
 class Properties extends React.Component {
     constructor(props) {
         super(props);
-        
+
         this.state = {
             activeTab: props.ActiveTab,
             showWhereElementPropeties: 0,
@@ -111,7 +112,7 @@ class Properties extends React.Component {
             CalculationSourceInputs: '',
             MainJs: '',
             LeftText: '',
-            RightText:'',
+            RightText: '',
 
             // Validation
             RequiredError: 'This value is required',
@@ -546,7 +547,7 @@ class Properties extends React.Component {
                 });
         }
         //else {
-            //    this.fillDependentFieldList();
+        //    this.fillDependentFieldList();
         //}
     }
 
@@ -745,7 +746,7 @@ class Properties extends React.Component {
                                                 this.toggle("1");
                                             }}
                                         >
-                                            General
+                                            {this.props.t("General")}
                                         </NavLink>
                                     </NavItem>
                                     <NavItem>
@@ -758,7 +759,7 @@ class Properties extends React.Component {
                                                 this.toggle("2");
                                             }}
                                         >
-                                            Dependency
+                                            {this.props.t("Dependency")}
                                         </NavLink>
                                     </NavItem>
                                     {this.state.showWhereElementPropeties !== 2 &&
@@ -773,7 +774,7 @@ class Properties extends React.Component {
                                                         this.toggle("3");
                                                     }}
                                                 >
-                                                    Validation
+                                                    {this.props.t("Validation")}
                                                 </NavLink>
                                             </NavItem><NavItem>
                                                 <NavLink
@@ -785,7 +786,7 @@ class Properties extends React.Component {
                                                         this.toggle("4");
                                                     }}
                                                 >
-                                                    Metadata
+                                                    {this.props.t("Metadata")}
                                                 </NavLink>
                                             </NavItem>
                                         </>
@@ -803,7 +804,7 @@ class Properties extends React.Component {
                                                             htmlFor="example-text-input"
                                                             className="col-md-2 col-form-label"
                                                         >
-                                                            Title
+                                                            {this.props.t("Title")}
                                                         </label>
                                                         <div className="col-md-10">
                                                             <input
@@ -811,7 +812,7 @@ class Properties extends React.Component {
                                                                 onChange={this.handleTitleChange}
                                                                 className="form-control"
                                                                 type="text"
-                                                                placeholder="Title"
+                                                                placeholder={this.props.t("Title")}
 
                                                             />
                                                         </div>
@@ -822,7 +823,7 @@ class Properties extends React.Component {
                                                         htmlFor="example-text-input"
                                                         className="col-md-2 col-form-label"
                                                     >
-                                                        Input name
+                                                        {this.props.t("Input name")}
                                                     </label>
                                                     <div className="col-md-10">
                                                         <input
@@ -830,7 +831,7 @@ class Properties extends React.Component {
                                                             onChange={this.handleElementNameChange}
                                                             className={this.state.ElementNameInputClass}
                                                             type="text"
-                                                            placeholder="Input name"
+                                                            placeholder={this.props.t("Input name")}
                                                         />
                                                         <div type="invalid" className="invalid-feedback">{this.state.RequiredError}</div>
                                                     </div>
@@ -841,7 +842,7 @@ class Properties extends React.Component {
                                                             htmlFor="example-text-input"
                                                             className="col-md-2 col-form-label"
                                                         >
-                                                            Description
+                                                            {this.props.t("Description")}
                                                         </label>
                                                         <div className="col-md-10">
                                                             <input
@@ -849,7 +850,7 @@ class Properties extends React.Component {
                                                                 onChange={this.handleDescriptionChange}
                                                                 className="form-control"
                                                                 type="text"
-                                                                placeholder="Description"
+                                                                placeholder={this.props.t("Description")}
                                                             />
                                                         </div>
                                                     </Row>
@@ -863,13 +864,13 @@ class Properties extends React.Component {
                                                                     htmlFor="example-text-input"
                                                                     className="col-md-2 col-form-label"
                                                                 >
-                                                                    Field width
-                                                                </label>
+                                                                    {this.props.t("Field width")}                                                                           </label>
                                                                 <div className={this.state.fieldWidthsW}>
                                                                     <Select
                                                                         value={this.state.widthSelectedGroup}
                                                                         onChange={this.handleWidthChange}
                                                                         options={this.state.widthOptionGroup}
+                                                                        placeholder={this.props.t("Select")}
                                                                         classNamePrefix="select2-selection" />
                                                                 </div>
                                                             </Row>
@@ -878,18 +879,18 @@ class Properties extends React.Component {
                                                                 {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7 && this.state.ElementType !== 12) &&
                                                                     <div className="form-check col-md-6">
                                                                         <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
-                                                                        <label className="form-check-label" htmlFor="isRequired">Is required</label>
+                                                                        <label className="form-check-label" htmlFor="isRequired">{this.props.t("Is required")}</label>
                                                                     </div>}
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
-                                                                    <label className="form-check-label" htmlFor="isHidden">Is hidden</label>
+                                                                    <label className="form-check-label" htmlFor="isHidden">{this.props.t("Is hidden from user")}</label>
                                                                 </div>
                                                             </Row>
                                                             {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7) &&
                                                                 <Row className="mb-3 ml-0">
                                                                     <div className="form-check col-md-6">
                                                                         <input type="checkbox" className="form-check-input" checked={this.state.CanMissing} onChange={this.handleCanMissingChange} id="canMissing" />
-                                                                        <label className="form-check-label" htmlFor="canMissing">Can missing</label>
+                                                                        <label className="form-check-label" htmlFor="canMissing">{this.props.t("Can be missing")}</label>
                                                                     </div>
                                                                 </Row>}
                                                         </div>
@@ -920,7 +921,7 @@ class Properties extends React.Component {
                                                         <Label
                                                             className="form-check-label"
                                                         >
-                                                            Yes
+                                                            {this.props.t("Yes")}
                                                         </Label>
                                                     </div>
                                                     <div className="form-check form-check-inline">
@@ -934,23 +935,24 @@ class Properties extends React.Component {
                                                         <Label
                                                             className="form-check-label"
                                                         >
-                                                            No
+                                                            {this.props.t("No")}
                                                         </Label>
                                                     </div>
                                                 </div>
                                             </Col>
                                         </Row>
-                                        {this.state.IsDependent === 1 && (
+                                        {this.state.IsDependent === true && (
                                             <>
                                                 <Row>
                                                     <Col sm="12">
                                                         <div className="mb-3">
-                                                            <Label>Dependent field</Label>
+                                                            <Label>{this.props.t("Dependent field")}</Label>
                                                             <Select
                                                                 value={this.state.dependentFieldsSelectedGroup}
                                                                 onChange={this.handleDependentFieldChange}
                                                                 options={this.state.dependentFieldOptionGroup}
                                                                 classNamePrefix="select2-selection"
+                                                                placeholder={this.props.t("Select")}
                                                                 className={this.state.DepFldInputClass}
                                                                 isDisabled={this.state.dependentEnabled} />
                                                         </div>
@@ -959,24 +961,26 @@ class Properties extends React.Component {
                                                 <Row>
                                                     <Col sm="4">
                                                         <div className="mb-3">
-                                                            <Label>Dependency condition</Label>
+                                                            <Label>{this.props.t("Dependency condition")}</Label>
                                                             <Select
                                                                 value={this.state.conditionSelectedGroup}
                                                                 onChange={this.handleDependentConditionChange}
                                                                 options={this.state.conditionOptionGroup}
                                                                 classNamePrefix="select2-selection"
+                                                                placeholder={this.props.t("Select")}
                                                                 className={this.state.DepConInputClass}
                                                                 isDisabled={this.state.dependentEnabled} />
                                                         </div>
                                                     </Col>
                                                     <Col sm="4">
                                                         <div className="mb-3">
-                                                            <Label>Dependency action</Label>
+                                                            <Label>{this.props.t("Dependency action")}</Label>
                                                             <Select
                                                                 value={this.state.actionSelectedGroup}
                                                                 onChange={this.handleDependentActionChange}
                                                                 options={this.state.actionOptionGroup}
                                                                 classNamePrefix="select2-selection"
+                                                                placeholder={this.props.t("Select")}
                                                                 className={this.state.DepActInputClass}
                                                                 isDisabled={this.state.dependentEnabled} />
                                                         </div>
@@ -986,7 +990,7 @@ class Properties extends React.Component {
                                                             htmlFor="example-text-input"
                                                             className="col-md-12 col-form-label"
                                                         >
-                                                            Dependent filed value
+                                                            {this.props.t("Dependent filed value")}
                                                         </label>
                                                         <div className={this.state.DepFldVlInputClass}>
                                                             <div className="input-tag__tags">
@@ -1007,7 +1011,7 @@ class Properties extends React.Component {
                                         {/*    <div>*/}
                                         <Row>
                                             <div className="mb-3">
-                                                <Label className="form-label mb-3 d-flex">Is related</Label>
+                                                <Label className="form-label mb-3 d-flex">{this.props.t("Is related")}</Label>
                                                 <div className="form-check form-check-inline">
                                                     <Input
                                                         type="radio"
@@ -1018,7 +1022,7 @@ class Properties extends React.Component {
                                                     <Label
                                                         className="form-check-label" htmlFor="relatedRadioInline"
                                                     >
-                                                        Yes
+                                                        {this.props.t("Yes")}
                                                     </Label>
                                                 </div>
                                                 <div className="form-check form-check-inline">
@@ -1031,7 +1035,7 @@ class Properties extends React.Component {
                                                     <Label
                                                         className="form-check-label" htmlFor="customRadioInline2"
                                                     >
-                                                        No
+                                                        {this.props.t("No")}
                                                     </Label>
                                                 </div>
                                             </div>
@@ -1041,9 +1045,9 @@ class Properties extends React.Component {
                                                 <Table className="table table-hover mb-0">
                                                     <thead>
                                                         <tr>
-                                                            <th>Input name</th>
-                                                            <th>Variable name</th>
-                                                            <th>Action</th>
+                                                            <th>{this.props.t("Input name")}</th>
+                                                            <th>{this.props.t("Variable name")}</th>
+                                                            <th>{this.props.t("Action")}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1054,6 +1058,7 @@ class Properties extends React.Component {
                                                                     onChange={this.handleRelationFieldChange}
                                                                     options={this.state.relationFieldOptionGroup}
                                                                     classNamePrefix="select2-selection"
+                                                                    placeholder={this.props.t("Select")}
                                                                     className={this.state.DepFldInputClass}
                                                                     isDisabled={this.state.dependentEnabled}
                                                                 />
@@ -1116,7 +1121,7 @@ class Properties extends React.Component {
                             </CardBody>
                         </Card>
                         <div style={{ float: 'right' }}>
-                            <input className="btn btn-primary" type="submit" value="Save" />
+                            <input className="btn btn-primary" type="submit" value={this.props.t("Save")} />
                         </div>
                     </Col>
                 </form>
@@ -1129,4 +1134,4 @@ class Properties extends React.Component {
     }
 }
 
-export default Properties;
+export default withTranslation()(Properties);

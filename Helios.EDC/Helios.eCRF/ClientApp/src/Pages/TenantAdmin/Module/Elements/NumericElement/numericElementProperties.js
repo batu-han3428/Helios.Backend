@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class NumericElementProperties extends Component {
     constructor(props) {
@@ -49,7 +50,7 @@ class NumericElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Unit
+                        {this.props.t("Unit")}
                     </label>
                     <div className="col-md-4">
                         <input
@@ -57,13 +58,13 @@ class NumericElementProperties extends Component {
                             onChange={this.handleUnitChange}
                             className="form-control"
                             type="text"
-                            placeholder="Unit" />
+                            placeholder={this.props.t("Unit")}/>
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Mask type
+                        {this.props.t("Mask type")}
                     </label>
                     <div className="col-md-4">
                         <input
@@ -71,7 +72,7 @@ class NumericElementProperties extends Component {
                             onChange={this.handleMaskChange}
                             className="form-control"
                             type="text"
-                            placeholder="Mask type" />
+                            placeholder={this.props.t("Mask type")}/>
                     </div>
                 </Row>
                 <Row className="mb-3">
@@ -79,7 +80,7 @@ class NumericElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Lower limit
+                        {this.props.t("Lower limit")}
                     </label>
                     <div className="col-md-4">
                         <input
@@ -87,13 +88,13 @@ class NumericElementProperties extends Component {
                             onChange={this.handleLowerLimitChange}
                             className="form-control"
                             type="text"
-                            placeholder="Lower limit" />
+                            placeholder={this.props.t("Lower limit")}/>
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Upper limit
+                        {this.props.t("Upper limit")}
                     </label>
                     <div className="col-md-4">
                         <input
@@ -101,7 +102,7 @@ class NumericElementProperties extends Component {
                             onChange={this.handleUpperLimitChange}
                             className="form-control"
                             type="text"
-                            placeholder="Upper limit" />
+                            placeholder={this.props.t("Upper limit")} />
                     </div>
                 </Row>
             </div>
@@ -109,4 +110,4 @@ class NumericElementProperties extends Component {
     }
 }
 
-export default NumericElementProperties;
+export default withTranslation()(NumericElementProperties);

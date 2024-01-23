@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class HiddenElementProperties extends Component {
     constructor(props) {
@@ -32,7 +33,6 @@ class HiddenElementProperties extends Component {
     };
 
     handleAddTodayDateChange(e) {
-        debugger;
         this.props.changeAddTodayDate(e.target.value);
         this.props.AddTodayDate = e.target.value;
     };
@@ -45,7 +45,7 @@ class HiddenElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Default value
+                        {this.props.t("Default value")}
                     </label>
                     <div className="col-md-4" style={{ marginRight:'6px' }}>
                         <input
@@ -53,14 +53,14 @@ class HiddenElementProperties extends Component {
                             onChange={this.handleDefaultValueChange}
                             className="form-control"
                             type="text"
-                            placeholder="Default value" />
+                            placeholder={this.props.t("Default value")}/>
                     </div>
                     <div className="form-check col-md-4" style={{ marginTop:'7px' }}>
                         <input type="checkbox"
                             className="form-check-input"
                             checked={this.state.AddTodayDate}
                             onChange={this.handleAddTodayDateChange} id="addTodayDate" />
-                        <label className="form-check-label" htmlFor="addTodayDate">Show "Today" button</label>
+                        <label className="form-check-label" htmlFor="addTodayDate">{this.props.t("Show Today button")}</label>
                     </div>
                 </Row>
             </>
@@ -68,4 +68,4 @@ class HiddenElementProperties extends Component {
     }
 };
 
-export default HiddenElementProperties;
+export default withTranslation()(HiddenElementProperties);

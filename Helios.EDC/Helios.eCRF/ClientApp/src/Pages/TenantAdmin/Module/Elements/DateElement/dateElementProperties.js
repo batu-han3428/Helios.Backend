@@ -14,6 +14,7 @@ import {
     TabContent,
     TabPane,
 } from "reactstrap";
+import { withTranslation } from "react-i18next";
 
 class DateElementProperties extends Component {
     constructor(props) {
@@ -38,7 +39,7 @@ class DateElementProperties extends Component {
     };
 
     handleAddTodayDateChange(e) {
-        var val = e.target.value ==="on" ? true : false;
+        var val = e.target.value === "on" ? true : false;
         this.props.changeAddTodayDate(val);
         this.state.AddTodayDate = val;
     };
@@ -74,7 +75,7 @@ class DateElementProperties extends Component {
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        Start day
+                        {this.props.t("Start day")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -82,12 +83,12 @@ class DateElementProperties extends Component {
                             onChange={this.handleStartDayChange}
                             className="form-control"
                             type="number"
-                            placeholder="Start day" />
+                            placeholder={this.props.t("Start day")} />
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        End day
+                        {this.props.t("End day")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -95,14 +96,14 @@ class DateElementProperties extends Component {
                             onChange={this.handleEndDayChange}
                             className="form-control"
                             type="number"
-                            placeholder="End day" />
+                            placeholder={this.props.t("End day")} />
                     </div>
                 </Row>
                 <Row className="mb-3">
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        Start month
+                        {this.props.t("Start month")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -110,12 +111,12 @@ class DateElementProperties extends Component {
                             onChange={this.handleStartMonthChange}
                             className="form-control"
                             type="number"
-                            placeholder="Start month" />
+                            placeholder={this.props.t("Start month")} />
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        End month
+                        {this.props.t("End month")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -123,14 +124,14 @@ class DateElementProperties extends Component {
                             onChange={this.handleEndMonthChange}
                             className="form-control"
                             type="number"
-                            placeholder="End month" />
+                            placeholder={this.props.t("End month")} />
                     </div>
                 </Row>
                 <Row className="mb-3">
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        Start year
+                        {this.props.t("Start year")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -138,12 +139,12 @@ class DateElementProperties extends Component {
                             onChange={this.handleStartYearChange}
                             className="form-control"
                             type="number"
-                            placeholder="Start year" />
+                            placeholder={this.props.t("Start year")} />
                     </div>
                     <label
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label">
-                        End year
+                        {this.props.t("End year")}
                     </label>
                     <div className="col-md-3" style={{ marginRight: '6px' }}>
                         <input
@@ -151,7 +152,7 @@ class DateElementProperties extends Component {
                             onChange={this.handleEndYearChange}
                             className="form-control"
                             type="number"
-                            placeholder="End year" />
+                            placeholder={this.props.t("End year")} />
                     </div>
                 </Row>
                 <Row className="mb-3">
@@ -159,23 +160,23 @@ class DateElementProperties extends Component {
                         htmlFor="example-text-input"
                         className="col-md-2 col-form-label"
                     >
-                        Default value
+                        {this.props.t("Default value")}
                     </label>
-                    <div className="col-md-6" style={{ marginRight: '6px' }}>
+                    <div className="col-md-5" style={{ marginRight: '20px' }}>
                         <input
                             value={this.props.DefaultValue}
                             onChange={this.handleDefaultValueChange}
                             className="form-control"
                             type="text"
-                            placeholder="Default value" />
-                        <span style={{ fontSize:'7pt' }}>Format : DD.MM.YYYY or UNK.UNK.YYYY / Format : DD.MM.YYYY veya UNK.UNK.YYYY</span>
+                            placeholder={this.props.t("Default value")} />
+                        <span style={{ fontSize: '7pt' }}>{this.props.t("Date description")}</span>
                     </div>
                     <div className="form-check col-md-3" style={{ marginTop: '7px' }}>
                         <input type="checkbox"
                             className="form-check-input"
                             checked={this.state.AddTodayDate}
                             onChange={this.handleAddTodayDateChange} id="addTodayDate" />
-                        <label className="form-check-label" htmlFor="addTodayDate">Show "Today" button</label>
+                        <label className="form-check-label" htmlFor="addTodayDate">{this.props.t("Show Today date button")}</label>
                     </div>
                 </Row>
             </>
@@ -183,4 +184,4 @@ class DateElementProperties extends Component {
     }
 };
 
-export default DateElementProperties;
+export default withTranslation()(DateElementProperties);
