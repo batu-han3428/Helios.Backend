@@ -61,8 +61,8 @@ namespace Helios.Core.Models
         public string LeftText { get; set; } = "";
         public string RightText { get; set; } = "";
 
-        public string CalculationSourceInputs { get; set; }
-        public string MainJs { get; set; }
+        public string CalculationSourceInputs { get; set; } = "";
+        public string MainJs { get; set; } = "";
 
         ////dependent
         public Int64 DependentSourceFieldId { get; set; }

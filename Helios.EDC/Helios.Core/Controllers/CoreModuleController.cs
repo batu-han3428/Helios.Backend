@@ -125,6 +125,7 @@ namespace Helios.Core.Controllers
                     Order = x.Order,
                     IsDependent = x.IsDependent,
                     IsRelated = x.IsRelated,
+                    IsRequired = x.IsRequired,
                     ElementOptions = x.ElementDetail.ElementOptions,
                     Width = x.Width,
                     Unit = x.ElementDetail.Unit,
@@ -292,6 +293,7 @@ namespace Helios.Core.Controllers
 
                     elm.ElementDetailId = elementDetail.Id;
                     _context.Elements.Update(elm);
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                     if (model.IsDependent)
                     {
@@ -338,6 +340,7 @@ namespace Helios.Core.Controllers
 
                     //control for both of element and elementDetail saved
                     var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
+
                     if (elmDtl == null)
                     {
                         elm.IsActive = false;
@@ -412,6 +415,7 @@ namespace Helios.Core.Controllers
                 element.UpdatedById = model.UserId;
 
                 _context.Update(elementDetail);
+                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                 if (model.IsDependent)
                 {

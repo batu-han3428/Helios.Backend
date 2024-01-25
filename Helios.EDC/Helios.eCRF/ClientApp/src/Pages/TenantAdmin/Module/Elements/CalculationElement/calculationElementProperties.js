@@ -19,6 +19,8 @@ import {
 import Select from "react-select";
 import CodeMirror from "@uiw/react-codemirror";
 import { withTranslation } from "react-i18next";
+import { getElementNameByKey } from '../Common/utils';
+import './calcStyle.css';
 
 const baseUrl = "https://localhost:7196";
 
@@ -70,12 +72,18 @@ class CalculationElementProperties extends Component {
         })
             .then(response => response.json())
             .then(data => {
-                const allElements = data.map(item => ({
-                    label: item.type !== 1 ? item.title + ' (' + item.elementName + ')' : item.title,
+                var allElements = data.map(item => ({
+                    label: item.elementName + " - " + getElementNameByKey(this.props, item.elementType),
                     value: item.id,
                 }));
 
-                this.state.elementListOptionGroup = allElements;
+                const newItem = {
+                    label: "calculated - calculated",
+                    value: 0,
+                };
+
+                const newArray = [...allElements, newItem];
+                this.state.elementListOptionGroup = newArray;
 
                 if (this.state.inputCounter === 0) {
                     this.addRow();
@@ -102,7 +110,7 @@ class CalculationElementProperties extends Component {
         this.state.Code = val;
         this.props.changeMainJs(val);
     };
-
+    
     render() {
         return (
             <Row className="mb-3">
