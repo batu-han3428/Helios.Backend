@@ -2,7 +2,7 @@
 {
     public enum ActionType
     {
-        HideTarget = 1,
-        ShowTarget = 2,
+        ShowTarget = 1,
+        HideTarget = 2,
     }
 }

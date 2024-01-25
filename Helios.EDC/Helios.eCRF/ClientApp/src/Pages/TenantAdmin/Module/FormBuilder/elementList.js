@@ -30,6 +30,7 @@ import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 import { withTranslation } from "react-i18next";
+import { getElementNameByKey } from '../Elements/Common/utils.js'
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -73,7 +74,7 @@ function ElementList(props) {
     const tog_large = (e, type, id, tabid, isCalc = false) => {
         setIsCalcBtn(isCalc);
         
-        setElementName(getElementNameByKey(type) + " "+ props.t("Properties"));
+        setElementName(getElementNameByKey(props, type) + " "+ props.t("Properties"));
         
         if (id !== 0) {
             setElementId(id);
@@ -197,11 +198,13 @@ function ElementList(props) {
             case 8:
                 return <RadioElement
                     IsDisable={"disabled"}
+                    Layout={param.layout }
                     ElementOptions={param.elementOptions}
                 />
             case 9:
                 return <CheckElement
                     IsDisable={"disabled"}
+                    Layout={param.layout }
                     ElementOptions={param.elementOptions}
                 />
             case 10:
@@ -242,10 +245,11 @@ function ElementList(props) {
         return <Row className={cls} key={item.id}>
             <div style={{ marginBottom: '3px', marginTop: '10px' }}>
                 <label style={{ marginRight: '5px' }}>
+                    {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
                     {item.elementType !== 1 && item.title}
                 </label>
                 {item.isDependent && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-link"></i></Button>
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
                 )}
                 {item.isRelated && (
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
@@ -263,50 +267,10 @@ function ElementList(props) {
             </label>
         </Row>
     }
-    );
-
-    const getElementNameByKey = (key) => {
-        switch (key) {
-            case 1:
-                return props.t("Label");
-            case 2:
-                return props.t("Text");
-            case 3:
-                return props.t("Hidden");
-            case 4:
-                return props.t("Numeric");
-            case 5:
-                return props.t("Textarea");
-            case 6:
-                return props.t("Date");
-            case 7:
-                return props.t("Calculation");
-            case 8:
-                return props.t("Radio list");
-            case 9:
-                return props.t("Check list");
-            case 10:
-                return props.t("Dropdown");
-            case 11:
-                return props.t("Dropdown checklist");
-            case 12:
-                return props.t("File attachmen");
-            case 13:
-                return props.t("Range slider");
-            case 14:
-                return props.t("Concomitant medication");
-            case 15:
-                return props.t("Table");
-            case 16:
-                return props.t("Datagrid");
-            case 17:
-                return props.t("Adverse Event");
-            default:
-        }
-    };
+    );    
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {getElementNameByKey(l.key)} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {getElementNameByKey(props, l.key)} </Button>
     );
 
     useEffect(() => {
@@ -317,7 +281,7 @@ function ElementList(props) {
 
     return (
         <div>
-            <div style={{ width: "200px", float: 'left' }}>
+            <div style={{ width: "200px", float: 'left', position: 'fixed' }}>
                 <div>
                     {elmementItems}
                 </div>

@@ -23,6 +23,7 @@ import Select from "react-select";
 import classnames from "classnames";
 import { withTranslation } from "react-i18next";
 import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
+import { getElementNameByKey } from '../Elements/Common/utils.js'
 import Swal from 'sweetalert2';
 import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import TextElementProperties from '../Elements/TextElement/textElementProperties.js';
@@ -138,7 +139,7 @@ class Properties extends React.Component {
                 { label: "Show", value: 1 },
                 { label: "Hide", value: 2 },
             ],
-            actionSelectedGroup: 0,
+            actionSelectedGroup: { label: "Show", value: 1 },
             dependentEnabled: true,
 
             //relation
@@ -356,7 +357,7 @@ class Properties extends React.Component {
             .then(response => response.json())
             .then(data => {
                 data.map(item => {
-                    var itm = { label: item.title, value: item.id };
+                    var itm = { label: item.elementName + " - " + getElementNameByKey(this.props, item.elementType), value: item.id };
 
                     if (item.id != this.state.Id) {
                         depFldOptionGroup.push(itm);
@@ -415,7 +416,7 @@ class Properties extends React.Component {
             this.setState({ dependentEnabled: true });
             this.setState({ dependentFieldsSelectedGroup: 0 });
             this.setState({ conditionSelectedGroup: 0 });
-            this.setState({ actionSelectedGroup: 0 });
+            this.setState({ actionSelectedGroup: { label: "Show", value: 1 } });
             //this.setState({ DependentFieldValue: '' });
         }
     }

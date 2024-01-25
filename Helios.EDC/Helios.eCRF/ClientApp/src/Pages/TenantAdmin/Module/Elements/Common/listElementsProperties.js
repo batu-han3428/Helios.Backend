@@ -51,6 +51,7 @@ class ListElementsProperties extends Component {
             tagKey: '',
             tagKeyDisableStatus: false,
             tagAddDisableStatus: false,
+            tagAddDisplayStatus: "block",
             tagKeyInpCls: 'form-control',
             rows: [{
                 tagName: '',
@@ -153,6 +154,7 @@ class ListElementsProperties extends Component {
         this.state.operationType = e;
         this.state.modalState = !(this.state.modalState);
         this.state.tagAddDisableStatus = false;
+        this.state.tagAddDisplayStatus = "block";
         this.state.tagKeyDisableStatus = e == 0 || isEdit;
         this.state.isEdit = isEdit;
     };
@@ -350,6 +352,7 @@ class ListElementsProperties extends Component {
             this.state.tagKey = n[0].tagkey;
             this.state.tagKeyDisableStatus = true;
             this.state.tagAddDisableStatus = true;
+            this.state.tagAddDisplayStatus = "none";
             this.isEdit = true;
 
             this.setState(prevState => ({
@@ -370,6 +373,7 @@ class ListElementsProperties extends Component {
             this.toggleNewTagModal(0, true);
             this.state.tagKeyDisableStatus = true;
             this.state.tagAddDisableStatus = true;
+            this.state.tagAddDisplayStatus = "none";
             this.isEdit = true;
         }
     }
@@ -518,7 +522,7 @@ class ListElementsProperties extends Component {
                                                         ))}
                                                     </tbody>
                                                 </Table>
-                                                <Button color="success" onClick={this.addRow} className='mt-1' disabled={this.state.tagAddDisableStatus}>
+                                                <Button color="success" onClick={this.addRow} className='mt-1' disabled={this.state.tagAddDisableStatus} style={{ display: this.state.tagAddDisplayStatus }}>
                                                     {this.props.t("Add another")}
                                                 </Button>
                                             </div>
