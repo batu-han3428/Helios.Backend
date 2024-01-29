@@ -1,4 +1,4 @@
-﻿namespace Helios.Core.Enums
+﻿namespace Helios.Common.Enums
 {
     public enum ActionType
     {

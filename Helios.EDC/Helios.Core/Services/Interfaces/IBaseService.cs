@@ -1,4 +1,4 @@
-﻿using Helios.Core.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Core.Services.Interfaces
 {

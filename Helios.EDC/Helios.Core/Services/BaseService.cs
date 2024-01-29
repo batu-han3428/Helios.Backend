@@ -1,7 +1,7 @@
 ﻿using Helios.Core.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
-using Helios.Core.Enums;
+using Helios.Common.Enums;
 using Helios.Core.Domains.Entities;
 using Helios.Core.Services.Interfaces;
 

@@ -1,9 +1,5 @@
 ﻿using Helios.Core.Domains.Base;
-using Helios.Core.enums;
-using Helios.Core.Enums;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Helios.Common.Enums;
 
 namespace Helios.Core.Domains.Entities
 {
@@ -49,9 +45,13 @@ namespace Helios.Core.Domains.Entities
         public string? RightText { get; set; }
 
         //calculation
-        public string CalculationSourceInputs { get; set; }
+        public string? CalculationSourceInputs { get; set; }
         public bool IsInCalculation { get; set; }
         public string? MainJs { get; set; }
+
+        public string? RelationSourceInputs { get; set; }
+        public string? RelationMainJs { get; set; }
+
 
         public Element Element { get; set; }
 

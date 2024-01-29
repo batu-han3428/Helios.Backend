@@ -1,5 +1,4 @@
-﻿using Helios.Core.enums;
-using Helios.Core.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.eCRF.Models
 {
@@ -71,6 +70,10 @@ namespace Helios.eCRF.Models
         public int DependentCondition { get; set; } = 0;
         public int DependentAction { get; set; } = 0;
         public string DependentFieldValue { get; set; } = "";
+     
+        ////relation
+        public string RelationSourceInputs { get; set; } = "";
+        public string RelationMainJs { get; set; } = "";
     }
 
     public class ElementShortModel

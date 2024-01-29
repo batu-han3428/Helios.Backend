@@ -1,4 +1,4 @@
-export function getElementNameByKey(props, key) {
+export function GetElementNameByKey(props, key) {
     switch (key) {
         case 1:
             return props.t("Label");

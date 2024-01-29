@@ -19,7 +19,7 @@ import {
 import Select from "react-select";
 import CodeMirror from "@uiw/react-codemirror";
 import { withTranslation } from "react-i18next";
-import { getElementNameByKey } from '../Common/utils';
+import { GetElementNameByKey } from '../Common/utils';
 import './calcStyle.css';
 
 const baseUrl = "https://localhost:7196";
@@ -73,7 +73,7 @@ class CalculationElementProperties extends Component {
             .then(response => response.json())
             .then(data => {
                 var allElements = data.map(item => ({
-                    label: item.elementName + " - " + getElementNameByKey(this.props, item.elementType),
+                    label: item.elementName + " - " + GetElementNameByKey(this.props, item.elementType),
                     value: item.id,
                 }));
 
