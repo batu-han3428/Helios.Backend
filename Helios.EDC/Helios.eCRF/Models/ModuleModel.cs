@@ -1,7 +1,4 @@
-﻿using Helios.Core.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Helios.eCRF.Models
+﻿namespace Helios.eCRF.Models
 {
     public class ModuleModel
     {

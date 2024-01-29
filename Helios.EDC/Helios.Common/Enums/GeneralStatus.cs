@@ -1,6 +1,6 @@
-﻿namespace Helios.Core.enums
+﻿namespace Helios.Common.Enums
 {
-    public enum ModuleStatus
+    public enum GeneralStatus
     {
         NotComplated = 0,
         Complated = 1,

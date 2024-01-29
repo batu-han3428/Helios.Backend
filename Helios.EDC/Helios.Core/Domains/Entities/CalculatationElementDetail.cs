@@ -1,7 +1,4 @@
 ﻿using Helios.Core.Domains.Base;
-using Helios.Core.Enums;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
 
 namespace Helios.Core.Domains.Entities
 {

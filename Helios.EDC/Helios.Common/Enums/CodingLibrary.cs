@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
-namespace Helios.Core.Enums
+namespace Helios.Common.Enums
 {
     public enum CodingLibrary
     {

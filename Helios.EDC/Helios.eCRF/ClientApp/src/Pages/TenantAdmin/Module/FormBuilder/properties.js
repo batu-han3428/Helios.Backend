@@ -23,7 +23,8 @@ import Select from "react-select";
 import classnames from "classnames";
 import { withTranslation } from "react-i18next";
 import ToastComp from '../../../../components/Common/ToastComp/ToastComp';
-import { getElementNameByKey } from '../Elements/Common/utils.js'
+import { GetElementNameByKey } from '../Elements/Common/utils.js'
+import CodeMirror from "@uiw/react-codemirror";
 import Swal from 'sweetalert2';
 import AccordionComp from '../../../../components/Common/AccordionComp/AccordionComp';
 import TextElementProperties from '../Elements/TextElement/textElementProperties.js';
@@ -63,6 +64,7 @@ class Properties extends React.Component {
             IsHidden: false,
             IsRequired: false,
             IsDependent: false,
+            IsRelation: false,
             IsReadonly: false,
             CanMissing: false,
 
@@ -86,14 +88,41 @@ class Properties extends React.Component {
             DependentSourceFieldId: 0,
             DependentTargetFieldId: 0,
             DependentCondition: 0,
-            DependentAction: 0,
+            DependentAction: 1,
             DependentFieldValue: [],
             DependentFieldValueTags: [],
             wth: 10,
 
+            dependentFieldOptionGroup: [],
+            dependentFieldsSelectedGroup: 0,
+            conditionOptionGroup: [
+                { label: "Less", value: 1 },
+                { label: "More", value: 2 },
+                { label: "Equal", value: 3 },
+                { label: "More and equal", value: 4 },
+                { label: "Less and equal", value: 5 },
+                { label: "Not equal", value: 6 },
+            ],
+            conditionSelectedGroup: null,
+            actionOptionGroup: [
+                { label: "Show", value: 1 },
+                { label: "Hide", value: 2 },
+            ],
+            actionSelectedGroup: { label: "Show", value: 1 },
+            dependentEnabled: true,
+
             // Relation
             RelationFieldId: 0,
             RelationVariableName: '',
+            RelationMainJs: '',
+            RelationSourceInputs: '',
+            relationElementRows: [],
+            inputCounter: 0,
+            relationFieldOptionGroup: [],
+            relationFieldsSelectedGroup: 0,
+            fieldWidthsW: "",
+            relationEnabled: true,
+            RelFldVlInputClass: 'table-responsive mb-3',
 
             // Elements properties
             Unit: '',
@@ -122,30 +151,6 @@ class Properties extends React.Component {
             DepConInputClass: '',
             DepActInputClass: '',
             DepFldVlInputClass: 'form-control input-tag',
-
-            // dependent
-            dependentFieldOptionGroup: [],
-            dependentFieldsSelectedGroup: 0,
-            conditionOptionGroup: [
-                { label: "Less", value: 1 },
-                { label: "More", value: 2 },
-                { label: "Equal", value: 3 },
-                { label: "More and equal", value: 4 },
-                { label: "Less and equal", value: 5 },
-                { label: "Not equal", value: 6 },
-            ],
-            conditionSelectedGroup: null,
-            actionOptionGroup: [
-                { label: "Show", value: 1 },
-                { label: "Hide", value: 2 },
-            ],
-            actionSelectedGroup: { label: "Show", value: 1 },
-            dependentEnabled: true,
-
-            //relation
-            relationFieldOptionGroup: [],
-            relationFieldsSelectedGroup: 0,
-            fieldWidthsW: "",
         };
 
         this.toastRef = React.createRef();
@@ -170,12 +175,16 @@ class Properties extends React.Component {
         this.handleIsHiddenChange = this.handleIsHiddenChange.bind(this);
         this.handleIsRequiredChange = this.handleIsRequiredChange.bind(this);
         this.handleIsDependentChange = this.handleIsDependentChange.bind(this);
+        this.handleIsRelationChange = this.handleIsRelationChange.bind(this);
         this.handleIsReadonlyChange = this.handleIsReadonlyChange.bind(this);
         this.handleCanMissingChange = this.handleCanMissingChange.bind(this);
         this.handleDependentFieldChange = this.handleDependentFieldChange.bind(this);
         this.handleDependentConditionChange = this.handleDependentConditionChange.bind(this);
         this.handleDependentActionChange = this.handleDependentActionChange.bind(this);
         this.handleRelationFieldChange = this.handleRelationFieldChange.bind(this);
+        this.addRelationRow = this.addRelationRow.bind(this);
+        this.handleRelationInputChange = this.handleRelationInputChange.bind(this);
+        this.removeRelationRow = this.removeRelationRow.bind(this);
 
         this.changeUnit.bind(this);
         this.changeMask.bind(this);
@@ -194,6 +203,7 @@ class Properties extends React.Component {
         this.changeEndYear.bind(this);
         this.changeCalculationSourceInputs.bind(this);
         this.changeMainJs.bind(this);
+        this.changeRelationMainJs.bind(this);
         this.changeLeftText.bind(this);
         this.changeRightText.bind(this);
     }
@@ -357,7 +367,7 @@ class Properties extends React.Component {
             .then(response => response.json())
             .then(data => {
                 data.map(item => {
-                    var itm = { label: item.elementName + " - " + getElementNameByKey(this.props, item.elementType), value: item.id };
+                    var itm = { label: item.elementName + " - " + GetElementNameByKey(this.props, item.elementType), value: item.id };
 
                     if (item.id != this.state.Id) {
                         depFldOptionGroup.push(itm);
@@ -422,6 +432,17 @@ class Properties extends React.Component {
     }
 
     // #end region dependent
+
+    handleIsRelationChange = (e) => {
+        this.state.IsRelation = e.target.value == "1" ? true : false;
+
+        if (e.target.value == "1") {
+            this.setState({ relationEnabled: false });
+        }
+        else {
+            this.setState({ relationEnabled: true });
+        }
+    }
 
     handleRelationFieldChange(e) {
         //this.setState({ DependentSourceFieldId: e.value });
@@ -502,6 +523,10 @@ class Properties extends React.Component {
         this.setState({ MainJs: newValue });
     };
 
+    changeRelationMainJs = (newValue) => {
+        this.setState({ RelationMainJs: newValue });
+    };
+
     changeLeftText = (newValue) => {
         this.setState({ LeftText: newValue });
     };
@@ -533,6 +558,35 @@ class Properties extends React.Component {
             this.removeDependentFieldValueTag(this.state.DependentFieldValue.length - 1);
         }
     }
+
+    removeRelationRow = (index) => {
+        this.setState((prevState) => {
+            const newRows = [...prevState.relationElementRows];
+            newRows.splice(index, 1);
+            return { relationElementRows: newRows };
+        });
+    };
+
+    addRelationRow = () => {
+        this.state.RelFldVlInputClass = 'table-responsive mb-3';
+        this.state.inputCounter = this.state.inputCounter + 1;
+
+        this.setState((prevState) => ({
+            relationElementRows: [...prevState.relationElementRows, {
+                relationFieldsSelectedGroup: this.state.relationFieldOptionGroup[0], variableName: 'A' + this.state.inputCounter
+            }],
+        }));
+    };
+
+    handleRelationInputChange = (index, fieldName, value) => {
+        this.setState((prevState) => {
+            const newRows = [...prevState.relationElementRows];
+            newRows[index][fieldName] = value;
+            return { relationElementRows: newRows };
+        }, () => {
+            this.setState({ RelationSourceInputs: JSON.stringify(this.state.relationElementRows) });
+        });
+    };
 
     getElementData() {
         if (this.state.Id != 0) {
@@ -583,6 +637,13 @@ class Properties extends React.Component {
         this.state.DependentCondition = data.dependentCondition;
         this.state.DependentAction = data.dependentAction;
         this.state.DependentFieldValue = data.dependentFieldValue == "" ? [] : JSON.parse(data.dependentFieldValue);
+
+        var rel = JSON.parse(data.relationSourceInputs);
+        this.state.IsRelation = data.isRelated;
+        this.state.RelationSourceInputs = rel;
+        this.state.relationElementRows = rel;
+        this.state.RelationMainJs = data.relationMainJs;
+        this.state.inputCounter = rel.length;
 
         var w = this.state.widthOptionGroup.filter(function (e) {
             if (e.value == data.width)
@@ -639,6 +700,11 @@ class Properties extends React.Component {
             isValid = false;
         }
 
+        if (this.state.IsRelation && this.state.relationElementRows.length == 0) {
+            this.setState({ RelFldVlInputClass: "table-responsive mb-3 input-tag form-control is-invalid" });
+            isValid = false;
+        }
+
         if (isValid) {
             fetch(baseUrl + '/Module/SaveModuleContent', {
                 method: 'POST',
@@ -663,6 +729,7 @@ class Properties extends React.Component {
                     IsRequired: this.state.IsRequired,
                     IsDependent: this.state.IsDependent,
                     IsReadonly: this.state.IsReadonly,
+                    IsRelated: this.state.IsRelation,
                     CanMissing: this.state.CanMissing,
 
                     // Dependency properties
@@ -682,7 +749,9 @@ class Properties extends React.Component {
                     DefaultValue: this.state.DefaultValue,
                     AddTodayDate: this.state.AddTodayDate,
                     CalculationSourceInputs: this.state.CalculationSourceInputs,
+                    RelationSourceInputs: this.state.RelationSourceInputs,
                     MainJs: this.state.MainJs,
+                    RelationMainJs: this.state.RelationMainJs,
                     StartDay: this.state.StartDay,
                     EndDay: this.state.EndDay,
                     StartMonth: this.state.StartMonth,
@@ -1008,17 +1077,16 @@ class Properties extends React.Component {
                                                 </Row>
                                             </>
                                         )}
-                                        {/*<AccordionComp title="Advanced options" body={*/}
-                                        {/*    <div>*/}
                                         <Row>
                                             <div className="mb-3">
                                                 <Label className="form-label mb-3 d-flex">{this.props.t("Is related")}</Label>
                                                 <div className="form-check form-check-inline">
                                                     <Input
                                                         type="radio"
-                                                        id="relatedRadioInline"
-                                                        name="relatedRadioInline"
+                                                        value="1"
                                                         className="form-check-input"
+                                                        checked={this.state.IsRelation === true}
+                                                        onChange={this.handleIsRelationChange}
                                                     />
                                                     <Label
                                                         className="form-check-label" htmlFor="relatedRadioInline"
@@ -1029,9 +1097,10 @@ class Properties extends React.Component {
                                                 <div className="form-check form-check-inline">
                                                     <Input
                                                         type="radio"
-                                                        id="customRadioInline2"
-                                                        name="relatedRadioInline"
+                                                        value="0"
                                                         className="form-check-input"
+                                                        checked={this.state.IsRelation === false}
+                                                        onChange={this.handleIsRelationChange}
                                                     />
                                                     <Label
                                                         className="form-check-label" htmlFor="customRadioInline2"
@@ -1041,38 +1110,67 @@ class Properties extends React.Component {
                                                 </div>
                                             </div>
                                         </Row>
-                                        <Row>
-                                            <div className="table-responsive">
-                                                <Table className="table table-hover mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>{this.props.t("Input name")}</th>
-                                                            <th>{this.props.t("Variable name")}</th>
-                                                            <th>{this.props.t("Action")}</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>
-                                                                <Select
-                                                                    value={this.state.relationFieldsSelectedGroup}
-                                                                    onChange={this.handleRelationFieldChange}
-                                                                    options={this.state.relationFieldOptionGroup}
-                                                                    classNamePrefix="select2-selection"
-                                                                    placeholder={this.props.t("Select")}
-                                                                    className={this.state.DepFldInputClass}
-                                                                    isDisabled={this.state.dependentEnabled}
-                                                                />
-                                                            </td>
-                                                            <td>Otto</td>
-                                                            <td>@mdo</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </Table>
-                                            </div>
-                                        </Row>
-                                        {/*    </div>*/}
-                                        {/*} />*/}
+                                        {this.state.IsRelation === true && (
+                                            <Row className="mb-3">
+                                                <div className={this.state.RelFldVlInputClass}>
+                                                    <Table className="table table-hover mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>{this.props.t("Source input name")}</th>
+                                                                <th>{this.props.t("Variable name")}</th>
+                                                                <th>{this.props.t("Action")}</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {this.state.relationElementRows.map((row, index) => (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        <Select
+                                                                            value={row.relationFieldsSelectedGroup}
+                                                                            onChange={(e) => this.handleRelationInputChange(index, 'relationFieldsSelectedGroup', e)}
+                                                                            options={this.state.relationFieldOptionGroup}
+                                                                            classNamePrefix="select2-selection"
+                                                                            className="form-control"
+                                                                            placeholder={this.props.t("Select")}
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <input
+                                                                            style={{ fontSize: '8pt' }}
+                                                                            value={row.variableName}
+                                                                            className="form-control"
+                                                                            type="text"
+                                                                            placeholder="Variable name"
+                                                                            onChange={(e) => this.handleRelationInputChange(index, 'variableName', e.target.value)}
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <Button className="actionBtn" onClick={() => this.removeRelationRow(index)}>
+                                                                            <i className="far fa-trash-alt"></i>
+                                                                        </Button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
+                                                    <Button color="success" onClick={this.addRelationRow} className='mt-1'>
+                                                        {this.props.t("Add another")}
+                                                    </Button>
+                                                </div>
+                                                <div style={{ border: "#eee 1px solid", borderRadius: '5px' }}>
+                                                    <div style={{ borderBottom: '#eee 1px solid' }}>
+                                                        <label>
+                                                            {this.props.t("Javascript editor")}
+                                                        </label>
+                                                    </div>
+                                                    <CodeMirror
+                                                        value={this.state.RelationMainJs}
+                                                        onChange={this.changeRelationMainJs}
+                                                        height="100px"
+                                                    />
+                                                </div>
+                                            </Row>
+                                        )}
                                     </TabPane>
                                     {this.state.showWhereElementPropeties !== 2 &&
                                         <>

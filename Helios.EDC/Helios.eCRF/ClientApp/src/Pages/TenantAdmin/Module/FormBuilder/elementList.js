@@ -30,7 +30,7 @@ import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 import { withTranslation } from "react-i18next";
-import { getElementNameByKey } from '../Elements/Common/utils.js'
+import { GetElementNameByKey } from '../Elements/Common/utils.js'
 
 const elements = [
     { key: 1, name: 'Label', icon: 'fas fa-text-height' },
@@ -74,7 +74,7 @@ function ElementList(props) {
     const tog_large = (e, type, id, tabid, isCalc = false) => {
         setIsCalcBtn(isCalc);
         
-        setElementName(getElementNameByKey(props, type) + " "+ props.t("Properties"));
+        setElementName(GetElementNameByKey(props, type) + " "+ props.t("Properties"));
         
         if (id !== 0) {
             setElementId(id);
@@ -252,7 +252,7 @@ function ElementList(props) {
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
                 )}
                 {item.isRelated && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-diagram-project"></i></Button>
+                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "2")}><i className="fas fa-project-diagram"></i></Button>
                 )}
                 {item.elementType === 7 /*calculated*/ && (
                     <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
@@ -270,7 +270,7 @@ function ElementList(props) {
     );    
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {getElementNameByKey(props, l.key)} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {GetElementNameByKey(props, l.key)} </Button>
     );
 
     useEffect(() => {

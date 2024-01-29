@@ -1,7 +1,7 @@
 ﻿using Helios.Common.DTO;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
-using Helios.Core.Enums;
+using Helios.Common.Enums;
 using Helios.Core.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -175,6 +175,8 @@ namespace Helios.Core.Controllers
                    Layout = x.ElementDetail.Layout,
                    IsDependent = x.IsDependent,
                    IsRelated = x.IsRelated,
+                   RelationSourceInputs = x.ElementDetail.RelationSourceInputs,
+                   RelationMainJs = x.ElementDetail.RelationMainJs,
                    ElementOptions = x.ElementDetail.ElementOptions,
                    DefaultValue = x.ElementDetail.DefaultValue,
                    AddTodayDate = x.ElementDetail.AddTodayDate,
@@ -244,9 +246,10 @@ namespace Helios.Core.Controllers
                     IsDependent = model.IsDependent,
                     IsHidden = model.IsHidden,
                     IsReadonly = model.IsReadonly,
+                    IsRequired = model.IsRequired,
+                    IsRelated = model.IsRelated,
                     IsTitleHidden = model.IsTitleHidden,
                     Width = model.Width,
-                    IsRequired = model.IsRequired,
                     ModuleId = model.ModuleId,
                     TenantId = model.TenantId,
                     Order = moduleElementMaxOrder + 1,
@@ -273,7 +276,9 @@ namespace Helios.Core.Controllers
                         DefaultValue = model.DefaultValue,
                         AddTodayDate = model.AddTodayDate,
                         CalculationSourceInputs = model.CalculationSourceInputs,
+                        RelationSourceInputs = model.RelationSourceInputs,
                         MainJs = model.MainJs,
+                        RelationMainJs = model.RelationMainJs,
                         StartDay = model.StartDay,
                         EndDay = model.EndDay,
                         StartMonth = model.StartMonth,
@@ -301,13 +306,16 @@ namespace Helios.Core.Controllers
                         {
                             SourceElementId = model.DependentTargetFieldId,
                             TargetElementId = elm.Id,
+                            ModuleId = model.ModuleId,
                             TenantId = model.TenantId,
+                            EventType = EventType.Dependency,
                             ValueCondition = (ActionCondition)model.DependentCondition,
                             ActionType = (ActionType)model.DependentAction,
                             ActionValue = model.DependentFieldValue,
                         };
 
                         _context.ModuleElementEvents.Add(elementEvent);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
 
                     if (model.ElementType == ElementType.Calculated)
@@ -334,9 +342,42 @@ namespace Helios.Core.Controllers
 
                             _context.ElementDetails.Update(item);
                         }
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
 
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    if (model.IsRelated)
+                    {
+                        var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                        var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                        foreach (var item in relElmIds)
+                        {
+                            var elementEvent = new ModuleElementEvent()
+                            {
+                                ModuleId = model.ModuleId,
+                                SourceElementId = item,
+                                TargetElementId = elm.Id,
+                                TenantId = model.TenantId,
+                                EventType = EventType.Relation,
+                            };
+
+                            _context.ModuleElementEvents.Add(elementEvent);
+                        }
+
+                        var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!isSuccess)
+                        {
+                            element.IsRelated = false;
+                            elementDetail.RelationSourceInputs = "";
+                            elementDetail.RelationMainJs = "";
+
+                            _context.Elements.Update(element);
+                            _context.ElementDetails.Update(elementDetail);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+                    }
 
                     //control for both of element and elementDetail saved
                     var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
@@ -382,9 +423,10 @@ namespace Helios.Core.Controllers
                 element.IsDependent = model.IsDependent;
                 element.IsHidden = model.IsHidden;
                 element.IsReadonly = model.IsReadonly;
+                element.IsRequired = model.IsRequired;
+                element.IsRelated = model.IsRelated;
                 element.IsTitleHidden = model.IsTitleHidden;
                 element.Width = model.Width;
-                element.IsRequired = model.IsRequired;
                 element.ModuleId = model.ModuleId;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
@@ -402,7 +444,9 @@ namespace Helios.Core.Controllers
                 elementDetail.DefaultValue = model.DefaultValue;
                 elementDetail.AddTodayDate = model.AddTodayDate;
                 elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
+                elementDetail.RelationSourceInputs = model.RelationSourceInputs;
                 elementDetail.MainJs = model.MainJs;
+                elementDetail.RelationMainJs = model.RelationMainJs;
                 elementDetail.StartDay = model.StartDay;
                 elementDetail.EndDay = model.EndDay;
                 elementDetail.StartMonth = model.StartMonth;
@@ -427,6 +471,7 @@ namespace Helios.Core.Controllers
                         {
                             SourceElementId = model.DependentSourceFieldId,
                             TargetElementId = element.Id,
+                            EventType = EventType.Dependency,
                             ValueCondition = (ActionCondition)model.DependentCondition,
                             ActionType = (ActionType)model.DependentAction,
                             ActionValue = model.DependentFieldValue,
@@ -446,6 +491,8 @@ namespace Helios.Core.Controllers
 
                         _context.ModuleElementEvents.Update(dep);
                     }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.ElementType == ElementType.Calculated)
@@ -501,9 +548,65 @@ namespace Helios.Core.Controllers
                             _context.Update(item);
                         }
                     }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                if (model.IsRelated)
+                {
+                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var relIds = rels.Select(x => x.Id).ToList();
+
+                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                    var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                    //first add unadded rows to evet
+                    foreach (var item in relList)
+                    {
+                        var exstRel = rels.FirstOrDefault(x => x.SourceElementId == item.relationFieldsSelectedGroup.value && x.TargetElementId == model.Id);
+
+                        if (exstRel == null)
+                        {
+                            var elementEvent = new ModuleElementEvent()
+                            {
+                                ModuleId = model.ModuleId,
+                                SourceElementId = item.relationFieldsSelectedGroup.value,
+                                TargetElementId = model.Id,
+                                TenantId = model.TenantId,
+                                EventType = EventType.Relation,
+                            };
+
+                            _context.ModuleElementEvents.Add(elementEvent);
+                        }
+                    }
+
+                    //then remove deleted rows
+                    foreach (var item in rels)
+                    {
+                        var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+
+                        if (delRel == null)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ModuleElementEvents.Add(item);
+                        }
+                    }
+
+                    var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    if (!isSuccess)
+                    {
+                        element.IsRelated = false;
+                        elementDetail.RelationSourceInputs = "";
+                        elementDetail.RelationMainJs = "";
+
+                        _context.Elements.Update(element);
+                        _context.ElementDetails.Update(elementDetail);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
             }
 
             return result;
