@@ -222,7 +222,22 @@ function ModuleList() {
                             <Col className="col-12">
                                 <Card>
                                     <CardBody>
-                                        <MDBDataTable hover responsive striped bordered data={data} />
+                                        <table className="table table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Module Name</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {tableData.map((rowData, rowIndex) => (
+                                                    <tr key={rowIndex} onDoubleClick={() => navigateToFormBuilder(rowData.id)}>
+                                                        <td>{rowData.name}</td>
+                                                        <td>{getActions(rowData.id)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </CardBody>
                                 </Card>
                             </Col>

@@ -219,7 +219,25 @@ namespace Helios.Core.Controllers
 
             if (model.ElementType == ElementType.Calculated)
             {
-                calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
+                if (model.CalculationSourceInputs == null || model.CalculationSourceInputs == "[]" || string.IsNullOrEmpty(model.CalculationSourceInputs))
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Error in calculation elements selection";
+
+                    return result;
+                }
+
+                try
+                {
+                    calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
+                }
+                catch (Exception ex)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Error in calculation elements selection";
+
+                    return result;
+                }
             }
 
             if (element == null)
@@ -443,8 +461,6 @@ namespace Helios.Core.Controllers
                 elementDetail.ElementOptions = model.ElementOptions;
                 elementDetail.DefaultValue = model.DefaultValue;
                 elementDetail.AddTodayDate = model.AddTodayDate;
-                elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
-                elementDetail.RelationSourceInputs = model.RelationSourceInputs;
                 elementDetail.MainJs = model.MainJs;
                 elementDetail.RelationMainJs = model.RelationMainJs;
                 elementDetail.StartDay = model.StartDay;
@@ -497,29 +513,45 @@ namespace Helios.Core.Controllers
 
                 if (model.ElementType == ElementType.Calculated)
                 {
+                    var dbCalcList = JsonSerializer.Deserialize<List<CalculationModel>>(elementDetail.CalculationSourceInputs);
                     var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
                     var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+
+                    //update updated variable list
+                    foreach (var item in dbCalcList)
+                    {
+                        var c = calcList.FirstOrDefault(x => x.variableName == item.variableName);
+
+                        if (c != null && c.elementFieldSelectedGroup.value != item.elementFieldSelectedGroup.value)
+                        {
+                            var exc = existCalDtil.FirstOrDefault(x => x.TargetElementId == item.elementFieldSelectedGroup.value && x.IsActive && !x.IsDeleted);
+
+                            exc.TargetElementId = c.elementFieldSelectedGroup.value;
+                            _context.CalculatationElementDetails.Update(exc);
+                        }
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                     //change elementDetail first
                     foreach (var item in elementInExistCalList)
                     {
                         item.IsInCalculation = false;
-
                         _context.ElementDetails.Update(item);
                     }
 
-                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
                     var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     //then change new elementDetail flags
                     foreach (var item in elementInCalList)
                     {
                         item.IsInCalculation = true;
-
                         _context.ElementDetails.Update(item);
                     }
 
+                    existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
                     //add new calcElementDetails
                     foreach (var item in calcList)
                     {
@@ -549,23 +581,39 @@ namespace Helios.Core.Controllers
                         }
                     }
 
+                    elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
+                    _context.ElementDetails.Update(elementDetail);
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.IsRelated)
                 {
+                    var dbRelList = JsonSerializer.Deserialize<List<RelationModel>>(elementDetail.RelationSourceInputs);
                     var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var relIds = rels.Select(x => x.Id).ToList();
 
                     var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
                     var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
 
+                    foreach (var item in dbRelList)
+                    {
+                        var r = relList.FirstOrDefault(x => x.variableName == item.variableName);
+
+                        if (r != null && r.relationFieldsSelectedGroup.value != item.relationFieldsSelectedGroup.value)
+                        {
+                            var exr = rels.FirstOrDefault(x => x.TargetElementId == item.relationFieldsSelectedGroup.value && x.IsActive && !x.IsDeleted);
+
+                            exr.TargetElementId = r.relationFieldsSelectedGroup.value;
+                            _context.ModuleElementEvents.Update(exr);
+                        }
+                    }
+
+                    var relIds = rels.Select(x => x.SourceElementId).ToList();
+
                     //first add unadded rows to evet
                     foreach (var item in relList)
                     {
-                        var exstRel = rels.FirstOrDefault(x => x.SourceElementId == item.relationFieldsSelectedGroup.value && x.TargetElementId == model.Id);
-
-                        if (exstRel == null)
+                        if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
                         {
                             var elementEvent = new ModuleElementEvent()
                             {
@@ -593,6 +641,9 @@ namespace Helios.Core.Controllers
                             _context.ModuleElementEvents.Add(item);
                         }
                     }
+
+                    elementDetail.RelationSourceInputs = model.RelationSourceInputs;
+                    _context.ElementDetails.Update(elementDetail);
 
                     var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 

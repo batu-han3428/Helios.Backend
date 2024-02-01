@@ -113,7 +113,7 @@ class DateElement extends Component {
                         onChange={this.handleDayChange}
                         options={this.state.DayOptionGroup}
                         classNamePrefix="select2-selection"
-                        placeholder={this.props.t("Select")}
+                        placeholder={this.props.t("Day")}
                         isDisabled={this.state.isDisable}
                     />
                 </div>/
@@ -123,7 +123,7 @@ class DateElement extends Component {
                         onChange={this.handleMonthChange}
                         options={this.state.MonthOptionGroup}
                         classNamePrefix="select2-selection"
-                        placeholder={this.props.t("Select")}
+                        placeholder={this.props.t("Month")}
                         isDisabled={this.state.isDisable}
                     />
                 </div>/
@@ -133,7 +133,7 @@ class DateElement extends Component {
                         onChange={this.handleYearChange}
                         options={this.state.YearOptionGroup}
                         classNamePrefix="select2-selection"
-                        placeholder={this.props.t("Select")}
+                        placeholder={this.props.t("Year")}
                         isDisabled={this.state.isDisable}
                     />
                 </div>
