@@ -151,6 +151,8 @@ class Properties extends React.Component {
             DepConInputClass: '',
             DepActInputClass: '',
             DepFldVlInputClass: 'form-control input-tag',
+
+            IsFormValid: true
         };
 
         this.toastRef = React.createRef();
@@ -184,6 +186,7 @@ class Properties extends React.Component {
         this.handleRelationFieldChange = this.handleRelationFieldChange.bind(this);
         this.addRelationRow = this.addRelationRow.bind(this);
         this.handleRelationInputChange = this.handleRelationInputChange.bind(this);
+        this.isRelationVariableNameDuplicate = this.isRelationVariableNameDuplicate.bind(this);
         this.removeRelationRow = this.removeRelationRow.bind(this);
 
         this.changeUnit.bind(this);
@@ -206,6 +209,8 @@ class Properties extends React.Component {
         this.changeRelationMainJs.bind(this);
         this.changeLeftText.bind(this);
         this.changeRightText.bind(this);
+
+        this.changeIsFormValid.bind(this);
     }
 
     toggle(tab) {
@@ -263,6 +268,7 @@ class Properties extends React.Component {
                     ModuleId={this.state.ModuleId}
                     changeMainJs={this.changeMainJs} MainJs={this.state.MainJs}
                     changeCalculationSourceInputs={this.changeCalculationSourceInputs} CalculationSourceInputs={this.state.CalculationSourceInputs}
+                    changeIsFormValid={this.changeIsFormValid}
                 />;
             case 8:
             case 9:
@@ -369,9 +375,9 @@ class Properties extends React.Component {
                 data.map(item => {
                     var itm = { label: item.elementName + " - " + GetElementNameByKey(this.props, item.elementType), value: item.id };
 
-                    if (item.id != this.state.Id) {
-                        depFldOptionGroup.push(itm);
-                    }
+                    //if (item.id != this.state.Id) {
+                    depFldOptionGroup.push(itm);
+                    //}
                 });
 
                 this.state.dependentFieldOptionGroup = depFldOptionGroup;
@@ -535,6 +541,10 @@ class Properties extends React.Component {
         this.setState({ RightText: newValue });
     };
 
+    changeIsFormValid = (newValue) => {
+        this.setState({ IsFormValid: newValue });
+    };
+
     removeDependentFieldValueTag = (i) => {
         const newTags = [...this.state.DependentFieldValue];
         newTags.splice(i, 1);
@@ -585,8 +595,25 @@ class Properties extends React.Component {
             return { relationElementRows: newRows };
         }, () => {
             this.setState({ RelationSourceInputs: JSON.stringify(this.state.relationElementRows) });
+            var isVal = true;
+
+            for (var i = 0; i < this.state.relationElementRows.length; i++) {
+                var chkDup = this.isRelationVariableNameDuplicate(i);
+
+                if (chkDup) {
+                    isVal = false;
+                    break;
+                }
+            }
+
+            this.state.IsFormValid = isVal;
         });
     };
+
+    isRelationVariableNameDuplicate(index) {
+        const variableName = this.state.relationElementRows[index].variableName;
+        return this.state.relationElementRows.some((row, i) => i !== index && row.variableName === variableName);
+    }
 
     getElementData() {
         if (this.state.Id != 0) {
@@ -640,10 +667,10 @@ class Properties extends React.Component {
 
         var rel = JSON.parse(data.relationSourceInputs);
         this.state.IsRelation = data.isRelated;
-        this.state.RelationSourceInputs = rel;
-        this.state.relationElementRows = rel;
-        this.state.RelationMainJs = data.relationMainJs;
-        this.state.inputCounter = rel.length;
+        this.state.RelationSourceInputs = rel != null ? data.relationSourceInputs : '';
+        this.state.relationElementRows = rel != null ? rel : [];
+        this.state.RelationMainJs = data.relationMainJs != null ? data.relationMainJs : '';
+        this.state.inputCounter = rel != null ? rel.length : 0;
 
         var w = this.state.widthOptionGroup.filter(function (e) {
             if (e.value == data.width)
@@ -705,7 +732,7 @@ class Properties extends React.Component {
             isValid = false;
         }
 
-        if (isValid) {
+        if (isValid && this.state.IsFormValid) {
             fetch(baseUrl + '/Module/SaveModuleContent', {
                 method: 'POST',
                 headers: {
@@ -1138,7 +1165,7 @@ class Properties extends React.Component {
                                                                         <input
                                                                             style={{ fontSize: '8pt' }}
                                                                             value={row.variableName}
-                                                                            className="form-control"
+                                                                            className={`form-control ${this.isRelationVariableNameDuplicate(index) ? 'is-invalid' : ''}`}
                                                                             type="text"
                                                                             placeholder="Variable name"
                                                                             onChange={(e) => this.handleRelationInputChange(index, 'variableName', e.target.value)}

@@ -43,7 +43,10 @@ class CalculationElementProperties extends Component {
         this.addRow = this.addRow.bind(this);
         this.fillAllElementList = this.fillAllElementList.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.isVariableNameDuplicate = this.isVariableNameDuplicate.bind(this);
+        this.isElementFieldSelectedInvalid = this.isElementFieldSelectedInvalid.bind(this);
         this.setCode = this.setCode.bind(this);
+        this.controlNullValuesInRows = this.controlNullValuesInRows.bind(this);
 
         this.fillAllElementList();
     }
@@ -53,6 +56,8 @@ class CalculationElementProperties extends Component {
             const newRows = [...prevState.elementRows];
             newRows.splice(index, 1);
             return { elementRows: newRows };
+        }, () => {
+            this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
         });
     };
 
@@ -60,10 +65,17 @@ class CalculationElementProperties extends Component {
         this.state.inputCounter = this.state.inputCounter + 1;
 
         this.setState((prevState) => ({
-            elementRows: [...prevState.elementRows, {
-                elementFieldSelectedGroup: this.state.elementListOptionGroup[0], variableName: 'A' + this.state.inputCounter
-            }],
-        }));
+            elementRows: [
+                ...prevState.elementRows,
+                {
+                    elementFieldSelectedGroup: this.state.elementListOptionGroup[0],
+                    variableName: 'A' + this.state.inputCounter,
+                },
+            ],
+        }), () => {
+            this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
+            this.controlNullValuesInRows();
+        });
     };
 
     fillAllElementList() {
@@ -103,6 +115,7 @@ class CalculationElementProperties extends Component {
             return { elementRows: newRows };
         }, () => {
             this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
+            this.controlNullValuesInRows();
         });
     };
 
@@ -110,7 +123,38 @@ class CalculationElementProperties extends Component {
         this.state.Code = val;
         this.props.changeMainJs(val);
     };
-    
+
+    isVariableNameDuplicate(index) {
+        const variableName = this.state.elementRows[index].variableName;
+        return this.state.elementRows.some((row, i) => i !== index && row.variableName === variableName);
+    }
+
+    isElementFieldSelectedInvalid(index) {
+        const selectedValue = this.state.elementRows[index].elementFieldSelectedGroup;
+        return !selectedValue; // Returns true if not selected
+    }
+
+    controlNullValuesInRows() {
+        var isVal = true;
+        for (var i = 0; i < this.state.elementRows.length; i++) {
+            var chkDup = this.isVariableNameDuplicate(i);
+
+            if (chkDup) {
+                isVal = false;
+                break;
+            }
+
+            var chkSel = this.isElementFieldSelectedInvalid(i);
+
+            if (chkSel) {
+                isVal = false;
+                break;
+            }
+        }
+
+        this.props.changeIsFormValid(isVal);
+    }
+
     render() {
         return (
             <Row className="mb-3">
@@ -132,7 +176,7 @@ class CalculationElementProperties extends Component {
                                             onChange={(e) => this.handleInputChange(index, 'elementFieldSelectedGroup', e)}
                                             options={this.state.elementListOptionGroup}
                                             classNamePrefix="select2-selection"
-                                            className="form-control"
+                                            className={`form-control ${this.isElementFieldSelectedInvalid(index) ? 'is-invalid' : ''}`}
                                             placeholder={this.props.t("Select")}
                                         />
                                     </td>
@@ -140,7 +184,7 @@ class CalculationElementProperties extends Component {
                                         <input
                                             style={{ fontSize: '8pt' }}
                                             value={row.variableName}
-                                            className="form-control"
+                                            className={`form-control ${this.isVariableNameDuplicate(index) ? 'is-invalid' : ''}`}
                                             type="text"
                                             placeholder="Variable name"
                                             onChange={(e) => this.handleInputChange(index, 'variableName', e.target.value)}
