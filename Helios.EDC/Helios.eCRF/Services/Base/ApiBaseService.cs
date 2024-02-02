@@ -14,11 +14,11 @@ namespace Helios.eCRF.Services.Base
         }
 
         protected RestClient AuthServiceClient {
-            get { return new RestClient(new Uri("https://localhost:5200/")); }
+            get { return new RestClient(new Uri("http://10.8.0.7:8080")); }
         }
         
         protected RestClient CoreServiceClient {
-            get { return new RestClient(new Uri("https://localhost:4200/")); }
+            get { return new RestClient(new Uri("http://10.8.0.8:3500/")); }
         }
 
         public string ClientIp { get; set; }

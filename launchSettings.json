@@ -4,10 +4,10 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "helios.ecrf": "StartDebugging",
-        "helios.ecrf.ui": "StartDebugging",
+        "rabbitmq": "StartDebugging",
         "helios.authentication": "StartDebugging",
-        "helios.core": "StartDebugging"
+        "helios.core": "StartDebugging",
+        "frontend": "StartDebugging"
       }
     }
   }

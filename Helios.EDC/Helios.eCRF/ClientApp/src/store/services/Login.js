@@ -2,7 +2,7 @@
 
 export const LoginApi = createApi({
     reducerPath: 'loginApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://localhost:7196/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3300/' }),
     endpoints: (builder) => ({
         loginPost: builder.mutation({
             query: (data) => ({

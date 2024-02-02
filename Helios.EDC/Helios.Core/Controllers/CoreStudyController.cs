@@ -778,5 +778,319 @@ namespace Helios.Core.Controllers
             }
         }
         #endregion
+
+        #region Visit
+        [HttpGet]
+        public async Task<List<VisitModel>> GetVisits(Int64 studyId)
+        {
+            return await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x => x.StudyVisitPages).ThenInclude(x => x.StudyVisitPageModules).Select(x => new VisitModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                VisitType = (VisitType)x.VisitType,
+                Order = x.Order,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                Children = x.StudyVisitPages.Select(page => new VisitModel
+                {
+                    Id = page.Id,
+                    Name = page.Name,
+                    Order = page.Order,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = page.UpdatedAt,
+                    EPro = page.EPro,
+                    Children = page.StudyVisitPageModules.Select(module => new VisitModel
+                    {
+                        Id = module.Id,
+                        Name = module.Name,
+                        Order = module.Order,
+                        CreatedAt = x.CreatedAt,
+                        UpdatedAt = module.UpdatedAt
+                    }).ToList()
+                }).ToList()
+            }).ToListAsync();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetVisits(VisitDTO visitDTO)
+        {
+            try
+            {
+                if (visitDTO.Id == null || visitDTO.Id == 0)
+                {
+                    if (visitDTO.Type == VisitStatu.visit.ToString())
+                    {
+                        await _context.StudyVisits.AddAsync(new StudyVisit
+                        {
+                            StudyId = visitDTO.StudyId,
+                            Name = visitDTO.Name,
+                            VisitType = (enums.VisitType)visitDTO.VisitType,
+                            Order = visitDTO.Order
+                        });
+
+                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }else if (visitDTO.Type == VisitStatu.page.ToString())
+                    {
+                        await _context.StudyVisitPages.AddAsync(new StudyVisitPage
+                        {
+                            StudyVisitId = visitDTO.ParentId.Value,
+                            Name = visitDTO.Name,
+                            Order = visitDTO.Order
+                        });
+
+                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }
+                    else if (visitDTO.Type == "module")
+                    {
+                        await _context.StudyVisitPageModules.AddAsync(new StudyVisitPageModule
+                        {
+                            StudyRoleModulePermissionId = 1,
+                            StudyVisitPageId = visitDTO.ParentId.Value,
+                            Name = visitDTO.Name,
+                            Order = visitDTO.Order
+                        });
+
+                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+                else
+                {
+                    if (visitDTO.Type == VisitStatu.visit.ToString())
+                    {
+                        var visit = await _context.StudyVisits.FirstOrDefaultAsync(x=>x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
+
+                        if (visit != null)
+                        {
+                            visit.Name = visitDTO.Name;
+                            visit.VisitType = (enums.VisitType)visitDTO.VisitType.Value;
+
+                            var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                            if (result)
+                            {
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
+                        }
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                    else if (visitDTO.Type == VisitStatu.page.ToString())
+                    {
+                        var page = await _context.StudyVisitPages.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
+
+                        if (page != null)
+                        {
+                            page.Name = visitDTO.Name;
+
+                            var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                            if (result)
+                            {
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
+                        }
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteVisits(VisitDTO visitDTO)
+        {
+            try
+            {
+                if (visitDTO.Type == VisitStatu.visit.ToString())
+                {
+                     var visit = await _context.StudyVisits
+                        .Include(v => v.StudyVisitPages)
+                        .ThenInclude(p => p.StudyVisitPageModules)
+                        .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
+
+                    if (visit != null)
+                    {
+                        _context.StudyVisits.Remove(visit);
+
+                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+                else if (visitDTO.Type == VisitStatu.page.ToString())
+                {
+                    var page = await _context.StudyVisitPages
+                       .Include(v => v.StudyVisitPageModules)
+                       .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
+
+                    if (page != null)
+                    {
+                        _context.StudyVisitPages.Remove(page);
+
+                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                        if (result)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+               
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetVisitPageEPro(VisitDTO visitDTO)
+        {
+            var page = await _context.StudyVisitPages.FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
+
+            if (page != null)
+            {
+                page.EPro = !page.EPro;
+
+                var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful",
+                        Values = new { value = page.EPro }
+                    };
+                }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "Unsuccessful"
+            };
+        }
+        #endregion
     }
 }

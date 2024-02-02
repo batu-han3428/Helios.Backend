@@ -20,13 +20,11 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:44458",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       },
-      "useSSL": true,
-      "sslPort": 3201
+      "useSSL": true
     }
   },
   "iisSettings": {

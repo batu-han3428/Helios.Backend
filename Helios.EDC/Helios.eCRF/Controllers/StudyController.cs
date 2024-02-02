@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Model;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -11,10 +12,12 @@ namespace Helios.eCRF.Controllers
     public class StudyController : Controller
     {
         private IStudyService _studyService;
+        private ICacheService _cacheService;
 
-        public StudyController(IStudyService studyService)
+        public StudyController(IStudyService studyService, ICacheService cacheService)
         {
             _studyService = studyService;
+            _cacheService = cacheService;
         }
 
         #region Study
@@ -239,6 +242,80 @@ namespace Helios.eCRF.Controllers
         {
             var result = await _studyService.SetEmailTemplate(emailTemplateDTO);
 
+            return Ok(result);
+        }
+        #endregion
+
+        #region Visit
+
+        /// <summary>
+        /// Çalışmanın vizitlerini döner
+        /// </summary>
+        /// <param name="studyId">çalışma id</param>
+        /// <returns>vizit listesi</returns>
+        [HttpGet("{studyId}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> GetVisits(Int64 studyId)
+        {
+            var result = await _studyService.GetVisits(studyId);
+            return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
+        }
+
+
+        /// <summary>
+        /// Visit, page yada module ekler veya günceller
+        /// </summary>
+        /// <param name="visitDTO">eklenecek yada güncellenecek veri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> SetVisits(VisitDTO visitDTO)
+        {
+            var result = await _studyService.SetVisits(visitDTO);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Visit, page yada module siler
+        /// </summary>
+        /// <param name="visitDTO">silinecek veri</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> DeleteVisits(VisitDTO visitDTO)
+        {
+            var result = await _studyService.DeleteVisits(visitDTO);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// page in epro olup olmadığını ayarlar
+        /// </summary>
+        /// <param name="visitDTO">page</param>
+        /// <returns>başarılı başarısız</returns>
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> SetVisitPageEPro(VisitDTO visitDTO)
+        {
+            var result = await _studyService.SetVisitPageEPro(visitDTO);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Yetkileri listeler
+        /// </summary>
+        /// <param name="permissionPage">yetki key</param>
+        /// <returns>yetki listesi</returns>
+        [HttpGet("{pageKey}")]
+        [Authorize(Roles = "TenantAdmin")]
+        public async Task<IActionResult> GetPermissionList(PermissionPage pageKey)
+        {
+            var result = _cacheService.GetPermissions(pageKey);
             return Ok(result);
         }
         #endregion

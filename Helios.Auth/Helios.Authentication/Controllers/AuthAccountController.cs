@@ -113,22 +113,37 @@ namespace Helios.Authentication.Controllers
             {
                 return true;
             }
-            else if (user.UserRoles.Any(x => x.Role.Name == Roles.SystemAdmin.ToString()))
+            
+            if (user.UserRoles.Any(x => x.Role.Name == Roles.SystemAdmin.ToString()))
             {
-                return await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+                bool result =  await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+
+                if (result)
+                {
+                    return result;
+                }
             }
-            else if (user.UserRoles.Any(x => x.Role.Name == Roles.TenantAdmin.ToString()))
+            
+            if (user.UserRoles.Any(x => x.Role.Name == Roles.TenantAdmin.ToString()))
             {
-                return await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+                bool result = await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+
+                if (result)
+                {
+                    return result;
+                }
             }
-            else if (user.UserRoles.Any(x => x.Role.Name == Roles.StudyUser.ToString()))
+            
+            if (user.UserRoles.Any(x => x.Role.Name == Roles.StudyUser.ToString()))
             {
-                return await _coreService.StudyUserActiveControl(user.Id);
+                bool result = await _coreService.StudyUserActiveControl(user.Id);
+
+                if (result)
+                {
+                    return result;
+                }
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         [HttpPost]

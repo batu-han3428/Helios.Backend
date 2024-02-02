@@ -209,8 +209,8 @@ namespace Helios.Authentication.Extension
                     
                     c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                     {
-                        cfg.Host(/*new Uri(rabbitMQUrl),*/ "rabbitmq://localhost",
-                              b => { b.Username(rabbitMQUserName); b.Password(rabbitMQPassword); });
+                            cfg.Host(new Uri(rabbitMQUrl),
+                               b => { b.Username(rabbitMQUserName); b.Password(rabbitMQPassword); });
 
                         cfg.ReceiveEndpoint(rabbitMQueueName_UserConsumer, ep =>
                         {

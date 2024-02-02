@@ -1,50 +1,36 @@
 version: '3.4'
 
+volumes:
+  data-volume:
+networks:
+  v3network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.8.0.0/16
+          gateway: 10.8.0.1
+
 services:
-  # helios.authentication:
-  #   image: ${DOCKER_REGISTRY-}heliosauthentication
-  #   build:
-  #     context: .
-  #     dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
-  #   ports:
-  #    - 5200:80
-  #    - 5201:443
-  #   networks:
-  #       v3network:
-  #           ipv4_address: 10.7.0.5
-
-  # helios.core:
-  #   image: ${DOCKER_REGISTRY-}helioscore
-  #   build:
-  #     context: .
-  #     dockerfile: Helios.EDC/Helios.Core/Dockerfile
-  #   ports:
-  #    - 4200:80
-  #    - 4201:443
-  #   networks:
-  #       v3network:
-  #           ipv4_address: 10.7.0.4
-
-
-
   redis_image:
     image: redis
     container_name: redis.cache
     command: redis-server --requirepass heliosredis
+    ports:
+      - 6380:6380
     networks:
         v3network:
-            ipv4_address: 10.7.0.2
+          ipv4_address: 10.8.0.2
+
   rabbitmq:
       image: rabbitmq:3-management-alpine
       ports:
           - 5672:5672
           - 15672:15672
       networks:
-        v3network:
-            ipv4_address: 10.7.0.3
+         v3network:
+            ipv4_address: 10.8.0.5
       volumes:
         - ./volume/rabbitmq:/data
-
 
   helios.ecrf:
     image: ${DOCKER_REGISTRY-}heliosecrf
@@ -52,33 +38,61 @@ services:
       context: .
       dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
     ports:
-     - 3200:80
-     - 3201:443
+       - "3300:3300"
+       - "3301:3301"
+    environment:
+      - Redis__Host=redis_image
+      - Redis__Password=heliosredis
     networks:
         v3network:
-            ipv4_address: 10.7.0.6
-
-  # helios.ecrf.ui:
-  #   image: ${DOCKER_REGISTRY-}heliosecrfui
-  #   container_name: frontend
-  #   environment:
-  #      - REACT_APP_API_URL:"http://localhost:3201"
-  #   build:
-  #     context: .
-  #     dockerfile: Helios.EDC/Helios.eCRF/ClientApp/Dockerfile
-  #   # restart: on-failure
-  #   stdin_open: true
-  #   ports:
-  #    - 44458:44458
-  #   volumes:
-  #     - 'C:\Projects\v3\Medcase\Helios.EDC\Helios.eCRF\ClientApp\:/app'
-     
+            ipv4_address: 10.8.0.6
 
 
-networks:
-  v3network:
-    driver: bridge
-    ipam:
-     config:
-       - subnet: 10.7.0.0/16
-         gateway: 10.7.0.1
+
+
+  frontend:
+    build:
+      context: .
+      target: dev-envs
+      dockerfile: Helios.EDC/Helios.eCRF/ClientApp/Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "./Helios.EDC/Helios.eCRF/ClientApp:/app"
+      - ./Helios.EDC/Helios.eCRF/ClientApp/.nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./Helios.EDC/Helios.eCRF/ClientApp/public:/usr/share/nginx/html
+      - "/app/node_modules"
+    environment:
+     - WATCHPACK_POLLING=true
+
+
+  helios.authentication:
+    image: ${DOCKER_REGISTRY-}heliosauthentication
+    build:
+      context: .
+      dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
+    ports:
+        - "8080:8080"
+        - "8081:8081"
+    environment:
+      - AppConfig__RabbitMQCrf=rabbitmq://10.8.0.5:5672/
+      - AppConfig__RabbitMQUserName=guest
+      - AppConfig__RabbitMQPassword=guest
+    networks:
+         v3network:
+            ipv4_address: 10.8.0.7
+
+  helios.core:
+    image: ${DOCKER_REGISTRY-}helioscore
+    build:
+      context: .
+      dockerfile: Helios.EDC/Helios.Core/Dockerfile
+    ports:
+      - "3500:3500"
+      - "3501:3501"
+    networks:
+         v3network:
+            ipv4_address: 10.8.0.8
+
