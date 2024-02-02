@@ -21,5 +21,9 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> AddEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
         Task<ApiResponse<dynamic>> DeleteEmailTemplateTag(EmailTemplateTagDTO emailTemplateTagDTO);
         Task<ApiResponse<dynamic>> SetEmailTemplate(EmailTemplateDTO emailTemplateDTO);
+        Task<RestResponse<List<VisitModel>>> GetVisits(Int64 studyId);
+        Task<ApiResponse<dynamic>> SetVisits(VisitDTO visitDTO);
+        Task<ApiResponse<dynamic>> DeleteVisits(VisitDTO visitDTO);
+        Task<ApiResponse<dynamic>> SetVisitPageEPro(VisitDTO visitDTO);
     }
 }

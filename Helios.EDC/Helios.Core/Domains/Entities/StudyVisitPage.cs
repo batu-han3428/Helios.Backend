@@ -15,6 +15,7 @@ namespace Helios.Core.Domains.Entities
         public bool CanVerify { get; set; }
         public bool CanSdv { get; set; }
         public bool CanQuery { get; set; }
+        public bool EPro { get; set; }
         public StudyVisit StudyVisit { get; set; }
         public ICollection<StudyVisitPageModule> StudyVisitPageModules { get; set; }
     }

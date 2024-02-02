@@ -6,8 +6,10 @@
     <DockerPublishLocally>False</DockerPublishLocally>
     <ProjectGuid>80afff7e-8f43-4aa5-8cc3-897f61134917</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>helios.authentication</DockerServiceName>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DockerServiceName>frontend</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

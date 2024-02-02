@@ -8,6 +8,7 @@ namespace Helios.Core.Domains.Entities
         public Int64 StudyVisitPageId { get; set; }
         [ForeignKey("StudyRoleModulePermission")]
         public Int64 StudyRoleModulePermissionId { get; set; }
+        public string Name { get; set; }
         public Int64 ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public int Order {get;set;}

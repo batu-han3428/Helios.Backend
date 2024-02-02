@@ -45,7 +45,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        // Swagger UI'ýn kök dizinine yönlendirme
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();
@@ -55,5 +60,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-

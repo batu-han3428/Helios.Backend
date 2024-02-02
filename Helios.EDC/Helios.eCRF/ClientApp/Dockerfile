@@ -1,22 +1,55 @@
-FROM node:18.18 as builder
+FROM node:lts AS development
 
-RUN mkdir /usr/src/app
-WORKDIR /usr/src/app
+WORKDIR /app
 
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
 
-COPY package.json /usr/src/app/package.json
+RUN npm ci --legacy-peer-deps
 
-RUN npm install -g npm@10.2.4
-RUN npm install --legacy-peer-deps
+COPY . /app
 
-COPY ./public /usr/src/app/public
-COPY ./src /usr/src/app/src
+ENV CI=false
+ENV PORT=3000
+
+CMD [ "npm", "start" ]
+
+FROM development AS build
 
 RUN npm run build
 
-# production environment
-FROM nginx:1.15.10-alpine
-COPY --from=builder /usr/src/app/build /var/www
-COPY ./nginx.conf /etc/nginx/nginx.conf
-CMD ["nginx", "-g", "daemon off;"]
+FROM development as dev-envs
+#RUN <<EOF
+#apt-get update 
+#apt-get install -y --no-install-recommends git
+#EOF
+
+RUN apt-get update -y
+RUN apt-get install -y --no-install-recommends git
+
+#RUN <<EOF
+#useradd -s /bin/bash -m vscode
+#groupadd docker
+#usermod -aG docker vscode
+#EOF
+
+RUN useradd -s /bin/bash -m vscode
+RUN groupadd docker
+RUN usermod -aG docker vscode
+
+COPY --from=gloursdocker/docker / /
+CMD [ "npm", "start" ]
+
+FROM nginx:alpine
+
+COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+WORKDIR /usr/share/nginx/html
+
+RUN rm -rf ./*
+
+COPY --from=build /app/build .
+
+COPY index.html /usr/share/nginx/html/index.html
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", builder =>
     {
-        builder.WithOrigins("https://localhost:44458", "https://localhost:7196") // Ýzin vermek istediðiniz kök domaini buraya ekleyin
+        builder.WithOrigins("https://localhost:44458", "https://localhost:7196", "https://localhost:3000") // Ýzin vermek istediðiniz kök domaini buraya ekleyin
                .AllowAnyMethod()
                .AllowAnyHeader();
     });
@@ -56,7 +56,12 @@ if (!app.Environment.IsDevelopment())
 else
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        // Swagger UI'ýn kök dizinine yönlendirme
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();

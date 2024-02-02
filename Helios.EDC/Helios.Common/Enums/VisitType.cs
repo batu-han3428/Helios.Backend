@@ -1,4 +1,10 @@
-﻿namespace Helios.Common.Enums
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Helios.Common.Enums
 {
     public enum VisitType
     {
@@ -18,5 +24,12 @@
         /// </summary>
         AdversEvent = 3,
         SeriousAdversEvent = 4
+    }
+
+    public enum VisitStatu
+    {
+        visit = 1,
+        page = 2,
+        module = 3
     }
 }
