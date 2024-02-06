@@ -33,23 +33,23 @@ import { withTranslation } from "react-i18next";
 import { GetElementNameByKey } from '../Elements/Common/utils.js'
 
 const elements = [
-    { key: 1, name: 'Label', icon: 'fas fa-text-height' },
-    { key: 2, name: 'Text', icon: 'fas fa-font' },
-    { key: 3, name: 'Hidden', icon: 'fas fa-puzzle-piece' },
-    { key: 4, name: 'Numeric', icon: 'fas fa-sort-numeric-down' },
-    { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
-    { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
+    { key: 17, name: 'Adverse Event', icon: 'fas fa-heartbeat' },
     { key: 7, name: 'Calculation', icon: 'fas fa-calculator' },
-    { key: 8, name: 'Radio List', icon: 'ion ion-md-radio-button-on' },
     { key: 9, name: 'Check List', icon: 'fas fa-check-square' },
-    { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
-    { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
-    { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
-    { key: 13, name: 'Range Slider', icon: 'fas fa-sliders-h' },
     { key: 14, name: 'Concomitant medication', icon: 'dripicons-view-list' },
-    { key: 15, name: 'Table', icon: 'fas fa-table' },
     { key: 16, name: 'Datagrid', icon: 'fas fa-table' },
-    { key: 17, name: 'Adverse Event', icon: 'fas fa-heartbeat' }
+    { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
+    { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
+    { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
+    { key: 3, name: 'Hidden', icon: 'fas fa-puzzle-piece' },
+    { key: 1, name: 'Label', icon: 'fas fa-text-height' },
+    { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
+    { key: 4, name: 'Numeric', icon: 'fas fa-sort-numeric-down' },
+    { key: 8, name: 'Radio List', icon: 'ion ion-md-radio-button-on' },
+    { key: 13, name: 'Range Slider', icon: 'fas fa-sliders-h' },
+    { key: 15, name: 'Table', icon: 'fas fa-table' },
+    { key: 2, name: 'Text', icon: 'fas fa-font' },
+    { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
 ];
 
 function ElementList(props) {

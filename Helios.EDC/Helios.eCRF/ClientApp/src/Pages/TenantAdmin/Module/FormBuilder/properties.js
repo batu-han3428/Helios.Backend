@@ -36,6 +36,7 @@ import CalculationElementProperties from "../Elements/CalculationElement/calcula
 import TextareaElementProperties from "../Elements/TextareaElement/textareaElementProperties.js";
 import FileUploaderElementProperties from "../Elements/FileUploaderElement/fileUploaderElementProperties.js";
 import RangeSliderElementProperties from "../Elements/RangeSliderElement/rangeSliderElementProperties.js";
+import DatagridElementProperties from "../Elements/DatagridElement/datagridElementProperties";
 
 const baseUrl = "https://localhost:7196";
 
@@ -294,6 +295,11 @@ class Properties extends React.Component {
                     changeUpperLimit={this.changeUpperLimit} UpperLimit={this.state.UpperLimit}
                     changeLeftText={this.changeLeftText} LeftText={this.state.LeftText}
                     changeRightText={this.changeRightText} RightText={this.state.RightText}
+                />;
+            case 16:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-10";
+                return <DatagridElementProperties
                 />;
             default:
                 this.state.showWhereElementPropeties = 0;

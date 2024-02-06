@@ -20,11 +20,11 @@ namespace Helios.Core.Domains.Entities
         public AlignLayout Layout { get; set; }
 
         //datagrid, table
-        //public int RowCount { get; set; } 
-        //public int ColumnCount { get; set; }
-        //public string RowTitles { get; set; }
-        //public string RowWidths { get; set; }
-        
+        public int RowCount { get; set; }
+        public int ColumnCount { get; set; }
+        public string? RowTitles { get; set; }
+        public string? RowWidths { get; set; }
+
         //datetime
         public int StartDay { get; set; }
         public int EndDay { get; set; }

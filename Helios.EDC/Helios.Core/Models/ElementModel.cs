@@ -63,6 +63,12 @@ namespace Helios.Core.Models
         public string CalculationSourceInputs { get; set; } = "";
         public string MainJs { get; set; } = "";
 
+        //datagrid, table
+        public int RowCount { get; set; } = 0;
+        public int ColumnCount { get; set; } = 0;
+        public string? RowTitles { get; set; } = "";
+        public string? RowWidths { get; set; } = "";
+
         ////dependent
         public Int64 DependentSourceFieldId { get; set; }
         public Int64 DependentTargetFieldId { get; set; }
