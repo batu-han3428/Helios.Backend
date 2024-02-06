@@ -21,5 +21,6 @@ namespace Helios.Core.Domains.Entities
         public bool SAELockAction { get; set; }
         public Study Study { get; set; }
         public ICollection<StudyVisitPage> StudyVisitPages { get; set; }
+        public List<Permission> Permissions { get; set; }
     }
 }

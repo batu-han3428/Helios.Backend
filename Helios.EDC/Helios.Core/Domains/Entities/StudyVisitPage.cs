@@ -18,5 +18,6 @@ namespace Helios.Core.Domains.Entities
         public bool EPro { get; set; }
         public StudyVisit StudyVisit { get; set; }
         public ICollection<StudyVisitPageModule> StudyVisitPageModules { get; set; }
+        public List<Permission> Permissions { get; set; }
     }
 }

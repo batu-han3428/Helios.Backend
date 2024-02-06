@@ -8,6 +8,7 @@ import { addStudy, loginuser, resetStudy } from "../../store/actions";
 import { layoutTypes } from "../../constants/layout";
 import { onLogin } from "../../helpers/Auth/useAuth";
 import { userRoutes } from "../allRoutes";
+import { API_BASE_URL } from "../../constants/endpoints";
 
 
 const AuthMiddleware = (props) => {
@@ -21,8 +22,8 @@ const AuthMiddleware = (props) => {
     const [error, setError] = useState(false);
 
     const fetchData = async (token) => {
-        
-        const apiUrl = `https://localhost:7196/Study/GetStudy/${studyId}`;
+
+        const apiUrl = API_BASE_URL+`Study/GetStudy/${studyId}`;
 
         fetch(apiUrl, {
             method: 'GET',

@@ -16,7 +16,7 @@ services:
     container_name: redis.cache
     command: redis-server --requirepass heliosredis
     ports:
-      - 6380:6380
+      - 6379:6379
     networks:
         v3network:
           ipv4_address: 10.8.0.2
@@ -41,7 +41,7 @@ services:
        - "3300:3300"
        - "3301:3301"
     environment:
-      - Redis__Host=redis_image
+      - Redis__Host=redis.cache
       - Redis__Password=heliosredis
     networks:
         v3network:
