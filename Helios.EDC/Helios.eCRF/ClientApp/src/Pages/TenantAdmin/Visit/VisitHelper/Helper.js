@@ -1,5 +1,5 @@
 ﻿import { endloading, startloading } from '../../../../store/loader/actions';
-import Settings from '../Comp/Settings';
+import Settings from '../../Visit/Comp/Settings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import i18n from 'i18next';
 import { useLazyVisitListGetQuery, useVisitSetMutation, useVisitDeleteMutation } from "../../../../store/services/Visit";

@@ -2,7 +2,7 @@
 import { Form, Input, Select, Popconfirm, Dropdown } from 'antd';
 import visitType from '../VisitTypeItems';
 import EditableContext from './EditableContext';
-import { useApiHelper, handleSettings } from '../StudyHelper/Helper';
+import { useApiHelper, handleSettings } from '../VisitHelper/Helper';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const EditableCell = ({
