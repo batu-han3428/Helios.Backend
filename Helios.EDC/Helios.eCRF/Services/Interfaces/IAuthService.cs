@@ -16,5 +16,6 @@ namespace Helios.eCRF.Services.Interfaces
         Task<ApiResponse<dynamic>> SaveForgotPassword(string Mail, string Language);
         Task<ApiResponse<dynamic>> ResetPasswordGet(string code, string username, bool firstPassword);
         Task<ApiResponse<dynamic>> ResetPasswordPost(ResetPasswordDTO model);
+        ApiResponse<dynamic> UpdateJwt(JwtDTO jwtDTO);
     }
 }

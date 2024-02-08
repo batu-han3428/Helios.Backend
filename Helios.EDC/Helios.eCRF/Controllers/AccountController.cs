@@ -4,6 +4,7 @@ using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Helios.Common.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Helios.eCRF.Controllers
 {
@@ -126,6 +127,14 @@ namespace Helios.eCRF.Controllers
 
             var result = await authService.ResetPasswordPost(model);
 
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "TenantAdmin")]
+        public IActionResult UpdateJwt(JwtDTO jwtDTO)
+        {
+            var result = authService.UpdateJwt(jwtDTO);
             return Ok(result);
         }
     }

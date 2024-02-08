@@ -115,7 +115,7 @@ const AddOrUpdateStudy = props => {
         }
     }, []);
 
-    const { data: studyData, error, isLoading } = useStudyGetQuery(studyId, {
+    const { data: studyData, error, isLoading } = useStudyGetQuery({
         skip, refetchOnMountOrArgChange: true 
     });
 

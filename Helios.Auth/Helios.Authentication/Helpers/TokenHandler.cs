@@ -14,6 +14,7 @@ namespace Helios.Authentication.Helpers
         Token CreateAccessToken(ApplicationUser user, List<Int64> tenantIds = null, List<Int64> studyIds = null);
         Token CreateAccessTokenFromOldJwt(SSOLoginDTO sSOLoginDTO);
         public string CreateRefreshToken();
+        Token UpdateJwtToken(JwtDTO jwtToken);
     }
     public class TokenHandler: ITokenHandler
     {
@@ -113,6 +114,61 @@ namespace Helios.Authentication.Helpers
             securityToken.Payload["tenantId"] = sSOLoginDTO.TenantId != 0 ? sSOLoginDTO.TenantId : "";
             securityToken.Payload["studyId"] = sSOLoginDTO.StudyId != 0 ? sSOLoginDTO.StudyId : "";
             securityToken.Payload["timeZone"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "timeZone")?.Value;
+
+            JwtSecurityTokenHandler newTokenHandler = new JwtSecurityTokenHandler();
+
+            tokenInstance.AccessToken = newTokenHandler.WriteToken(securityToken);
+
+            tokenInstance.RefreshToken = CreateRefreshToken();
+
+            return tokenInstance;
+        }
+
+        public Token UpdateJwtToken(JwtDTO jwtToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var oldToken = tokenHandler.ReadToken(jwtToken.Token) as JwtSecurityToken;
+
+            if (oldToken == null)
+            {
+                throw new SecurityTokenException("Invalid JWT format");
+            }
+
+            List<string> roles = oldToken?.Claims
+                .Where(c => c.Type == "roles")
+                .Select(c => c.Value)
+                .ToList();
+            var oldName = oldToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            var oldMail = oldToken?.Claims.FirstOrDefault(c => c.Type == "mail")?.Value;
+            var oldUserId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
+            var oldTenantId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "tenantId")?.Value);
+            var studyId = oldToken?.Claims.FirstOrDefault(c => c.Type == "studyId")?.Value;
+            var oldStudyId = studyId != null && studyId != "" ? Convert.ToInt64(studyId) : 0;
+            var oldTimeZone = oldToken?.Claims.FirstOrDefault(c => c.Type == "timeZone")?.Value;
+
+            Token tokenInstance = new Token();
+
+            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtToken:SecurityKey"]));
+            SigningCredentials signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            tokenInstance.Expiration = DateTime.Now.AddDays(1);
+
+            JwtSecurityToken securityToken = new JwtSecurityToken(
+                issuer: Configuration["JwtToken:Issuer"],
+                audience: Configuration["JwtToken:Audience"],
+                expires: tokenInstance.Expiration,
+                notBefore: DateTime.Now,
+                signingCredentials: signingCredentials
+            );
+
+            securityToken.Payload["isAuthenticated"] = true;
+            securityToken.Payload["name"] = jwtToken.Name != null && oldName != jwtToken.Name ? jwtToken.Name : oldName;
+            securityToken.Payload["roles"] = jwtToken?.Roles != null ? roles.OrderBy(x => x).SequenceEqual(jwtToken?.Roles?.OrderBy(x => x)) ? roles : jwtToken.Roles : roles;
+            securityToken.Payload["mail"] = jwtToken.Mail != null && oldMail != jwtToken.Mail ? jwtToken.Mail : oldMail;
+            securityToken.Payload["userId"] = jwtToken.UserId != null && oldUserId != jwtToken.UserId ? jwtToken.UserId : oldUserId;
+            securityToken.Payload["tenantId"] = jwtToken.TenantId != null && oldTenantId != jwtToken.TenantId ? jwtToken.TenantId == 0 ? "" : jwtToken.TenantId : oldTenantId;
+            securityToken.Payload["studyId"] = jwtToken.StudyId != null && oldStudyId != jwtToken.StudyId ? jwtToken.StudyId == 0 ? "" : jwtToken.StudyId : oldStudyId;
+            securityToken.Payload["timeZone"] = jwtToken.TimeZone != null && oldTimeZone != jwtToken.TimeZone ? jwtToken.TimeZone : oldTimeZone;
 
             JwtSecurityTokenHandler newTokenHandler = new JwtSecurityTokenHandler();
 

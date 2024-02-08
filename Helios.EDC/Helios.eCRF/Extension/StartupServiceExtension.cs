@@ -11,6 +11,7 @@ namespace Helios.eCRF.Extension
         private static IConfiguration Configuration;
         public static IServiceCollection DefaultConfigurationService(this IServiceCollection services, IConfiguration Configuration)
         {
+            services.AddHttpContextAccessor();
             services.AddSingleton<IConnectionMultiplexer>(provider =>
             {
                 var redisOptions = Configuration.GetSection("Redis").Get<RedisOptions>();

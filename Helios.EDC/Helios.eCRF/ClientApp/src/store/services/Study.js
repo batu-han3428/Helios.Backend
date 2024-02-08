@@ -24,7 +24,7 @@ export const StudyApi = createApi({
             providesTags: ['Study'],
         }),
         studyGet: builder.query({
-            query: (studyId) => `/Study/GetStudy/${studyId}`,
+            query: () => `/Study/GetStudy`,
             refetchOnMountOrArgChange: true, 
             keepUnusedDataFor: 0,
             async onQueryStarted(_, { dispatch, queryFulfilled }) {

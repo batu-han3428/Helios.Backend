@@ -305,6 +305,18 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
+        public ApiResponse<dynamic> UpdateJwt(JwtDTO jwtDTO)
+        {
+            Token newToken = _tokenHandler.UpdateJwtToken(jwtDTO);
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = true,
+                Message = "",
+                Values = new { accessToken = newToken.AccessToken }
+            };
+        }
+
+        [HttpPost]
         public async Task<ApiResponse<dynamic>> SSOLogin(SSOLoginDTO sSOLoginDTO)
         {
             Token token = _tokenHandler.CreateAccessTokenFromOldJwt(sSOLoginDTO);

@@ -13,7 +13,7 @@ namespace Helios.eCRF.Services
 {
     public class UserService : ApiBaseService, IUserService
     {
-        public UserService(IConfiguration configuration) : base(configuration)
+        public UserService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(configuration, httpContextAccessor)
         {
         }
 
