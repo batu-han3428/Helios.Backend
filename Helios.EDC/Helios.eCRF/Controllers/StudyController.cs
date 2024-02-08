@@ -39,13 +39,12 @@ namespace Helios.eCRF.Controllers
         /// <summary>
         /// seçili çalışmanın bilgilerini döner
         /// </summary>
-        /// <param name="studyId">çalışma id</param>
         /// <returns>çalışma bilgileri</returns>
-        [HttpGet("{studyId}")]
+        [HttpGet]
         [Authorize(Roles = "TenantAdmin")]
-        public async Task<IActionResult> GetStudy(Int64 studyId)
+        public async Task<IActionResult> GetStudy()
         {
-            var result = await _studyService.GetStudy(studyId);
+            var result = await _studyService.GetStudy();
             return new ObjectResult(result.Data) { StatusCode = (int)result.StatusCode };
         }
 

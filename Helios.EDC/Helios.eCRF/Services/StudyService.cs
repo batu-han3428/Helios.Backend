@@ -9,7 +9,7 @@ namespace Helios.eCRF.Services
 {
     public class StudyService : ApiBaseService, IStudyService
     {
-        public StudyService(IConfiguration configuration) : base(configuration)
+        public StudyService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(configuration, httpContextAccessor)
         {
         }
 
@@ -25,12 +25,12 @@ namespace Helios.eCRF.Services
             }
         }
 
-        public async Task<RestResponse<StudyDTO>> GetStudy(Int64 studyId)
+        public async Task<RestResponse<StudyDTO>> GetStudy()
         {
             using (var client = CoreServiceClient)
             {
                 var req = new RestRequest("CoreStudy/GetStudy", Method.Get);
-                req.AddParameter("studyId", studyId);
+                req.AddParameter("studyId", StudyId);
                 var result = await client.ExecuteAsync<StudyDTO>(req);
                 return result;
             }

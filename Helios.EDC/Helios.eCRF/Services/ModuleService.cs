@@ -12,7 +12,7 @@ namespace Helios.eCRF.Services
 {
     public class ModuleService : ApiBaseService, IModuleService
     {
-        public ModuleService(IConfiguration configuration) : base(configuration)
+        public ModuleService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(configuration, httpContextAccessor)
         {
         }
 

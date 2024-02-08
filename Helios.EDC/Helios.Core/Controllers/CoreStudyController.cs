@@ -824,7 +824,7 @@ namespace Helios.Core.Controllers
                         {
                             StudyId = visitDTO.StudyId,
                             Name = visitDTO.Name,
-                            VisitType = (enums.VisitType)visitDTO.VisitType,
+                            VisitType = (VisitType)visitDTO.VisitType,
                             Order = visitDTO.Order
                         });
 
@@ -919,7 +919,7 @@ namespace Helios.Core.Controllers
                         if (visit != null)
                         {
                             visit.Name = visitDTO.Name;
-                            visit.VisitType = (enums.VisitType)visitDTO.VisitType.Value;
+                            visit.VisitType = (VisitType)visitDTO.VisitType.Value;
 
                             var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 

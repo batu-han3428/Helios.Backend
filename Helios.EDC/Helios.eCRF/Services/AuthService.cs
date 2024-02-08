@@ -9,7 +9,7 @@ namespace Helios.eCRF.Services
 {
     public class AuthService : ApiBaseService, IAuthService
     {
-        public AuthService(IConfiguration configuration) : base(configuration)
+        public AuthService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(configuration, httpContextAccessor)
         {
         }
 
@@ -90,6 +90,18 @@ namespace Helios.eCRF.Services
                 req.AddJsonBody(model);
                 var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
                 return result.Data;
+            }
+        }
+
+        public ApiResponse<dynamic> UpdateJwt(JwtDTO jwtDTO)
+        {
+            jwtDTO.Token = Token;
+            using (var client = AuthServiceClient)
+            {
+                var req = new RestRequest("AuthAccount/UpdateJwt", Method.Post);
+                req.AddJsonBody(jwtDTO);
+                var result = client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Result.Data;
             }
         }
     }
