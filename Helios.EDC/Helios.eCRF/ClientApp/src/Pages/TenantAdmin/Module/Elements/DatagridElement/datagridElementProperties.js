@@ -21,9 +21,11 @@ import { withTranslation } from "react-i18next";
 class DatagridElementProperties extends Component {
     constructor(props) {
         super(props);
+        var inps = props.DatagridProperties !== "" ? JSON.parse(props.DatagridProperties) : [];
 
         this.state = {
-            elementRows: [],
+            elementRows: inps,
+            columnCount: props.ColumnCount
         }
 
         this.removeRow = this.removeRow.bind(this);
@@ -32,16 +34,21 @@ class DatagridElementProperties extends Component {
     }
 
     removeRow = (index) => {
+        this.state.columnCount = this.state.columnCount - 1;
+
         this.setState((prevState) => {
             const newRows = [...prevState.elementRows];
             newRows.splice(index, 1);
             return { elementRows: newRows };
         }, () => {
-            //this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeColumnCount(this.state.columnCount);
         });
     };
 
     addRow = () => {
+        this.state.columnCount = this.state.columnCount + 1;
+
         this.setState((prevState) => ({
             elementRows: [
                 ...prevState.elementRows,
@@ -51,7 +58,8 @@ class DatagridElementProperties extends Component {
                 },
             ],
         }), () => {
-            //this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeColumnCount(this.state.columnCount);
         });
     };
 
@@ -61,8 +69,7 @@ class DatagridElementProperties extends Component {
             newRows[index][fieldName] = value;
             return { elementRows: newRows };
         }, () => {
-            //this.props.changeCalculationSourceInputs(JSON.stringify(this.state.elementRows));
-            //this.controlNullValuesInRows();
+            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
         });
     };
 
@@ -84,7 +91,6 @@ class DatagridElementProperties extends Component {
                                     <tr key={index}>
                                         <td>
                                             <input
-                                                style={{ fontSize: '8pt' }}
                                                 value={row.title}
                                                 className="form-control"
                                                 type="text"
@@ -94,7 +100,6 @@ class DatagridElementProperties extends Component {
                                         </td>
                                         <td>
                                             <input
-                                                style={{ fontSize: '8pt' }}
                                                 value={row.width}
                                                 className="form-control"
                                                 type="text"

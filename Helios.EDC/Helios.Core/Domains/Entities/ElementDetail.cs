@@ -7,8 +7,8 @@ namespace Helios.Core.Domains.Entities
     {
         public Int64 ElementId { get; set; }
         public Int64 ParentId { get; set; }
-        public int RowIndex { get; set; }
-        public int ColunmIndex { get; set; }
+        public int? RowIndex { get; set; }
+        public int? ColunmIndex { get; set; }
         public string? MetaDataTags { get; set; }
         public string? ButtonText { get; set; }
         public string? DefaultValue { get; set; }
@@ -17,22 +17,21 @@ namespace Helios.Core.Domains.Entities
         public string? UpperLimit { get; set; }
         public string? Extension { get; set; } //numeric description
         public string? Mask { get; set; }
-        public AlignLayout Layout { get; set; }
+        public AlignLayout? Layout { get; set; }
 
         //datagrid, table
-        public int RowCount { get; set; }
-        public int ColumnCount { get; set; }
-        public string? RowTitles { get; set; }
-        public string? RowWidths { get; set; }
+        public int? RowCount { get; set; }
+        public int? ColumnCount { get; set; }
+        public string? DatagridProperties { get; set; }
 
         //datetime
-        public int StartDay { get; set; }
-        public int EndDay { get; set; }
-        public int StartMonth { get; set; }
-        public int EndMonth { get; set; }
-        public int EndYear { get; set; }
-        public int StartYear { get; set; }
-        public bool AddTodayDate { get; set; }
+        public int? StartDay { get; set; }
+        public int? EndDay { get; set; }
+        public int? StartMonth { get; set; }
+        public int? EndMonth { get; set; }
+        public int? EndYear { get; set; }
+        public int? StartYear { get; set; }
+        public bool? AddTodayDate { get; set; }
 
         //chkbox, radio, ddown vs
         public string? ElementOptions { get; set; } //json text value

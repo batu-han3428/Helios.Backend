@@ -16,9 +16,35 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { withTranslation } from "react-i18next";
 import ElementList from './elementList.js';
 import './formBuilder.css';
+import { useDispatch, useSelector } from "react-redux";
+import { startloading, endloading } from '../../../../store/loader/actions';
 
 const FormBuilder = props => {
-    const {moduleId} = useParams();
+    const userInformation = useSelector(state => state.rootReducer.Login);
+    const { moduleId } = useParams();
+    const [moduleElementList, setModuleElementList] = useState([]);
+    const baseUrl = "https://localhost:7196";
+    const dispatch = useDispatch();
+
+    const fetchData = () => {
+        fetch(baseUrl + '/Module/GetModuleElements?id=' + moduleId, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                setModuleElementList(data);
+            })
+            .catch(error => {
+                //console.error('Error:', error);
+            });
+    }
+
+
+    useEffect(() => {
+        dispatch(startloading());
+        fetchData();
+        dispatch(endloading());
+    });
 
     return (
         <div style={({ height: "100vh" }, { display: "flex" })} >
@@ -32,7 +58,7 @@ const FormBuilder = props => {
                         </Row>
                     </div>
                     <div>
-                        <ElementList ModuleId={moduleId} />
+                        <ElementList TenantId={userInformation.TenantId} ModuleId={moduleId} ModuleElementList={moduleElementList} ShowElementList={true } />
                     </div>
                 </div>
             </div>

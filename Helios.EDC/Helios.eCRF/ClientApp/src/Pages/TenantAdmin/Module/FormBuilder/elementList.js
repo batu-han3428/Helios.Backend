@@ -29,53 +29,41 @@ import DateElement from '../Elements/DateElement/dateElement.js';
 import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
+import DatagridElement from '../Elements/DatagridElement/datagridElement.js';
 import { withTranslation } from "react-i18next";
-import { GetElementNameByKey } from '../Elements/Common/utils.js'
-
-const elements = [
-    { key: 17, name: 'Adverse Event', icon: 'fas fa-heartbeat' },
-    { key: 7, name: 'Calculation', icon: 'fas fa-calculator' },
-    { key: 9, name: 'Check List', icon: 'fas fa-check-square' },
-    { key: 14, name: 'Concomitant medication', icon: 'dripicons-view-list' },
-    { key: 16, name: 'Datagrid', icon: 'fas fa-table' },
-    { key: 6, name: 'Date', icon: 'far fa-calendar-alt ' },
-    { key: 10, name: 'Drop Down', icon: 'ti-arrow-circle-down' },
-    { key: 12, name: 'File Attachmen', icon: 'fas fa-file-import' },
-    { key: 3, name: 'Hidden', icon: 'fas fa-puzzle-piece' },
-    { key: 1, name: 'Label', icon: 'fas fa-text-height' },
-    { key: 11, name: 'Drop Down Checklist', icon: 'ti-arrow-circle-down' },
-    { key: 4, name: 'Numeric', icon: 'fas fa-sort-numeric-down' },
-    { key: 8, name: 'Radio List', icon: 'ion ion-md-radio-button-on' },
-    { key: 13, name: 'Range Slider', icon: 'fas fa-sliders-h' },
-    { key: 15, name: 'Table', icon: 'fas fa-table' },
-    { key: 2, name: 'Text', icon: 'fas fa-font' },
-    { key: 5, name: 'Textarea', icon: 'fas fa-ad' },
-];
+import { GetElementNameByKey } from '../Elements/Common/utils.js';
+import { GetAllElementList } from './allElementList.js';
 
 function ElementList(props) {
     const toastRef = useRef();
-
     const baseUrl = "https://localhost:7196";
-    const [moduleId, setModuleId] = useState(props.ModuleId);
+    const [tenantId] = useState(props.TenantId);
+    const [moduleId] = useState(props.ModuleId);
     const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);
+    const [elements] = useState(GetAllElementList());
     const [elementType, setElementType] = useState(0);
-    const [modal_large, setmodal_large] = useState(false);
+    const [showElementList] = useState(props.ShowElementList);
+    const [propModal, setpropModal] = useState(false);
     const [activeTab, setActiveTab] = useState(false);
     const [elementName, setElementName] = useState('');
     const [isCalcBtn, setIsCalcBtn] = useState('');
     const dispatch = useDispatch();
     const userInformation = useSelector(state => state.rootReducer.Login);
 
+    useEffect(() => {
+        setModuleElementList(props.ModuleElementList);
+    }, [props.ModuleElementList]);
+
     const removeBodyCss = () => {
         document.body.classList.add("no_padding");
     };
 
-    const tog_large = (e, type, id, tabid, isCalc = false) => {
+    const togglePropModal = (e, type, id, tabid, isCalc = false) => {
         setIsCalcBtn(isCalc);
-        
-        setElementName(GetElementNameByKey(props, type) + " "+ props.t("Properties"));
-        
+
+        setElementName(GetElementNameByKey(props, type) + " " + props.t("Properties"));
+
         if (id !== 0) {
             setElementId(id);
             setElementType(0);
@@ -85,7 +73,7 @@ function ElementList(props) {
         }
 
         setActiveTab(tabid);
-        setmodal_large(!modal_large);
+        setpropModal(!propModal);
         removeBodyCss();
     };
 
@@ -116,13 +104,13 @@ function ElementList(props) {
 
     const deleteElement = (e, id) => {
         Swal.fire({
-            title: "You will not be able to recover this element!",
-            text: "Do you confirm?",
-            icon: "warning",
+            title: props.t("You will not be able to recover this element"),
+            text: props.t("Do you confirm"),
+            icon: props.t("Warning"),
             showCancelButton: true,
             confirmButtonColor: "#3bbfad",
-            confirmButtonText: "Yes",
-            cancelButtonText: "Cancel",
+            confirmButtonText: props.t("Yes"),
+            cancelButtonText: props.t("Cancel"),
             closeOnConfirm: false
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -150,19 +138,6 @@ function ElementList(props) {
                 }
             }
         })
-    }
-
-    const fetchData = () => {
-        fetch(baseUrl + '/Module/GetModuleElements?id=' + moduleId, {
-            method: 'GET',
-        })
-            .then(response => response.json())
-            .then(data => {
-                setModuleElementList(data);
-            })
-            .catch(error => {
-                //console.error('Error:', error);
-            });
     }
 
     const renderElementsSwitch = (param) => {
@@ -198,13 +173,13 @@ function ElementList(props) {
             case 8:
                 return <RadioElement
                     IsDisable={"disabled"}
-                    Layout={param.layout }
+                    Layout={param.layout}
                     ElementOptions={param.elementOptions}
                 />
             case 9:
                 return <CheckElement
                     IsDisable={"disabled"}
-                    Layout={param.layout }
+                    Layout={param.layout}
                     ElementOptions={param.elementOptions}
                 />
             case 10:
@@ -230,73 +205,98 @@ function ElementList(props) {
                     RightText={param.rightText}
                     DefaultValue={param.defaultValue}
                 />
+            case 16:
+                return <DatagridElement
+                    IsDisable={true}
+                    Id={param.id} TenantId={tenantId} ModuleId={moduleId} UserId={0}
+                    ColumnCount={param.columnCount}
+                    DatagridProperties={param.datagridProperties}
+                    ChildElementList={param.childElements}
+                />
             default:
                 return <TextElement
                     IsDisable={"disabled"}
-                    
                 />;
         }
     }
 
-    const content = moduleElementList.map((item) => {
-        var w = item.width === 0 ? 12 : item.width;
-        var cls = "mb-6 col-md-" + w;
+    const content = Array.isArray(moduleElementList)
+        ? moduleElementList.map((item) => {
+            var w = item.width === 0 ? 12 : item.width;
+            var cls = "mb-6 col-md-" + w;
 
-        return <Row className={cls} key={item.id}>
-            <div style={{ marginBottom: '3px', marginTop: '10px' }}>
-                <label style={{ marginRight: '5px' }}>
-                    {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
-                    {item.elementType !== 1 && item.title}
-                </label>
-                {item.isDependent && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
-                )}
-                {item.isRelated && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "2")}><i className="fas fa-project-diagram"></i></Button>
-                )}
-                {item.elementType === 7 /*calculated*/ && (
-                    <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
-                )}
-                <Button className="actionBtn" id={item.id} onClick={e => tog_large(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
-                <Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
-                <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
-            </div>
-            {renderElementsSwitch(item)}
-            <label style={{ fontSize: "8pt", textDecoration: 'none' }}>
-                {item.description}
-            </label>
-        </Row>
-    }
-    );    
+            return (
+                <Row className={cls} key={item.id}>
+                    <div style={{ marginBottom: '3px', marginTop: '10px' }}>
+                        <label style={{ marginRight: '5px' }}>
+                            {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
+                            {item.elementType !== 1 && item.title}
+                        </label>
+                        {item.isDependent && (
+                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
+                        )}
+                        {item.isRelated && (
+                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-project-diagram"></i></Button>
+                        )}
+                        {item.elementType === 7 /*calculated*/ && (
+                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
+                        )}
+                        <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
+                        {item.parentId === 0 && (
+                            < Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
+                        )}
+                        <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
+                    </div>
+                    {renderElementsSwitch(item)}
+                    <label style={{ fontSize: "8pt", textDecoration: 'none' }}>
+                        {item.description}
+                    </label>
+                </Row>
+            );
+        })
+        : null;
 
     const elmementItems = elements.map((l) =>
-        <Button className="elmlst" id={l.key} key={l.key} onClick={e => tog_large(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {GetElementNameByKey(props, l.key)} </Button>
+        <Button className="elmlst" id={l.key} key={l.key} onClick={e => togglePropModal(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {GetElementNameByKey(props, l.key)} </Button>
     );
-
-    useEffect(() => {
-        dispatch(startloading());
-        fetchData();
-        dispatch(endloading());
-    });
 
     return (
         <div>
-            <div style={{ width: "200px", float: 'left', position: 'fixed' }}>
+            {showElementList && (
+                <>
+                    <div style={{ width: "200px", float: 'left', position: 'fixed' }}>
+                        <div>
+                            {elmementItems}
+                        </div>
+                    </div>
+                    <div style={{ margin: '10px 20px 10px 215px' }} className="row">
+                        {content}
+                    </div>
+                </>
+            )}
+            {!showElementList && (
                 <div>
-                    {elmementItems}
+                    {content}
                 </div>
-                <Col sm={6} md={4} xl={3}>
-                    <Modal isOpen={modal_large} toggle={tog_large} size="lg">
-                        <ModalHeader className="mt-0" toggle={tog_large}>{elementName}</ModalHeader>
-                        <ModalBody>
-                            <Properties ModuleId={moduleId} Type={elementType} Id={elementId} TenantId={userInformation.tenantId} UserId={userInformation.userId} ActiveTab={activeTab} isCalcBtn={isCalcBtn}></Properties>
-                        </ModalBody>
-                    </Modal>
-                </Col>
-            </div>
-            <div style={{ margin: '10px 20px 10px 215px' }} className="row">
-                {content}
-            </div>
+            )}
+            <Col sm={6} md={4} xl={3}>
+                <Modal isOpen={propModal} toggle={togglePropModal} size="lg">
+                    <ModalHeader className="mt-0" toggle={togglePropModal}>{elementName}</ModalHeader>
+                    <ModalBody>
+                        <Properties
+                            ModuleId={moduleId}
+                            Type={elementType}
+                            Id={elementId}
+                            TenantId={userInformation.tenantId}
+                            UserId={userInformation.userId}
+                            ParentId={0}
+                            ActiveTab={activeTab}
+                            isCalcBtn={isCalcBtn}
+                            ColumnIndex={null}>
+                        </Properties>
+                    </ModalBody>
+                </Modal>
+            </Col>
             <ToastComp
                 ref={toastRef}
             />
@@ -305,4 +305,4 @@ function ElementList(props) {
     );
 }
 
-export default withTranslation() (ElementList);
+export default withTranslation()(ElementList);

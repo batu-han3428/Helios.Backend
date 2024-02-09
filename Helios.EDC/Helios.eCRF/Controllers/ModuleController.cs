@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Model;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -156,7 +157,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(Int64 id)
         {
-            var result = _moduleService.GetMultipleTagList(id).Result.GroupBy(x => x.Tagkey).ToList();
+            var result = _moduleService.GetMultipleTagList(id).Result.GroupBy(x => x.TagKey).ToList();
 
             return result;
         }
