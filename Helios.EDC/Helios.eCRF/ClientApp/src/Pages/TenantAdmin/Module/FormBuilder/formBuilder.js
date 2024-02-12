@@ -27,7 +27,7 @@ const FormBuilder = props => {
     const dispatch = useDispatch();
 
     const fetchData = () => {
-        fetch(baseUrl + '/Module/GetModuleElements?id=' + moduleId, {
+        fetch(baseUrl + '/Module/GetModuleElementsWithChildren?id=' + moduleId, {
             method: 'GET',
         })
             .then(response => response.json())

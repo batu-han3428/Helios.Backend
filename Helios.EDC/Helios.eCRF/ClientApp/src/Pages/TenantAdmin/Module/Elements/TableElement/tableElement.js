@@ -15,7 +15,7 @@ import { GetElementNameByKey } from '../Common/utils.js';
 import Properties from '../../FormBuilder/properties.js';
 import ElementList from '../../FormBuilder/elementList.js';
 
-class DatagridElement extends Component {
+class TableElement extends Component {
     constructor(props) {
         super(props);
        
@@ -80,7 +80,7 @@ class DatagridElement extends Component {
                     <thead>
                         <tr>
                             {this.state.datagridProperties.map((col, index) => (
-                                <th key={index} style={{ width: col.width, backgroundColor: "#6D6E70", color: "#FFF" }}>{col.title}</th>
+                                <th key={index} style={{ width: col.width }}>{col.title}</th>
                             ))}
                         </tr>
                     </thead>
@@ -136,4 +136,4 @@ class DatagridElement extends Component {
     }
 };
 
-export default withTranslation()(DatagridElement);
+export default withTranslation()(TableElement);

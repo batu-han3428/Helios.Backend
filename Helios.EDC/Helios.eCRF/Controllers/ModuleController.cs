@@ -101,9 +101,17 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(Int64 id)
+        public async Task<List<ElementModel>> GetModuleAllElements(Int64 id)
         {
-            var result = await _moduleService.GetModuleElements(id);
+            var result = await _moduleService.GetModuleAllElements(id);
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 id)
+        {
+            var result = await _moduleService.GetModuleElementsWithChildren(id);
 
             return result;
         }

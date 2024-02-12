@@ -160,7 +160,7 @@ class ListElementsProperties extends Component {
     };
 
     handleTagKeyChange(e) {
-        this.setState({ tagKey: e.target.value });
+        this.setState({ tagKey: e.target.value.replace(/^\s+/, '') });
     };
 
     addRow = () => {
@@ -176,7 +176,7 @@ class ListElementsProperties extends Component {
     handleInputChange = (index, fieldName, value) => {
         this.setState((prevState) => {
             const newRows = [...prevState.rows];
-            newRows[index][fieldName] = value;
+            newRows[index][fieldName] = value.replace(/^\s+/, '');
             return { rows: newRows };
         });
     };

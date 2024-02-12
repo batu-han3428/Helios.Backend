@@ -112,7 +112,47 @@ namespace Helios.Core.Controllers
         #endregion
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(Int64 moduleId)
+        public async Task<List<ElementModel>> GetModuleAllElements(Int64 moduleId)
+        {
+            var result = await _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted)
+                .Include(x => x.ElementDetail)
+                .Select(x => new ElementModel()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    ElementName = x.ElementName,
+                    ElementType = x.ElementType,
+                    Order = x.Order,
+                    IsDependent = x.IsDependent,
+                    IsRelated = x.IsRelated,
+                    IsRequired = x.IsRequired,
+                    ElementOptions = x.ElementDetail.ElementOptions,
+                    Width = x.Width,
+                    Unit = x.ElementDetail.Unit,
+                    Mask = x.ElementDetail.Mask,
+                    LowerLimit = x.ElementDetail.LowerLimit,
+                    UpperLimit = x.ElementDetail.UpperLimit,
+                    Layout = x.ElementDetail.Layout,
+                    DefaultValue = x.ElementDetail.DefaultValue,
+                    AddTodayDate = x.ElementDetail.AddTodayDate,
+                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                    MainJs = x.ElementDetail.MainJs,
+                    StartDay = x.ElementDetail.StartDay,
+                    EndDay = x.ElementDetail.EndDay,
+                    StartMonth = x.ElementDetail.StartMonth,
+                    EndMonth = x.ElementDetail.EndMonth,
+                    StartYear = x.ElementDetail.StartYear,
+                    EndYear = x.ElementDetail.EndYear,
+                    LeftText = x.ElementDetail.LeftText,
+                    RightText = x.ElementDetail.RightText
+                }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 moduleId)
         {
             var finalList = new List<ElementModel>();
 
@@ -267,10 +307,10 @@ namespace Helios.Core.Controllers
                 }
             }
 
+            var moduleElements = _context.Elements.Where(x => x.ModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
+
             if (element == null)
             {
-                var moduleElements = _context.Elements.Where(x => x.ModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
-
                 if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
                 {
                     result.IsSuccess = false;
@@ -288,7 +328,7 @@ namespace Helios.Core.Controllers
                     elm = new Element()
                     {
                         Title = model.Title,
-                        ElementName = model.ElementName,
+                        ElementName = model.ElementName.TrimStart().TrimEnd(),
                         Description = model.Description,
                         CanMissing = model.CanMissing,
                         ElementType = model.ElementType,
@@ -301,7 +341,7 @@ namespace Helios.Core.Controllers
                         Width = model.Width,
                         ModuleId = model.ModuleId,
                         TenantId = model.TenantId,
-                        Order = moduleElementMaxOrder + 1,
+                        Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
                     };
@@ -486,8 +526,19 @@ namespace Helios.Core.Controllers
             }
             else
             {
+                if(element.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
+                {
+                    if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = "Duplicate element name";
+
+                        return result;
+                    }
+                }
+
                 element.Title = model.Title;
-                element.ElementName = model.ElementName;
+                element.ElementName = model.ElementName.TrimStart().TrimEnd();
                 element.Description = model.Description;
                 element.CanMissing = model.CanMissing;
                 element.ElementType = model.ElementType;
@@ -740,7 +791,7 @@ namespace Helios.Core.Controllers
 
                 element.Id = 0;
                 element.ElementName = name;
-                element.Order = (element.Order + 1);
+                element.Order = element.Order + 1;
 
                 var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                 elementDetail.Id = 0;
@@ -755,6 +806,44 @@ namespace Helios.Core.Controllers
 
                 _context.Update(element);
                 _context.Update(elementDetail);
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                    foreach (var child in children)
+                    {
+                        var nm = child.ElementName + "_1";
+
+                        for (; ; )
+                        {
+                            if (checkElementName(child.ModuleId, nm).Result)
+                                break;
+                            else
+                                nm = nm + "_1";
+                        }
+
+                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                        chDtl.Id = 0;
+
+                        child.Id = 0;
+                        child.ElementName = nm;
+                        child.Order = child.Order + 1;
+
+                        _context.Add(child);
+                        _context.Add(chDtl);
+                     
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        child.ElementDetailId = chDtl.Id;
+                        chDtl.Id = child.Id;
+                        chDtl.ParentId = element.Id;
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
 
                 var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
 
@@ -804,6 +893,30 @@ namespace Helios.Core.Controllers
                     result.Message = "This element used as relation or dependent in another element. Please remove it first and try again.";
 
                     return result;
+                }
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+
+                    foreach (var item in childrenDtils)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                    foreach (var item in children)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.Elements.Update(item);
+                    }
                 }
 
                 element.IsDeleted = true;
@@ -856,7 +969,7 @@ namespace Helios.Core.Controllers
                     var tag = new MultipleChoiceTag()
                     {
                         Key = item.TagKey,
-                        Name = item.TagName,
+                        Name = item.TagName.TrimStart().TrimEnd(),
                         Value = item.TagValue
                     };
 
@@ -879,7 +992,7 @@ namespace Helios.Core.Controllers
             if (moduleElements == null)
                 moduleElements = _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
 
-            if (moduleElements.FirstOrDefault(x => x.ElementName == elementName) != null)
+            if (moduleElements.FirstOrDefault(x => x.ElementName == elementName.TrimStart().TrimEnd()) != null)
                 return false;
             else
                 return true;

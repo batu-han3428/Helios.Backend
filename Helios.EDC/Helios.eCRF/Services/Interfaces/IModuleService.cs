@@ -14,7 +14,8 @@ namespace Helios.eCRF.Services.Interfaces
         Task<bool> DeleteModule(ModuleModel model);
         Task<ModuleModel> GetModule(Int64 id);
         Task<List<ModuleModel>> GetModuleList(Int64 tenantId);
-        Task<List<ElementModel>> GetModuleElements(Int64 id);
+        Task<List<ElementModel>> GetModuleAllElements(Int64 id);
+        Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 id);
         Task<ElementModel> GetElementData(Int64 id);
         Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model);
         Task<ApiResponse<dynamic>> CopyElement(Int64 id, Int64 userId);

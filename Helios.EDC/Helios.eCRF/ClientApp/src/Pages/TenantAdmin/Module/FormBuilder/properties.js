@@ -89,7 +89,7 @@ class Properties extends React.Component {
             // Dependency properties
             DependentSourceFieldId: 0,
             DependentTargetFieldId: 0,
-            DependentCondition: 0,
+            DependentCondition: 3,
             DependentAction: 1,
             DependentFieldValue: [],
             DependentFieldValueTags: [],
@@ -105,7 +105,7 @@ class Properties extends React.Component {
                 { label: "Less and equal", value: 5 },
                 { label: "Not equal", value: 6 },
             ],
-            conditionSelectedGroup: null,
+            conditionSelectedGroup: { label: "Equal", value: 3 },
             actionOptionGroup: [
                 { label: "Show", value: 1 },
                 { label: "Hide", value: 2 },
@@ -135,10 +135,10 @@ class Properties extends React.Component {
             SavedTagList: [],
             DefaultValue: '',
             AddTodayDate: false,
-            StartDay: 0,
-            EndDay: 0,
-            StartMonth: 0,
-            EndMonth: 0,
+            StartDay: 1,
+            EndDay: 31,
+            StartMonth: 1,
+            EndMonth: 12,
             StartYear: 0,
             EndYear: 0,
             CalculationSourceInputs: '',
@@ -383,7 +383,7 @@ class Properties extends React.Component {
     fillDependentFieldList() {
         var depFldOptionGroup = [];
 
-        fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
+        fetch(baseUrl + '/Module/GetModuleAllElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())
@@ -422,7 +422,7 @@ class Properties extends React.Component {
         this.state.DepFldInputClass = '';
     };
 
-    handleDependentConditionChange = selectedOption => {
+    handleDependentConditionChange(selectedOption) {
         this.setState({ DependentCondition: selectedOption.value });
         this.state.conditionSelectedGroup = selectedOption;
         this.state.DepConInputClass = '';
@@ -447,7 +447,7 @@ class Properties extends React.Component {
         else {
             this.setState({ dependentEnabled: true });
             this.setState({ dependentFieldsSelectedGroup: 0 });
-            this.setState({ conditionSelectedGroup: 0 });
+            this.setState({ conditionSelectedGroup: { label: "Equal", value: 3 } });
             this.setState({ actionSelectedGroup: { label: "Show", value: 1 } });
             //this.setState({ DependentFieldValue: '' });
         }
@@ -692,10 +692,10 @@ class Properties extends React.Component {
         this.state.IsDependent = data.isDependent;
         this.state.DependentSourceFieldId = data.dependentSourceFieldId;
         this.state.DependentTargetFieldId = data.dependentTargetFieldId;
-        this.state.DependentCondition = data.dependentCondition;
-        this.state.DependentAction = data.dependentAction == 0 ? 1 : data.dependentAction;
+        this.state.DependentCondition = data.dependentCondition === 0 ? 3 : data.dependentCondition;
+        this.state.DependentAction = data.dependentAction === 0 ? 1 : data.dependentAction;
         this.state.DependentFieldValue = data.dependentFieldValue == "" ? [] : JSON.parse(data.dependentFieldValue);
-
+        
         var rel = JSON.parse(data.relationSourceInputs);
         this.state.IsRelation = data.isRelated;
         this.state.RelationSourceInputs = rel != null ? data.relationSourceInputs : '';
@@ -704,25 +704,34 @@ class Properties extends React.Component {
         this.state.inputCounter = rel != null ? rel.length : 0;
 
         var w = this.state.widthOptionGroup.filter(function (e) {
-            if (e.value == data.width)
+            if (e.value === data.width)
                 return e;
         });
 
         this.state.widthSelectedGroup = w;
 
-        var cn = this.state.conditionOptionGroup.filter(function (e) {
-            if (e.value == data.dependentCondition)
+        var t = this.state.DependentSourceFieldId;
+
+        var f = this.state.dependentFieldOptionGroup.filter(function (e) {
+            if (e.value === t)
                 return e;
         });
 
-        this.state.conditionSelectedGroup = cn;
+        this.state.dependentFieldsSelectedGroup = f;
+
+        var cn = this.state.conditionOptionGroup.filter(function (e) {
+            if (e.value === data.dependentCondition)
+                return e;
+        });
+
+        this.state.conditionSelectedGroup = cn.length === 0 ? { label: "Equal", value: 3 } : cn;
 
         var ac = this.state.actionOptionGroup.filter(function (e) {
-            if (e.value == data.dependentAction)
+            if (e.value === data.dependentAction)
                 return e;
         });
 
-        this.state.actionSelectedGroup = ac.length == 0 ? { label: "Show", value: 1 } : ac;
+        this.state.actionSelectedGroup = ac.length === 0 ? { label: "Show", value: 1 } : ac;
 
         if (data.isDependent) {
             this.setState({ dependentEnabled: false });
@@ -733,32 +742,32 @@ class Properties extends React.Component {
         var isValid = true;
         debugger;
 
-        if (this.state.ElementName == "") {
+        if (this.state.ElementName === "") {
             this.setState({ ElementNameInputClass: "is-invalid form-control" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && (this.state.DependentSourceFieldId == 0 || this.state.DependentTargetFieldId == 0)) {
+        if (this.state.IsDependent && (this.state.DependentSourceFieldId === 0 || this.state.DependentTargetFieldId === 0)) {
             this.setState({ DepFldInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentCondition == 0) {
+        if (this.state.IsDependent && this.state.DependentCondition === 0) {
             this.setState({ DepConInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentAction == 0) {
+        if (this.state.IsDependent && this.state.DependentAction === 0) {
             this.setState({ DepActInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentFieldValue == '') {
+        if (this.state.IsDependent && this.state.DependentFieldValue === '') {
             this.setState({ DepFldVlInputClass: "form-control input-tag is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsRelation && this.state.relationElementRows.length == 0) {
+        if (this.state.IsRelation && this.state.relationElementRows.length === 0) {
             this.setState({ RelFldVlInputClass: "table-responsive mb-3 input-tag form-control is-invalid" });
             isValid = false;
         }
