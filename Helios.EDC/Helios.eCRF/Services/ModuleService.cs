@@ -79,13 +79,28 @@ namespace Helios.eCRF.Services
             return moduleList;
         }
 
-        public async Task<List<ElementModel>> GetModuleElements(Int64 id)
+        public async Task<List<ElementModel>> GetModuleAllElements(Int64 id)
         {
             var elements = new List<ElementModel>();
 
             using (var client = CoreServiceClient)
             {
-                var req = new RestRequest("CoreModule/GetModuleElements", Method.Get);
+                var req = new RestRequest("CoreModule/GetModuleAllElements", Method.Get);
+                req.AddParameter("moduleId", id);
+                var result = await client.ExecuteAsync(req);
+                elements = JsonConvert.DeserializeObject<List<ElementModel>>(result.Content);
+            }
+
+            return elements;
+        }
+
+        public async Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 id)
+        {
+            var elements = new List<ElementModel>();
+
+            using (var client = CoreServiceClient)
+            {
+                var req = new RestRequest("CoreModule/GetModuleElementsWithChildren", Method.Get);
                 req.AddParameter("moduleId", id);
                 var result = await client.ExecuteAsync(req);
                 elements = JsonConvert.DeserializeObject<List<ElementModel>>(result.Content);
@@ -138,7 +153,7 @@ namespace Helios.eCRF.Services
                 return result.Data;
             }
         }
-    
+
         public async Task<ApiResponse<dynamic>> DeleteElement(Int64 id, Int64 userId)
         {
             var model = new ElementShortModel()

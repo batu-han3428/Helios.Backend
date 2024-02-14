@@ -523,5 +523,12 @@
   "Order": "Order",
   "Add page": "Add page",
   "Add visit": "Add visit",
-  "Visit list": "Visit list"
+  "Visit list": "Visit list",
+  "Width": "Width",
+  "Add a column": "Add a column",
+  "Add a child input": "Add a child input",
+  "You will not be able to recover this element": "You will not be able to recover this element!",
+  "Do you confirm": "Do you confirm?",
+  "Warning": "Warning",
+  "Row count": "Row count"
 }

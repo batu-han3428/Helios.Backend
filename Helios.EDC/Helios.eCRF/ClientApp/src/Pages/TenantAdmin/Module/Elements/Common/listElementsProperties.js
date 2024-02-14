@@ -104,11 +104,11 @@ class ListElementsProperties extends Component {
                     this.state.allTagList = data;
 
                     data.map(item => {
-                        var itm = { label: item[0].tagkey, value: item[0].id };
+                        var itm = { label: item[0].tagKey, value: item[0].id };
                         tgOptionGroup.push(itm);
 
                     });
-
+                    
                     this.state.TagListOptionGroup = tgOptionGroup;
                 })
                 .catch(error => {
@@ -138,7 +138,7 @@ class ListElementsProperties extends Component {
 
         this.state.allTagList.filter(function (e) {
             e.filter(function (ee) {
-                if (selectedOption.label == ee.tagkey) {
+                if (selectedOption.label == ee.tagKey) {
                     tgs.push(ee);
                 }
             });
@@ -160,7 +160,7 @@ class ListElementsProperties extends Component {
     };
 
     handleTagKeyChange(e) {
-        this.setState({ tagKey: e.target.value });
+        this.setState({ tagKey: e.target.value.replace(/^\s+/, '') });
     };
 
     addRow = () => {
@@ -176,7 +176,7 @@ class ListElementsProperties extends Component {
     handleInputChange = (index, fieldName, value) => {
         this.setState((prevState) => {
             const newRows = [...prevState.rows];
-            newRows[index][fieldName] = value;
+            newRows[index][fieldName] = value.replace(/^\s+/, '');
             return { rows: newRows };
         });
     };
@@ -349,7 +349,7 @@ class ListElementsProperties extends Component {
             }];
 
             this.toggleNewTagModal(0, true);
-            this.state.tagKey = n[0].tagkey;
+            this.state.tagKey = n[0].tagKey;
             this.state.tagKeyDisableStatus = true;
             this.state.tagAddDisableStatus = true;
             this.state.tagAddDisplayStatus = "none";

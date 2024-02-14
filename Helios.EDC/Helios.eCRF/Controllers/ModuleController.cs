@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Model;
 using Helios.eCRF.Models;
 using Helios.eCRF.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -100,9 +101,17 @@ namespace Helios.eCRF.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(Int64 id)
+        public async Task<List<ElementModel>> GetModuleAllElements(Int64 id)
         {
-            var result = await _moduleService.GetModuleElements(id);
+            var result = await _moduleService.GetModuleAllElements(id);
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 id)
+        {
+            var result = await _moduleService.GetModuleElementsWithChildren(id);
 
             return result;
         }
@@ -156,7 +165,7 @@ namespace Helios.eCRF.Controllers
         [HttpGet]
         public async Task<List<IGrouping<string, TagModel>>> GetMultipleTagList(Int64 id)
         {
-            var result = _moduleService.GetMultipleTagList(id).Result.GroupBy(x => x.Tagkey).ToList();
+            var result = _moduleService.GetMultipleTagList(id).Result.GroupBy(x => x.TagKey).ToList();
 
             return result;
         }

@@ -79,7 +79,7 @@ class CalculationElementProperties extends Component {
     };
 
     fillAllElementList() {
-        fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
+        fetch(baseUrl + '/Module/GetModuleAllElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())

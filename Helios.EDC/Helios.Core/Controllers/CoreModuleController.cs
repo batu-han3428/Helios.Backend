@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json;
+using Helios.Common.Model;
 
 namespace Helios.Core.Controllers
 {
@@ -111,7 +112,7 @@ namespace Helios.Core.Controllers
         #endregion
 
         [HttpGet]
-        public async Task<List<ElementModel>> GetModuleElements(Int64 moduleId)
+        public async Task<List<ElementModel>> GetModuleAllElements(Int64 moduleId)
         {
             var result = await _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted)
                 .Include(x => x.ElementDetail)
@@ -151,46 +152,112 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
+        public async Task<List<ElementModel>> GetModuleElementsWithChildren(Int64 moduleId)
+        {
+            var finalList = new List<ElementModel>();
+
+            var result = await _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted)
+                .Include(x => x.ElementDetail)
+                .Select(x => new ElementModel()
+                {
+                    Id = x.Id,
+                    ParentId = x.ElementDetail.ParentId,
+                    Title = x.Title,
+                    Description = x.Description,
+                    ElementName = x.ElementName,
+                    ElementType = x.ElementType,
+                    Order = x.Order,
+                    IsDependent = x.IsDependent,
+                    IsRelated = x.IsRelated,
+                    IsRequired = x.IsRequired,
+                    ElementOptions = x.ElementDetail.ElementOptions,
+                    Width = x.Width,
+                    Unit = x.ElementDetail.Unit,
+                    Mask = x.ElementDetail.Mask,
+                    LowerLimit = x.ElementDetail.LowerLimit,
+                    UpperLimit = x.ElementDetail.UpperLimit,
+                    Layout = x.ElementDetail.Layout,
+                    DefaultValue = x.ElementDetail.DefaultValue,
+                    AddTodayDate = x.ElementDetail.AddTodayDate,
+                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                    MainJs = x.ElementDetail.MainJs,
+                    StartDay = x.ElementDetail.StartDay,
+                    EndDay = x.ElementDetail.EndDay,
+                    StartMonth = x.ElementDetail.StartMonth,
+                    EndMonth = x.ElementDetail.EndMonth,
+                    StartYear = x.ElementDetail.StartYear,
+                    EndYear = x.ElementDetail.EndYear,
+                    LeftText = x.ElementDetail.LeftText,
+                    RightText = x.ElementDetail.RightText,
+                    ColumnCount = x.ElementDetail.ColumnCount,
+                    RowCount = x.ElementDetail.RowCount,
+                    DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
+                    ColumnIndex = x.ElementDetail.ColunmIndex,
+                    RowIndex = x.ElementDetail.RowIndex,
+                }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
+
+            foreach (var item in result)
+            {
+                if (item.ParentId == 0)
+                    finalList.Add(item);
+                else
+                {
+                    var parent = result.FirstOrDefault(x => x.Id == item.ParentId);
+
+                    parent.ChildElements.Add(item);
+                }
+            }
+
+            return finalList;
+        }
+
+        [HttpGet]
         public async Task<ElementModel> GetElementData(Int64 id)
         {
             var result = new ElementModel();
 
             result = await _context.Elements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted)
-               .Include(x => x.ElementDetail)
-               .Select(x => new ElementModel()
-               {
-                   Id = x.Id,
-                   Title = x.Title,
-                   ElementName = x.ElementName,
-                   ElementType = x.ElementType,
-                   Description = x.Description,
-                   IsRequired = x.IsRequired,
-                   IsHidden = x.IsHidden,
-                   CanMissing = x.CanMissing,
-                   Width = x.Width,
-                   Unit = x.ElementDetail.Unit,
-                   Mask = x.ElementDetail.Mask,
-                   LowerLimit = x.ElementDetail.LowerLimit,
-                   UpperLimit = x.ElementDetail.UpperLimit,
-                   Layout = x.ElementDetail.Layout,
-                   IsDependent = x.IsDependent,
-                   IsRelated = x.IsRelated,
-                   RelationSourceInputs = x.ElementDetail.RelationSourceInputs,
-                   RelationMainJs = x.ElementDetail.RelationMainJs,
-                   ElementOptions = x.ElementDetail.ElementOptions,
-                   DefaultValue = x.ElementDetail.DefaultValue,
-                   AddTodayDate = x.ElementDetail.AddTodayDate,
-                   CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
-                   MainJs = x.ElementDetail.MainJs,
-                   StartDay = x.ElementDetail.StartDay,
-                   EndDay = x.ElementDetail.EndDay,
-                   StartMonth = x.ElementDetail.StartMonth,
-                   EndMonth = x.ElementDetail.EndMonth,
-                   StartYear = x.ElementDetail.StartYear,
-                   EndYear = x.ElementDetail.EndYear,
-                   LeftText = x.ElementDetail.LeftText,
-                   RightText = x.ElementDetail.RightText
-               }).AsNoTracking().FirstOrDefaultAsync();
+            .Include(x => x.ElementDetail)
+            .Select(x => new ElementModel()
+            {
+                Id = x.Id,
+                ParentId = x.ElementDetail.ParentId,
+                Title = x.Title,
+                ElementName = x.ElementName,
+                ElementType = x.ElementType,
+                Description = x.Description,
+                IsRequired = x.IsRequired,
+                IsHidden = x.IsHidden,
+                CanMissing = x.CanMissing,
+                Width = x.Width,
+                Unit = x.ElementDetail.Unit,
+                Mask = x.ElementDetail.Mask,
+                LowerLimit = x.ElementDetail.LowerLimit,
+                UpperLimit = x.ElementDetail.UpperLimit,
+                Layout = x.ElementDetail.Layout,
+                IsDependent = x.IsDependent,
+                IsRelated = x.IsRelated,
+                RelationSourceInputs = x.ElementDetail.RelationSourceInputs,
+                RelationMainJs = x.ElementDetail.RelationMainJs,
+                ElementOptions = x.ElementDetail.ElementOptions,
+                DefaultValue = x.ElementDetail.DefaultValue,
+                AddTodayDate = x.ElementDetail.AddTodayDate,
+                CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
+                MainJs = x.ElementDetail.MainJs,
+                StartDay = x.ElementDetail.StartDay,
+                EndDay = x.ElementDetail.EndDay,
+                StartMonth = x.ElementDetail.StartMonth,
+                EndMonth = x.ElementDetail.EndMonth,
+                StartYear = x.ElementDetail.StartYear,
+                EndYear = x.ElementDetail.EndYear,
+                LeftText = x.ElementDetail.LeftText,
+                RightText = x.ElementDetail.RightText,
+                ColumnCount = x.ElementDetail.ColumnCount,
+                RowCount = x.ElementDetail.RowCount,
+                DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
+                ColumnIndex = x.ElementDetail.ColunmIndex,
+                RowIndex = x.ElementDetail.RowIndex,
+            }).AsNoTracking().FirstOrDefaultAsync();
 
             if (result.IsDependent)
             {
@@ -240,10 +307,10 @@ namespace Helios.Core.Controllers
                 }
             }
 
+            var moduleElements = _context.Elements.Where(x => x.ModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
+
             if (element == null)
             {
-                var moduleElements = _context.Elements.Where(x => x.ModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
-
                 if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
                 {
                     result.IsSuccess = false;
@@ -252,152 +319,197 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                var moduleElementMaxOrder = moduleElements.Count() > 0 ? moduleElements.Select(x => x.Order).Max() : 1;
+                var elm = new Element();
 
-                var elm = new Element()
+                try
                 {
-                    Title = model.Title,
-                    ElementName = model.ElementName,
-                    Description = model.Description,
-                    CanMissing = model.CanMissing,
-                    ElementType = model.ElementType,
-                    IsDependent = model.IsDependent,
-                    IsHidden = model.IsHidden,
-                    IsReadonly = model.IsReadonly,
-                    IsRequired = model.IsRequired,
-                    IsRelated = model.IsRelated,
-                    IsTitleHidden = model.IsTitleHidden,
-                    Width = model.Width,
-                    ModuleId = model.ModuleId,
-                    TenantId = model.TenantId,
-                    Order = moduleElementMaxOrder + 1,
-                    //CreatedAt = DateTimeOffset.Now,
-                    //AddedById = userId,
-                };
+                    var moduleElementMaxOrder = moduleElements.Count() > 0 ? moduleElements.Select(x => x.Order).Max() : 1;
 
-                _context.Elements.Add(elm);
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                if (result.IsSuccess)
-                {
-                    var elementDetail = new ElementDetail()
+                    elm = new Element()
                     {
-                        ElementId = elm.Id,
+                        Title = model.Title,
+                        ElementName = model.ElementName.TrimStart().TrimEnd(),
+                        Description = model.Description,
+                        CanMissing = model.CanMissing,
+                        ElementType = model.ElementType,
+                        IsDependent = model.IsDependent,
+                        IsHidden = model.IsHidden,
+                        IsReadonly = model.IsReadonly,
+                        IsRequired = model.IsRequired,
+                        IsRelated = model.IsRelated,
+                        IsTitleHidden = model.IsTitleHidden,
+                        Width = model.Width,
+                        ModuleId = model.ModuleId,
                         TenantId = model.TenantId,
-                        Unit = model.Unit,
-                        Mask = model.Mask,
-                        LowerLimit = model.LowerLimit,
-                        UpperLimit = model.UpperLimit,
-                        Layout = model.Layout,
-                        ElementOptions = model.ElementOptions,
-                        MetaDataTags = model.ElementName,
-                        DefaultValue = model.DefaultValue,
-                        AddTodayDate = model.AddTodayDate,
-                        CalculationSourceInputs = model.CalculationSourceInputs,
-                        RelationSourceInputs = model.RelationSourceInputs,
-                        MainJs = model.MainJs,
-                        RelationMainJs = model.RelationMainJs,
-                        StartDay = model.StartDay,
-                        EndDay = model.EndDay,
-                        StartMonth = model.StartMonth,
-                        EndMonth = model.EndMonth,
-                        StartYear = model.StartYear,
-                        EndYear = model.EndYear,
-                        IsInCalculation = model.ElementType == ElementType.Calculated,
-                        LeftText = model.LeftText,
-                        RightText = model.RightText,
+                        Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
                         //CreatedAt = DateTimeOffset.Now,
                         //AddedById = userId,
-                        //ButtonText = model.buttonText
                     };
 
-                    _context.ElementDetails.Add(elementDetail);
+                    _context.Elements.Add(elm);
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
-                    elm.ElementDetailId = elementDetail.Id;
-                    _context.Elements.Update(elm);
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    if (model.IsDependent)
+                    if (result.IsSuccess)
                     {
-                        var elementEvent = new ModuleElementEvent()
+                        var elementDetail = new ElementDetail()
                         {
-                            SourceElementId = model.DependentTargetFieldId,
-                            TargetElementId = elm.Id,
-                            ModuleId = model.ModuleId,
+                            ElementId = elm.Id,
                             TenantId = model.TenantId,
-                            EventType = EventType.Dependency,
-                            ValueCondition = (ActionCondition)model.DependentCondition,
-                            ActionType = (ActionType)model.DependentAction,
-                            ActionValue = model.DependentFieldValue,
+                            ParentId = model.ParentId,
+                            Unit = model.Unit,
+                            Mask = model.Mask,
+                            LowerLimit = model.LowerLimit,
+                            UpperLimit = model.UpperLimit,
+                            Layout = model.Layout,
+                            ElementOptions = model.ElementOptions,
+                            MetaDataTags = model.ElementName,
+                            DefaultValue = model.DefaultValue,
+                            AddTodayDate = model.AddTodayDate,
+                            CalculationSourceInputs = model.CalculationSourceInputs,
+                            RelationSourceInputs = model.RelationSourceInputs,
+                            MainJs = model.MainJs,
+                            RelationMainJs = model.RelationMainJs,
+                            StartDay = model.StartDay,
+                            EndDay = model.EndDay,
+                            StartMonth = model.StartMonth,
+                            EndMonth = model.EndMonth,
+                            StartYear = model.StartYear,
+                            EndYear = model.EndYear,
+                            IsInCalculation = model.ElementType == ElementType.Calculated,
+                            LeftText = model.LeftText,
+                            RightText = model.RightText,
+                            RowCount = model.RowCount,
+                            ColumnCount = model.ColumnCount,
+                            DatagridAndTableProperties = model.DatagridAndTableProperties,
+                            RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
+                            ColunmIndex = model.ColumnIndex
+                            //CreatedAt = DateTimeOffset.Now,
+                            //AddedById = userId,
+                            //ButtonText = model.buttonText
                         };
 
-                        _context.ModuleElementEvents.Add(elementEvent);
+                        _context.ElementDetails.Add(elementDetail);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    }
 
-                    if (model.ElementType == ElementType.Calculated)
-                    {
-                        var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
-                        var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId)).ToListAsync();
-
-                        foreach (var item in calcList)
-                        {
-                            var calcDtil = new CalculatationElementDetail()
-                            {
-                                TenantId = model.TenantId,
-                                ModuleId = model.ModuleId,
-                                CalculationElementId = elm.Id,
-                                TargetElementId = item.elementFieldSelectedGroup.value,
-                            };
-
-                            _context.CalculatationElementDetails.Add(calcDtil);
-                        }
-
-                        foreach (var item in elementInCalList)
-                        {
-                            item.IsInCalculation = true;
-
-                            _context.ElementDetails.Update(item);
-                        }
-
+                        elm.ElementDetailId = elementDetail.Id;
+                        _context.Elements.Update(elm);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    }
 
-                    if (model.IsRelated)
-                    {
-                        var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                        var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
-
-                        foreach (var item in relElmIds)
+                        if (model.IsDependent)
                         {
                             var elementEvent = new ModuleElementEvent()
                             {
-                                ModuleId = model.ModuleId,
-                                SourceElementId = item,
+                                SourceElementId = model.DependentTargetFieldId,
                                 TargetElementId = elm.Id,
+                                ModuleId = model.ModuleId,
                                 TenantId = model.TenantId,
-                                EventType = EventType.Relation,
+                                EventType = EventType.Dependency,
+                                ValueCondition = (ActionCondition)model.DependentCondition,
+                                ActionType = (ActionType)model.DependentAction,
+                                ActionValue = model.DependentFieldValue,
                             };
 
                             _context.ModuleElementEvents.Add(elementEvent);
-                        }
-
-                        var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                        if (!isSuccess)
-                        {
-                            element.IsRelated = false;
-                            elementDetail.RelationSourceInputs = "";
-                            elementDetail.RelationMainJs = "";
-
-                            _context.Elements.Update(element);
-                            _context.ElementDetails.Update(elementDetail);
                             result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
-                    }
 
-                    //control for both of element and elementDetail saved
+                        if (model.ElementType == ElementType.Calculated)
+                        {
+                            var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                            var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId)).ToListAsync();
+
+                            foreach (var item in calcList)
+                            {
+                                var calcDtil = new CalculatationElementDetail()
+                                {
+                                    TenantId = model.TenantId,
+                                    ModuleId = model.ModuleId,
+                                    CalculationElementId = elm.Id,
+                                    TargetElementId = item.elementFieldSelectedGroup.value,
+                                };
+
+                                _context.CalculatationElementDetails.Add(calcDtil);
+                            }
+
+                            foreach (var item in elementInCalList)
+                            {
+                                item.IsInCalculation = true;
+
+                                _context.ElementDetails.Update(item);
+                            }
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+
+                        if (model.IsRelated)
+                        {
+                            var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                            var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                            foreach (var item in relElmIds)
+                            {
+                                var elementEvent = new ModuleElementEvent()
+                                {
+                                    ModuleId = model.ModuleId,
+                                    SourceElementId = item,
+                                    TargetElementId = elm.Id,
+                                    TenantId = model.TenantId,
+                                    EventType = EventType.Relation,
+                                };
+
+                                _context.ModuleElementEvents.Add(elementEvent);
+                            }
+
+                            var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            if (!isSuccess)
+                            {
+                                element.IsRelated = false;
+                                elementDetail.RelationSourceInputs = "";
+                                elementDetail.RelationMainJs = "";
+
+                                _context.Elements.Update(element);
+                                _context.ElementDetails.Update(elementDetail);
+                                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                            }
+                        }
+
+                        //control for both of element and elementDetail saved
+                        var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
+
+                        if (elmDtl == null)
+                        {
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.Elements.Update(elm);
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again.";
+                        }
+                        else if (!result.IsSuccess)//if dependent or calculation didn't save
+                        {
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.Elements.Update(elm);
+
+                            elmDtl.IsActive = false;
+                            elmDtl.IsDeleted = true;
+                            _context.ElementDetails.Update(elmDtl);
+
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again.";
+                        }
+                    }
+                    else
+                    {
+                        result.Message = "Error";
+                    }
+                }
+                catch (Exception ex)
+                {
                     var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
 
                     if (elmDtl == null)
@@ -410,31 +522,23 @@ namespace Helios.Core.Controllers
                         result.IsSuccess = false;
                         result.Message = "Operation failed. Please try again.";
                     }
-                    else if (!result.IsSuccess)//if dependent or calculation didn't save
-                    {
-                        elm.IsActive = false;
-                        elm.IsDeleted = true;
-                        _context.Elements.Update(elm);
-
-                        elmDtl.IsActive = false;
-                        elmDtl.IsDeleted = true;
-                        _context.ElementDetails.Update(elmDtl);
-
-                        var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                        result.IsSuccess = false;
-                        result.Message = "Operation failed. Please try again.";
-                    }
-                }
-                else
-                {
-                    result.Message = "Error";
                 }
             }
             else
             {
+                if (element.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
+                {
+                    if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = "Duplicate element name";
+
+                        return result;
+                    }
+                }
+
                 element.Title = model.Title;
-                element.ElementName = model.ElementName;
+                element.ElementName = model.ElementName.TrimStart().TrimEnd();
                 element.Description = model.Description;
                 element.CanMissing = model.CanMissing;
                 element.ElementType = model.ElementType;
@@ -471,6 +575,9 @@ namespace Helios.Core.Controllers
                 elementDetail.EndYear = model.EndYear;
                 elementDetail.LeftText = model.LeftText;
                 elementDetail.RightText = model.RightText;
+                elementDetail.RowCount = model.RowCount;
+                elementDetail.ColumnCount = model.ColumnCount;
+                elementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 
@@ -552,7 +659,7 @@ namespace Helios.Core.Controllers
                     }
 
                     existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
-                    //add new calcElementDetails
+                                                                                          //add new calcElementDetails
                     foreach (var item in calcList)
                     {
                         if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
@@ -684,7 +791,7 @@ namespace Helios.Core.Controllers
 
                 element.Id = 0;
                 element.ElementName = name;
-                element.Order = (element.Order + 1);
+                element.Order = element.Order + 1;
 
                 var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                 elementDetail.Id = 0;
@@ -699,6 +806,57 @@ namespace Helios.Core.Controllers
 
                 _context.Update(element);
                 _context.Update(elementDetail);
+
+                if (element.ElementType == ElementType.Calculated)
+                {
+                    var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
+
+                    foreach (var cal in calcdtls)
+                    {
+                        cal.CalculationElementId = element.Id;
+                        _context.Add(cal);
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                    foreach (var child in children)
+                    {
+                        var nm = child.ElementName + "_1";
+
+                        for (; ; )
+                        {
+                            if (checkElementName(child.ModuleId, nm).Result)
+                                break;
+                            else
+                                nm = nm + "_1";
+                        }
+
+                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                        chDtl.Id = 0;
+
+                        child.Id = 0;
+                        child.ElementName = nm;
+                        child.Order = child.Order + 1;
+
+                        _context.Add(child);
+                        _context.Add(chDtl);
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        child.ElementDetailId = chDtl.Id;
+                        chDtl.Id = child.Id;
+                        chDtl.ParentId = element.Id;
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
 
                 var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
 
@@ -732,6 +890,84 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
+                if (elementDetail.IsInCalculation && element.ElementType != ElementType.Calculated)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "This element used in a calculation element formul. Please remove it first from calculation element.";
+
+                    return result;
+                }
+
+                var moduleEvent = _context.ModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+
+                if (moduleEvent != null)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "This element used as relation or dependent in another element. Please remove it first and try again.";
+
+                    return result;
+                }
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+
+                    foreach (var item in childrenDtils)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.ElementDetails.Update(item);
+                    }
+
+                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                    foreach (var item in children)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.Elements.Update(item);
+                    }
+                }
+
+                if (element.ElementType == ElementType.Calculated)
+                {
+                    var childrenDtils = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var targetElmIds = childrenDtils.Select(x=>x.TargetElementId).ToList();
+
+                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x=>x.TargetElementId).ToListAsync();
+
+                    var chngIds = new List<Int64>();
+
+                    foreach (var item in anotherCalcDtils)
+                    {
+                        if (item.ToList().Count == 1)
+                            chngIds.Add(item.FirstOrDefault().TargetElementId);
+                    }
+
+                    var elmDtils = _context.ElementDetails.Where(x => targetElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToList();
+
+                    foreach (var item in elmDtils)
+                    {
+                        if (chngIds.Contains(item.ElementId))
+                        {
+                            item.IsInCalculation = false;
+
+                            _context.ElementDetails.Update(item);
+                        }
+                    }
+
+                    foreach (var item in childrenDtils)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.CalculatationElementDetails.Update(item);
+                    }
+                }
+
                 element.IsDeleted = true;
                 element.IsActive = false;
                 elementDetail.IsDeleted = true;
@@ -782,7 +1018,7 @@ namespace Helios.Core.Controllers
                     var tag = new MultipleChoiceTag()
                     {
                         Key = item.TagKey,
-                        Name = item.TagName,
+                        Name = item.TagName.TrimStart().TrimEnd(),
                         Value = item.TagValue
                     };
 
@@ -805,7 +1041,7 @@ namespace Helios.Core.Controllers
             if (moduleElements == null)
                 moduleElements = _context.Elements.Where(x => x.ModuleId == moduleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
 
-            if (moduleElements.FirstOrDefault(x => x.ElementName == elementName) != null)
+            if (moduleElements.FirstOrDefault(x => x.ElementName == elementName.TrimStart().TrimEnd()) != null)
                 return false;
             else
                 return true;

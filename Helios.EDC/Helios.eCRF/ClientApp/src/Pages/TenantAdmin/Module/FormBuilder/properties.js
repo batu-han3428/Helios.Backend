@@ -36,19 +36,22 @@ import CalculationElementProperties from "../Elements/CalculationElement/calcula
 import TextareaElementProperties from "../Elements/TextareaElement/textareaElementProperties.js";
 import FileUploaderElementProperties from "../Elements/FileUploaderElement/fileUploaderElementProperties.js";
 import RangeSliderElementProperties from "../Elements/RangeSliderElement/rangeSliderElementProperties.js";
+import DatagridElementProperties from "../Elements/DatagridElement/datagridElementProperties";
+import TableElementProperties from "../Elements/TableElement/tableElementProperties";
 
 const baseUrl = "https://localhost:7196";
 
 class Properties extends React.Component {
     constructor(props) {
         super(props);
-
+        
         this.state = {
             activeTab: props.ActiveTab,
             showWhereElementPropeties: 0,
 
             // General properties
             Id: props.Id,
+            ParentId: props.ParentId,
             TenantId: props.TenantId,
             UserId: props.UserId,
             ModuleId: props.ModuleId,
@@ -87,7 +90,7 @@ class Properties extends React.Component {
             // Dependency properties
             DependentSourceFieldId: 0,
             DependentTargetFieldId: 0,
-            DependentCondition: 0,
+            DependentCondition: 3,
             DependentAction: 1,
             DependentFieldValue: [],
             DependentFieldValueTags: [],
@@ -103,7 +106,7 @@ class Properties extends React.Component {
                 { label: "Less and equal", value: 5 },
                 { label: "Not equal", value: 6 },
             ],
-            conditionSelectedGroup: null,
+            conditionSelectedGroup: { label: "Equal", value: 3 },
             actionOptionGroup: [
                 { label: "Show", value: 1 },
                 { label: "Hide", value: 2 },
@@ -133,16 +136,21 @@ class Properties extends React.Component {
             SavedTagList: [],
             DefaultValue: '',
             AddTodayDate: false,
-            StartDay: 0,
-            EndDay: 0,
-            StartMonth: 0,
-            EndMonth: 0,
+            StartDay: 1,
+            EndDay: 31,
+            StartMonth: 1,
+            EndMonth: 12,
             StartYear: 0,
             EndYear: 0,
             CalculationSourceInputs: '',
             MainJs: '',
             LeftText: '',
             RightText: '',
+            DatagridAndTableProperties: '',
+            RowCount: 0,
+            ColumnCount: 0,
+            ColumnIndex: props.ColumnIndex,
+            RowIndex: props.RowIndex,
 
             // Validation
             RequiredError: 'This value is required',
@@ -209,6 +217,9 @@ class Properties extends React.Component {
         this.changeRelationMainJs.bind(this);
         this.changeLeftText.bind(this);
         this.changeRightText.bind(this);
+        this.changeDatagridAndTableProperties.bind(this);
+        this.changeRowCount.bind(this);
+        this.changeColumnCount.bind(this);
 
         this.changeIsFormValid.bind(this);
     }
@@ -295,6 +306,21 @@ class Properties extends React.Component {
                     changeLeftText={this.changeLeftText} LeftText={this.state.LeftText}
                     changeRightText={this.changeRightText} RightText={this.state.RightText}
                 />;
+            case 15:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-10";
+                return <TableElementProperties
+                    changeDatagridAndTableProperties={this.changeDatagridAndTableProperties} DatagridAndTableProperties={this.state.DatagridAndTableProperties}
+                    changeColumnCount={this.changeColumnCount} ColumnCount={this.state.ColumnCount}
+                    changeRowCount={this.changeRowCount} RowCount={this.state.RowCount}
+                />;
+            case 16:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-10";
+                return <DatagridElementProperties
+                    changeDatagridAndTableProperties={this.changeDatagridAndTableProperties} DatagridAndTableProperties={this.state.DatagridAndTableProperties}
+                    changeColumnCount={this.changeColumnCount} ColumnCount={this.state.ColumnCount}
+                />;
             default:
                 this.state.showWhereElementPropeties = 0;
                 this.state.fieldWidthsW = "col-md-10";
@@ -367,7 +393,7 @@ class Properties extends React.Component {
     fillDependentFieldList() {
         var depFldOptionGroup = [];
 
-        fetch(baseUrl + '/Module/GetModuleElements?id=' + this.state.ModuleId, {
+        fetch(baseUrl + '/Module/GetModuleAllElements?id=' + this.state.ModuleId, {
             method: 'GET',
         })
             .then(response => response.json())
@@ -406,7 +432,7 @@ class Properties extends React.Component {
         this.state.DepFldInputClass = '';
     };
 
-    handleDependentConditionChange = selectedOption => {
+    handleDependentConditionChange(selectedOption) {
         this.setState({ DependentCondition: selectedOption.value });
         this.state.conditionSelectedGroup = selectedOption;
         this.state.DepConInputClass = '';
@@ -431,7 +457,7 @@ class Properties extends React.Component {
         else {
             this.setState({ dependentEnabled: true });
             this.setState({ dependentFieldsSelectedGroup: 0 });
-            this.setState({ conditionSelectedGroup: 0 });
+            this.setState({ conditionSelectedGroup: { label: "Equal", value: 3 } });
             this.setState({ actionSelectedGroup: { label: "Show", value: 1 } });
             //this.setState({ DependentFieldValue: '' });
         }
@@ -541,6 +567,18 @@ class Properties extends React.Component {
         this.setState({ RightText: newValue });
     };
 
+    changeDatagridAndTableProperties = (newValue) => {
+        this.setState({ DatagridAndTableProperties: newValue });
+    };
+
+    changeRowCount = (newValue) => {
+        this.setState({ RowCount: newValue });
+    };
+
+    changeColumnCount = (newValue) => {
+        this.setState({ ColumnCount: newValue });
+    };
+
     changeIsFormValid = (newValue) => {
         this.setState({ IsFormValid: newValue });
     };
@@ -616,7 +654,7 @@ class Properties extends React.Component {
     }
 
     getElementData() {
-        if (this.state.Id != 0) {
+        if (this.state.Id !== 0) {
             fetch(baseUrl + '/Module/GetElementData?id=' + this.state.Id, {
                 method: 'GET',
             })
@@ -658,13 +696,16 @@ class Properties extends React.Component {
         this.state.IsHidden = data.isHidden;
         this.state.CanMissing = data.canMissing;
         this.state.SavedTagList = data.elementOptions == null ? [] : JSON.parse(data.elementOptions);
+        this.state.DatagridAndTableProperties = data.datagridAndTableProperties;
+        this.state.RowCount = data.rowCount;
+        this.state.ColumnCount = data.columnCount;
         this.state.IsDependent = data.isDependent;
         this.state.DependentSourceFieldId = data.dependentSourceFieldId;
         this.state.DependentTargetFieldId = data.dependentTargetFieldId;
-        this.state.DependentCondition = data.dependentCondition;
-        this.state.DependentAction = data.dependentAction;
+        this.state.DependentCondition = data.dependentCondition === 0 ? 3 : data.dependentCondition;
+        this.state.DependentAction = data.dependentAction === 0 ? 1 : data.dependentAction;
         this.state.DependentFieldValue = data.dependentFieldValue == "" ? [] : JSON.parse(data.dependentFieldValue);
-
+        
         var rel = JSON.parse(data.relationSourceInputs);
         this.state.IsRelation = data.isRelated;
         this.state.RelationSourceInputs = rel != null ? data.relationSourceInputs : '';
@@ -673,25 +714,34 @@ class Properties extends React.Component {
         this.state.inputCounter = rel != null ? rel.length : 0;
 
         var w = this.state.widthOptionGroup.filter(function (e) {
-            if (e.value == data.width)
+            if (e.value === data.width)
                 return e;
         });
 
         this.state.widthSelectedGroup = w;
 
-        var cn = this.state.conditionOptionGroup.filter(function (e) {
-            if (e.value == data.dependentCondition)
+        var t = this.state.DependentSourceFieldId;
+
+        var f = this.state.dependentFieldOptionGroup.filter(function (e) {
+            if (e.value === t)
                 return e;
         });
 
-        this.state.conditionSelectedGroup = cn;
+        this.state.dependentFieldsSelectedGroup = f;
+
+        var cn = this.state.conditionOptionGroup.filter(function (e) {
+            if (e.value === data.dependentCondition)
+                return e;
+        });
+
+        this.state.conditionSelectedGroup = cn.length === 0 ? { label: "Equal", value: 3 } : cn;
 
         var ac = this.state.actionOptionGroup.filter(function (e) {
-            if (e.value == data.dependentAction)
+            if (e.value === data.dependentAction)
                 return e;
         });
 
-        this.state.actionSelectedGroup = ac;
+        this.state.actionSelectedGroup = ac.length === 0 ? { label: "Show", value: 1 } : ac;
 
         if (data.isDependent) {
             this.setState({ dependentEnabled: false });
@@ -702,32 +752,32 @@ class Properties extends React.Component {
         var isValid = true;
         debugger;
 
-        if (this.state.ElementName == "") {
+        if (this.state.ElementName === "") {
             this.setState({ ElementNameInputClass: "is-invalid form-control" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && (this.state.DependentSourceFieldId == 0 || this.state.DependentTargetFieldId == 0)) {
+        if (this.state.IsDependent && (this.state.DependentSourceFieldId === 0 || this.state.DependentTargetFieldId === 0)) {
             this.setState({ DepFldInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentCondition == 0) {
+        if (this.state.IsDependent && this.state.DependentCondition === 0) {
             this.setState({ DepConInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentAction == 0) {
+        if (this.state.IsDependent && this.state.DependentAction === 0) {
             this.setState({ DepActInputClass: "form-control is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsDependent && this.state.DependentFieldValue == '') {
+        if (this.state.IsDependent && this.state.DependentFieldValue === '') {
             this.setState({ DepFldVlInputClass: "form-control input-tag is-invalid" });
             isValid = false;
         }
 
-        if (this.state.IsRelation && this.state.relationElementRows.length == 0) {
+        if (this.state.IsRelation && this.state.relationElementRows.length === 0) {
             this.setState({ RelFldVlInputClass: "table-responsive mb-3 input-tag form-control is-invalid" });
             isValid = false;
         }
@@ -741,6 +791,7 @@ class Properties extends React.Component {
                 },
                 body: JSON.stringify({
                     Id: this.state.Id,
+                    ParentId: this.state.ParentId,
                     ModuleId: this.state.ModuleId,
                     TenantId: this.state.TenantId,
                     UserId: this.state.UserId,
@@ -786,7 +837,12 @@ class Properties extends React.Component {
                     StartYear: this.state.StartYear,
                     EndYear: this.state.EndYear,
                     LeftText: this.state.LeftText,
-                    RightText: this.state.RightText
+                    RightText: this.state.RightText,
+                    RowCount: this.state.RowCount,
+                    ColumnCount: this.state.ColumnCount,
+                    DatagridAndTableProperties: this.state.DatagridAndTableProperties,
+                    ColumnIndex: this.state.ColumnIndex,
+                    RowIndex: this.state.RowIndex
                 })
             }).then(res => res.json())
                 .then(data => {
@@ -956,28 +1012,31 @@ class Properties extends React.Component {
                                                     <>
                                                         <div>
                                                             {/*<FieldWidths changeFieldWidth={this.changeFieldWidth} Width={this.state.FieldWidths}></FieldWidths>*/}
-                                                            <Row className="mb-3">
-                                                                <label
-                                                                    htmlFor="example-text-input"
-                                                                    className="col-md-2 col-form-label"
-                                                                >
-                                                                    {this.props.t("Field width")}                                                                           </label>
-                                                                <div className={this.state.fieldWidthsW}>
-                                                                    <Select
-                                                                        value={this.state.widthSelectedGroup}
-                                                                        onChange={this.handleWidthChange}
-                                                                        options={this.state.widthOptionGroup}
-                                                                        placeholder={this.props.t("Select")}
-                                                                        classNamePrefix="select2-selection" />
-                                                                </div>
-                                                            </Row>
+                                                            {this.state.ElementType !== 16 && (
+                                                                <Row className="mb-3">
+                                                                    <label
+                                                                        htmlFor="example-text-input"
+                                                                        className="col-md-2 col-form-label"
+                                                                    >
+                                                                        {this.props.t("Field width")}                                                                           </label>
+                                                                    <div className={this.state.fieldWidthsW}>
+                                                                        <Select
+                                                                            value={this.state.widthSelectedGroup}
+                                                                            onChange={this.handleWidthChange}
+                                                                            options={this.state.widthOptionGroup}
+                                                                            placeholder={this.props.t("Select")}
+                                                                            classNamePrefix="select2-selection" />
+                                                                    </div>
+                                                                </Row>
+                                                            )}
                                                             {this.state.showWhereElementPropeties === 0 && this.renderElementPropertiesSwitch(this.state.ElementType)}
                                                             <Row className="mb-3 ml-0">
-                                                                {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7 && this.state.ElementType !== 12) &&
+                                                                {(this.state.showWhereElementPropeties !== 2 && this.state.ElementType !== 7 && this.state.ElementType !== 12 && this.state.ElementType !== 16) &&
                                                                     <div className="form-check col-md-6">
                                                                         <input type="checkbox" className="form-check-input" checked={this.state.IsRequired} onChange={this.handleIsRequiredChange} id="isRequired" />
                                                                         <label className="form-check-label" htmlFor="isRequired">{this.props.t("Is required")}</label>
-                                                                    </div>}
+                                                                    </div>
+                                                                }
                                                                 <div className="form-check col-md-6">
                                                                     <input type="checkbox" className="form-check-input" checked={this.state.IsHidden} onChange={this.handleIsHiddenChange} id="isHidden" />
                                                                     <label className="form-check-label" htmlFor="isHidden">{this.props.t("Is hidden from user")}</label>
