@@ -21,16 +21,17 @@ import { withTranslation } from "react-i18next";
 class TableElementProperties extends Component {
     constructor(props) {
         super(props);
-        var inps = props.DatagridProperties !== "" ? JSON.parse(props.DatagridProperties) : [];
+        var inps = props.DatagridAndTableProperties !== "" ? JSON.parse(props.DatagridAndTableProperties) : [];
 
         this.state = {
             elementRows: inps,
-            columnCount: props.ColumnCount
+            columnCount: props.ColumnCount,
         }
 
         this.removeRow = this.removeRow.bind(this);
         this.addRow = this.addRow.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleRowCountChange = this.handleRowCountChange.bind(this);
     }
 
     removeRow = (index) => {
@@ -41,7 +42,7 @@ class TableElementProperties extends Component {
             newRows.splice(index, 1);
             return { elementRows: newRows };
         }, () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
             this.props.changeColumnCount(this.state.columnCount);
         });
     };
@@ -58,7 +59,7 @@ class TableElementProperties extends Component {
                 },
             ],
         }), () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
             this.props.changeColumnCount(this.state.columnCount);
         });
     };
@@ -69,13 +70,32 @@ class TableElementProperties extends Component {
             newRows[index][fieldName] = value;
             return { elementRows: newRows };
         }, () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
         });
+    };
+
+    handleRowCountChange(e) {
+        this.props.changeRowCount(e.target.value);
     };
 
     render() {
         return (
             <>
+                <Row className="mb-3">
+                    <label
+                        htmlFor="example-text-input"
+                        className="col-md-2 col-form-label">
+                        {this.props.t("Row count")}
+                    </label>
+                    <div className="col-md-3" style={{ marginRight: '6px' }}>
+                        <input
+                            value={this.props.RowCount}
+                            onChange={this.handleRowCountChange}
+                            className="form-control"
+                            type="number"
+                            placeholder={this.props.t("Row count")} />
+                    </div>
+                </Row>
                 <Row className="mb-3">
                     <div className="table-responsive mb-3">
                         <Table className="table table-hover mb-0">

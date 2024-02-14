@@ -71,7 +71,7 @@ namespace Helios.Common.Model
         //datagrid, table
         public int? RowCount { get; set; } = 0;
         public int? ColumnCount { get; set; } = 0;
-        public string? DatagridProperties { get; set; } = "";
+        public string? DatagridAndTableProperties { get; set; } = "";
         public int? RowIndex { get; set; }
         public int? ColumnIndex { get; set; }
 

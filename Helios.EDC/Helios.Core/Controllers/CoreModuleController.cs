@@ -191,7 +191,7 @@ namespace Helios.Core.Controllers
                     RightText = x.ElementDetail.RightText,
                     ColumnCount = x.ElementDetail.ColumnCount,
                     RowCount = x.ElementDetail.RowCount,
-                    DatagridProperties = x.ElementDetail.DatagridProperties,
+                    DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                     ColumnIndex = x.ElementDetail.ColunmIndex,
                     RowIndex = x.ElementDetail.RowIndex,
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
@@ -254,7 +254,7 @@ namespace Helios.Core.Controllers
                 RightText = x.ElementDetail.RightText,
                 ColumnCount = x.ElementDetail.ColumnCount,
                 RowCount = x.ElementDetail.RowCount,
-                DatagridProperties = x.ElementDetail.DatagridProperties,
+                DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                 ColumnIndex = x.ElementDetail.ColunmIndex,
                 RowIndex = x.ElementDetail.RowIndex,
             }).AsNoTracking().FirstOrDefaultAsync();
@@ -380,8 +380,8 @@ namespace Helios.Core.Controllers
                             RightText = model.RightText,
                             RowCount = model.RowCount,
                             ColumnCount = model.ColumnCount,
-                            DatagridProperties = model.DatagridProperties,
-                            RowIndex = model.ElementType == ElementType.DataGrid ? 1 : 0,
+                            DatagridAndTableProperties = model.DatagridAndTableProperties,
+                            RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
                             ColunmIndex = model.ColumnIndex
                             //CreatedAt = DateTimeOffset.Now,
                             //AddedById = userId,
@@ -526,7 +526,7 @@ namespace Helios.Core.Controllers
             }
             else
             {
-                if(element.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
+                if (element.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
                 {
                     if (!checkElementName(model.ModuleId, model.ElementName, moduleElements).Result)
                     {
@@ -577,7 +577,7 @@ namespace Helios.Core.Controllers
                 elementDetail.RightText = model.RightText;
                 elementDetail.RowCount = model.RowCount;
                 elementDetail.ColumnCount = model.ColumnCount;
-                elementDetail.DatagridProperties = model.DatagridProperties;
+                elementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
 
@@ -807,6 +807,19 @@ namespace Helios.Core.Controllers
                 _context.Update(element);
                 _context.Update(elementDetail);
 
+                if (element.ElementType == ElementType.Calculated)
+                {
+                    var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
+
+                    foreach (var cal in calcdtls)
+                    {
+                        cal.CalculationElementId = element.Id;
+                        _context.Add(cal);
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
                     var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
@@ -834,7 +847,7 @@ namespace Helios.Core.Controllers
 
                         _context.Add(child);
                         _context.Add(chDtl);
-                     
+
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                         child.ElementDetailId = chDtl.Id;
@@ -877,7 +890,7 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
-                if (elementDetail.IsInCalculation)
+                if (elementDetail.IsInCalculation && element.ElementType != ElementType.Calculated)
                 {
                     result.IsSuccess = false;
                     result.Message = "This element used in a calculation element formul. Please remove it first from calculation element.";
@@ -916,6 +929,42 @@ namespace Helios.Core.Controllers
                         item.IsDeleted = true;
 
                         _context.Elements.Update(item);
+                    }
+                }
+
+                if (element.ElementType == ElementType.Calculated)
+                {
+                    var childrenDtils = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var targetElmIds = childrenDtils.Select(x=>x.TargetElementId).ToList();
+
+                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x=>x.TargetElementId).ToListAsync();
+
+                    var chngIds = new List<Int64>();
+
+                    foreach (var item in anotherCalcDtils)
+                    {
+                        if (item.ToList().Count == 1)
+                            chngIds.Add(item.FirstOrDefault().TargetElementId);
+                    }
+
+                    var elmDtils = _context.ElementDetails.Where(x => targetElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToList();
+
+                    foreach (var item in elmDtils)
+                    {
+                        if (chngIds.Contains(item.ElementId))
+                        {
+                            item.IsInCalculation = false;
+
+                            _context.ElementDetails.Update(item);
+                        }
+                    }
+
+                    foreach (var item in childrenDtils)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.CalculatationElementDetails.Update(item);
                     }
                 }
 

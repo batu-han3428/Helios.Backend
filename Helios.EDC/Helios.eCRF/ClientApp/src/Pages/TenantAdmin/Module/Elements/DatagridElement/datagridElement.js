@@ -26,7 +26,7 @@ class DatagridElement extends Component {
             userId: props.UserId,
             isDisable: props.IsDisable,
             columnCount: props.ColumnCount,
-            datagridProperties: props.DatagridProperties !== "" ? JSON.parse(props.DatagridProperties) : [],
+            datagridAndTableProperties: props.DatagridAndTableProperties !== "" ? JSON.parse(props.DatagridAndTableProperties) : [],
             childElementList: props.ChildElementList.length === 0 ? [] : props.ChildElementList,
             modalState: false,
             elementListOptionGroup: GetAllElementListForSelect(16),
@@ -79,7 +79,7 @@ class DatagridElement extends Component {
                 <Table className="table table-hover table-bordered mb-0">
                     <thead>
                         <tr>
-                            {this.state.datagridProperties.map((col, index) => (
+                            {this.state.datagridAndTableProperties.map((col, index) => (
                                 <th key={index} style={{ width: col.width, backgroundColor: "#6D6E70", color: "#FFF" }}>{col.title}</th>
                             ))}
                         </tr>

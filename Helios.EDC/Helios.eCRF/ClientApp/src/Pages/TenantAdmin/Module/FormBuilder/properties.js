@@ -37,6 +37,7 @@ import TextareaElementProperties from "../Elements/TextareaElement/textareaEleme
 import FileUploaderElementProperties from "../Elements/FileUploaderElement/fileUploaderElementProperties.js";
 import RangeSliderElementProperties from "../Elements/RangeSliderElement/rangeSliderElementProperties.js";
 import DatagridElementProperties from "../Elements/DatagridElement/datagridElementProperties";
+import TableElementProperties from "../Elements/TableElement/tableElementProperties";
 
 const baseUrl = "https://localhost:7196";
 
@@ -145,10 +146,11 @@ class Properties extends React.Component {
             MainJs: '',
             LeftText: '',
             RightText: '',
-            DatagridProperties: '',
+            DatagridAndTableProperties: '',
             RowCount: 0,
             ColumnCount: 0,
             ColumnIndex: props.ColumnIndex,
+            RowIndex: props.RowIndex,
 
             // Validation
             RequiredError: 'This value is required',
@@ -215,7 +217,7 @@ class Properties extends React.Component {
         this.changeRelationMainJs.bind(this);
         this.changeLeftText.bind(this);
         this.changeRightText.bind(this);
-        this.changeDatagridProperties.bind(this);
+        this.changeDatagridAndTableProperties.bind(this);
         this.changeRowCount.bind(this);
         this.changeColumnCount.bind(this);
 
@@ -304,11 +306,19 @@ class Properties extends React.Component {
                     changeLeftText={this.changeLeftText} LeftText={this.state.LeftText}
                     changeRightText={this.changeRightText} RightText={this.state.RightText}
                 />;
+            case 15:
+                this.state.showWhereElementPropeties = 3;
+                this.state.fieldWidthsW = "col-md-10";
+                return <TableElementProperties
+                    changeDatagridAndTableProperties={this.changeDatagridAndTableProperties} DatagridAndTableProperties={this.state.DatagridAndTableProperties}
+                    changeColumnCount={this.changeColumnCount} ColumnCount={this.state.ColumnCount}
+                    changeRowCount={this.changeRowCount} RowCount={this.state.RowCount}
+                />;
             case 16:
                 this.state.showWhereElementPropeties = 3;
                 this.state.fieldWidthsW = "col-md-10";
                 return <DatagridElementProperties
-                    changeDatagridProperties={this.changeDatagridProperties} DatagridProperties={this.state.DatagridProperties}
+                    changeDatagridAndTableProperties={this.changeDatagridAndTableProperties} DatagridAndTableProperties={this.state.DatagridAndTableProperties}
                     changeColumnCount={this.changeColumnCount} ColumnCount={this.state.ColumnCount}
                 />;
             default:
@@ -557,8 +567,8 @@ class Properties extends React.Component {
         this.setState({ RightText: newValue });
     };
 
-    changeDatagridProperties = (newValue) => {
-        this.setState({ DatagridProperties: newValue });
+    changeDatagridAndTableProperties = (newValue) => {
+        this.setState({ DatagridAndTableProperties: newValue });
     };
 
     changeRowCount = (newValue) => {
@@ -686,7 +696,7 @@ class Properties extends React.Component {
         this.state.IsHidden = data.isHidden;
         this.state.CanMissing = data.canMissing;
         this.state.SavedTagList = data.elementOptions == null ? [] : JSON.parse(data.elementOptions);
-        this.state.DatagridProperties = data.datagridProperties;
+        this.state.DatagridAndTableProperties = data.datagridAndTableProperties;
         this.state.RowCount = data.rowCount;
         this.state.ColumnCount = data.columnCount;
         this.state.IsDependent = data.isDependent;
@@ -830,8 +840,9 @@ class Properties extends React.Component {
                     RightText: this.state.RightText,
                     RowCount: this.state.RowCount,
                     ColumnCount: this.state.ColumnCount,
-                    DatagridProperties: this.state.DatagridProperties,
-                    ColumnIndex: this.state.ColumnIndex
+                    DatagridAndTableProperties: this.state.DatagridAndTableProperties,
+                    ColumnIndex: this.state.ColumnIndex,
+                    RowIndex: this.state.RowIndex
                 })
             }).then(res => res.json())
                 .then(data => {

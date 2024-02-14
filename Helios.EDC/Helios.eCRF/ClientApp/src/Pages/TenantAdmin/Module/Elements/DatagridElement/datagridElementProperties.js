@@ -21,7 +21,7 @@ import { withTranslation } from "react-i18next";
 class DatagridElementProperties extends Component {
     constructor(props) {
         super(props);
-        var inps = props.DatagridProperties !== "" ? JSON.parse(props.DatagridProperties) : [];
+        var inps = props.DatagridAndTableProperties !== "" ? JSON.parse(props.DatagridAndTableProperties) : [];
 
         this.state = {
             elementRows: inps,
@@ -41,7 +41,7 @@ class DatagridElementProperties extends Component {
             newRows.splice(index, 1);
             return { elementRows: newRows };
         }, () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
             this.props.changeColumnCount(this.state.columnCount);
         });
     };
@@ -58,7 +58,7 @@ class DatagridElementProperties extends Component {
                 },
             ],
         }), () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
             this.props.changeColumnCount(this.state.columnCount);
         });
     };
@@ -69,7 +69,7 @@ class DatagridElementProperties extends Component {
             newRows[index][fieldName] = value;
             return { elementRows: newRows };
         }, () => {
-            this.props.changeDatagridProperties(JSON.stringify(this.state.elementRows));
+            this.props.changeDatagridAndTableProperties(JSON.stringify(this.state.elementRows));
         });
     };
 

@@ -22,7 +22,7 @@ namespace Helios.Core.Domains.Entities
         //datagrid, table
         public int? RowCount { get; set; }
         public int? ColumnCount { get; set; }
-        public string? DatagridProperties { get; set; }
+        public string? DatagridAndTableProperties { get; set; }
 
         //datetime
         public int? StartDay { get; set; }

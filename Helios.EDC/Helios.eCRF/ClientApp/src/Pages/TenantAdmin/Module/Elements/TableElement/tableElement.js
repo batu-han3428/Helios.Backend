@@ -18,7 +18,7 @@ import ElementList from '../../FormBuilder/elementList.js';
 class TableElement extends Component {
     constructor(props) {
         super(props);
-       
+
         this.state = {
             id: props.Id,
             moduleId: props.ModuleId,
@@ -26,14 +26,16 @@ class TableElement extends Component {
             userId: props.UserId,
             isDisable: props.IsDisable,
             columnCount: props.ColumnCount,
-            datagridProperties: props.DatagridProperties !== "" ? JSON.parse(props.DatagridProperties) : [],
+            rowCount: props.RowCount,
+            datagridAndTableProperties: props.DatagridAndTableProperties !== "" ? JSON.parse(props.DatagridAndTableProperties) : [],
             childElementList: props.ChildElementList.length === 0 ? [] : props.ChildElementList,
             modalState: false,
             elementListOptionGroup: GetAllElementListForSelect(16),
             elementListSelectedGroup: null,
             elementName: "",
             elementType: 0,
-            columnIndex: 0
+            columnIndex: 0,
+            rowIndex: 0
         }
 
         this.toggleAddElementModal = this.toggleAddElementModal.bind(this);
@@ -41,9 +43,10 @@ class TableElement extends Component {
         this.getTdContent = this.getTdContent.bind(this);
     }
 
-    toggleAddElementModal = (columnIndex) => {
+    toggleAddElementModal = (columnIndex, rowIndex) => {
         this.state.modalState = !(this.state.modalState);
         this.state.columnIndex = columnIndex;
+        this.state.rowIndex = rowIndex;
     };
 
     handleElementListChange = (e) => {
@@ -57,11 +60,12 @@ class TableElement extends Component {
         this.state.propertiesModalState = !(this.state.propertiesModalState);
     };
 
-    getTdContent(index) {
+    getTdContent(colIndex, rowIndex) {
         var result = false;
         var cld = [];
+
         this.state.childElementList.map(item => {
-            if (item.columnIndex === index + 1) {
+            if (item.columnIndex === colIndex + 1 && item.rowIndex === rowIndex + 1) {
                 result = true;
                 cld.push(item);
             }
@@ -70,7 +74,7 @@ class TableElement extends Component {
         if (result)
             return <ElementList TenantId={this.state.TenantId} ModuleId={this.state.moduleId} ModuleElementList={cld} ShowElementList={false} />
         else
-            return <input className="btn btn-success" type="button" value="+" onClick={() => this.toggleAddElementModal(index + 1)} />;
+            return <input className="btn btn-success" type="button" value="+" onClick={() => this.toggleAddElementModal(colIndex + 1, rowIndex + 1)} />;
     }
 
     render() {
@@ -79,19 +83,21 @@ class TableElement extends Component {
                 <Table className="table table-hover table-bordered mb-0">
                     <thead>
                         <tr>
-                            {this.state.datagridProperties.map((col, index) => (
-                                <th key={index} style={{ width: col.width }}>{col.title}</th>
+                            {this.state.datagridAndTableProperties.map((col, index) => (
+                                <th key={index} style={{ width: col.width, backgroundColor: "#6D6E70", color: "#FFF" }}>{col.title}</th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            {[...Array(this.state.columnCount)].map((_, columnIndex) => (
-                                <td key={columnIndex}>
-                                    {this.getTdContent(columnIndex)}
-                                </td>
-                            ))}
-                        </tr>
+                        {[...Array(this.state.rowCount)].map((_, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {[...Array(this.state.columnCount)].map((_, columnIndex) => (
+                                    <td key={columnIndex}>
+                                        {this.getTdContent(columnIndex, rowIndex)}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
                     </tbody>
                 </Table>
 
@@ -126,7 +132,8 @@ class TableElement extends Component {
                                 ParentId={this.state.id}
                                 ActiveTab={"1"}
                                 isCalcBtn={false}
-                                ColumnIndex={this.state.columnIndex}>
+                                ColumnIndex={this.state.columnIndex}
+                                RowIndex={this.state.rowIndex}>
                             </Properties>
                         </div>
                     </ModalBody>

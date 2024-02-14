@@ -30,6 +30,7 @@ import TextareaElement from '../Elements/TextareaElement/textareaElement.js';
 import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderElement.js';
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 import DatagridElement from '../Elements/DatagridElement/datagridElement.js';
+import TableElement from '../Elements/TableElement/tableElement.js';
 import { withTranslation } from "react-i18next";
 import { GetElementNameByKey } from '../Elements/Common/utils.js';
 import { GetAllElementList } from './allElementList.js';
@@ -205,12 +206,20 @@ function ElementList(props) {
                     RightText={param.rightText}
                     DefaultValue={param.defaultValue}
                 />
+            case 15:
+                return <TableElement
+                    IsDisable={true}
+                    Id={param.id} TenantId={tenantId} ModuleId={moduleId} UserId={0}
+                    ColumnCount={param.columnCount} RowCount={param.rowCount}
+                    DatagridAndTableProperties={param.datagridAndTableProperties}
+                    ChildElementList={param.childElements}
+                />
             case 16:
                 return <DatagridElement
                     IsDisable={true}
                     Id={param.id} TenantId={tenantId} ModuleId={moduleId} UserId={0}
                     ColumnCount={param.columnCount}
-                    DatagridProperties={param.datagridProperties}
+                    DatagridAndTableProperties={param.datagridAndTableProperties}
                     ChildElementList={param.childElements}
                 />
             default:
@@ -292,7 +301,9 @@ function ElementList(props) {
                             ParentId={0}
                             ActiveTab={activeTab}
                             isCalcBtn={isCalcBtn}
-                            ColumnIndex={null}>
+                            ColumnIndex={null}
+                            RowIndex={null}
+                        >
                         </Properties>
                     </ModalBody>
                 </Modal>
