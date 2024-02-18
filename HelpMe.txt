@@ -1,0 +1,40 @@
+********************************
+Repos:
+Frontend : https://dev.azure.com/codeforapp/Medcase/_git/Helios.Frontend
+Backend: https://dev.azure.com/codeforapp/Medcase/_git/Medcase
+
+********************************
+
+Azure artifacts:
+Install :
+https://github.com/microsoft/artifacts-credprovider?tab=readme-ov-file#setup
+Add as system envoiment variable:
+$env:NUGET_PLUGIN_PATHS="C:\Users\inan\.nuget\plugins\netcore\CredentialProvider.Microsoft\CredentialProvider.Microsoft.exe"
+
+
+Dotnet resporse solution:
+dotnet restore --interactive .\Helios.sln
+
+Example:
+dotnet nuget push nupkgs/mypackage.1.1.0.nupkg --source MySource --api-key AZ
+
+To push package:
+dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.nupkg --source "helios-v3" --api-key az --interactive
+
+
+********************************
+
+az config set core.allow_broker=true
+az account clear
+az login
+
+az aks get-credentials --resource-group Medcase-Main --name *****
+
+********************************
+
+az acr login --name medcase
+
+docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.1 "C:\Projects\ProjectCrf\"
+docker tag helios-auth:v0.0.1 medcase.azurecr.io/helios/helios-auth:v0.0.1
+docker push medcase.azurecr.io/helios/helios-auth:v0.0.1
+********************************
