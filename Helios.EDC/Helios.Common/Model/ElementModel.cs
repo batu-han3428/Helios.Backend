@@ -72,8 +72,8 @@ namespace Helios.Common.Model
         public int? RowCount { get; set; } = 0;
         public int? ColumnCount { get; set; } = 0;
         public string? DatagridAndTableProperties { get; set; } = "";
-        public int? RowIndex { get; set; }
-        public int? ColumnIndex { get; set; }
+        public int? RowIndex { get; set; } = 0;
+        public int? ColumnIndex { get; set; } = 0;
 
         ////dependent
         public Int64 DependentSourceFieldId { get; set; }
@@ -86,7 +86,7 @@ namespace Helios.Common.Model
         public string RelationSourceInputs { get; set; } = "";
         public string RelationMainJs { get; set; } = "";
 
-        public bool HasChildren { get; set; } = false;
+        //public bool? HasChildren { get; set; } = false;
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
     }
 

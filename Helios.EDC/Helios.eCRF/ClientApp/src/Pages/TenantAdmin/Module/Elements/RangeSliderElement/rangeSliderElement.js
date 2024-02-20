@@ -31,7 +31,7 @@ class RangeSliderElement extends Component {
                 <Slider
                     min={parseInt(this.props.LowerLimit)}
                     max={parseInt(this.props.UpperLimit)}
-                    value={this.state.isDisable === true ? null : this.state.horizontal}
+                    value={this.state.isDisable === true ? 0 : this.state.horizontal}
                     labels={this.state.horizontalLabels}
                     onChange={this.handleChangeHorizontal}
                 />

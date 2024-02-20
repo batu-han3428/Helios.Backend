@@ -12,6 +12,7 @@ import {
     ModalFooter,
     Button,
 } from "reactstrap";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Properties from './properties.js';
 import './formBuilder.css';
 import { useDispatch, useSelector } from "react-redux";
@@ -37,7 +38,7 @@ import { GetAllElementList } from './allElementList.js';
 
 function ElementList(props) {
     const toastRef = useRef();
-    const baseUrl = "https://localhost:7196";
+    const baseUrl = "http://localhost:3300";
     const [tenantId] = useState(props.TenantId);
     const [moduleId] = useState(props.ModuleId);
     const [elementId, setElementId] = useState(0);
@@ -50,11 +51,16 @@ function ElementList(props) {
     const [elementName, setElementName] = useState('');
     const [isCalcBtn, setIsCalcBtn] = useState('');
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const userInformation = useSelector(state => state.rootReducer.Login);
 
     useEffect(() => {
         setModuleElementList(props.ModuleElementList);
     }, [props.ModuleElementList]);
+
+    const navigateToPreview = (id) => {
+        navigate(`/preview/${id}`);
+    };
 
     const removeBodyCss = () => {
         document.body.classList.add("no_padding");
@@ -265,17 +271,23 @@ function ElementList(props) {
         })
         : null;
 
-    const elmementItems = elements.map((l) =>
+    const elementItems = elements.map((l) =>
         <Button className="elmlst" id={l.key} key={l.key} onClick={e => togglePropModal(e, l.key, 0, "1")}><i className={l.icon} style={{ color: '#00a8f3' }}></i> &nbsp; {GetElementNameByKey(props, l.key)} </Button>
     );
 
     return (
         <div>
+            <div style={{ float: 'right' }}>
+                <Button color="success" onClick={() => { navigateToPreview(moduleId) }} className='mt-1'>
+                    {props.t("Preview")}
+                </Button>
+            </div>
+            <br/>
             {showElementList && (
                 <>
                     <div style={{ width: "200px", float: 'left', position: 'fixed' }}>
                         <div>
-                            {elmementItems}
+                            {elementItems}
                         </div>
                     </div>
                     <div style={{ margin: '10px 20px 10px 215px' }} className="row">

@@ -23,7 +23,7 @@ const FormBuilder = props => {
     const userInformation = useSelector(state => state.rootReducer.Login);
     const { moduleId } = useParams();
     const [moduleElementList, setModuleElementList] = useState([]);
-    const baseUrl = "https://localhost:7196";
+    const baseUrl = "http://localhost:3300";
     const dispatch = useDispatch();
 
     const fetchData = () => {
