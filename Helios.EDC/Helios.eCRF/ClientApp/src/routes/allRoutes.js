@@ -93,7 +93,7 @@ import AddOrUpdateModule from "../Pages/TenantAdmin/Module/addOrUpdateModule.js"
 import StudyList from "../Pages/TenantAdmin/Study/StudyList";
 import LockedList from "../Pages/TenantAdmin/Study/LockedList";
 import AddOrUpdateStudy from "../Pages/TenantAdmin/Study/AddOrUpdateStudy";
-import Study from "../Pages/TenantAdmin/Study/Study";
+import Study from "../Pages/TenantAdmin/Visit/VisitList";
 
 //Site & Laboratories
 import Sites from "../Pages/TenantAdmin/SiteLaboratories/Sites";

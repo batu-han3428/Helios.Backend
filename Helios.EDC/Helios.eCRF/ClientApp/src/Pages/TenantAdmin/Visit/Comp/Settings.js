@@ -4,13 +4,15 @@ import { withTranslation } from "react-i18next";
 import { useDispatch, useSelector } from 'react-redux';
 import { endloading, startloading } from '../../../../store/loader/actions';
 import { Tabs, Table, Checkbox, Typography } from 'antd';
-import { useVisitPageEProSetMutation, useLazyPermissionListGetQuery } from "../../../../store/services/Visit";
+import { useVisitPageEProSetMutation, useLazyPermissionListGetQuery, useVisitPagePermissionSetMutation } from "../../../../store/services/Visit";
 
 const Settings = props => {
 
     const dispatch = useDispatch();
 
     const [visitPageEProSet] = useVisitPageEProSetMutation();
+
+    const [visitPagePermissionSet] = useVisitPagePermissionSetMutation();
 
     const [recordEPro, setRecordEPro] = useState(false);
 
@@ -19,7 +21,7 @@ const Settings = props => {
     const userInformation = useSelector(state => state.rootReducer.Login);
 
     const submitForm = async () => {
-        if (activeTab == 1) {
+        if (activeTab === 1) {
             if (isEpro !== recordEPro) {
                 try {
                     dispatch(startloading());
@@ -59,6 +61,51 @@ const Settings = props => {
                 });
             }
         }
+        else if (activeTab === 2) {
+            try {
+                dispatch(startloading());
+                let dto = {
+                    userId: userInformation.userId,
+                    studyId: studyInformation.studyId,
+                    permissionKeys: selectedRowKeys
+                };
+                if (props.record.type === 'visit') {
+                    dto.studyVisitId = props.record.id;
+                } else if (props.record.type === 'page') {
+                    dto.studyVisitPageId = props.record.id;
+                }
+                else {
+                    return false;
+                }
+                const response = await visitPagePermissionSet(dto);
+                if (response.data.isSuccess) {
+                    props.toast.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: true
+                    });
+                    dispatch(endloading());
+                } else {
+                    props.toast.current.setToast({
+                        message: props.t(response.data.message),
+                        stateToast: false
+                    });
+                    dispatch(endloading());
+                }
+            } catch (e) {
+                props.toast.current.setToast({
+                    message: props.t("An unexpected error occurred."),
+                    stateToast: false
+                });
+                dispatch(endloading());
+            }
+        }
+        else {
+            props.toast.current.setToast({
+                message: props.t("An unexpected error occurred."),
+                stateToast: false
+            });
+            dispatch(endloading());
+        }
     }
 
     useImperativeHandle(props.refs, () => ({
@@ -71,53 +118,21 @@ const Settings = props => {
             dataIndex: 'name',
         }
     ];
-    const data = [
-        {
-            key: 'CanFreeze',
-            name: 'Freeze',
-        },
-        {
-            key: 'CanLock',
-            name: 'Lock',
-        },
-        {
-            key: '3',
-            name: 'Signature',
-        },
-        {
-            key: '4',
-            name: 'SDV',
-        },
-        {
-            key: '5',
-            name: 'Query',
-        },
-        {
-            key: '6',
-            name: 'Verification',
-        },
-        {
-            key: '7',
-            name: 'SAE Lock',
-        },
-    ];
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-    //const dataa = {
-    //    CanFreeze: true,
-    //    CanLock: false
-    //};
+    const [permission, setPermission] = useState();
 
-    const [dataa, setDataa] = useState({});
+    const [totalHeight, setTotalHeight] = useState(0);
 
     const [items, setItems] = useState([]);
 
     const [trigger, { data: permissionsData, error, isLoading }] = useLazyPermissionListGetQuery();
 
     useEffect(() => {
-        if (props.record) {
-            trigger(props.record.type === 'page' ? 2 : 1);
+        if (props.record && studyInformation.studyId) {
+
+            trigger({ pageKey: props.record.type === 'page' ? 2 : 1, studyId: studyInformation.studyId, id: props.record.id });
 
             setRecordEPro(props.record.epro);
 
@@ -125,25 +140,13 @@ const Settings = props => {
                 setIsEpro(props.record.epro);
             }
         }
-    }, [props.record])
+    }, [props.record, studyInformation.studyId])
 
     useEffect(() => {
         if (!isLoading && !error && permissionsData) {
-            console.log(permissionsData)
-            //const response = {
-            //    CanFreeze: true,
-            //    CanLock: false
-            //};
-            //setDataa(response);
-           
-
-            //if (Object.values(response).length !== 0) {
-            //    const preselectedKeys = Object.keys(response)
-            //        .filter((key) => response[key] === true)
-            //        .map((key) => key);
-            //    setSelectedRowKeys(preselectedKeys);
-            //}
-
+            setPermission(permissionsData.permissionRedisModel);
+            setTotalHeight(permissionsData.permissionRedisModel.length * 50);
+            setSelectedRowKeys(permissionsData.permissionModel.map(x=>x.permissionName));
         } else if (!isLoading && error) {
             props.toast.current.setToast({
                 message: props.t("An unexpected error occurred."),
@@ -183,6 +186,9 @@ const Settings = props => {
                 children: contentEpro()
             });
             key++;
+            setActiveTab(1);
+        } else {
+            setActiveTab(2);
         }
         items.push({
             key: key,
@@ -190,7 +196,7 @@ const Settings = props => {
             children: contentPermission()
         });
         setItems(items);
-    }, [selectedRowKeys, isEpro])
+    }, [selectedRowKeys, isEpro, permission])
 
     const rowSelection = {
         selectedRowKeys,
@@ -203,8 +209,6 @@ const Settings = props => {
         }),
     };
 
-    const totalHeight = data.length * 50;
-
     const contentPermission = () => {
         return (
             <Table
@@ -213,17 +217,22 @@ const Settings = props => {
                     ...rowSelection,
                 }}
                 columns={columns}
-                dataSource={data}
+                dataSource={permission}
                 pagination={false}
                 scroll={{ y: totalHeight > 300 ? 300 : undefined }}
             />
         );
     }
 
-    const [activeTab, setActiveTab] = useState('1');
+    const [activeTab, setActiveTab] = useState(0);
 
     const handleTabChange = (key) => {
-        setActiveTab(key);
+        const data = items.find(x => x.key === key);
+        if (data.label === 'ePRO') {
+            setActiveTab(1);
+        } else {
+            setActiveTab(2);
+        }
     };
 
     return (
