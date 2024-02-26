@@ -32,6 +32,7 @@ import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderEle
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 import DatagridElement from '../Elements/DatagridElement/datagridElement.js';
 import TableElement from '../Elements/TableElement/tableElement.js';
+import CalculationElement from '../Elements/CalculationElement/calculationElement.js';
 import { withTranslation } from "react-i18next";
 import { GetElementNameByKey } from '../Elements/Common/utils.js';
 import { GetAllElementList } from './allElementList.js';
@@ -41,6 +42,7 @@ function ElementList(props) {
     const baseUrl = "http://localhost:3300";
     const [tenantId] = useState(props.TenantId);
     const [moduleId] = useState(props.ModuleId);
+    const [isDisable] = useState(props.IsDisable);
     const [elementId, setElementId] = useState(0);
     const [moduleElementList, setModuleElementList] = useState([]);
     const [elements] = useState(GetAllElementList());
@@ -148,15 +150,16 @@ function ElementList(props) {
     }
 
     const renderElementsSwitch = (param) => {
+        var dsbl = isDisable ? "disabled" : "";
         switch (param.elementType) {
             case 1:
                 return <LabelElement Title={param.title} />;
             case 2:
-                return <TextElement IsDisable={"disabled"}
+                return <TextElement IsDisable={dsbl}
                 />;
             case 4:
                 return <NumericElement
-                    IsDisable={"disabled"}
+                    IsDisable={dsbl}
                     Unit={""}
                     Mask={""}
                     LowerLimit={0}
@@ -164,48 +167,56 @@ function ElementList(props) {
                 />;
             case 5:
                 return <TextareaElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     DefaultValue={param.defaultValue}
                 />
             case 6:
                 return <DateElement
-                    IsDisable={true}
+                    Title={param.title}
+                    IsRequired={param.isRequired}
+                    IsDisable={isDisable}
+                    AddTodayDate={param.addTodayDate}
                     StartDay={param.startDay}
                     EndDay={param.endDay}
                     StartMonth={param.startMonth}
                     EndMonth={param.endMonth}
                     StartYear={param.startYear}
                     EndYear={param.endYear}
+                    DefaultValue={param.defaultValue}
+                    IsPreview={false}
+                />
+            case 7:
+                return <CalculationElement
                 />
             case 8:
                 return <RadioElement
-                    IsDisable={"disabled"}
+                    IsDisable={dsbl}
                     Layout={param.layout}
                     ElementOptions={param.elementOptions}
                 />
             case 9:
                 return <CheckElement
-                    IsDisable={"disabled"}
+                    IsDisable={dsbl}
                     Layout={param.layout}
                     ElementOptions={param.elementOptions}
                 />
             case 10:
                 return <DropdownElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     ElementOptions={param.elementOptions}
                 />
             case 11:
                 return <DropdownCheckListElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     ElementOptions={param.elementOptions}
                 />
             case 12:
                 return <FileUploaderElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                 />
             case 13:
                 return <RangeSliderElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     LowerLimit={param.lowerLimit}
                     UpperLimit={param.upperLimit}
                     LeftText={param.leftText}
@@ -214,7 +225,7 @@ function ElementList(props) {
                 />
             case 15:
                 return <TableElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     Id={param.id} TenantId={tenantId} ModuleId={moduleId} UserId={0}
                     ColumnCount={param.columnCount} RowCount={param.rowCount}
                     DatagridAndTableProperties={param.datagridAndTableProperties}
@@ -222,7 +233,7 @@ function ElementList(props) {
                 />
             case 16:
                 return <DatagridElement
-                    IsDisable={true}
+                    IsDisable={isDisable}
                     Id={param.id} TenantId={tenantId} ModuleId={moduleId} UserId={0}
                     ColumnCount={param.columnCount}
                     DatagridAndTableProperties={param.datagridAndTableProperties}
@@ -230,7 +241,7 @@ function ElementList(props) {
                 />
             default:
                 return <TextElement
-                    IsDisable={"disabled"}
+                    IsDisable={dsbl}
                 />;
         }
     }
@@ -247,20 +258,24 @@ function ElementList(props) {
                             {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
                             {item.elementType !== 1 && item.title}
                         </label>
-                        {item.isDependent && (
-                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
+                        {isDisable && (
+                            <>
+                                {item.isDependent && (
+                                    <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-link"></i></Button>
+                                )}
+                                {item.isRelated && (
+                                    <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-project-diagram"></i></Button>
+                                )}
+                                {item.elementType === 7 /*calculated*/ && (
+                                    <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
+                                )}
+                                <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
+                                {item.parentId === 0 && (
+                                    < Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
+                                )}
+                                <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
+                            </>
                         )}
-                        {item.isRelated && (
-                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "2")}><i className="fas fa-project-diagram"></i></Button>
-                        )}
-                        {item.elementType === 7 /*calculated*/ && (
-                            <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, 0, item.id, "1", true)}><i className="fas fa-calculator"></i></Button>
-                        )}
-                        <Button className="actionBtn" id={item.id} onClick={e => togglePropModal(e, item.elementType, item.id, "1")}><i className="far fa-edit"></i></Button>
-                        {item.parentId === 0 && (
-                            < Button className="actionBtn"><i className="far fa-copy" onClick={e => copyElement(e, item.id)}></i></Button>
-                        )}
-                        <Button className="actionBtn"><i className="fas fa-trash-alt" onClick={e => deleteElement(e, item.id)}></i></Button>
                     </div>
                     {renderElementsSwitch(item)}
                     <label style={{ fontSize: "8pt", textDecoration: 'none' }}>
@@ -277,14 +292,14 @@ function ElementList(props) {
 
     return (
         <div>
-            <div style={{ float: 'right' }}>
-                <Button color="success" onClick={() => { navigateToPreview(moduleId) }} className='mt-1'>
-                    {props.t("Preview")}
-                </Button>
-            </div>
-            <br/>
             {showElementList && (
                 <>
+                    <div style={{ float: 'right' }}>
+                        <Button color="success" onClick={() => { navigateToPreview(moduleId); }} className='mt-1'>
+                            {props.t("Preview")}
+                        </Button>
+                    </div>
+                    <br />
                     <div style={{ width: "200px", float: 'left', position: 'fixed' }}>
                         <div>
                             {elementItems}

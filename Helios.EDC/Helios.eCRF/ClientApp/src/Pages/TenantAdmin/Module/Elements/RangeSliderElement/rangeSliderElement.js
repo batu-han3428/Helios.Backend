@@ -9,6 +9,7 @@ class RangeSliderElement extends Component {
         this.state = {
             isDisable: props.IsDisable,
             horizontal: props.DefaultValue,
+            Value: props.Value,
             horizontalLabels: {
                 0: props.LeftText,
                 100: props.RightText

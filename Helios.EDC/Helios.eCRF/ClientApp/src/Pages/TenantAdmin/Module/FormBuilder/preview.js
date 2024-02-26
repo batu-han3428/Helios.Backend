@@ -32,6 +32,7 @@ import FileUploaderElement from '../Elements/FileUploaderElement/fileUploaderEle
 import RangeSliderElement from '../Elements/RangeSliderElement/rangeSliderElement.js';
 import DatagridElement from '../Elements/DatagridElement/datagridElement.js';
 import TableElement from '../Elements/TableElement/tableElement.js';
+import CalculationElement from '../Elements/CalculationElement/calculationElement.js';
 import { withTranslation } from "react-i18next";
 
 function Preview() {
@@ -83,13 +84,21 @@ function Preview() {
                 />
             case 6:
                 return <DateElement
+                    Title={param.title}
+                    IsRequired={param.isRequired}
                     IsDisable={false}
+                    AddTodayDate={param.addTodayDate}
                     StartDay={param.startDay}
                     EndDay={param.endDay}
                     StartMonth={param.startMonth}
                     EndMonth={param.endMonth}
                     StartYear={param.startYear}
                     EndYear={param.endYear}
+                    DefaultValue={param.defaultValue}
+                    IsPreview={true }
+                />
+            case 7:
+                return <CalculationElement
                 />
             case 8:
                 return <RadioElement
@@ -157,10 +166,12 @@ function Preview() {
             return (
                 <Row className={cls} key={item.id}>
                     <div style={{ marginBottom: '3px', marginTop: '10px' }}>
-                        <label style={{ marginRight: '5px' }}>
-                            {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
-                            {item.elementType !== 1 && item.title}
-                        </label>
+                        {item.elementType !== 6 && (
+                            <label style={{ marginRight: '5px' }}>
+                                {item.isRequired && (<span style={{ color: 'red' }}>*&nbsp;</span>)}
+                                {item.elementType !== 1 && item.title}
+                            </label>
+                        )}
                     </div>
                     {renderElementsSwitch(item)}
                     <label style={{ fontSize: "8pt", textDecoration: 'none' }}>

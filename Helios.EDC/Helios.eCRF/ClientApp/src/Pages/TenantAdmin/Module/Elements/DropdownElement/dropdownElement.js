@@ -9,6 +9,7 @@ class DropdownElement extends Component {
         this.state = {
             isDisable: props.IsDisable,
             orgElementOptions: JSON.parse(props.ElementOptions),
+            Value: props.Value,
             ElementOptions: [],
         }
 
@@ -21,7 +22,7 @@ class DropdownElement extends Component {
         var optns = [];
 
         this.state.orgElementOptions.map(item => {
-            var itm = { label: item.tagKey, value: item.id };
+            var itm = { label: item.tagName, value: item.id };
             optns.push(itm);
         });
 

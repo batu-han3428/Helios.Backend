@@ -31,7 +31,7 @@ const baseUrl = "http://localhost:3300";
 class ListElementsProperties extends Component {
     constructor(props) {
         super(props);
-
+        
         this.state = {
             Id: 0,
             layoutOptionGroup: [

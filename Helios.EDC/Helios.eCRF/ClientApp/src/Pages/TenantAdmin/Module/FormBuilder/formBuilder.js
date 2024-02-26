@@ -58,7 +58,7 @@ const FormBuilder = props => {
                         </Row>
                     </div>
                     <div>
-                        <ElementList TenantId={userInformation.TenantId} ModuleId={moduleId} ModuleElementList={moduleElementList} ShowElementList={true } />
+                        <ElementList TenantId={userInformation.TenantId} ModuleId={moduleId} ModuleElementList={moduleElementList} ShowElementList={true} IsDisable={true} />
                     </div>
                 </div>
             </div>

@@ -52,7 +52,7 @@ class Properties extends React.Component {
             // General properties
             Id: props.Id,
             ParentId: props.ParentId,
-            TenantId: props.TenantId,
+            TenantId: 2,
             UserId: props.UserId,
             ModuleId: props.ModuleId,
             IsCalcBtn: props.isCalcBtn,
