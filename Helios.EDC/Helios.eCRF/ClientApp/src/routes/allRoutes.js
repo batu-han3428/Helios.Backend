@@ -85,6 +85,7 @@ import UiOffcanvas from "../Pages/Template/Ui/UiOffcanvas";
 
 //Module
 import FormBuilder from "../Pages/TenantAdmin/Module/FormBuilder/formBuilder.js";
+import Preview from "../Pages/TenantAdmin/Module/FormBuilder/preview.js";
 import Module from "../Pages/TenantAdmin/Module/moduleList.js";
 import AddOrUpdateModule from "../Pages/TenantAdmin/Module/addOrUpdateModule.js";
 
@@ -132,6 +133,7 @@ const userRoutes = [
     { path: "/moduleList", component: <Module />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/addModule", component: <AddOrUpdateModule />, menuType: "admin", roles: ['TenantAdmin'] },
     { path: "/formBuilder/:moduleId", component: <FormBuilder />, menuType: "admin", roles: ['TenantAdmin'] },
+    { path: "/preview/:moduleId", component: <Preview />, menuType: "admin", roles: ['TenantAdmin'] },
 
     //study
     { path: "/studylist", component: <StudyList />, menuType: "admin", roles: ['TenantAdmin'] },
