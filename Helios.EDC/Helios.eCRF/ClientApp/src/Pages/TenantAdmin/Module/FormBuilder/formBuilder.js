@@ -2,15 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
-    Card,
-    CardBody,
-    CardTitle,
-    Modal,
-    Container,
-    ModalBody,
-    ModalHeader,
-    ModalFooter,
-    Button,
 } from "reactstrap";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { withTranslation } from "react-i18next";

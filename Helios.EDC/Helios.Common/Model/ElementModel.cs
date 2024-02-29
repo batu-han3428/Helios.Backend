@@ -86,6 +86,8 @@ namespace Helios.Common.Model
         public string RelationSourceInputs { get; set; } = "";
         public string RelationMainJs { get; set; } = "";
 
+        public string? VariableName { get; set; } = "";
+
         //public bool? HasChildren { get; set; } = false;
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
     }

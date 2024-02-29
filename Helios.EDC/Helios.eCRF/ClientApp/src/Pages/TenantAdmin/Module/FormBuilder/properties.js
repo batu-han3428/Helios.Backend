@@ -783,71 +783,75 @@ class Properties extends React.Component {
         }
 
         if (isValid && this.state.IsFormValid) {
+            var bdy = JSON.stringify({
+                Id: this.state.Id,
+                ModuleId: this.state.ModuleId,
+                TenantId: this.state.TenantId,
+                UserId: this.state.UserId,
+                ElementDetailId: this.state.ElementDetailId,
+                ParentId: this.state.ParentId,
+                ElementType: this.state.ElementType,
+                ElementName: this.state.ElementName,
+                Title: this.state.Title,
+                IsTitleHidden: this.state.IsTitleHidden,
+                Order: this.state.Order,
+                Description: this.state.Description,
+                Width: this.state.FieldWidths,
+                IsHidden: this.state.IsHidden,
+                IsRequired: this.state.IsRequired,
+                IsDependent: this.state.IsDependent,
+                IsRelated: this.state.IsRelation,
+                IsReadonly: this.state.IsReadonly,
+                CanMissing: this.state.CanMissing,
+
+                // Elements properties
+                DefaultValue: this.state.DefaultValue,
+                Unit: this.state.Unit,
+                Mask: this.state.Mask,
+                LowerLimit: this.state.LowerLimit,
+                UpperLimit: this.state.UpperLimit,
+                Layout: this.state.Layout,
+                StartDay: this.state.StartDay,
+                EndDay: this.state.EndDay,
+                StartMonth: this.state.StartMonth,
+                EndMonth: this.state.EndMonth,
+                StartYear: this.state.StartYear,
+                EndYear: this.state.EndYear,
+                AddTodayDate: this.state.AddTodayDate,
+                ElementOptions: this.state.SavedTagList != null && this.state.SavedTagList.length > 0 ? JSON.stringify(this.state.SavedTagList) : "",
+                LeftText: this.state.LeftText,
+                RightText: this.state.RightText,
+                CalculationSourceInputs: this.state.CalculationSourceInputs,
+                MainJs: this.state.MainJs,
+                RowCount: this.state.RowCount,
+                ColumnCount: this.state.ColumnCount,
+                DatagridAndTableProperties: this.state.DatagridAndTableProperties == null ? "" : this.state.DatagridAndTableProperties,
+                RowIndex: this.state.RowIndex,
+                ColumnIndex: this.state.ColumnIndex,
+
+                // Dependency properties
+                DependentSourceFieldId: this.state.DependentSourceFieldId == null ? 0 : this.state.DependentSourceFieldId,
+                DependentTargetFieldId: this.state.DependentTargetFieldId == null ? 0 : this.state.DependentTargetFieldId,
+                DependentCondition: this.state.DependentCondition,
+                DependentAction: this.state.DependentAction,
+                DependentFieldValue: this.state.DependentFieldValue.length > 0 ? JSON.stringify(this.state.DependentFieldValue) : "",
+
+                RelationSourceInputs: this.state.RelationSourceInputs,
+                RelationMainJs: this.state.RelationMainJs,
+
+                ChildElements: [],
+                VariableName: ""
+            });
+
+            debugger;
+
             fetch(baseUrl + '/Module/SaveModuleContent', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    Id: this.state.Id,
-                    ModuleId: this.state.ModuleId,
-                    TenantId: this.state.TenantId,
-                    UserId: this.state.UserId,
-                    ElementDetailId: this.state.ElementDetailId,
-                    ParentId: this.state.ParentId,
-                    ElementType: this.state.ElementType,
-                    ElementName: this.state.ElementName,
-                    Title: this.state.Title,
-                    IsTitleHidden: this.state.IsTitleHidden,
-                    Order: this.state.Order,
-                    Description: this.state.Description,
-                    Width: this.state.FieldWidths,
-                    IsHidden: this.state.IsHidden,
-                    IsRequired: this.state.IsRequired,
-                    IsDependent: this.state.IsDependent,
-                    IsRelated: this.state.IsRelation,
-                    IsReadonly: this.state.IsReadonly,
-                    CanMissing: this.state.CanMissing,
-
-                    // Elements properties
-                    DefaultValue: this.state.DefaultValue,
-                    Unit: this.state.Unit,
-                    Mask: this.state.Mask,
-                    LowerLimit: this.state.LowerLimit,
-                    UpperLimit: this.state.UpperLimit,
-                    Layout: this.state.Layout,
-                    StartDay: this.state.StartDay,
-                    EndDay: this.state.EndDay,
-                    StartMonth: this.state.StartMonth,
-                    EndMonth: this.state.EndMonth,
-                    StartYear: this.state.StartYear,
-                    EndYear: this.state.EndYear,
-                    AddTodayDate: this.state.AddTodayDate,
-                    ElementOptions: this.state.SavedTagList != null ? JSON.stringify(this.state.SavedTagList) : "",
-                    LeftText: this.state.LeftText,
-                    RightText: this.state.RightText,
-                    CalculationSourceInputs: this.state.CalculationSourceInputs,
-                    MainJs: this.state.MainJs,
-                    RowCount: this.state.RowCount,
-                    ColumnCount: this.state.ColumnCount,
-                    DatagridAndTableProperties: this.state.DatagridAndTableProperties == null ? "" : this.state.DatagridAndTableProperties,
-                    RowIndex: this.state.RowIndex,
-                    ColumnIndex: this.state.ColumnIndex,
-
-                    // Dependency properties
-                    DependentSourceFieldId: this.state.DependentSourceFieldId == null ? 0 : this.state.DependentSourceFieldId,
-                    DependentTargetFieldId: this.state.DependentTargetFieldId == null ? 0 : this.state.DependentTargetFieldId,
-                    DependentCondition: this.state.DependentCondition,
-                    DependentAction: this.state.DependentAction,
-                    DependentFieldValue: JSON.stringify(this.state.DependentFieldValue),
-
-                    RelationSourceInputs: this.state.RelationSourceInputs,
-                    RelationMainJs: this.state.RelationMainJs,
-
-                    //HasChildren: false,
-                    ChildElements: []
-                })
+                body: bdy
             }).then(res => res.json())
                 .then(data => {
                     if (data.isSuccess) {
@@ -869,6 +873,7 @@ class Properties extends React.Component {
                 .catch(error => {
                     debugger;
                     console.error('Error:', error);
+                    alert(error)
                 });
         }
         else {

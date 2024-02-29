@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Text;
@@ -37,18 +38,21 @@ namespace Helios.Core.helpers
                 value = "null";
             return value;
         }
+
         public static string ConvertNullRandomizeStrToEmptyStr(this string value)
         {
             if (string.IsNullOrEmpty(value))
                 value = "Not Randomized";
             return value;
         }
+
         public static string ConvertNullPatientStrToEmptyStr(this string value)
         {
             if (string.IsNullOrEmpty(value) || value == "-")
                 value = "No Data";
             return value;
         }
+
         public static string ConvertTRCharToENChar(this string text)
         {
             var t = string.Join("", text.Normalize(NormalizationForm.FormD).Where(c => char.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark));
@@ -228,6 +232,15 @@ namespace Helios.Core.helpers
 
                 return sb.ToString();
             }
+        }
+
+        public static string GetEnumDescription(Enum value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+
+            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(DescriptionAttribute));
+
+            return attribute == null ? value.ToString() : attribute.Description;
         }
     }
 }

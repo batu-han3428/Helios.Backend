@@ -25,16 +25,16 @@ namespace Helios.Common.Enums
         [Description("Calculation")]
         Calculated = 7,
 
-        [Description("Radiobutton")]
+        [Description("Radio list")]
         RadioList = 8,
 
-        [Description("CheckList")]
+        [Description("Check list")]
         CheckList = 9,
 
-        [Description("Drop-Down")]
+        [Description("Dropdown")]
         DropDown = 10,
 
-        [Description("Drop-Down checklist")]
+        [Description("Dropdown checklist")]
         DropDownMulti = 11,
 
         [Description("File attachment")]
