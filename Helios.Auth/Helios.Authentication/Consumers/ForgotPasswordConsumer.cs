@@ -5,9 +5,9 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using System.Text.Encodings.Web;
 using Helios.Common.DTO;
 using System.Web;
-using Helios.Authentication.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Helios.Common.Domains.Authentication.Entities;
 
 namespace Helios.Authentication.Consumers
 {

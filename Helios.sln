@@ -27,8 +27,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Documentation", "_Documentation", "{BEA4E709-006F-4CC1-ACA6-740D97E01099}"
 	ProjectSection(SolutionItems) = preProject
-		nuget.config = nuget.config
 		HelpMe.txt = HelpMe.txt
+		nuget.config = nuget.config
 		Readme.txt = Readme.txt
 	EndProjectSection
 EndProject

@@ -1,7 +1,7 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Enums;
 using Helios.Authentication.Services.Interfaces;
+using Helios.Common.Domains.Authentication.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
 using System.Net.Mime;
@@ -27,7 +27,7 @@ namespace Helios.Authentication.Services
             var auditTrailModel = new SystemAuditTrail
             {
                 TenantId = TenantId,
-                SystemAuditChangeType = SystemAuditChangeType,
+                //SystemAuditChangeType = SystemAuditChangeType,
                 Details = detail,
                 OldValue = previousValues,
                 NewValue = newValues,

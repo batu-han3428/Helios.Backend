@@ -1,6 +1,5 @@
 ﻿using Helios.Authentication.Consumers;
 using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +7,7 @@ using System.Net.Mail;
 using System.Net;
 using Helios.Authentication.Services.Interfaces;
 using Helios.Authentication.Services;
+using Helios.Common.Domains.Authentication.Entities;
 
 namespace Helios.Authentication.Extension
 {

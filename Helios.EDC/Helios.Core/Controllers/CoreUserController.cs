@@ -1,7 +1,7 @@
-﻿using Helios.Common.DTO;
+﻿using Helios.Common.Domains.Core.Entities;
+using Helios.Common.DTO;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
-using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

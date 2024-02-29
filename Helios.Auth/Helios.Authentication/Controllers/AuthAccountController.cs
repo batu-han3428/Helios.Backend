@@ -1,5 +1,4 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Helios.Common.Model;
 using System.Web;
 using Helios.Common.Enums;
+using Helios.Common.Domains.Authentication.Entities;
 
 namespace Helios.Authentication.Controllers
 {
