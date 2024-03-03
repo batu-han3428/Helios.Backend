@@ -7,6 +7,7 @@ using Helios.Core.helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 namespace Helios.Core.Controllers
 {
@@ -152,7 +153,7 @@ namespace Helios.Core.Controllers
                     //CompanyLogoPath = !string.IsNullOrEmpty(path) ? path : null,
                 };
                 _context.Studies.Add(activeResearch);
-                _context.Studies.Add(demoResearch); 
+                _context.Studies.Add(demoResearch);
 
                 var tenantResult = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
 
@@ -258,11 +259,11 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> StudyLockOrUnlock(StudyLockDTO studyLockDTO)
         {
             var study = await _context.Studies.Where(x => x.Id == studyLockDTO.Id).Include(x => x.EquivalentStudy).FirstOrDefaultAsync();
-            
-            if(study != null)
+
+            if (study != null)
             {
                 study.IsLock = !studyLockDTO.IsLock;
-                study.EquivalentStudy.IsLock= !studyLockDTO.IsLock;
+                study.EquivalentStudy.IsLock = !studyLockDTO.IsLock;
 
                 _context.Studies.Update(study);
 
@@ -439,7 +440,7 @@ namespace Helios.Core.Controllers
                     Message = "No record to delete was found."
                 };
             }
-                
+
             _context.Sites.Remove(oldEntity);
 
             var result = await _context.SaveCoreContextAsync(siteModel.UserId, DateTimeOffset.Now) > 0;
@@ -471,9 +472,9 @@ namespace Helios.Core.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
-                TemplateType= x.TemplateType,
-                CreatedAt= x.CreatedAt,
-                UpdatedAt= x.UpdatedAt
+                TemplateType = x.TemplateType,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
             }).ToListAsync();
 
             return result;
@@ -522,7 +523,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<EmailTemplateModel> GetEmailTemplate(Int64 templateId)
         {
-            var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.Id == templateId).Include(x=>x.MailTemplatesRoles).Select(x => new EmailTemplateModel()
+            var result = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.Id == templateId).Include(x => x.MailTemplatesRoles).Select(x => new EmailTemplateModel()
             {
                 Id = x.Id,
                 TenantId = x.TenantId,
@@ -531,7 +532,7 @@ namespace Helios.Core.Controllers
                 ExternalMails = x.ExternalMails != "" ? JsonConvert.DeserializeObject<List<string>>(x.ExternalMails) : new List<string>(),
                 Name = x.Name,
                 TemplateType = x.TemplateType,
-                Roles = x.MailTemplatesRoles.Where(x=>x.IsActive && !x.IsDeleted).Select(a=>a.RoleId).ToList(),
+                Roles = x.MailTemplatesRoles.Where(x => x.IsActive && !x.IsDeleted).Select(a => a.RoleId).ToList(),
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt
             }).FirstOrDefaultAsync();
@@ -556,7 +557,8 @@ namespace Helios.Core.Controllers
         {
             if (emailTemplateTagDTO.UserId != 0 && emailTemplateTagDTO.TenantId != 0)
             {
-                if(_context.MailTemplateTags.Any(x=>x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.TemplateType == emailTemplateTagDTO.TemplateType && x.Tag == emailTemplateTagDTO.Tag.Trim())){
+                if (_context.MailTemplateTags.Any(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateTagDTO.TenantId && x.TemplateType == emailTemplateTagDTO.TemplateType && x.Tag == emailTemplateTagDTO.Tag.Trim()))
+                {
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
@@ -631,13 +633,13 @@ namespace Helios.Core.Controllers
                     }
                 }
             }
-            
+
             return new ApiResponse<dynamic>
             {
                 IsSuccess = false,
                 Message = "An unexpected error occurred."
             };
-          
+
         }
 
         [HttpPost]
@@ -671,7 +673,7 @@ namespace Helios.Core.Controllers
                 }).ToList();
 
                 mailTemplate.MailTemplatesRoles.AddRange(roles);
-     
+
                 await _context.MailTemplates.AddAsync(mailTemplate);
 
                 var result = await _context.SaveCoreContextAsync(emailTemplateDTO.UserId, DateTimeOffset.Now);
@@ -703,7 +705,7 @@ namespace Helios.Core.Controllers
             }
             else
             {
-                var data = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Id == emailTemplateDTO.Id).Include(x=>x.MailTemplatesRoles).FirstOrDefaultAsync();
+                var data = await _context.MailTemplates.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Id == emailTemplateDTO.Id).Include(x => x.MailTemplatesRoles).FirstOrDefaultAsync();
 
                 if (data == null)
                 {
@@ -713,7 +715,7 @@ namespace Helios.Core.Controllers
                         Message = "An unexpected error occurred."
                     };
                 }
-               
+
                 if (_context.MailTemplates.Any(x => x.IsActive && !x.IsDeleted && x.TenantId == emailTemplateDTO.TenantId && x.StudyId == emailTemplateDTO.StudyId && x.Id != emailTemplateDTO.Id && x.Name == emailTemplateDTO.Name.Trim()))
                 {
                     return new ApiResponse<dynamic>
@@ -846,7 +848,8 @@ namespace Helios.Core.Controllers
                                 Message = "Unsuccessful"
                             };
                         }
-                    }else if (visitDTO.Type == VisitStatu.page.ToString())
+                    }
+                    else if (visitDTO.Type == VisitStatu.page.ToString())
                     {
                         await _context.StudyVisitPages.AddAsync(new StudyVisitPage
                         {
@@ -914,7 +917,7 @@ namespace Helios.Core.Controllers
                 {
                     if (visitDTO.Type == VisitStatu.visit.ToString())
                     {
-                        var visit = await _context.StudyVisits.FirstOrDefaultAsync(x=>x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
+                        var visit = await _context.StudyVisits.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
 
                         if (visit != null)
                         {
@@ -990,10 +993,10 @@ namespace Helios.Core.Controllers
             {
                 if (visitDTO.Type == VisitStatu.visit.ToString())
                 {
-                     var visit = await _context.StudyVisits
-                        .Include(v => v.StudyVisitPages)
-                        .ThenInclude(p => p.StudyVisitPageModules)
-                        .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
+                    var visit = await _context.StudyVisits
+                       .Include(v => v.StudyVisitPages)
+                       .ThenInclude(p => p.StudyVisitPageModules)
+                       .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
 
                     if (visit != null)
                     {
@@ -1051,7 +1054,7 @@ namespace Helios.Core.Controllers
                     IsSuccess = false,
                     Message = "Unsuccessful"
                 };
-               
+
             }
             catch (Exception e)
             {
@@ -1083,6 +1086,96 @@ namespace Helios.Core.Controllers
                         Values = new { value = page.EPro }
                     };
                 }
+            }
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = false,
+                Message = "Unsuccessful"
+            };
+        }
+
+        [HttpGet]
+        public async Task<List<PermissionModel>> GetVisitPagePermissionList(PermissionPage pageKey, Int64 studyId, Int64 id)
+        {
+            if (pageKey == PermissionPage.Visit)
+            {
+                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
+                {
+                    PermissionName = x.PermissionName
+                }).ToListAsync();
+            }else if (pageKey == PermissionPage.Page)
+            {
+                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitPageId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
+                {
+                    PermissionName = x.PermissionName
+                }).ToListAsync();
+            }
+            else
+            {
+                return new List<PermissionModel>();
+            }
+        }
+
+        /// <summary>
+        /// yetki ekler veya siler. isactive true ise yetki seçilidir. false veya hiç kaydı yoksa seçili değildir.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetVisitPagePermission(VisitPagePermissionDTO dto)
+        {
+            List<Permission> permissions = null;
+            Expression<Func<Permission, bool>> query = null;
+
+            //visit yetkileri için if, page yetkileri için else if
+            if (dto.StudyVisitId != null && dto.StudyVisitId != 0)
+            {
+                query = x => x.StudyId == dto.StudyId && x.StudyVisitId == dto.StudyVisitId && !x.IsDeleted;
+            }
+            else if (dto.StudyVisitPageId != null && dto.StudyVisitPageId != 0)
+            {
+                query = x => x.StudyId == dto.StudyId && x.StudyVisitPageId == dto.StudyVisitPageId && !x.IsDeleted;
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+
+            //yetkileri çekiyorum
+            permissions = await _context.Permissions.Where(query).ToListAsync();
+
+            //yeni seçtiğim yetkilerin daha önce veri tabanında kayıtlı olup olmadığını anlıyorum
+            var expectData = dto.PermissionKeys.Except(permissions.Select(x => x.PermissionName).ToList()).ToList();
+            //kayıtlı olmayanlar varsa if giriyor
+            if (expectData.Count > 0)
+            {
+                var newDatas = expectData.Select(x => new Permission { PermissionName = x, StudyVisitId = dto.StudyVisitId, StudyId = dto.StudyId }).ToList();
+                //seçili yetkileri isactive true şekilde ekliyorum.
+                await _context.Permissions.AddRangeAsync(newDatas);
+            }
+            //daha önceden seçili şimdi ise onayı kaldırılmış olan yetkileri buluyorum
+            var activeExpect = permissions.Where(x => x.IsActive && !dto.PermissionKeys.Contains(x.PermissionName)).ToList();
+            //o yetkileri false a çekiyorum
+            activeExpect.ForEach(x => x.IsActive = false);
+            //önceden onayı kaldırılmış ama şimdi onaylanmış yetkileri buluyorum
+            var inactiveExpect = permissions.Where(x => !x.IsActive && dto.PermissionKeys.Contains(x.PermissionName)).ToList();
+            //onları true yapıyorum
+            inactiveExpect.ForEach(x => x.IsActive = true);
+
+            var result = await _context.SaveCoreContextAsync(dto.UserId, DateTimeOffset.Now) > 0;
+
+            if (result)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Successful"
+                };
             }
 
             return new ApiResponse<dynamic>

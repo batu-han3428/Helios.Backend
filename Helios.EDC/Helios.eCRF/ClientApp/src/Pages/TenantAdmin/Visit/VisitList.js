@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Table, Row, Col, Switch, Dropdown, Tooltip, Space } from 'antd';
 import { CheckOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
-import EditableRow from './Comp/EditableRow';
-import EditableCell from './Comp/EditableCell';
+import EditableRow from '../Visit/Comp/EditableRow';
+import EditableCell from '../Visit/Comp/EditableCell';
 import ToastComp from '../../../components/Common/ToastComp/ToastComp';
 import ModalComp from '../../../components/Common/ModalComp/ModalComp';
-import { useApiHelper, visitSettingsItems } from './StudyHelper/Helper';
+import { useApiHelper, visitSettingsItems } from './VisitHelper/Helper';
 
 const Study = props => {
 

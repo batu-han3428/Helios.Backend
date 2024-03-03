@@ -74,6 +74,7 @@ namespace Helios.Core.Domains.Entities
         public Study Study { get; set; }
         public List<StudyUser> StudyUsers { get; set; }
         public StudyRoleModulePermission StudyRoleModulePermission { get; set; }
+        public List<Permission> Permissions { get; set; }
 
         public void NewRole()
         {
