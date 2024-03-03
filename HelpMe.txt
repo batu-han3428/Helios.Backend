@@ -1,5 +1,6 @@
 ********************************
 Repos:
+
 Frontend : https://dev.azure.com/codeforapp/Medcase/_git/Helios.Frontend
 Backend: https://dev.azure.com/codeforapp/Medcase/_git/Medcase
 
@@ -15,20 +16,28 @@ $env:NUGET_PLUGIN_PATHS="C:\Users\inan\.nuget\plugins\netcore\CredentialProvider
 Dotnet resporse solution:
 dotnet restore --interactive .\Helios.sln
 
-Example:
-dotnet nuget push nupkgs/mypackage.1.1.0.nupkg --source MySource --api-key AZ
 
 To push package:
-dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.nupkg --source "helios-v3" --api-key az --interactive
+dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.2.0.nupkg --source "helios-v3" --api-key az --interactive
+
+nuget.exe push -Source "helios-v3" -ApiKey az Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.2.0.nupkg
+
+
+dotnet nuget push --source "helios-v3" --api-key az <package-path>
 
 
 ********************************
+
+docker login medcase.azurecr.io 
+username : medcase 
+password: 7bxV+9vsBuvDfbXu3Ut0e8z2qsXeKoAhXKpyCk3xkr+ACRBw4jaH
+
 
 az config set core.allow_broker=true
 az account clear
 az login
 
-az aks get-credentials --resource-group Medcase-Main --name *****
+*** az aks get-credentials --resource-group Medcase-Main --name *****
 
 ********************************
 
@@ -42,4 +51,5 @@ docker push medcase.azurecr.io/helios/helios-auth:v0.0.1
 docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.1 "C:\Projects\v3\Medcase"
 docker tag helios-core:v0.0.1 medcase.azurecr.io/helios/helios-core:v0.0.1
 docker push medcase.azurecr.io/helios/helios-core:v0.0.1
+
 ********************************
