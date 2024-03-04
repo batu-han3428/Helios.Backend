@@ -18,12 +18,22 @@ dotnet restore --interactive .\Helios.sln
 
 
 To push package:
-dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.2.0.nupkg --source "helios-v3" --api-key az --interactive
+---dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg --source "helios-v3" --api-key az --interactive
 
-nuget.exe push -Source "helios-v3" -ApiKey az Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.2.0.nupkg
+./nuget.exe push -Source "helios-v3" -ApiKey az Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg
 
 
-dotnet nuget push --source "helios-v3" --api-key az <package-path>
+---dotnet nuget push --source "helios-v3" --api-key az <package-path>
+
+********************************
+
+Pushing Helios.Common.1.0.0.1.nupkg to 'https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/'...
+  PUT https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/
+    [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Silent'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+    [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Interactive'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+  Accepted https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/ 2727ms
 
 
 ********************************
@@ -43,13 +53,13 @@ az login
 
 az acr login --name medcase
 
-docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.1 "C:\Projects\v3\Medcase"
-docker tag helios-auth:v0.0.1 medcase.azurecr.io/helios/helios-auth:v0.0.1
-docker push medcase.azurecr.io/helios/helios-auth:v0.0.1
+docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.2 "."
+docker tag helios-auth:v0.0.2 medcase.azurecr.io/helios/helios-auth:v0.0.2
+docker push medcase.azurecr.io/helios/helios-auth:v0.0.2
 
 
-docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.1 "C:\Projects\v3\Medcase"
-docker tag helios-core:v0.0.1 medcase.azurecr.io/helios/helios-core:v0.0.1
-docker push medcase.azurecr.io/helios/helios-core:v0.0.1
+docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.2 "."
+docker tag helios-core:v0.0.2 medcase.azurecr.io/helios/helios-core:v0.0.2
+docker push medcase.azurecr.io/helios/helios-core:v0.0.2
 
 ********************************
