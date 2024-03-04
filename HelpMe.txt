@@ -20,7 +20,7 @@ dotnet restore --interactive .\Helios.sln
 To push package:
 ---dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg --source "helios-v3" --api-key az --interactive
 
-./nuget.exe push -Source "helios-v3" -ApiKey az Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg
+./nuget.exe push -Source "helios-v3" -ApiKey az Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.3.nupkg
 
 
 ---dotnet nuget push --source "helios-v3" --api-key az <package-path>
@@ -53,13 +53,13 @@ az login
 
 az acr login --name medcase
 
-docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.2 "."
-docker tag helios-auth:v0.0.2 medcase.azurecr.io/helios/helios-auth:v0.0.2
-docker push medcase.azurecr.io/helios/helios-auth:v0.0.2
+docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.3 "."
+docker tag helios-auth:v0.0.3 medcase.azurecr.io/helios/helios-auth:v0.0.3
+docker push medcase.azurecr.io/helios/helios-auth:v0.0.3
 
 
-docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.2 "."
-docker tag helios-core:v0.0.2 medcase.azurecr.io/helios/helios-core:v0.0.2
-docker push medcase.azurecr.io/helios/helios-core:v0.0.2
+docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.3 "."
+docker tag helios-core:v0.0.3 medcase.azurecr.io/helios/helios-core:v0.0.3
+docker push medcase.azurecr.io/helios/helios-core:v0.0.3
 
 ********************************
