@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json;
 using Helios.Common.Model;
+using Helios.Core.helpers;
 
 namespace Helios.Core.Controllers
 {
@@ -136,7 +137,6 @@ namespace Helios.Core.Controllers
                     Layout = x.ElementDetail.Layout,
                     DefaultValue = x.ElementDetail.DefaultValue,
                     AddTodayDate = x.ElementDetail.AddTodayDate,
-                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                     MainJs = x.ElementDetail.MainJs,
                     StartDay = x.ElementDetail.StartDay,
                     EndDay = x.ElementDetail.EndDay,
@@ -179,7 +179,6 @@ namespace Helios.Core.Controllers
                     Layout = x.ElementDetail.Layout,
                     DefaultValue = x.ElementDetail.DefaultValue,
                     AddTodayDate = x.ElementDetail.AddTodayDate,
-                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                     MainJs = x.ElementDetail.MainJs,
                     StartDay = x.ElementDetail.StartDay,
                     EndDay = x.ElementDetail.EndDay,
@@ -237,12 +236,10 @@ namespace Helios.Core.Controllers
                 Layout = x.ElementDetail.Layout,
                 IsDependent = x.IsDependent,
                 IsRelated = x.IsRelated,
-                RelationSourceInputs = x.ElementDetail.RelationSourceInputs,
                 RelationMainJs = x.ElementDetail.RelationMainJs,
                 ElementOptions = x.ElementDetail.ElementOptions,
                 DefaultValue = x.ElementDetail.DefaultValue,
                 AddTodayDate = x.ElementDetail.AddTodayDate,
-                CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                 MainJs = x.ElementDetail.MainJs,
                 StartDay = x.ElementDetail.StartDay,
                 EndDay = x.ElementDetail.EndDay,
@@ -259,9 +256,16 @@ namespace Helios.Core.Controllers
                 RowIndex = x.ElementDetail.RowIndex,
             }).AsNoTracking().FirstOrDefaultAsync();
 
+            var events = new List<ModuleElementEvent>();
+
+            if (result.IsRelated || result.IsDependent)
+            {
+                events = await _context.ModuleElementEvents.Where(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted).ToListAsync();
+            }
+
             if (result.IsDependent)
             {
-                var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted);
+                var dep = events.FirstOrDefault(x => x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
 
                 if (dep != null)
                 {
@@ -271,6 +275,51 @@ namespace Helios.Core.Controllers
                     result.DependentAction = (int)dep.ActionType;
                     result.DependentFieldValue = dep.ActionValue;
                 }
+            }
+
+            if (result.IsRelated)
+            {
+                var rels = events.Where(x => x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToList();
+                var relSrcIds = rels.Select(x => x.SourceElementId).ToList();
+                var srcs = await _context.Elements.Where(x => relSrcIds.Contains(x.Id)).ToArrayAsync();
+                var relStr = "[";
+
+                foreach (var item in rels)
+                {
+                    var src = srcs.FirstOrDefault(x => x.Id == item.SourceElementId);
+
+                    relStr += "{\"relationFieldsSelectedGroup\":{\"label\":\"" + src.ElementName + " - " + StringExtensionsHelper.GetEnumDescription(src.ElementType) + "\",\"value\":" + item.SourceElementId + "},\"variableName\":\"" + item.VariableName + "\"}";
+
+                    if (item == rels.LastOrDefault())
+                        relStr += "]";
+                    else
+                        relStr += ",";
+                }
+
+                result.RelationSourceInputs = relStr;
+            }
+
+            if (result.ElementType == ElementType.Calculated)
+            {
+                var cals = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == result.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var calSrcIds = cals.Select(x => x.TargetElementId).ToList();
+                var srcs = await _context.Elements.Where(x => calSrcIds.Contains(x.Id)).ToArrayAsync();
+
+                var calStr = "[";
+
+                foreach (var item in cals)
+                {
+                    var src = srcs.FirstOrDefault(x => x.Id == item.TargetElementId);
+
+                    calStr += "{\"elementFieldSelectedGroup\":{\"label\":\"" + src.ElementName + " - " + StringExtensionsHelper.GetEnumDescription(src.ElementType) + "\",\"value\":" + item.TargetElementId + "},\"variableName\":\"" + item.VariableName + "\"}";
+
+                    if (item == cals.LastOrDefault())
+                        calStr += "]";
+                    else
+                        calStr += ",";
+                }
+
+                result.CalculationSourceInputs = calStr;
             }
 
             return result;
@@ -365,16 +414,14 @@ namespace Helios.Core.Controllers
                             MetaDataTags = model.ElementName,
                             DefaultValue = model.DefaultValue,
                             AddTodayDate = model.AddTodayDate,
-                            CalculationSourceInputs = model.CalculationSourceInputs,
-                            RelationSourceInputs = model.RelationSourceInputs,
                             MainJs = model.MainJs,
                             RelationMainJs = model.RelationMainJs,
-                            StartDay = model.StartDay,
-                            EndDay = model.EndDay,
-                            StartMonth = model.StartMonth,
-                            EndMonth = model.EndMonth,
-                            StartYear = model.StartYear,
-                            EndYear = model.EndYear,
+                            StartDay = model.ElementType != ElementType.DateOption ? 0 : model.StartDay,
+                            EndDay = model.ElementType != ElementType.DateOption ? 0 : model.EndDay,
+                            StartMonth = model.ElementType != ElementType.DateOption ? 0 : model.StartMonth,
+                            EndMonth = model.ElementType != ElementType.DateOption ? 0 : model.EndMonth,
+                            StartYear = model.ElementType != ElementType.DateOption ? 0 : model.StartYear,
+                            EndYear = model.ElementType != ElementType.DateOption ? 0 : model.EndYear,
                             IsInCalculation = model.ElementType == ElementType.Calculated,
                             LeftText = model.LeftText,
                             RightText = model.RightText,
@@ -426,6 +473,7 @@ namespace Helios.Core.Controllers
                                     ModuleId = model.ModuleId,
                                     CalculationElementId = elm.Id,
                                     TargetElementId = item.elementFieldSelectedGroup.value,
+                                    VariableName = item.variableName
                                 };
 
                                 _context.CalculatationElementDetails.Add(calcDtil);
@@ -444,17 +492,17 @@ namespace Helios.Core.Controllers
                         if (model.IsRelated)
                         {
                             var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                            var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
 
-                            foreach (var item in relElmIds)
+                            foreach (var item in relList)
                             {
                                 var elementEvent = new ModuleElementEvent()
                                 {
                                     ModuleId = model.ModuleId,
-                                    SourceElementId = item,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value,
                                     TargetElementId = elm.Id,
                                     TenantId = model.TenantId,
                                     EventType = EventType.Relation,
+                                    VariableName = item.variableName
                                 };
 
                                 _context.ModuleElementEvents.Add(elementEvent);
@@ -465,7 +513,6 @@ namespace Helios.Core.Controllers
                             if (!isSuccess)
                             {
                                 element.IsRelated = false;
-                                elementDetail.RelationSourceInputs = "";
                                 elementDetail.RelationMainJs = "";
 
                                 _context.Elements.Update(element);
@@ -620,23 +667,20 @@ namespace Helios.Core.Controllers
 
                 if (model.ElementType == ElementType.Calculated)
                 {
-                    var dbCalcList = JsonSerializer.Deserialize<List<CalculationModel>>(elementDetail.CalculationSourceInputs);
                     var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
                     var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
                     var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
 
                     //update updated variable list
-                    foreach (var item in dbCalcList)
+                    foreach (var item in existCalDtil)
                     {
-                        var c = calcList.FirstOrDefault(x => x.variableName == item.variableName);
+                        var c = calcList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        if (c != null && c.elementFieldSelectedGroup.value != item.elementFieldSelectedGroup.value)
+                        if (c != null && c.elementFieldSelectedGroup.value != item.TargetElementId)
                         {
-                            var exc = existCalDtil.FirstOrDefault(x => x.TargetElementId == item.elementFieldSelectedGroup.value && x.IsActive && !x.IsDeleted);
-
-                            exc.TargetElementId = c.elementFieldSelectedGroup.value;
-                            _context.CalculatationElementDetails.Update(exc);
+                            item.TargetElementId = c.elementFieldSelectedGroup.value;
+                            _context.CalculatationElementDetails.Update(item);
                         }
                     }
 
@@ -659,7 +703,8 @@ namespace Helios.Core.Controllers
                     }
 
                     existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
-                                                                                          //add new calcElementDetails
+
+                    //add new calcElementDetails
                     foreach (var item in calcList)
                     {
                         if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
@@ -688,7 +733,6 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
                     _context.ElementDetails.Update(elementDetail);
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -696,22 +740,19 @@ namespace Helios.Core.Controllers
 
                 if (model.IsRelated)
                 {
-                    var dbRelList = JsonSerializer.Deserialize<List<RelationModel>>(elementDetail.RelationSourceInputs);
                     var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
                     var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
 
-                    foreach (var item in dbRelList)
+                    foreach (var item in rels)
                     {
-                        var r = relList.FirstOrDefault(x => x.variableName == item.variableName);
+                        var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.relationFieldsSelectedGroup.value)
+                        if (r != null && r.relationFieldsSelectedGroup.value != item.TargetElementId)
                         {
-                            var exr = rels.FirstOrDefault(x => x.TargetElementId == item.relationFieldsSelectedGroup.value && x.IsActive && !x.IsDeleted);
-
-                            exr.TargetElementId = r.relationFieldsSelectedGroup.value;
-                            _context.ModuleElementEvents.Update(exr);
+                            item.TargetElementId = r.relationFieldsSelectedGroup.value;
+                            _context.ModuleElementEvents.Update(item);
                         }
                     }
 
@@ -749,7 +790,6 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    elementDetail.RelationSourceInputs = model.RelationSourceInputs;
                     _context.ElementDetails.Update(elementDetail);
 
                     var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -757,7 +797,6 @@ namespace Helios.Core.Controllers
                     if (!isSuccess)
                     {
                         element.IsRelated = false;
-                        elementDetail.RelationSourceInputs = "";
                         elementDetail.RelationMainJs = "";
 
                         _context.Elements.Update(element);
@@ -935,9 +974,9 @@ namespace Helios.Core.Controllers
                 if (element.ElementType == ElementType.Calculated)
                 {
                     var childrenDtils = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var targetElmIds = childrenDtils.Select(x=>x.TargetElementId).ToList();
+                    var targetElmIds = childrenDtils.Select(x => x.TargetElementId).ToList();
 
-                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x=>x.TargetElementId).ToListAsync();
+                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x => x.TargetElementId).ToListAsync();
 
                     var chngIds = new List<Int64>();
 

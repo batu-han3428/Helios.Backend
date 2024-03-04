@@ -44,11 +44,9 @@ namespace Helios.Core.Domains.Entities
         public string? RightText { get; set; }
 
         //calculation
-        public string? CalculationSourceInputs { get; set; }
         public bool IsInCalculation { get; set; }
         public string? MainJs { get; set; }
 
-        public string? RelationSourceInputs { get; set; }
         public string? RelationMainJs { get; set; }
 
 
