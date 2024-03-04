@@ -1,5 +1,4 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +11,7 @@ using MassTransit.Initializers;
 using Azure.Storage.Blobs;
 using Helios.Common.Enums;
 using System.Data;
+using Helios.Common.Domains.Authentication.Entities;
 
 namespace Helios.Authentication.Controllers
 {

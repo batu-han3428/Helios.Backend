@@ -14,7 +14,7 @@ namespace Helios.Common.Model
         public Int64 TenantId { get; set; }
         public Int64 UserId { get; set; }
         public Int64 ElementDetailId { get; set; }
-        public Int64 ParentId { get; set; }
+        public Int64? ParentId { get; set; }
         public ElementType ElementType { get; set; } = 0;
         public string ElementName { get; set; } = "";
         public string Title { get; set; } = "";

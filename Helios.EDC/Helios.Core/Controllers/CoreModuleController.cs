@@ -1,15 +1,13 @@
 ﻿using Helios.Common.DTO;
 using Helios.Core.Contexts;
-using Helios.Core.Domains.Entities;
 using Helios.Common.Enums;
 using Helios.Core.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using System.Text.Json;
 using Helios.Common.Model;
 using Helios.Core.helpers;
+using Helios.Common.Domains.Core.Entities;
 
 namespace Helios.Core.Controllers
 {
@@ -28,7 +26,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<bool> AddModule(ModuleModel model)
         {
-            _context.Modules.Add(new Domains.Entities.Module
+            _context.Modules.Add(new Module
             {
                 TenantId = model.TenantId,
                 AddedById = model.UserId,
@@ -107,6 +105,115 @@ namespace Helios.Core.Controllers
                 Id = x.Id,
                 Name = x.Name
             }).AsNoTracking().ToListAsync();
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<List<ModuleDTO>> GetModuleCollective(string moduleIds)
+        {
+            string[] tenantIdsArray = moduleIds.Split(',');
+            List<Int64> moduleIdsInt = new List<Int64>();
+            foreach (string id in tenantIdsArray)
+            {
+                if (Int64.TryParse(id, out Int64 guid))
+                {
+                    moduleIdsInt.Add(guid);
+                }
+            }
+            var result = await _context.Modules
+                .Where(x => moduleIdsInt.Contains(x.Id) && x.IsActive && !x.IsDeleted)
+                .Select(x => new ModuleDTO
+                {
+                    Name = x.Name,
+                    StudyRoleModulePermissionId = 1,
+                    StudyVisitPageId = 1,
+                    ReferenceKey = 1,
+                    VersionKey = 1,
+                    Order = 1,
+                    CanFreeze = true,
+                    CanLock = true,
+                    CanSign = true,
+                    CanVerify = true,
+                    CanSdv = true,
+                    CanQuery = true,
+                    StudyVisitPageModuleElements = x.Elements.Select(e => new ElementDTO
+                    {
+                        ElementType = e.ElementType,
+                        ElementName = e.ElementName,
+                        Title = e.Title,
+                        IsTitleHidden = e.IsTitleHidden,
+                        Order = e.Order,
+                        Description = e.Description,
+                        Width = e.Width,
+                        IsHidden = e.IsHidden,
+                        IsRequired = e.IsRequired,
+                        IsDependent = e.IsDependent,
+                        IsRelated = e.IsRelated,
+                        IsReadonly = e.IsReadonly,
+                        CanMissing = e.CanMissing,
+                        StudyVisitPageModuleElementDetails = new ElementDetailDTO
+                        {
+                            ParentId = e.ElementDetail.ParentId,
+                            RowIndex = e.ElementDetail.RowIndex,
+                            ColunmIndex = e.ElementDetail.ColunmIndex,
+                            MetaDataTags = e.ElementDetail.MetaDataTags,
+                            ButtonText = e.ElementDetail.ButtonText,
+                            DefaultValue = e.ElementDetail.DefaultValue,
+                            Unit = e.ElementDetail.Unit,
+                            LowerLimit = e.ElementDetail.LowerLimit,
+                            UpperLimit = e.ElementDetail.UpperLimit,
+                            Mask = e.ElementDetail.Mask,
+                            Layout = e.ElementDetail.Layout,
+                            RowCount = e.ElementDetail.RowCount,
+                            ColumnCount = e.ElementDetail.ColumnCount,
+                            DatagridAndTableProperties = e.ElementDetail.DatagridAndTableProperties,
+                            StartDay = e.ElementDetail.StartDay,
+                            EndDay = e.ElementDetail.EndDay,
+                            StartMonth = e.ElementDetail.StartMonth,
+                            EndMonth = e.ElementDetail.EndMonth,
+                            EndYear = e.ElementDetail.EndYear,
+                            StartYear = e.ElementDetail.StartYear,
+                            AddTodayDate = e.ElementDetail.AddTodayDate,
+                            ElementOptions = e.ElementDetail.ElementOptions,
+                            TargetElementId = e.ElementDetail.TargetElementId,
+                            LeftText = e.ElementDetail.LeftText,
+                            RightText = e.ElementDetail.RightText,
+                            CalculationSourceInputs = e.ElementDetail.CalculationSourceInputs,
+                            IsInCalculation = e.ElementDetail.IsInCalculation,
+                            MainJs = e.ElementDetail.MainJs,
+                            RelationSourceInputs = e.ElementDetail.RelationSourceInputs,
+                            RelationMainJs = e.ElementDetail.RelationMainJs
+                        }
+                    }).ToList(),
+                    studyVisitPageModuleCalculationElementDetails = x.CalculatationElementDetails.Select(ced => new CalculatationElementDetailDTO
+                    {
+                        CalculationElementId = ced.CalculationElementId,
+                        TargetElementId = ced.TargetElementId,
+                        VariableName = ced.VariableName,
+                    }).ToList(),
+                    StudyVisitPageModuleElementEvent = x.ModuleElementEvents.Select(mee => new ModuleElementEventDTO
+                    {
+                        EventType = mee.EventType,
+                        ActionType = mee.ActionType,
+                        SourceElementId = mee.SourceElementId,
+                        TargetElementId = mee.TargetElementId,
+                        ValueCondition = mee.ValueCondition,
+                        ActionValue = mee.ActionValue,
+                        VariableName = mee.VariableName,
+                    }).ToList(),
+                    StudyRoleModulePermission = new Common.DTO.StudyRoleModulePermissionDTO
+                    {
+                        StudyRoleId = 1,
+                        Read = true,
+                        Write = true,
+                        SDV = true,
+                        Query = true,
+                        Freeze = true,
+                        Lock = true,
+                    }
+                })
+                .ToListAsync();
 
             return result;
         }

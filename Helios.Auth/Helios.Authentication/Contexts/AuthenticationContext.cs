@@ -1,5 +1,5 @@
-﻿using Helios.Authentication.Entities;
-using Helios.Authentication.Entities.Base;
+﻿using Helios.Common.Domains.Authentication.Base;
+using Helios.Common.Domains.Authentication.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

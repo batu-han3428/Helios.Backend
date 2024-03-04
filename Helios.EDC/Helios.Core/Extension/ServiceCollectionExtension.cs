@@ -6,6 +6,7 @@ using Helios.Core.Contexts;
 using MassTransit;
 using Helios.Core.Services;
 using Helios.Core.Services.Interfaces;
+using Helios.Common.Helpers.AutoMapper;
 
 namespace Helios.Core.Extension
 {
@@ -587,6 +588,7 @@ namespace Helios.Core.Extension
         public static void DependencyInjection(this IServiceCollection services)
         {
             services.AddScoped<IBaseService, BaseService>();
+            services.AddAutoMapper(typeof(MappingProfile));
         }
     }
 }

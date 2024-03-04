@@ -32,38 +32,38 @@ services:
       volumes:
         - ./volume/rabbitmq:/data
 
-  # helios.ecrf:
-  #   image: ${DOCKER_REGISTRY-}heliosecrf
-  #   build:
-  #     context: .
-  #     dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
-  #   ports:
-  #      - "3300:3300"
-  #      - "3301:3301"
-  #   environment:
-  #     - Redis__Host=redis_image
-  #     - Redis__Password=heliosredis
-  #   networks:
-  #       v3network:
-  #           ipv4_address: 10.8.0.6
+  helios.ecrf:
+    image: ${DOCKER_REGISTRY-}heliosecrf
+    build:
+      context: .
+      dockerfile: Helios.EDC/Helios.eCRF/Dockerfile
+    ports:
+       - "3300:3300"
+       - "3301:3301"
+    environment:
+      - Redis__Host=redis.cache
+      - Redis__Password=heliosredis
+    networks:
+        v3network:
+            ipv4_address: 10.8.0.6
 
 
-  # frontend:
-  #   build:
-  #     context: .
-  #     target: dev-envs
-  #     dockerfile: Helios.EDC/Helios.eCRF/ClientApp/Dockerfile
-  #   container_name: frontend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - "./Helios.EDC/Helios.eCRF/ClientApp:/app"
-  #     - ./Helios.EDC/Helios.eCRF/ClientApp/.nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-  #     - ./Helios.EDC/Helios.eCRF/ClientApp/public:/usr/share/nginx/html
-  #     - "/app/node_modules"
-  #   environment:
-  #    - WATCHPACK_POLLING=true
+  frontend:
+    build:
+      context: .
+      target: dev-envs
+      dockerfile: Helios.EDC/Helios.eCRF/ClientApp/Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "./Helios.EDC/Helios.eCRF/ClientApp:/app"
+      - ./Helios.EDC/Helios.eCRF/ClientApp/.nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./Helios.EDC/Helios.eCRF/ClientApp/public:/usr/share/nginx/html
+      - "/app/node_modules"
+    environment:
+     - WATCHPACK_POLLING=true
 
 
   helios.authentication:

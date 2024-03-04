@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", builder =>
     {
-        builder.WithOrigins("https://localhost:44458", "https://localhost:7196", "https://localhost:3000") // Ýzin vermek istediðiniz kök domaini buraya ekleyin
+        builder.AllowAnyOrigin()
                .AllowAnyMethod()
                .AllowAnyHeader();
     });

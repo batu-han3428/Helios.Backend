@@ -1,6 +1,5 @@
-﻿using Helios.Core.Contexts.Base;
-using Helios.Core.Domains.Base;
-using Helios.Core.Domains.Entities;
+﻿using Helios.Common.Domains.Core.Base;
+using Helios.Common.Domains.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
@@ -116,5 +115,6 @@ namespace Helios.Core.Contexts
         public DbSet<SubjectVisit> SubjectVisits { get; set; }
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }        
         public DbSet<Permission> Permissions { get; set; }
+        public DbSet<StudyVisitPageModuleCalculationElementDetails> studyVisitPageModuleCalculationElementDetails { get; set; }
     }
 }

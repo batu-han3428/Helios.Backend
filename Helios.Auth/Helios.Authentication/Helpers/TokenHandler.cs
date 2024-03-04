@@ -1,5 +1,5 @@
-﻿using Helios.Authentication.Entities;
-using Helios.Authentication.Models;
+﻿using Helios.Authentication.Models;
+using Helios.Common.Domains.Authentication.Entities;
 using Helios.Common.DTO;
 using Helios.Common.Enums;
 using Microsoft.IdentityModel.Tokens;
