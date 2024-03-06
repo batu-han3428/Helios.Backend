@@ -1,5 +1,4 @@
-﻿using Helios.Common.Domains.Core.Base;
-using Helios.Common.Domains.Core.Entities;
+﻿using Helios.Core.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 

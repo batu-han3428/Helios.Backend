@@ -1,7 +1,7 @@
 ﻿using Helios.Authentication.Contexts;
 using Helios.Authentication.Enums;
 using Helios.Authentication.Services.Interfaces;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
 using System.Net.Mime;

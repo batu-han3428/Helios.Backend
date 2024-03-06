@@ -11,7 +11,7 @@ using MassTransit.Initializers;
 using Azure.Storage.Blobs;
 using Helios.Common.Enums;
 using System.Data;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Controllers
 {

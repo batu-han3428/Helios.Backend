@@ -7,7 +7,7 @@ using Helios.Common.DTO;
 using System.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Consumers
 {

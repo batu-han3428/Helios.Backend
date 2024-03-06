@@ -1,5 +1,5 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Helpers
 {
