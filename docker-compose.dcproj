@@ -6,10 +6,10 @@
     <DockerPublishLocally>False</DockerPublishLocally>
     <ProjectGuid>80afff7e-8f43-4aa5-8cc3-897f61134917</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:3500</DockerServiceUrl>
   </PropertyGroup>
   <PropertyGroup>
-    <DockerServiceName>frontend</DockerServiceName>
+    <DockerServiceName>helios.core</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
