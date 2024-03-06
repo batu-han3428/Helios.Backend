@@ -5,7 +5,6 @@ using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System.Reflection;
 
 namespace Helios.Core.Controllers
 {
@@ -159,52 +158,46 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> SetPermission(SetPermissionModel setPermissionModel)
+        public async Task<ApiResponse<dynamic>> SetPermission(StudyUserRolePermissionDTO dto)
         {
-            var studyRole = await _context.StudyRoles.FirstOrDefaultAsync(x => x.IsActive && !x.IsDeleted && x.Id == setPermissionModel.Id);
+            var userId = Request.Headers["Authorization"];
+            var studyId = Request.Headers["StudyId"];
+            var tenantId = Request.Headers["TenantId"];
 
-            if (studyRole != null)
+            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == 1 && x.StudyId == 1 && x.PermissionName == dto.PermissionKey);
+
+            if (permission != null)
             {
-                var propertyName = setPermissionModel.PermissionName;
-                var property = typeof(StudyRole).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-                if (property != null && property.PropertyType == typeof(bool))
+                permission.IsActive = !permission.IsActive;
+                _context.Permissions.Update(permission);
+            }
+            else
+            {
+                await _context.Permissions.AddAsync(new Permission
                 {
-                    property.SetValue(studyRole, setPermissionModel.Value);
-                    var result = await _context.SaveCoreContextAsync(setPermissionModel.UserId, DateTimeOffset.Now) > 0;
+                    StudyRoleId = dto.StudyRoleId,
+                    PermissionName = dto.PermissionKey,
+                    StudyId = Convert.ToInt64(studyId),
+                    TenantId = Convert.ToInt64(tenantId)
+                });
+            }
 
-                    if (result)
-                    {
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = true,
-                            Message = "Successful"
-                        };
-                    }
-                    else
-                    {
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = false,
-                            Message = "Unsuccessful"
-                        };
-                    }
-                }
-                else
+            var result = await _context.SaveCoreContextAsync(Convert.ToInt64(userId), DateTimeOffset.Now) > 0;
+
+            if (result)
+            {
+                return new ApiResponse<dynamic>
                 {
-                    return new ApiResponse<dynamic>
-                    {
-                        IsSuccess = false,
-                        Message = "An unexpected error occurred."
-                    };
-                }
+                    IsSuccess = true,
+                    Message = "Successful"
+                };
             }
             else
             {
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "An unexpected error occurred."
+                    Message = "Unsuccessful"
                 };
             }
         }
