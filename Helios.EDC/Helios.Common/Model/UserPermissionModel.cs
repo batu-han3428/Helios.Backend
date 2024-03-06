@@ -79,11 +79,4 @@ namespace Helios.Common.Model
         public bool? AddAdverseEvent { get; set; }
         public bool? AddMultiVisit { get; set; }
     }
-    
-    public class SetPermissionModel : BaseModel
-    {
-        public Int64 Id { get; set; }
-        public string PermissionName { get; set; }
-        public bool Value { get; set; }
-    }
 }
