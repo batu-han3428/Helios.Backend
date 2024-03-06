@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using Helios.Common.Domains.Core.Entities;
 using Helios.Common.DTO;
 using Helios.Common.Enums;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
+using Helios.Core.Domains.Entities;
 using Helios.Core.helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -1245,7 +1245,6 @@ namespace Helios.Core.Controllers
                     Layout = x.StudyVisitPageModuleElementDetails.Layout,
                     DefaultValue = x.StudyVisitPageModuleElementDetails.DefaultValue,
                     AddTodayDate = x.StudyVisitPageModuleElementDetails.AddTodayDate,
-                    CalculationSourceInputs = x.StudyVisitPageModuleElementDetails.CalculationSourceInputs,
                     MainJs = x.StudyVisitPageModuleElementDetails.MainJs,
                     StartDay = x.StudyVisitPageModuleElementDetails.StartDay,
                     EndDay = x.StudyVisitPageModuleElementDetails.EndDay,
@@ -1531,7 +1530,6 @@ namespace Helios.Core.Controllers
                     Layout = x.StudyVisitPageModuleElementDetails.Layout,
                     DefaultValue = x.StudyVisitPageModuleElementDetails.DefaultValue,
                     AddTodayDate = x.StudyVisitPageModuleElementDetails.AddTodayDate,
-                    CalculationSourceInputs = x.StudyVisitPageModuleElementDetails.CalculationSourceInputs,
                     MainJs = x.StudyVisitPageModuleElementDetails.MainJs,
                     StartDay = x.StudyVisitPageModuleElementDetails.StartDay,
                     EndDay = x.StudyVisitPageModuleElementDetails.EndDay,
@@ -1572,12 +1570,10 @@ namespace Helios.Core.Controllers
                 Layout = x.StudyVisitPageModuleElementDetails.Layout,
                 IsDependent = x.IsDependent,
                 IsRelated = x.IsRelated,
-                RelationSourceInputs = x.StudyVisitPageModuleElementDetails.RelationSourceInputs,
                 RelationMainJs = x.StudyVisitPageModuleElementDetails.RelationMainJs,
                 ElementOptions = x.StudyVisitPageModuleElementDetails.ElementOptions,
                 DefaultValue = x.StudyVisitPageModuleElementDetails.DefaultValue,
                 AddTodayDate = x.StudyVisitPageModuleElementDetails.AddTodayDate,
-                CalculationSourceInputs = x.StudyVisitPageModuleElementDetails.CalculationSourceInputs,
                 MainJs = x.StudyVisitPageModuleElementDetails.MainJs,
                 StartDay = x.StudyVisitPageModuleElementDetails.StartDay,
                 EndDay = x.StudyVisitPageModuleElementDetails.EndDay,

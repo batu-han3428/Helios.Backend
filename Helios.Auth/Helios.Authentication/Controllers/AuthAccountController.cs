@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Helios.Common.Model;
 using System.Web;
 using Helios.Common.Enums;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Controllers
 {

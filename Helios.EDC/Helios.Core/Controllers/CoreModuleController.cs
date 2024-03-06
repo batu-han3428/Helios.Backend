@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Helios.Common.Model;
 using Helios.Core.helpers;
-using Helios.Common.Domains.Core.Entities;
+using Helios.Core.Domains.Entities;
 
 namespace Helios.Core.Controllers
 {
@@ -179,10 +179,8 @@ namespace Helios.Core.Controllers
                             TargetElementId = e.ElementDetail.TargetElementId,
                             LeftText = e.ElementDetail.LeftText,
                             RightText = e.ElementDetail.RightText,
-                            CalculationSourceInputs = e.ElementDetail.CalculationSourceInputs,
                             IsInCalculation = e.ElementDetail.IsInCalculation,
                             MainJs = e.ElementDetail.MainJs,
-                            RelationSourceInputs = e.ElementDetail.RelationSourceInputs,
                             RelationMainJs = e.ElementDetail.RelationMainJs
                         }
                     }).ToList(),

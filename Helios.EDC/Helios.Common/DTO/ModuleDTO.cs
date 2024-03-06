@@ -1,7 +1,4 @@
-﻿
-using Helios.Common.Domains.Authentication.Entities;
-using Helios.Common.Domains.Core.Entities;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Common.DTO

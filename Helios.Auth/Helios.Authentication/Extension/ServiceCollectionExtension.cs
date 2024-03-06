@@ -7,7 +7,7 @@ using System.Net.Mail;
 using System.Net;
 using Helios.Authentication.Services.Interfaces;
 using Helios.Authentication.Services;
-using Helios.Common.Domains.Authentication.Entities;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Extension
 {
