@@ -8,7 +8,7 @@
         public StudyVisit StudyVisit { get; set; }
         public Int64? StudyVisitPageId { get; set; }
         public StudyVisitPage StudyVisitPage { get; set; }
-        public int PermissionName { get; set; }
+        public int PermissionKey { get; set; }
         public Int64 StudyId { get; set; }
     }
 }

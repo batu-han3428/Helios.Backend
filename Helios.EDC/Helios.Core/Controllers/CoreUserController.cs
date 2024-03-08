@@ -56,7 +56,7 @@ namespace Helios.Core.Controllers
                 Id = x.Id,
                 StudyId = x.StudyId,
                 RoleName = x.Name,
-                RolePermissions = x.Permissions.Where(a=>a.IsActive).Select(a=>a.PermissionName)
+                RolePermissions = x.Permissions.Where(a=>a.IsActive).Select(a=>a.PermissionKey)
             }).ToListAsync();
 
             return result;
@@ -99,7 +99,7 @@ namespace Helios.Core.Controllers
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == dto.StudyRoleId && x.StudyId == baseDTO.StudyId && x.PermissionName == dto.PermissionKey);
+            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == dto.StudyRoleId && x.StudyId == baseDTO.StudyId && x.PermissionKey == dto.PermissionKey);
 
             if (permission != null)
             {
@@ -111,7 +111,7 @@ namespace Helios.Core.Controllers
                 await _context.Permissions.AddAsync(new Permission
                 {
                     StudyRoleId = dto.StudyRoleId,
-                    PermissionName = dto.PermissionKey,
+                    PermissionKey = dto.PermissionKey,
                     StudyId = baseDTO.StudyId,
                     TenantId = baseDTO.TenantId
                 });
@@ -156,6 +156,7 @@ namespace Helios.Core.Controllers
                 StudyRole studyRole = new StudyRole();
                 studyRole.StudyId = baseDTO.StudyId;
                 studyRole.Name = userPermission.RoleName;
+                studyRole.TenantId = baseDTO.TenantId;
                 await _context.StudyRoles.AddAsync(studyRole);
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
