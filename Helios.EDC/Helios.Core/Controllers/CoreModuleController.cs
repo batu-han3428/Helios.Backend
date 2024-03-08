@@ -1180,6 +1180,16 @@ namespace Helios.Core.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AutoSaveElement(ElementShortModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            
+
+
+            return result;
+        }
+
         private async Task<bool> checkElementName(Int64 moduleId, string elementName, List<Element> moduleElements = null)
         {
             if (moduleElements == null)
