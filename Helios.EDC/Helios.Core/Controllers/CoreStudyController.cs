@@ -1103,13 +1103,13 @@ namespace Helios.Core.Controllers
             {
                 return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
                 {
-                    PermissionName = x.PermissionName
+                    PermissionName = x.PermissionKey
                 }).ToListAsync();
             }else if (pageKey == PermissionPage.Page)
             {
                 return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitPageId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
                 {
-                    PermissionName = x.PermissionName
+                    PermissionName = x.PermissionKey
                 }).ToListAsync();
             }
             else
@@ -1126,17 +1126,19 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetVisitPagePermission(VisitPagePermissionDTO dto)
         {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
             List<Permission> permissions = null;
             Expression<Func<Permission, bool>> query = null;
 
             //visit yetkileri için if, page yetkileri için else if
             if (dto.StudyVisitId != null && dto.StudyVisitId != 0)
             {
-                query = x => x.StudyId == dto.StudyId && x.StudyVisitId == dto.StudyVisitId && !x.IsDeleted;
+                query = x => x.StudyId == baseDTO.StudyId && x.StudyVisitId == dto.StudyVisitId && !x.IsDeleted;
             }
             else if (dto.StudyVisitPageId != null && dto.StudyVisitPageId != 0)
             {
-                query = x => x.StudyId == dto.StudyId && x.StudyVisitPageId == dto.StudyVisitPageId && !x.IsDeleted;
+                query = x => x.StudyId == baseDTO.StudyId && x.StudyVisitPageId == dto.StudyVisitPageId && !x.IsDeleted;
             }
             else
             {
@@ -1151,24 +1153,24 @@ namespace Helios.Core.Controllers
             permissions = await _context.Permissions.Where(query).ToListAsync();
 
             //yeni seçtiğim yetkilerin daha önce veri tabanında kayıtlı olup olmadığını anlıyorum
-            var expectData = dto.PermissionKeys.Except(permissions.Select(x => x.PermissionName).ToList()).ToList();
+            var expectData = dto.PermissionKeys.Except(permissions.Select(x => x.PermissionKey).ToList()).ToList();
             //kayıtlı olmayanlar varsa if giriyor
             if (expectData.Count > 0)
             {
-                var newDatas = expectData.Select(x => new Permission { PermissionName = x, StudyVisitId = dto.StudyVisitId, StudyId = dto.StudyId }).ToList();
+                var newDatas = expectData.Select(x => new Permission { PermissionKey = x, StudyVisitId = dto.StudyVisitId, StudyVisitPageId = dto.StudyVisitPageId, StudyId = baseDTO.StudyId, TenantId = baseDTO.TenantId }).ToList();
                 //seçili yetkileri isactive true şekilde ekliyorum.
                 await _context.Permissions.AddRangeAsync(newDatas);
             }
             //daha önceden seçili şimdi ise onayı kaldırılmış olan yetkileri buluyorum
-            var activeExpect = permissions.Where(x => x.IsActive && !dto.PermissionKeys.Contains(x.PermissionName)).ToList();
+            var activeExpect = permissions.Where(x => x.IsActive && !dto.PermissionKeys.Contains(x.PermissionKey)).ToList();
             //o yetkileri false a çekiyorum
             activeExpect.ForEach(x => x.IsActive = false);
             //önceden onayı kaldırılmış ama şimdi onaylanmış yetkileri buluyorum
-            var inactiveExpect = permissions.Where(x => !x.IsActive && dto.PermissionKeys.Contains(x.PermissionName)).ToList();
+            var inactiveExpect = permissions.Where(x => !x.IsActive && dto.PermissionKeys.Contains(x.PermissionKey)).ToList();
             //onları true yapıyorum
             inactiveExpect.ForEach(x => x.IsActive = true);
 
-            var result = await _context.SaveCoreContextAsync(dto.UserId, DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {
