@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
@@ -50,76 +51,12 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Int64 studyId)
         {
-            //auto mapper kullanılmalı. somi hanım kurdum demişti o yüzden kurmuyorum. fakat nereye kurdu bir saat bakmadım. kendisiyle konuşucam. o zaman düzeltiriz burayı.
-            var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).AsNoTracking().Select(x=> new UserPermissionDTO
+            var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x=>x.Permissions).AsNoTracking().Select(x=> new UserPermissionDTO
             {
                 Id = x.Id,
                 StudyId = x.StudyId,
                 RoleName = x.Name,
-                Add = x.Add,
-                View = x.View,
-                Edit = x.Edit,
-                ArchivePatient = x.ArchivePatient,
-                PatientStateChange = x.PatientStateChange,
-                Randomize = x.Randomize,
-                ViewRandomization = x.ViewRandomization,
-                Sdv = x.Sdv,
-                Sign = x.Sign,
-                Lock = x.Lock,
-                MarkAsNull = x.MarkAsNull,
-                QueryView = x.QueryView,
-                AutoQueryClosed = x.AutoQueryClosed,
-                CanFileView = x.CanFileView,
-                CanFileUpload = x.CanFileUpload,
-                CanFileDeleted = x.CanFileDeleted,
-                CanFileDownload = x.CanFileDownload,
-                StudyFoldersView = x.StudyFoldersView,
-                ExportData = x.ExportData,
-                DashboardView = x.DashboardView,
-                InputAuditTrail = x.InputAuditTrail,
-                AERemove = x.AERemove,
-                IwrsMarkAsRecieved = x.IwrsMarkAsRecieved,
-                IwrsTransfer = x.IwrsTransfer,
-                ApproveSourceDocuments = x.ApproveSourceDocuments,
-                Monitoring = x.Monitoring,
-                ApproveAudit = x.ApproveAudit,
-                Audit = x.Audit,
-                CanSeeCycleAuditing = x.CanSeeCycleAuditing,
-                CanSeeCycleMonitoring = x.CanSeeCycleMonitoring,
-                CanSeePatientAuditing = x.CanSeePatientAuditing,
-                CanSeePatientMonitoring = x.CanSeePatientMonitoring,
-                CanSeeSiteAuditing = x.CanSeeSiteAuditing,
-                CanSeeSiteMonitoring = x.CanSeeSiteMonitoring,
-                UploadAuditing = x.UploadAuditing,
-                UploadMonitoring = x.UploadMonitoring,
-                RemoteSdv = x.RemoteSdv,
-                HasPageFreeze = x.HasPageFreeze,
-                HasPageUnFreeze = x.HasPageUnFreeze,
-                HasPageUnLock = x.HasPageUnLock,
-                SeePageActionAudit = x.SeePageActionAudit,
-                CanCode = x.CanCode,
-                RemovePatient = x.RemovePatient,
-                AEArchive = x.AEArchive,
-                ArchiveMultiVisit = x.ArchiveMultiVisit,
-                RemoveMultiVisit = x.RemoveMultiVisit,
-                DoubleDataCompare = x.DoubleDataCompare,
-                DoubleDataEntry = x.DoubleDataEntry,
-                DoubleDataReport = x.DoubleDataReport,
-                DoubleDataViewAll = x.DoubleDataViewAll,
-                DoubleDataDelete = x.DoubleDataDelete,
-                DoubleDataQuery = x.DoubleDataQuery,
-                DoubleDataAnswerQuery = x.DoubleDataAnswerQuery,
-                DashboardBuilderAdmin = x.DashboardBuilderAdmin,
-                DashboardBuilderPivotExport = x.DashboardBuilderPivotExport,
-                DashboardBuilderSourceExport = x.DashboardBuilderSourceExport,
-                TmfAdmin = x.TmfAdmin,
-                TmfSiteUser = x.TmfSiteUser,
-                TmfUser = x.TmfUser,
-                MriPage = x.MriPage,
-                EConsentView = x.EConsentView,
-                ExportPatientForm = x.ExportPatientForm,
-                AddAdverseEvent = x.AddAdverseEvent,
-                AddMultiVisit = x.AddMultiVisit
+                RolePermissions = x.Permissions.Where(a=>a.IsActive).Select(a=>a.PermissionName)
             }).ToListAsync();
 
             return result;
@@ -160,11 +97,9 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetPermission(StudyUserRolePermissionDTO dto)
         {
-            var userId = Request.Headers["Authorization"];
-            var studyId = Request.Headers["StudyId"];
-            var tenantId = Request.Headers["TenantId"];
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == 1 && x.StudyId == 1 && x.PermissionName == dto.PermissionKey);
+            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == dto.StudyRoleId && x.StudyId == baseDTO.StudyId && x.PermissionName == dto.PermissionKey);
 
             if (permission != null)
             {
@@ -177,12 +112,12 @@ namespace Helios.Core.Controllers
                 {
                     StudyRoleId = dto.StudyRoleId,
                     PermissionName = dto.PermissionKey,
-                    StudyId = Convert.ToInt64(studyId),
-                    TenantId = Convert.ToInt64(tenantId)
+                    StudyId = baseDTO.StudyId,
+                    TenantId = baseDTO.TenantId
                 });
             }
 
-            var result = await _context.SaveCoreContextAsync(Convert.ToInt64(userId), DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {
@@ -205,7 +140,9 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission)
         {
-            var userPermissionCheck = await _context.StudyRoles.FirstOrDefaultAsync(p => p.Name == userPermission.RoleName && p.IsActive && !p.IsDeleted && p.StudyId == userPermission.StudyId);
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var userPermissionCheck = await _context.StudyRoles.FirstOrDefaultAsync(p => p.Name == userPermission.RoleName && p.IsActive && !p.IsDeleted && p.StudyId == baseDTO.StudyId);
             if (userPermissionCheck != null)
             {
                 return new ApiResponse<dynamic>
@@ -217,11 +154,10 @@ namespace Helios.Core.Controllers
             else if (userPermission.Id == 0)
             {
                 StudyRole studyRole = new StudyRole();
-                studyRole.StudyId = userPermission.StudyId;
+                studyRole.StudyId = baseDTO.StudyId;
                 studyRole.Name = userPermission.RoleName;
-                studyRole.NewRole();
                 await _context.StudyRoles.AddAsync(studyRole);
-                var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
                 if (result)
                 {
@@ -249,7 +185,7 @@ namespace Helios.Core.Controllers
 
                     _context.StudyRoles.Update(oldEntity);
 
-                    var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+                    var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
                     if (result)
                     {
@@ -272,6 +208,8 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionModel userPermission)
         {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
             var oldEntity = await _context.StudyRoles.FirstOrDefaultAsync(p => p.Id == userPermission.Id);
 
             if (oldEntity == null)
@@ -285,7 +223,7 @@ namespace Helios.Core.Controllers
 
             _context.Remove(oldEntity);
 
-            var result = await _context.SaveCoreContextAsync(userPermission.UserId, DateTimeOffset.Now) > 0;
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
             {
