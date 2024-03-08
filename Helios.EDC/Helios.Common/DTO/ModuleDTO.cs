@@ -5,30 +5,18 @@ namespace Helios.Common.DTO
 {
     public class ModuleDTO
     {
-        public Int64 Id { get; set; }
         public Int64 StudyVisitPageId { get; set; }
         public string Name { get; set; }
-        public Int64 StudyRoleModulePermissionId { get; set; }
         public List<ElementDTO> StudyVisitPageModuleElements { get; set; }
         public List<CalculatationElementDetailDTO> studyVisitPageModuleCalculationElementDetails { get; set; }
         public List<ModuleElementEventDTO> StudyVisitPageModuleElementEvent { get; set; }
-        public StudyRoleModulePermissionDTO StudyRoleModulePermission { get; set; }
         public Int64 ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public int Order { get; set; }
-        public bool CanFreeze { get; set; }
-        public bool CanLock { get; set; }
-        public bool CanSign { get; set; }
-        public bool CanVerify { get; set; }
-        public bool CanSdv { get; set; }
-        public bool CanQuery { get; set; }
     }
 
     public class ElementDTO
     {
-        public Int64 Id { get; set; }
-        public Int64 ModuleId { get; set; }
-        public Int64? ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName { get; set; }
         public string Title { get; set; }
@@ -47,8 +35,6 @@ namespace Helios.Common.DTO
 
     public class ElementDetailDTO
     {
-        public Int64 Id { get; set; }
-        public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColunmIndex { get; set; }
@@ -78,8 +64,6 @@ namespace Helios.Common.DTO
         public Int64? TargetElementId { get; set; }
         public string? LeftText { get; set; }
         public string? RightText { get; set; }
-        public string? CalculationSourceInputs { get; set; }
-        public string? RelationSourceInputs { get; set; }
         public bool IsInCalculation { get; set; }
         public string? MainJs { get; set; }
         public string? RelationMainJs { get; set; }
@@ -90,8 +74,6 @@ namespace Helios.Common.DTO
 
     public class CalculatationElementDetailDTO
     {
-        public Int64 Id { get; set; }
-        public Int64 ModuleId { get; set; }
         public Int64 CalculationElementId { get; set; }
         public Int64 TargetElementId { get; set; }
         public string VariableName { get; set; }
@@ -99,8 +81,6 @@ namespace Helios.Common.DTO
 
     public class ModuleElementEventDTO
     {
-        public Int64 Id { get; set; }
-        public Int64 ModuleId { get; set; }
         public EventType EventType { get; set; }
         public ActionType ActionType { get; set; }
         public Int64 SourceElementId { get; set; }
@@ -110,15 +90,4 @@ namespace Helios.Common.DTO
         public string? VariableName { get; set; }
     }
 
-    public class StudyRoleModulePermissionDTO
-    {
-        public Int64 StudyRoleId { get; set; }
-        public Int64 StudyVisitPageModuleId { get; set; }
-        public bool Read { get; set; }
-        public bool Write { get; set; }
-        public bool SDV { get; set; }
-        public bool Query { get; set; }
-        public bool Freeze { get; set; }
-        public bool Lock { get; set; }
-    }
 }

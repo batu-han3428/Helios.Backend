@@ -8,6 +8,7 @@ using System.Text.Json;
 using Helios.Common.Model;
 using Helios.Core.helpers;
 using Helios.Core.Domains.Entities;
+using Helios.Common.Helpers.Api;
 
 namespace Helios.Core.Controllers
 {
@@ -98,19 +99,23 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList(Int64 tenantId)
+        public async Task<List<ModuleModel>> GetModuleList()
         {
-            var result = await _context.Modules.Where(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var result = await _context.Modules.Where(x => x.TenantId == baseDTO.TenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
             {
                 Id = x.Id,
-                Name = x.Name
+                Name = x.Name,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
             }).AsNoTracking().ToListAsync();
 
             return result;
         }
 
         [HttpGet]
-        public async Task<List<ModuleDTO>> GetModuleCollective(string moduleIds)
+        public async Task<List<ModuleDTO>> GetModuleCollective(string moduleIds, Int64 pageId)
         {
             string[] tenantIdsArray = moduleIds.Split(',');
             List<Int64> moduleIdsInt = new List<Int64>();
@@ -126,17 +131,10 @@ namespace Helios.Core.Controllers
                 .Select(x => new ModuleDTO
                 {
                     Name = x.Name,
-                    StudyRoleModulePermissionId = 1,
-                    StudyVisitPageId = 1,
+                    StudyVisitPageId = pageId,
                     ReferenceKey = 1,
                     VersionKey = 1,
                     Order = 1,
-                    CanFreeze = true,
-                    CanLock = true,
-                    CanSign = true,
-                    CanVerify = true,
-                    CanSdv = true,
-                    CanQuery = true,
                     StudyVisitPageModuleElements = x.Elements.Select(e => new ElementDTO
                     {
                         ElementType = e.ElementType,
@@ -199,20 +197,8 @@ namespace Helios.Core.Controllers
                         ValueCondition = mee.ValueCondition,
                         ActionValue = mee.ActionValue,
                         VariableName = mee.VariableName,
-                    }).ToList(),
-                    StudyRoleModulePermission = new Common.DTO.StudyRoleModulePermissionDTO
-                    {
-                        StudyRoleId = 1,
-                        Read = true,
-                        Write = true,
-                        SDV = true,
-                        Query = true,
-                        Freeze = true,
-                        Lock = true,
-                    }
-                })
-                .ToListAsync();
-
+                    }).ToList()
+                }).ToListAsync();
             return result;
         }
         #endregion

@@ -97,7 +97,6 @@ namespace Helios.Core.Contexts
         public DbSet<MultipleChoiceTag> MultipleChoiceTag { get; set; }
         public DbSet<Site> Sites { get; set; }
         public DbSet<Study> Studies { get; set; }
-        public DbSet<StudyRoleModulePermission> StudyRoleModulePermissions { get; set; }
         public DbSet<StudyRole> StudyRoles { get; set; }
         public DbSet<StudyUser> StudyUsers { get; set; }
         public DbSet<StudyUserSite> StudyUserSites { get; set; }

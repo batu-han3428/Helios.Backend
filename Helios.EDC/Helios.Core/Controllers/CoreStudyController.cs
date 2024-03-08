@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Linq.Expressions;
+using Helios.Common.Helpers.Api;
 
 namespace Helios.Core.Controllers
 {
@@ -880,35 +881,6 @@ namespace Helios.Core.Controllers
                             };
                         }
                     }
-                    else if (visitDTO.Type == "module")
-                    {
-                        await _context.StudyVisitPageModules.AddAsync(new StudyVisitPageModule
-                        {
-                            StudyRoleModulePermissionId = 1,
-                            StudyVisitPageId = visitDTO.ParentId.Value,
-                            Name = visitDTO.Name,
-                            Order = visitDTO.Order
-                        });
-
-                        var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
-
-                        if (result)
-                        {
-                            return new ApiResponse<dynamic>
-                            {
-                                IsSuccess = true,
-                                Message = "Successful"
-                            };
-                        }
-                        else
-                        {
-                            return new ApiResponse<dynamic>
-                            {
-                                IsSuccess = false,
-                                Message = "Unsuccessful"
-                            };
-                        }
-                    }
 
                     return new ApiResponse<dynamic>
                     {
@@ -925,7 +897,7 @@ namespace Helios.Core.Controllers
                         if (visit != null)
                         {
                             visit.Name = visitDTO.Name;
-                            visit.VisitType = (VisitType)visitDTO.VisitType.Value;
+                            visit.VisitType = visitDTO.VisitType.Value;
 
                             var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -948,6 +920,32 @@ namespace Helios.Core.Controllers
                     else if (visitDTO.Type == VisitStatu.page.ToString())
                     {
                         var page = await _context.StudyVisitPages.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
+
+                        if (page != null)
+                        {
+                            page.Name = visitDTO.Name;
+
+                            var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
+                            if (result)
+                            {
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful"
+                                };
+                            }
+                        }
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "Unsuccessful"
+                        };
+                    }
+                    else if (visitDTO.Type == VisitStatu.module.ToString())
+                    {
+                        var page = await _context.StudyVisitPageModules.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
 
                         if (page != null)
                         {
@@ -1188,26 +1186,196 @@ namespace Helios.Core.Controllers
             };
         }
 
+        private List<StudyVisitPageModule> MapModuleDTOListToStudyVisitPageModuleList(List<ModuleDTO> moduleDTOList)
+        {
+            var studyVisitPageModuleList = new List<StudyVisitPageModule>();
+
+            Int64 pageId = moduleDTOList.First().StudyVisitPageId;
+
+            int lastOrder = _context.StudyVisitPageModules.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId).Select(x => x.Order).DefaultIfEmpty().Max();
+
+            if (lastOrder == 0)
+            {
+                lastOrder = 1;
+            }
+            else
+            {
+                lastOrder++;
+            }
+
+            foreach (var moduleDTO in moduleDTOList)
+            {
+                var studyVisitPageModule = new StudyVisitPageModule
+                {
+                    StudyVisitPageId = moduleDTO.StudyVisitPageId,
+                    Name = moduleDTO.Name,
+                    ReferenceKey = moduleDTO.ReferenceKey,
+                    VersionKey = moduleDTO.VersionKey,
+                    Order = lastOrder,
+                };
+
+                studyVisitPageModule.StudyVisitPageModuleElements = MapElementDTOListToStudyVisitPageModuleElementList(moduleDTO.StudyVisitPageModuleElements);
+                studyVisitPageModule.studyVisitPageModuleCalculationElementDetails = MapCalculatationElementDetailDTOListToStudyVisitPageModuleCalculationElementDetailsList(moduleDTO.studyVisitPageModuleCalculationElementDetails);
+                studyVisitPageModule.StudyVisitPageModuleElementEvent = MapModuleElementEventDTOListToStudyVisitPageModuleElementEventList(moduleDTO.StudyVisitPageModuleElementEvent);
+
+                studyVisitPageModuleList.Add(studyVisitPageModule);
+
+                lastOrder++;
+            }
+
+            return studyVisitPageModuleList;
+        }
+
+        private StudyVisitPageModuleElementDetail MapElementDTOListToStudyVisitPageModuleElementDetailsList(ElementDetailDTO? elementDetailDTO)
+        {
+            if (elementDetailDTO == null)
+            {
+                return null;
+            }
+            return new StudyVisitPageModuleElementDetail
+            {
+                ParentId = elementDetailDTO.ParentId,
+                RowIndex = elementDetailDTO.RowIndex,
+                ColunmIndex = elementDetailDTO.ColunmIndex,
+                CanQuery = elementDetailDTO.CanQuery,
+                CanSdv = elementDetailDTO.CanSdv,
+                CanRemoteSdv = elementDetailDTO.CanRemoteSdv,
+                CanComment = elementDetailDTO.CanComment,
+                CanDataEntry = elementDetailDTO.CanDataEntry,
+                ParentElementEProPageNumber = elementDetailDTO.ParentElementEProPageNumber,
+                MetaDataTags = elementDetailDTO.MetaDataTags,
+                EProPageNumber = elementDetailDTO.EProPageNumber,
+                ButtonText = elementDetailDTO.ButtonText,
+                DefaultValue = elementDetailDTO.DefaultValue,
+                Unit = elementDetailDTO.Unit,
+                LowerLimit = elementDetailDTO.LowerLimit,
+                UpperLimit = elementDetailDTO.UpperLimit,
+                Mask = elementDetailDTO.Mask,
+                Layout = elementDetailDTO.Layout,
+                StartDay = elementDetailDTO.StartDay,
+                EndDay = elementDetailDTO.EndDay,
+                StartMonth = elementDetailDTO.StartMonth,
+                EndMonth = elementDetailDTO.EndMonth,
+                StartYear = elementDetailDTO.StartYear,
+                EndYear = elementDetailDTO.EndYear,
+                AddTodayDate = elementDetailDTO.AddTodayDate,
+                ElementOptions = elementDetailDTO.ElementOptions,
+                TargetElementId = elementDetailDTO.TargetElementId,
+                LeftText = elementDetailDTO.LeftText,
+                RightText = elementDetailDTO.RightText,
+                IsInCalculation = elementDetailDTO.IsInCalculation,
+                MainJs = elementDetailDTO.MainJs,
+                RelationMainJs = elementDetailDTO.RelationMainJs,
+                RowCount = elementDetailDTO.RowCount,
+                ColumnCount = elementDetailDTO.ColumnCount,
+                DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties,
+            };
+        }
+
+        private List<StudyVisitPageModuleElement> MapElementDTOListToStudyVisitPageModuleElementList(List<ElementDTO> elementDTOList)
+        {
+            var studyVisitPageModuleElementList = new List<StudyVisitPageModuleElement>();
+
+            foreach (var elementDTO in elementDTOList)
+            {
+                var studyVisitPageModuleElement = new StudyVisitPageModuleElement
+                {
+                    ElementType = elementDTO.ElementType,
+                    ElementName = elementDTO.ElementName,
+                    Title = elementDTO.Title,
+                    IsTitleHidden = elementDTO.IsTitleHidden,
+                    Order = elementDTO.Order,
+                    Description = elementDTO.Description,
+                    Width = elementDTO.Width,
+                    IsHidden = elementDTO.IsHidden,
+                    IsRequired = elementDTO.IsRequired,
+                    IsDependent = elementDTO.IsDependent,
+                    IsRelated = elementDTO.IsRelated,
+                    IsReadonly = elementDTO.IsReadonly,
+                    CanMissing = elementDTO.CanMissing
+                };
+
+                studyVisitPageModuleElement.StudyVisitPageModuleElementDetails = MapElementDTOListToStudyVisitPageModuleElementDetailsList(elementDTO.StudyVisitPageModuleElementDetails);
+                studyVisitPageModuleElementList.Add(studyVisitPageModuleElement);
+            };
+
+            return studyVisitPageModuleElementList;
+        }
+
+        private List<StudyVisitPageModuleCalculationElementDetails> MapCalculatationElementDetailDTOListToStudyVisitPageModuleCalculationElementDetailsList(List<CalculatationElementDetailDTO> calculationElementDetailDTOList)
+        {
+            var studyVisitPageModuleCalculationElementDetailsList = new List<StudyVisitPageModuleCalculationElementDetails>();
+
+            foreach (var calculationElementDetailDTO in calculationElementDetailDTOList)
+            {
+                var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetails
+                {
+                    CalculationElementId = calculationElementDetailDTO.CalculationElementId,
+                    TargetElementId = calculationElementDetailDTO.TargetElementId,
+                    VariableName = calculationElementDetailDTO.VariableName
+                };
+
+                studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
+            }
+
+            return studyVisitPageModuleCalculationElementDetailsList;
+        }
+
+        private List<StudyVisitPageModuleElementEvent> MapModuleElementEventDTOListToStudyVisitPageModuleElementEventList(List<ModuleElementEventDTO> moduleElementEventDTOList)
+        {
+            var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
+
+            foreach (var moduleElementEventDTO in moduleElementEventDTOList)
+            {
+                var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
+                {
+
+                    EventType = moduleElementEventDTO.EventType,
+                    ActionType = moduleElementEventDTO.ActionType,
+                    SourceElementId = moduleElementEventDTO.SourceElementId,
+                    TargetElementId = moduleElementEventDTO.TargetElementId,
+                    ValueCondition = moduleElementEventDTO.ValueCondition,
+                    ActionValue = moduleElementEventDTO.ActionValue,
+                    VariableName = moduleElementEventDTO.VariableName,
+                };
+
+                studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
+            }
+
+            return studyVisitPageModuleElementEventList;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetStudyModule(List<ModuleDTO> dto)
         {
-            List<StudyVisitPageModule> moduleList = _mapper.Map<List<StudyVisitPageModule>>(dto);
-
-            await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
-
-            var userId = Request.Headers["Authorization"];
-
-            var result = await _context.SaveCoreContextAsync(Convert.ToInt64(userId), DateTimeOffset.Now) > 0;
-
-            if (result)
+            try
             {
-                return new ApiResponse<dynamic>
+                List<StudyVisitPageModule> moduleList = MapModuleDTOListToStudyVisitPageModuleList(dto);
+
+                await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
                 {
-                    IsSuccess = true,
-                    Message = "Successful"
-                };
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
             }
-            else
+            catch (Exception)
             {
                 return new ApiResponse<dynamic>
                 {
