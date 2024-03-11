@@ -87,6 +87,7 @@ namespace Helios.Common.Model
         public string RelationMainJs { get; set; } = "";
 
         public string? VariableName { get; set; } = "";
+        public int? AdverseEventType { get; set; } = 0;
 
         //public bool? HasChildren { get; set; } = false;
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();

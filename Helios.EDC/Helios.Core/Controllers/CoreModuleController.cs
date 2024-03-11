@@ -284,11 +284,12 @@ namespace Helios.Core.Controllers
                     DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                     ColumnIndex = x.ElementDetail.ColunmIndex,
                     RowIndex = x.ElementDetail.RowIndex,
+                    AdverseEventType = x.ElementDetail.AdverseEventType
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             foreach (var item in result)
             {
-                if (item.ParentId == 0)
+                if (item.ParentId == 0 || item.ParentId == null)
                     finalList.Add(item);
                 else
                 {
@@ -345,6 +346,7 @@ namespace Helios.Core.Controllers
                 DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                 ColumnIndex = x.ElementDetail.ColunmIndex,
                 RowIndex = x.ElementDetail.RowIndex,
+                AdverseEventType = x.ElementDetail.AdverseEventType
             }).AsNoTracking().FirstOrDefaultAsync();
 
             var events = new List<ModuleElementEvent>();
@@ -520,7 +522,8 @@ namespace Helios.Core.Controllers
                             ColumnCount = model.ColumnCount,
                             DatagridAndTableProperties = model.DatagridAndTableProperties,
                             RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
-                            ColunmIndex = model.ColumnIndex
+                            ColunmIndex = model.ColumnIndex,
+                            AdverseEventType = model.AdverseEventType,
                             //CreatedAt = DateTimeOffset.Now,
                             //AddedById = userId,
                             //ButtonText = model.buttonText
@@ -528,6 +531,19 @@ namespace Helios.Core.Controllers
 
                         _context.ElementDetails.Add(elementDetail);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!result.IsSuccess)
+                        {
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.Elements.Update(elm);
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again.";
+
+                            return result;
+                        }
 
                         elm.ElementDetailId = elementDetail.Id;
                         _context.Elements.Update(elm);
@@ -612,33 +628,20 @@ namespace Helios.Core.Controllers
                             }
                         }
 
-                        //control for both of element and elementDetail saved
-                        var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
-
-                        if (elmDtl == null)
-                        {
-                            elm.IsActive = false;
-                            elm.IsDeleted = true;
-                            _context.Elements.Update(elm);
-                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                            result.IsSuccess = false;
-                            result.Message = "Operation failed. Please try again.";
-                        }
-                        else if (!result.IsSuccess)//if dependent or calculation didn't save
+                        if (!result.IsSuccess)//if dependent or calculation didn't save
                         {
                             elm.IsActive = false;
                             elm.IsDeleted = true;
                             _context.Elements.Update(elm);
 
-                            elmDtl.IsActive = false;
-                            elmDtl.IsDeleted = true;
-                            _context.ElementDetails.Update(elmDtl);
+                            elementDetail.IsActive = false;
+                            elementDetail.IsDeleted = true;
+                            _context.ElementDetails.Update(elementDetail);
 
                             var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                             result.IsSuccess = false;
-                            result.Message = "Operation failed. Please try again.";
+                            result.Message = "Operation failed. Please try again to save dependents or calculation part.";
                         }
                     }
                     else
@@ -715,6 +718,7 @@ namespace Helios.Core.Controllers
                 elementDetail.RightText = model.RightText;
                 elementDetail.RowCount = model.RowCount;
                 elementDetail.ColumnCount = model.ColumnCount;
+                elementDetail.AdverseEventType = model.AdverseEventType;
                 elementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
@@ -1170,7 +1174,7 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> AutoSaveElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            
+
 
 
             return result;
