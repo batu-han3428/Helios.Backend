@@ -797,7 +797,7 @@ namespace Helios.Core.Controllers
                 Order = x.Order,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                Children = x.StudyVisitPages.Select(page => new VisitModel
+                Children = x.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
                 {
                     Id = page.Id,
                     Name = page.Name,
@@ -805,7 +805,7 @@ namespace Helios.Core.Controllers
                     CreatedAt = x.CreatedAt,
                     UpdatedAt = page.UpdatedAt,
                     EPro = page.EPro,
-                    Children = page.StudyVisitPageModules.Select(module => new VisitModel
+                    Children = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new VisitModel
                     {
                         Id = module.Id,
                         Name = module.Name,
@@ -995,12 +995,22 @@ namespace Helios.Core.Controllers
                 if (visitDTO.Type == VisitStatu.visit.ToString())
                 {
                     var visit = await _context.StudyVisits
-                       .Include(v => v.StudyVisitPages)
-                       .ThenInclude(p => p.StudyVisitPageModules)
-                       .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
+                        .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted)
+                        .Include(v => v.StudyVisitPages)
+                            .ThenInclude(p => p.StudyVisitPageModules)
+                        .Include(v => v.StudyVisitPages)
+                            .ThenInclude(p => p.Permissions)
+                        .Include(x => x.Permissions)
+                        .FirstOrDefaultAsync();
 
                     if (visit != null)
                     {
+                        _context.Permissions.RemoveRange(visit.Permissions);
+
+                        _context.Permissions.RemoveRange(visit.StudyVisitPages.SelectMany(x=>x.Permissions));
+
+                        _context.Permissions.RemoveRange();
+
                         _context.StudyVisits.Remove(visit);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
@@ -1024,11 +1034,14 @@ namespace Helios.Core.Controllers
                 else if (visitDTO.Type == VisitStatu.page.ToString())
                 {
                     var page = await _context.StudyVisitPages
+                       .Include(p => p.Permissions)
                        .Include(v => v.StudyVisitPageModules)
                        .FirstOrDefaultAsync(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted);
 
                     if (page != null)
                     {
+                        _context.Permissions.RemoveRange(page.Permissions);
+
                         _context.StudyVisitPages.Remove(page);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
