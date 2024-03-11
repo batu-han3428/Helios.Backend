@@ -48,6 +48,7 @@ namespace Helios.Core.Domains.Entities
 
         public string? RelationMainJs { get; set; }
 
+        public int? AdverseEventType { get; set; }
 
         public Element Element { get; set; }
 
