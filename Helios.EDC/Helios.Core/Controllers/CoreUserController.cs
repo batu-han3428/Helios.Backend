@@ -211,7 +211,7 @@ namespace Helios.Core.Controllers
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-            var oldEntity = await _context.StudyRoles.FirstOrDefaultAsync(p => p.Id == userPermission.Id);
+            var oldEntity = await _context.StudyRoles.Include(r => r.Permissions).FirstOrDefaultAsync(p => p.Id == userPermission.Id);
 
             if (oldEntity == null)
             {
@@ -222,7 +222,9 @@ namespace Helios.Core.Controllers
                 };
             }
 
-            _context.Remove(oldEntity);
+            _context.Permissions.RemoveRange(oldEntity.Permissions);
+
+            _context.StudyRoles.Remove(oldEntity);
 
             var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
