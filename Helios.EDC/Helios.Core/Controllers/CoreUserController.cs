@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
@@ -48,6 +49,124 @@ namespace Helios.Core.Controllers
         #endregion
 
         #region Permissions
+         
+        [HttpGet]
+        public async Task<List<RoleVisitPermissionsModel>> GetPermissionsVisitList(Int64 roleId)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var roleVisitPagePermissions = await _context.Permissions.Where(x => x.StudyRoleId == roleId && (x.StudyVisitId != null || x.StudyVisitPageId != null)).ToListAsync();
+
+            var visits = await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).Include(x => x.Permissions).Include(x => x.StudyVisitPages).ThenInclude(x => x.Permissions).ToListAsync();
+
+            var resultVisits = visits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).Select(x => new RoleVisitPermissionsModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Permissions = x.Permissions.Where(a=>a.StudyRoleId == null).Select(a=>new RolePermissions { IsActive=a.IsActive,Key=a.PermissionKey, IsDisabled = !a.IsActive }).ToList(),
+                Children = x.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new RoleVisitPermissionsModel
+                {
+                    Id = page.Id,
+                    Name = page.Name,
+                    Permissions = page.Permissions.Where(a => a.StudyRoleId == null).Select(a => new RolePermissions { IsActive = a.IsActive, Key = a.PermissionKey, IsDisabled = !a.IsActive }).ToList(),
+                }).ToList()
+            }).ToList();
+
+
+            foreach (var visit in resultVisits)
+            {
+                var permissions = visit.Permissions;
+
+                foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                {
+                    if (!permissions.Any(p => p.Key == (int)permission))
+                    {
+                        visit.Permissions.Add(new RolePermissions { IsActive = false, IsDisabled = true, Key = (int)permission });
+                    }
+                    else if (permissions.Any(p => p.Key == (int)permission && p.IsActive))
+                    {
+                        var rolePermission = roleVisitPagePermissions.FirstOrDefault(p => p.PermissionKey == (int)permission && p.StudyVisitId == visit.Id);
+
+                        if (rolePermission == null || !rolePermission.IsActive)
+                        {
+                            var visitPermission = permissions.FirstOrDefault(p => p.Key == (int)permission);
+                            visitPermission.IsActive = false;
+                        }
+                    }
+                }
+
+                foreach (var child in visit.Children)
+                {
+                    var childPermissions = child.Permissions;
+
+                    foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                    {
+                        if (!childPermissions.Any(p => p.Key == (int)permission))
+                        {
+                            child.Permissions.Add(new RolePermissions { IsActive = false, IsDisabled = true, Key = (int)permission });
+                        }
+                        else if (childPermissions.Any(p => p.Key == (int)permission && p.IsActive))
+                        {
+                            var rolePermission = roleVisitPagePermissions.FirstOrDefault(p => p.PermissionKey == (int)permission && p.StudyVisitPageId == child.Id);
+
+                            if (rolePermission == null || !rolePermission.IsActive)
+                            {
+                                var childPermission = childPermissions.FirstOrDefault(p => p.Key == (int)permission);
+                                childPermission.IsActive = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resultVisits;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetPermissionsVisitPage(PermissionsRoleVisitPageDTO dto)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var permission = await _context.Permissions.FirstOrDefaultAsync(x => x.StudyRoleId == dto.StudyRoleId && x.StudyId == baseDTO.StudyId && x.PermissionKey == dto.PermissionKey && ((dto.StudyVisitId != null && x.StudyVisitId == dto.StudyVisitId) || (dto.StudyPageId != null && x.StudyVisitPageId == dto.StudyPageId)));
+
+            if (permission != null)
+            {
+                permission.IsActive = !permission.IsActive;
+                _context.Permissions.Update(permission);
+            }
+            else
+            {
+                await _context.Permissions.AddAsync(new Permission
+                {
+                    StudyRoleId = dto.StudyRoleId,
+                    PermissionKey = dto.PermissionKey,
+                    StudyVisitId = dto.StudyVisitId,
+                    StudyVisitPageId = dto.StudyPageId,
+                    StudyId = baseDTO.StudyId,
+                    TenantId = baseDTO.TenantId
+                });
+            }
+
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+            if (result)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Successful"
+                };
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
         [HttpGet]
         public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Int64 studyId)
         {
