@@ -9,7 +9,9 @@ namespace Helios.Common.Enums
         Signature = 3,
         SDV = 4,
         Query = 5,
-        Verification = 6
+        Verification = 6,
+        ReadOnly = 7,
+        Edit = 8
     }
 
     public enum StudyRolePermission
