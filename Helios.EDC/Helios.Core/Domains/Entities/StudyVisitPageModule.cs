@@ -11,7 +11,5 @@ namespace Helios.Core.Domains.Entities
         public int Order { get; set; }
         public StudyVisitPage StudyVisitPage { get; set; }
         public ICollection<StudyVisitPageModuleElement> StudyVisitPageModuleElements { get; set; }
-        public List<StudyVisitPageModuleCalculationElementDetails> studyVisitPageModuleCalculationElementDetails { get; set; }
-        public List<StudyVisitPageModuleElementEvent> StudyVisitPageModuleElementEvent { get; set; }
     }
 }

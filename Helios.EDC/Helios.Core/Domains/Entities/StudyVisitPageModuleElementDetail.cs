@@ -40,6 +40,7 @@ namespace Helios.Core.Domains.Entities
         public int? RowCount { get; set; }
         public int? ColumnCount { get; set; }
         public string? DatagridAndTableProperties { get; set; }
+        public int? AdverseEventType { get; set; }
         public StudyVisitPageModuleElement StudyVisitPageModuleElement { get; set; }
     }
 }
