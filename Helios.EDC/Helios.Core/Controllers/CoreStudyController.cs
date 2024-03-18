@@ -826,13 +826,37 @@ namespace Helios.Core.Controllers
                 {
                     if (visitDTO.Type == VisitStatu.visit.ToString())
                     {
-                        await _context.StudyVisits.AddAsync(new StudyVisit
+                        StudyVisit visit = new StudyVisit
                         {
                             StudyId = visitDTO.StudyId,
                             Name = visitDTO.Name,
-                            VisitType = (VisitType)visitDTO.VisitType,
-                            Order = visitDTO.Order
-                        });
+                            VisitType = visitDTO.VisitType.Value,
+                            Order = visitDTO.Order,
+                        };
+
+                        List<Permission> permissions = new List<Permission>();
+                        foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                        {
+                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission });
+                        }
+
+                        var roles = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == visitDTO.StudyId).ToListAsync();
+                        foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                        {
+                            var rolPermissions = roles.Select(x => new Permission
+                            {
+                                StudyRoleId = x.Id,
+                                PermissionKey = (int)permission,
+                                StudyVisit = visit,
+                                StudyId = x.StudyId,
+                                TenantId = x.TenantId
+                            }).ToList();
+                            permissions.AddRange(rolPermissions);
+                        }
+
+                        visit.Permissions.AddRange(permissions);
+
+                        await _context.StudyVisits.AddAsync(visit);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -855,12 +879,36 @@ namespace Helios.Core.Controllers
                     }
                     else if (visitDTO.Type == VisitStatu.page.ToString())
                     {
-                        await _context.StudyVisitPages.AddAsync(new StudyVisitPage
+                        StudyVisitPage page = new StudyVisitPage
                         {
                             StudyVisitId = visitDTO.ParentId.Value,
                             Name = visitDTO.Name,
                             Order = visitDTO.Order
-                        });
+                        };
+
+                        List<Permission> permissions = new List<Permission>();
+                        foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                        {
+                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission });
+                        }
+
+                        var roles = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == visitDTO.StudyId).ToListAsync();
+                        foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
+                        {
+                            var rolPermissions = roles.Select(x => new Permission
+                            {
+                                StudyRoleId = x.Id,
+                                PermissionKey = (int)permission,
+                                StudyVisitPage = page,
+                                StudyId = x.StudyId,
+                                TenantId = x.TenantId
+                            }).ToList();
+                            permissions.AddRange(rolPermissions);
+                        }
+
+                        page.Permissions.AddRange(permissions);
+
+                        await _context.StudyVisitPages.AddAsync(page);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -1114,13 +1162,13 @@ namespace Helios.Core.Controllers
         {
             if (pageKey == PermissionPage.Visit)
             {
-                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
+                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitId == id && x.StudyRoleId == null && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
                 {
                     PermissionName = x.PermissionKey
                 }).ToListAsync();
             }else if (pageKey == PermissionPage.Page)
             {
-                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitPageId == id && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
+                return await _context.Permissions.Where(x => x.StudyId == studyId && x.StudyVisitPageId == id && x.StudyRoleId == null && x.IsActive && !x.IsDeleted).Select(x => new PermissionModel
                 {
                     PermissionName = x.PermissionKey
                 }).ToListAsync();
@@ -1788,6 +1836,79 @@ namespace Helios.Core.Controllers
             }
 
             return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetVisitRanking(List<VisitDTO> dto)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var visitList = dto.Where(data => data.Type == VisitStatu.visit.ToString()).ToList();
+                var pageList = dto.Where(data => data.Type == VisitStatu.page.ToString()).ToList();
+                var moduleList = dto.Where(data => data.Type == VisitStatu.module.ToString()).ToList();
+
+                var visitsToUpdate = await _context.StudyVisits.Where(v => visitList.Select(d => d.Id).Contains(v.Id)).ToListAsync();
+                var pagesToUpdate = await _context.StudyVisitPages.Where(p => pageList.Select(d => d.Id).Contains(p.Id)).ToListAsync();
+                var modulesToUpdate = await _context.StudyVisitPageModules.Where(m => moduleList.Select(d => d.Id).Contains(m.Id)).ToListAsync();
+
+                visitsToUpdate.ForEach(visit =>
+                {
+                    var newData = visitList.FirstOrDefault(d => d.Id == visit.Id);
+                    if (newData != null)
+                    {
+                        visit.Order = newData.Order;
+                    }
+                });
+
+                pagesToUpdate.ForEach(page =>
+                {
+                    var newData = pageList.FirstOrDefault(d => d.Id == page.Id);
+                    if (newData != null)
+                    {
+                        if(page.StudyVisitId != newData.ParentId && newData.ParentId != null) page.StudyVisitId = newData.ParentId.Value;
+                        if (page.Order != newData.Order) page.Order = newData.Order;
+                    }
+                });
+
+                modulesToUpdate.ForEach(module =>
+                {
+                    var newData = moduleList.FirstOrDefault(d => d.Id == module.Id);
+                    if (newData != null)
+                    {
+                        if (module.StudyVisitPageId != newData.ParentId && newData.ParentId != null) module.StudyVisitPageId = newData.ParentId.Value;
+                        if (module.Order != module.Order) module.Order = newData.Order;
+                    }
+                });
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
         }
         #endregion
     }
