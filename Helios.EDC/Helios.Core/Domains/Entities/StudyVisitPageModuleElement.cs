@@ -23,8 +23,11 @@ namespace Helios.Core.Domains.Entities
         public bool CanMissing { get; set; }
         public StudyVisitPageModule StudyVisitPageModule { get; set; }
         public StudyVisitPageModuleElementDetail? StudyVisitPageModuleElementDetail { get; set; }
-        public ICollection<StudyVisitPageModuleCalculationElementDetails>? studyVisitPageModuleCalculationElementDetails { get; set; }
+        public ICollection<StudyVisitPageModuleCalculationElementDetail>? studyVisitPageModuleCalculationElementDetails { get; set; }
         public ICollection<StudyVisitPageModuleElementEvent>? StudyVisitPageModuleElementEvents { get; set; }
+
+        [NotMapped]
+        public Int64 ElementId { get; set; }
 
     }
 }

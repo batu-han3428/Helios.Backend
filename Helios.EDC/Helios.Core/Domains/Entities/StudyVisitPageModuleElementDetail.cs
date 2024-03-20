@@ -1,9 +1,11 @@
 ﻿using Helios.Common.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
 {
     public class StudyVisitPageModuleElementDetail : EntityBase
     {
+        [ForeignKey("StudyVisitPageModuleElement")]
         public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }

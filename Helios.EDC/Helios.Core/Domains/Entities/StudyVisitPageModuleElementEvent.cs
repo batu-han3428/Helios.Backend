@@ -13,5 +13,6 @@ namespace Helios.Core.Domains.Entities
         public string ActionValue { get; set; }
         public string VariableName { get; set; }
         public StudyVisitPageModule StudyVisitPageModule { get; set; }
+        public StudyVisitPageModuleElement TargetElement { get; set; }
     }
 }
