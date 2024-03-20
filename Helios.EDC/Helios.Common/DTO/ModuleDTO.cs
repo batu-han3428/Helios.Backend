@@ -7,9 +7,7 @@ namespace Helios.Common.DTO
     {
         public Int64 StudyVisitPageId { get; set; }
         public string Name { get; set; }
-        public List<ElementDTO> StudyVisitPageModuleElements { get; set; }
-        public List<CalculatationElementDetailDTO> studyVisitPageModuleCalculationElementDetails { get; set; }
-        public List<ModuleElementEventDTO> StudyVisitPageModuleElementEvent { get; set; }
+        public List<ElementDTO> StudyVisitPageModuleElements { get; set; }        
         public Int64 ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public int Order { get; set; }
@@ -17,6 +15,7 @@ namespace Helios.Common.DTO
 
     public class ElementDTO
     {
+        public Int64 Id { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName { get; set; }
         public string Title { get; set; }
@@ -31,6 +30,8 @@ namespace Helios.Common.DTO
         public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
         public ElementDetailDTO? StudyVisitPageModuleElementDetails { get; set; }
+        public List<CalculatationElementDetailDTO>? StudyVisitPageModuleCalculationElementDetails { get; set; } = new List<CalculatationElementDetailDTO>();
+        public List<ModuleElementEventDTO>? StudyVisitPageModuleElementEvent { get; set; }
     }
 
     public class ElementDetailDTO

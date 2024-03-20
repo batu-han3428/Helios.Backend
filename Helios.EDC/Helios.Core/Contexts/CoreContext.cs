@@ -113,6 +113,6 @@ namespace Helios.Core.Contexts
         public DbSet<SubjectVisit> SubjectVisits { get; set; }
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }        
         public DbSet<Permission> Permissions { get; set; }
-        public DbSet<StudyVisitPageModuleCalculationElementDetails> studyVisitPageModuleCalculationElementDetails { get; set; }
+        public DbSet<StudyVisitPageModuleCalculationElementDetail> studyVisitPageModuleCalculationElementDetails { get; set; }
     }
 }

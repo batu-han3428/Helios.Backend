@@ -23,6 +23,7 @@ namespace Helios.Core.Domains.Entities
         public bool CanMissing { get; set; }
         public Module Module { get; set; }
         public ElementDetail? ElementDetail { get; set; }
-
+        public ICollection<CalculatationElementDetail>? CalculatationElementDetails { get; set; }
+        public ICollection<ModuleElementEvent>? ModuleElementEvents { get; set; }
     }
 }

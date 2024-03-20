@@ -7,5 +7,6 @@
         public Int64 TargetElementId { get; set; }
         public string VariableName { get; set; }
         public Module Module { get; set; }
+        public Element CalculationElement { get; set; }
     }
 }
