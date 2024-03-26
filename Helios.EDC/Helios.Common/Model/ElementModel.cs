@@ -30,7 +30,7 @@ namespace Helios.Common.Model
         public bool CanMissing { get; set; }
 
         //public string ParentId { get; set; }
-        
+
         //public bool CanQuery { get; set; }
         //public bool CanSdv { get; set; }
         //public bool CanRemoteSdv { get; set; }
@@ -39,7 +39,7 @@ namespace Helios.Common.Model
         //public int ParentElementEProPageNumber { get; set; }
         //public string MetaDataTags { get; set; }
         //public int EProPageNumber { get; set; }
-        //public string ButtonText { get; set; }
+        public string ButtonText { get; set; }
         public string? DefaultValue { get; set; } = "";
         public string? Unit { get; set; } = "";
         public string? Mask { get; set; } = "";

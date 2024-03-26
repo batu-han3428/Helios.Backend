@@ -1673,7 +1673,8 @@ namespace Helios.Core.Controllers
                     ColumnIndex = x.StudyVisitPageModuleElementDetail.ColunmIndex,
                     RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
                     AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType,
-                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId,
+                    ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             foreach (var item in result)
@@ -1950,7 +1951,8 @@ namespace Helios.Core.Controllers
                     EndYear = x.StudyVisitPageModuleElementDetail.EndYear,
                     LeftText = x.StudyVisitPageModuleElementDetail.LeftText,
                     RightText = x.StudyVisitPageModuleElementDetail.RightText,
-                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId,
+                    ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             return result;
@@ -2003,7 +2005,8 @@ namespace Helios.Core.Controllers
                     ColumnIndex = x.StudyVisitPageModuleElementDetail.ColunmIndex,
                     RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
                     AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType,
-                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId,
+                    ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText
                 }).AsNoTracking().FirstOrDefaultAsync();
 
                 var events = new List<StudyVisitPageModuleElementEvent>();
@@ -2186,7 +2189,8 @@ namespace Helios.Core.Controllers
                             RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
                             ColunmIndex = model.ColumnIndex,
                             AdverseEventType = model.AdverseEventType,
-                            TargetElementId = model.TargetElementId
+                            TargetElementId = model.TargetElementId,
+                            ButtonText = model.ButtonText
                             //CreatedAt = DateTimeOffset.Now,
                             //AddedById = userId,
                             //ButtonText = model.buttonText
@@ -2384,6 +2388,7 @@ namespace Helios.Core.Controllers
                 stdVstPgMdlElementDetail.AdverseEventType = model.AdverseEventType;
                 stdVstPgMdlElementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
                 stdVstPgMdlElementDetail.TargetElementId = model.TargetElementId;
+                stdVstPgMdlElementDetail.ButtonText = model.ButtonText;
                 stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
                 stdVstPgMdlElement.UpdatedById = model.UserId;
 
