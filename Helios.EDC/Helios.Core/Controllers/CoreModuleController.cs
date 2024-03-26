@@ -1,7 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Core.Contexts;
 using Helios.Common.Enums;
-using Helios.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;

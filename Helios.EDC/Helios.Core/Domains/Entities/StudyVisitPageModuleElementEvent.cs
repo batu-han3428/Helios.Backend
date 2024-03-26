@@ -5,6 +5,7 @@ namespace Helios.Core.Domains.Entities
     public class StudyVisitPageModuleElementEvent : EntityBase
     {
         public Int64 StudyVisitPageModuleId { get; set; }
+        public Int64 ReferenceKey { get; set; }
         public EventType EventType { get; set; }
         public ActionType ActionType { get; set; }
         public Int64 SourceElementId { get; set; }

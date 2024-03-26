@@ -1,4 +1,4 @@
-﻿namespace Helios.Core.Models
+﻿namespace Helios.Common.Model
 {
     public class RelationModel
     {

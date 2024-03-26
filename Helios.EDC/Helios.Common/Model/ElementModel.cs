@@ -88,6 +88,7 @@ namespace Helios.Common.Model
 
         public string? VariableName { get; set; } = "";
         public int? AdverseEventType { get; set; } = 0;
+        public Int64? TargetElementId { get; set; } = 0;
 
         //public bool? HasChildren { get; set; } = false;
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
