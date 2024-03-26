@@ -35,9 +35,6 @@ namespace Helios.Core.Domains.Entities
         //chkbox, radio, ddown vs
         public string? ElementOptions { get; set; } //json text value
 
-        //hidden
-        public Int64? TargetElementId { get; set; }
-
         //rangeslider
         public string? LeftText { get; set; }
         public string? RightText { get; set; }

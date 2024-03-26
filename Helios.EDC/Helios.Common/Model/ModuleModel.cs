@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Helios.Core.Models
+namespace Helios.Common.Model
 {
     public class ModuleModel
     {

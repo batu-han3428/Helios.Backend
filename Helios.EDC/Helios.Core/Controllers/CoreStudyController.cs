@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
-using Helios.Core.Models;
 using System.Linq;
 using System.Text.Json;
 
@@ -1055,7 +1054,7 @@ namespace Helios.Core.Controllers
                     {
                         _context.Permissions.RemoveRange(visit.Permissions);
 
-                        _context.Permissions.RemoveRange(visit.StudyVisitPages.SelectMany(x=>x.Permissions));
+                        _context.Permissions.RemoveRange(visit.StudyVisitPages.SelectMany(x => x.Permissions));
 
                         _context.Permissions.RemoveRange();
 
@@ -1342,7 +1341,6 @@ namespace Helios.Core.Controllers
                     EndYear = elementDetailDTO.EndYear,
                     AddTodayDate = elementDetailDTO.AddTodayDate,
                     ElementOptions = elementDetailDTO.ElementOptions,
-                    TargetElementId = elementDetailDTO.TargetElementId,
                     LeftText = elementDetailDTO.LeftText,
                     RightText = elementDetailDTO.RightText,
                     IsInCalculation = elementDetailDTO.IsInCalculation,
@@ -1360,30 +1358,6 @@ namespace Helios.Core.Controllers
             };
 
             return studyVisitPageModuleElementList;
-        }
-
-        private List<StudyVisitPageModuleElementEvent> MapModuleElementEventDTOListToStudyVisitPageModuleElementEventList(List<ModuleElementEventDTO> moduleElementEventDTOList)
-        {
-            var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
-
-            foreach (var moduleElementEventDTO in moduleElementEventDTOList)
-            {
-                var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
-                {
-
-                    EventType = moduleElementEventDTO.EventType,
-                    ActionType = moduleElementEventDTO.ActionType,
-                    SourceElementId = moduleElementEventDTO.SourceElementId,
-                    TargetElementId = moduleElementEventDTO.TargetElementId,
-                    ValueCondition = moduleElementEventDTO.ValueCondition,
-                    ActionValue = moduleElementEventDTO.ActionValue,
-                    VariableName = moduleElementEventDTO.VariableName,
-                };
-
-                studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
-            }
-
-            return studyVisitPageModuleElementEventList;
         }
 
         private async Task<ApiResponse<dynamic>> SetStudyModule(List<ModuleDTO> dto)
@@ -1535,112 +1509,25 @@ namespace Helios.Core.Controllers
                 };
             }
         }
-
-        [HttpGet]
-        public async Task<List<ElementModel>> GetStudyModuleAllElements(Int64 moduleId)
-        {
-            var result = await _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == moduleId && x.IsActive && !x.IsDeleted)
-                .Include(x => x.StudyVisitPageModuleElementDetail)
-                .Select(x => new ElementModel()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Description = x.Description,
-                    ElementName = x.ElementName,
-                    ElementType = x.ElementType,
-                    Order = x.Order,
-                    IsDependent = x.IsDependent,
-                    IsRelated = x.IsRelated,
-                    IsRequired = x.IsRequired,
-                    ElementOptions = x.StudyVisitPageModuleElementDetail.ElementOptions,
-                    Width = x.Width,
-                    Unit = x.StudyVisitPageModuleElementDetail.Unit,
-                    Mask = x.StudyVisitPageModuleElementDetail.Mask,
-                    LowerLimit = x.StudyVisitPageModuleElementDetail.LowerLimit,
-                    UpperLimit = x.StudyVisitPageModuleElementDetail.UpperLimit,
-                    Layout = x.StudyVisitPageModuleElementDetail.Layout,
-                    DefaultValue = x.StudyVisitPageModuleElementDetail.DefaultValue,
-                    AddTodayDate = x.StudyVisitPageModuleElementDetail.AddTodayDate,
-                    MainJs = x.StudyVisitPageModuleElementDetail.MainJs,
-                    StartDay = x.StudyVisitPageModuleElementDetail.StartDay,
-                    EndDay = x.StudyVisitPageModuleElementDetail.EndDay,
-                    StartMonth = x.StudyVisitPageModuleElementDetail.StartMonth,
-                    EndMonth = x.StudyVisitPageModuleElementDetail.EndMonth,
-                    StartYear = x.StudyVisitPageModuleElementDetail.StartYear,
-                    EndYear = x.StudyVisitPageModuleElementDetail.EndYear,
-                    LeftText = x.StudyVisitPageModuleElementDetail.LeftText,
-                    RightText = x.StudyVisitPageModuleElementDetail.RightText
-                }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
-
-            return result;
-        }
-
-        [HttpGet]
-        public async Task<ElementModel> GetStudyElementData(Int64 id)
-        {
-            var result = new ElementModel();
-
-            result = await _context.StudyVisitPageModuleElements.Where(x => x.Id == id && x.IsActive && !x.IsDeleted)
-            .Include(x => x.StudyVisitPageModuleElementDetail)
-            .Select(x => new ElementModel()
-            {
-                Id = x.Id,
-                ParentId = x.StudyVisitPageModuleElementDetail.ParentId,
-                Title = x.Title,
-                ElementName = x.ElementName,
-                ElementType = x.ElementType,
-                Description = x.Description,
-                IsRequired = x.IsRequired,
-                IsHidden = x.IsHidden,
-                CanMissing = x.CanMissing,
-                Width = x.Width,
-                Unit = x.StudyVisitPageModuleElementDetail.Unit,
-                Mask = x.StudyVisitPageModuleElementDetail.Mask,
-                LowerLimit = x.StudyVisitPageModuleElementDetail.LowerLimit,
-                UpperLimit = x.StudyVisitPageModuleElementDetail.UpperLimit,
-                Layout = x.StudyVisitPageModuleElementDetail.Layout,
-                IsDependent = x.IsDependent,
-                IsRelated = x.IsRelated,
-                RelationMainJs = x.StudyVisitPageModuleElementDetail.RelationMainJs,
-                ElementOptions = x.StudyVisitPageModuleElementDetail.ElementOptions,
-                DefaultValue = x.StudyVisitPageModuleElementDetail.DefaultValue,
-                AddTodayDate = x.StudyVisitPageModuleElementDetail.AddTodayDate,
-                MainJs = x.StudyVisitPageModuleElementDetail.MainJs,
-                StartDay = x.StudyVisitPageModuleElementDetail.StartDay,
-                EndDay = x.StudyVisitPageModuleElementDetail.EndDay,
-                StartMonth = x.StudyVisitPageModuleElementDetail.StartMonth,
-                EndMonth = x.StudyVisitPageModuleElementDetail.EndMonth,
-                StartYear = x.StudyVisitPageModuleElementDetail.StartYear,
-                EndYear = x.StudyVisitPageModuleElementDetail.EndYear,
-                LeftText = x.StudyVisitPageModuleElementDetail.LeftText,
-                RightText = x.StudyVisitPageModuleElementDetail.RightText,
-                ColumnCount = x.StudyVisitPageModuleElementDetail.ColumnCount,
-                RowCount = x.StudyVisitPageModuleElementDetail.RowCount,
-                DatagridAndTableProperties = x.StudyVisitPageModuleElementDetail.DatagridAndTableProperties,
-                ColumnIndex = x.StudyVisitPageModuleElementDetail.ColunmIndex,
-                RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
-                AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType
-            }).AsNoTracking().FirstOrDefaultAsync();
-
-            if (result.IsDependent)
-            {
-                var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted);
-
-                if (dep != null)
-                {
-                    result.DependentSourceFieldId = dep.SourceElementId;
-                    result.DependentTargetFieldId = dep.TargetElementId;
-                    result.DependentCondition = (int)dep.ValueCondition;
-                    result.DependentAction = (int)dep.ActionType;
-                    result.DependentFieldValue = dep.ActionValue;
-                }
-            }
-
-            return result;
-        }
         #endregion
 
         #region Module
+        [HttpGet]
+        public async Task<ModuleModel> GetStudyPageModule(Int64 id)
+        {
+            var model = new ModuleModel();
+
+            var module = await _context.StudyVisitPageModules.FirstOrDefaultAsync(x => x.Id == id && x.IsActive && !x.IsDeleted);
+
+            if (module != null)
+            {
+                model.Id = module.Id;
+                model.Name = module.Name;
+            }
+
+            return model;
+        }
+
         [HttpGet]
         public async Task<ApiResponse<dynamic>> GetModuleCollective(string moduleIds, Int64 pageId)
         {
@@ -1706,7 +1593,6 @@ namespace Helios.Core.Controllers
                             StartYear = e.ElementDetail.StartYear,
                             AddTodayDate = e.ElementDetail.AddTodayDate,
                             ElementOptions = e.ElementDetail.ElementOptions,
-                            TargetElementId = e.ElementDetail.TargetElementId,
                             LeftText = e.ElementDetail.LeftText,
                             RightText = e.ElementDetail.RightText,
                             IsInCalculation = e.ElementDetail.IsInCalculation,
@@ -1786,7 +1672,8 @@ namespace Helios.Core.Controllers
                     DatagridAndTableProperties = x.StudyVisitPageModuleElementDetail.DatagridAndTableProperties,
                     ColumnIndex = x.StudyVisitPageModuleElementDetail.ColunmIndex,
                     RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
-                    AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType
+                    AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType,
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             foreach (var item in result)
@@ -1914,7 +1801,7 @@ namespace Helios.Core.Controllers
                     result.Message = "Error";
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -2062,7 +1949,8 @@ namespace Helios.Core.Controllers
                     StartYear = x.StudyVisitPageModuleElementDetail.StartYear,
                     EndYear = x.StudyVisitPageModuleElementDetail.EndYear,
                     LeftText = x.StudyVisitPageModuleElementDetail.LeftText,
-                    RightText = x.StudyVisitPageModuleElementDetail.RightText
+                    RightText = x.StudyVisitPageModuleElementDetail.RightText,
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             return result;
@@ -2114,7 +2002,8 @@ namespace Helios.Core.Controllers
                     DatagridAndTableProperties = x.StudyVisitPageModuleElementDetail.DatagridAndTableProperties,
                     ColumnIndex = x.StudyVisitPageModuleElementDetail.ColunmIndex,
                     RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
-                    AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType
+                    AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType,
+                    TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId
                 }).AsNoTracking().FirstOrDefaultAsync();
 
                 var events = new List<StudyVisitPageModuleElementEvent>();
@@ -2253,7 +2142,7 @@ namespace Helios.Core.Controllers
                         IsRequired = model.IsRequired,
                         IsRelated = model.IsRelated,
                         IsTitleHidden = model.IsTitleHidden,
-                        Width = model.Width,
+                        Width = model.ElementType != ElementType.Hidden ? model.Width : GridLayout.ColMd3,
                         StudyVisitPageModuleId = model.ModuleId,
                         TenantId = model.TenantId,
                         Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
@@ -2297,6 +2186,7 @@ namespace Helios.Core.Controllers
                             RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
                             ColunmIndex = model.ColumnIndex,
                             AdverseEventType = model.AdverseEventType,
+                            TargetElementId = model.TargetElementId
                             //CreatedAt = DateTimeOffset.Now,
                             //AddedById = userId,
                             //ButtonText = model.buttonText
@@ -2493,6 +2383,7 @@ namespace Helios.Core.Controllers
                 stdVstPgMdlElementDetail.ColumnCount = model.ColumnCount;
                 stdVstPgMdlElementDetail.AdverseEventType = model.AdverseEventType;
                 stdVstPgMdlElementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
+                stdVstPgMdlElementDetail.TargetElementId = model.TargetElementId;
                 stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
                 stdVstPgMdlElement.UpdatedById = model.UserId;
 
@@ -2717,7 +2608,7 @@ namespace Helios.Core.Controllers
                     var newData = pageList.FirstOrDefault(d => d.Id == page.Id);
                     if (newData != null)
                     {
-                        if(page.StudyVisitId != newData.ParentId && newData.ParentId != null) page.StudyVisitId = newData.ParentId.Value;
+                        if (page.StudyVisitId != newData.ParentId && newData.ParentId != null) page.StudyVisitId = newData.ParentId.Value;
                         if (page.Order != newData.Order) page.Order = newData.Order;
                     }
                 });
@@ -2759,6 +2650,51 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
+        }
+
+        [HttpGet]
+        public async Task<List<VisitModel>> GetVisitPageList(Int64 studyId)
+        {
+            return await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x => x.StudyVisitPages).ThenInclude(x => x.StudyVisitPageModules).Select(x => new VisitModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                VisitType = (VisitType)x.VisitType,
+                Order = x.Order,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                Children = x.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
+                {
+                    Id = page.Id,
+                    Name = page.Name,
+                    Order = page.Order,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = page.UpdatedAt,
+                    EPro = page.EPro,
+                    Children = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new VisitModel
+                    {
+                        Id = module.Id,
+                        Name = module.Name,
+                        Order = module.Order,
+                        CreatedAt = x.CreatedAt,
+                        UpdatedAt = module.UpdatedAt
+                    }).ToList()
+                }).ToList()
+            }).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<VisitCollectionModel> GetVisitCollectionInfo(Int64 elementId)
+        {
+            var result = await _context.StudyVisitPageModuleElements.Where(x => x.Id == elementId).Select(x => new VisitCollectionModel
+            {
+                StudyVisitElementId = x.Id,
+                StudyVisitModuleId = x.StudyVisitPageModuleId,
+                StudyVisitPageId = x.StudyVisitPageModule.StudyVisitPageId,
+                StudyVisitId = x.StudyVisitPageModule.StudyVisitPage.StudyVisitId,
+            }).FirstOrDefaultAsync();
+
+            return result;
         }
         #endregion
 
