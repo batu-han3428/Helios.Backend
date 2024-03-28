@@ -61,13 +61,22 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> DeleteModule(ModuleModel model)
+        public async Task<ApiResponse<dynamic>> DeleteModule(ModuleModel model)
         {
-            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var result = new ApiResponse<dynamic>();
+            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.ElementDetail)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.ModuleElementEvents)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.CalculatationElementDetails)
+                .FirstOrDefaultAsync();
 
             if (module == null)
             {
-                return false;
+                result.IsSuccess = false;
+                result.Message = "Unsuccessfully.";
             }
 
             module.UpdatedAt = DateTimeOffset.Now;
@@ -75,8 +84,48 @@ namespace Helios.Core.Controllers
             module.IsActive = false;
             module.IsDeleted = true;
 
+            foreach (var item in module.Elements)
+            {
+                item.UpdatedAt = DateTimeOffset.Now;
+                item.UpdatedById = model.UserId;
+                item.IsActive = false;
+                item.IsDeleted = true;
+
+                item.ElementDetail.UpdatedAt = DateTimeOffset.Now;
+                item.ElementDetail.UpdatedById = model.UserId;
+                item.ElementDetail.IsActive = false;
+                item.ElementDetail.IsDeleted = true;
+
+                foreach (var evnt in item.ModuleElementEvents)
+                {
+                    evnt.UpdatedAt = DateTimeOffset.Now;
+                    evnt.UpdatedById = model.UserId;
+                    evnt.IsActive = false;
+                    evnt.IsDeleted = true;
+                }
+
+                foreach (var cal in item.CalculatationElementDetails)
+                {
+                    cal.UpdatedAt = DateTimeOffset.Now;
+                    cal.UpdatedById = model.UserId;
+                    cal.IsActive = false;
+                    cal.IsDeleted = true;
+                }
+            }
+
             _context.Modules.Update(module);
-            var result = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+            var res = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+            if (res)
+            {
+                result.IsSuccess = true;
+                result.Message = "Successfully.";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Unsuccessfully.";
+            }
 
             return result;
         }
@@ -777,6 +826,7 @@ namespace Helios.Core.Controllers
                                 TargetElementId = model.Id,
                                 TenantId = model.TenantId,
                                 EventType = EventType.Relation,
+                                VariableName = item.variableName
                             };
 
                             _context.ModuleElementEvents.Add(elementEvent);
