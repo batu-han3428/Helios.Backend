@@ -589,6 +589,21 @@ namespace Helios.Core.Controllers
                             }
                         }
 
+                        if (model.ValidationActionType != 0)
+                        {
+                            var validation = new ElementValidationDetail
+                            {
+                                ModuleId = model.ModuleId,
+                                ElementId = element.Id,
+                                ActionType = model.ValidationActionType,
+                                ValueCondition = (ActionCondition)model.ValidationCondition,
+                                Value = model.ValidationValue,
+                                Message = model.ValidationMessage,
+                            };
+
+
+                        }
+
                         if (!result.IsSuccess)//if dependent or calculation didn't save
                         {
                             elm.IsActive = false;
