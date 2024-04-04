@@ -376,6 +376,13 @@ namespace Helios.Core.Controllers
                 result.CalculationSourceInputs = calStr;
             }
 
+            var validations = await _context.ElementValidationDetails.Where(x => x.ElementId == result.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+            if (validations != null)
+            {
+                result.ValidationList = JsonSerializer.Serialize(validations);
+            }
+
             return result;
         }
 
@@ -445,8 +452,6 @@ namespace Helios.Core.Controllers
                         ModuleId = model.ModuleId,
                         TenantId = model.TenantId,
                         Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
-                        //CreatedAt = DateTimeOffset.Now,
-                        //AddedById = userId,
                     };
 
                     _context.Elements.Add(elm);
@@ -587,6 +592,28 @@ namespace Helios.Core.Controllers
                                 _context.ElementDetails.Update(elementDetail);
                                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                             }
+                        }
+
+                        if (model.HasValidation)
+                        {
+                            var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
+
+                            foreach (var item in validations)
+                            {
+                                var validation = new ElementValidationDetail
+                                {
+                                    ModuleId = model.ModuleId,
+                                    ElementId = elm.Id,
+                                    ActionType = item.ValidationActionType,
+                                    ValueCondition = item.ValidationCondition,
+                                    Value = item.ValidationValue,
+                                    Message = item.ValidationMessage,
+                                };
+
+                                _context.ElementValidationDetails.Add(validation);
+                            }
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
 
                         if (!result.IsSuccess)//if dependent or calculation didn't save
@@ -858,6 +885,76 @@ namespace Helios.Core.Controllers
 
                         _context.Elements.Update(element);
                         _context.ElementDetails.Update(elementDetail);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
+
+                if (model.HasValidation)
+                {
+                    var dbValidations = await _context.ElementValidationDetails.Where(x => x.ElementId == model.Id).ToListAsync();
+                    var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
+
+                    //add or update
+                    foreach (var item in validations)
+                    {
+                        var existVal = dbValidations.FirstOrDefault(x => x.Id == item.Id && x.IsActive && !x.IsDeleted);
+
+                        if (existVal != null)
+                        {
+                            existVal.Value = item.ValidationValue;
+                            existVal.ValueCondition = item.ValidationCondition;
+                            existVal.Message = item.ValidationMessage;
+                            existVal.ActionType = item.ValidationActionType;
+
+                            _context.ElementValidationDetails.Update(existVal);
+                        }
+                        else
+                        {
+                            var validation = new ElementValidationDetail
+                            {
+                                ModuleId = model.ModuleId,
+                                ElementId = element.Id,
+                                ActionType = item.ValidationActionType,
+                                ValueCondition = (ActionCondition)item.ValidationCondition,
+                                Value = item.ValidationValue,
+                                Message = item.ValidationMessage,
+                            };
+
+                            _context.ElementValidationDetails.Add(validation);
+                        }
+
+                    }
+
+                    //delete
+                    foreach (var item in dbValidations)
+                    {
+                        var existVal = validations.FirstOrDefault(x => x.Id == item.Id);
+
+                        if (existVal == null)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(item);
+                        }
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+                else
+                {
+                    var dbValidations = await _context.ElementValidationDetails.Where(x => x.ElementId == model.Id).ToListAsync();
+
+                    if (dbValidations.Count > 0)
+                    {
+                        foreach (var item in dbValidations)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(item);
+                        }
+
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
                 }
