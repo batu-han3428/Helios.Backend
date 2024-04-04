@@ -89,6 +89,7 @@ namespace Helios.Core.Contexts
         public DbSet<CalculatationElementDetail> CalculatationElementDetails { get; set; }
         public DbSet<ElementDetail> ElementDetails { get; set; }
         public DbSet<Element> Elements { get; set; }
+        public DbSet<ElementValidationDetail> ElementValidationDetails { get; set; }
         public DbSet<MailTemplate> MailTemplates { get; set; }
         public DbSet<MailTemplateTag> MailTemplateTags { get; set; }
         public DbSet<MailTemplatesRole> MailTemplatesRoles { get; set; }

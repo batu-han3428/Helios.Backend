@@ -91,10 +91,8 @@ namespace Helios.Common.Model
         public Int64? TargetElementId { get; set; } = 0;
 
         //validation
-        public ValidationActionType ValidationActionType { get; set; } = 0;
-        public int ValidationCondition { get; set; } = 0;
-        public string ValidationValue { get; set; } = "";
-        public string ValidationMessage { get; set; } = "";
+        public bool HasValidation { get; set; }
+        public string ValidationList { get; set; }
 
         //public bool? HasChildren { get; set; } = false;
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
@@ -105,5 +103,14 @@ namespace Helios.Common.Model
         public Int64 Id { get; set; }
         public Int64 UserId { get; set; }
         public string Value { get; set; }
+    }
+
+    public class ElementValidationModel
+    {
+        public Int64 Id { get; set; }
+        public ValidationActionType ValidationActionType { get; set; } = 0;
+        public ActionCondition ValidationCondition { get; set; } = 0;
+        public string ValidationValue { get; set; } = "";
+        public string ValidationMessage { get; set; } = "";
     }
 }
