@@ -1161,6 +1161,19 @@ namespace Helios.Core.Controllers
                     }
                 }
 
+                var validations = await _context.ElementValidationDetails.Where(x => x.ElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                if (validations != null && validations.Count > 0)
+                {
+                    foreach (var validation in validations)
+                    {
+                        validation.IsActive = false;
+                        validation.IsDeleted = true;
+
+                        _context.ElementValidationDetails.Update(validation);
+                    }
+                }
+
                 element.IsDeleted = true;
                 element.IsActive = false;
                 elementDetail.IsDeleted = true;
