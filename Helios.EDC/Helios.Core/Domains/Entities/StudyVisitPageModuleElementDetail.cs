@@ -5,7 +5,6 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyVisitPageModuleElementDetail : EntityBase
     {
-        public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColunmIndex { get; set; }
@@ -42,6 +41,7 @@ namespace Helios.Core.Domains.Entities
         public int? ColumnCount { get; set; }
         public string? DatagridAndTableProperties { get; set; }
         public int? AdverseEventType { get; set; }
+        public Int64 StudyVisitPageModuleElementId { get; set; }
         public StudyVisitPageModuleElement StudyVisitPageModuleElement { get; set; }
     }
 }
