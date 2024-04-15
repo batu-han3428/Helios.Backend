@@ -876,7 +876,7 @@ namespace Helios.Core.Controllers
                             TenantId = module.TenantId,
                             IsActive = module.IsActive,
                             IsDeleted = module.IsDeleted,
-                            StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element=> new StudyVisitPageModuleElement
+                            StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement
                             {
                                 ElementType = element.ElementType,
                                 ElementName = element.ElementName,
@@ -895,7 +895,7 @@ namespace Helios.Core.Controllers
                                 IsActive = element.IsActive,
                                 IsDeleted = element.IsDeleted,
                                 StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
-                                StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu=> new StudyVisitPageModuleCalculationElementDetail
+                                StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu => new StudyVisitPageModuleCalculationElementDetail
                                 {
                                     TargetElementId = calcu.TargetElementId,
                                     VariableName = calcu.VariableName,
@@ -904,7 +904,7 @@ namespace Helios.Core.Controllers
                                     IsDeleted = calcu.IsDeleted,
                                     IsActive = calcu.IsActive
                                 }).ToList(),
-                                StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events=> new StudyVisitPageModuleElementEvent
+                                StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events => new StudyVisitPageModuleElementEvent
                                 {
                                     EventType = events.EventType,
                                     ActionType = events.ActionType,
@@ -943,7 +943,7 @@ namespace Helios.Core.Controllers
                             TenantId = visitData.TenantId
                         };
 
-                        var pages = visitData.StudyVisitPages.Where(x=>x.IsActive && !x.IsDeleted).Select(page => new StudyVisitPage
+                        var pages = visitData.StudyVisitPages.Where(x => x.IsActive && !x.IsDeleted).Select(page => new StudyVisitPage
                         {
                             ReferenceKey = page.ReferenceKey,
                             VersionKey = page.VersionKey,
@@ -951,7 +951,7 @@ namespace Helios.Core.Controllers
                             Order = page.Order,
                             EPro = page.EPro,
                             TenantId = page.TenantId,
-                            StudyVisitPageModules = page.StudyVisitPageModules.Where(x=>x.IsActive && !x.IsDeleted).Select(module =>
+                            StudyVisitPageModules = page.StudyVisitPageModules.Where(x => x.IsActive && !x.IsDeleted).Select(module =>
                             {
                                 var newModule = new StudyVisitPageModule
                                 {
@@ -983,7 +983,7 @@ namespace Helios.Core.Controllers
                                         TenantId = element.TenantId
                                     };
 
-                                    var calcus = element.StudyVisitPageModuleCalculationElementDetails.Where(x=> x.IsActive && !x.IsDeleted).Select(calculation =>
+                                    var calcus = element.StudyVisitPageModuleCalculationElementDetails.Where(x => x.IsActive && !x.IsDeleted).Select(calculation =>
                                     {
                                         var calcu = new StudyVisitPageModuleCalculationElementDetail
                                         {
@@ -1040,7 +1040,7 @@ namespace Helios.Core.Controllers
 
                                     newModuleElements.StudyVisitPageModuleCalculationElementDetails = calcus;
 
-                                    newModuleElements.StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Where(x=>x.IsActive&&!x.IsDeleted).Select(events =>
+                                    newModuleElements.StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Where(x => x.IsActive && !x.IsDeleted).Select(events =>
                                     {
                                         var newEvents = new StudyVisitPageModuleElementEvent
                                         {
@@ -1083,7 +1083,7 @@ namespace Helios.Core.Controllers
                     var updatedVisits = visitDatas.Where(x => x.IsActive && !x.IsDeleted && updateVisits.Select(a => a.Id).Contains(x.Id)).ToList();
 
                     var newUpVisits = await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && updatedVisits.Select(a => a.ReferenceKey).Contains(x.ReferenceKey) && !updateVisits.Select(a => a.Id).Contains(x.Id)).ToListAsync();
-                   
+
                     foreach (var item in newUpVisits)
                     {
                         var p = updatedVisits.FirstOrDefault(x => x.ReferenceKey == item.ReferenceKey);
@@ -1189,9 +1189,9 @@ namespace Helios.Core.Controllers
                         Permissions = visit.Permissions
                     }).AsSplitQuery().ToListAsync();
 
-                    _context.Permissions.RemoveRange(newDelVisits.SelectMany(x=>x.Permissions));
+                    _context.Permissions.RemoveRange(newDelVisits.SelectMany(x => x.Permissions));
 
-                    _context.Permissions.RemoveRange(newDelVisits.SelectMany(x=>x.StudyVisitPages).SelectMany(x => x.Permissions));
+                    _context.Permissions.RemoveRange(newDelVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.Permissions));
 
                     _context.StudyVisits.RemoveRange(newDelVisits);
                 }
@@ -1249,13 +1249,13 @@ namespace Helios.Core.Controllers
                     });
                 }
                 #endregion
-                }
+            }
             #endregion
 
             #region Pages
             List<StudyVisitPage> addedPages = null;
             if (pageDTOs.Count > 0)
-            {             
+            {
                 pageDatas = await _context.StudyVisitPages.Where(x => pageDTOs.Select(a => a.Id).Contains(x.Id)).Select(page => new StudyVisitPage
                 {
                     Id = page.Id,
@@ -1458,7 +1458,7 @@ namespace Helios.Core.Controllers
                                 }).ToList();
                                 return newModule;
                             }).ToList();
-            
+
                         foreach (var module in modules)
                         {
                             newPage.StudyVisitPageModules.Add(module);
@@ -1567,7 +1567,7 @@ namespace Helios.Core.Controllers
                         Permissions = page.Permissions
                     }).AsSplitQuery().ToListAsync();
 
-                    _context.Permissions.RemoveRange(newDelPages.SelectMany(x=>x.Permissions));
+                    _context.Permissions.RemoveRange(newDelPages.SelectMany(x => x.Permissions));
 
                     _context.StudyVisitPages.RemoveRange(newDelPages);
                 }
@@ -1930,12 +1930,12 @@ namespace Helios.Core.Controllers
 
             if (result > 0)
             {
-                if ((addedVisits != null && addedVisits.Count > 0) || (addedPages != null && addedPages.Count > 0) || (addedModules != null && addedModules.Count >0))
+                if ((addedVisits != null && addedVisits.Count > 0) || (addedPages != null && addedPages.Count > 0) || (addedModules != null && addedModules.Count > 0))
                 {
                     if (addedVisits != null && addedVisits.Count > 0)
                     {
-                        try 
-                        { 
+                        try
+                        {
                             response = await SetCalculationAndEvents(addedVisits, visitDatas, VisitStatu.visit);
                         }
                         catch (Exception)
@@ -1958,8 +1958,8 @@ namespace Helios.Core.Controllers
 
                     if (addedModules != null && addedModules.Count > 0)
                     {
-                        try 
-                        { 
+                        try
+                        {
                             response = await SetCalculationAndEvents(addedModules, moduleDatas.Where(x => addedModules.Select(a => a.ReferenceKey).Contains(x.ReferenceKey)).ToList(), VisitStatu.module);
                         }
                         catch (Exception)
@@ -2258,7 +2258,7 @@ namespace Helios.Core.Controllers
                 Order = visit.Order,
                 IsActive = visit.IsActive,
                 IsDeleted = visit.IsDeleted,
-                StudyVisitPages = visit.StudyVisitPages.Select(page=>new StudyVisitPage
+                StudyVisitPages = visit.StudyVisitPages.Select(page => new StudyVisitPage
                 {
                     Id = page.Id,
                     UpdatedAt = page.UpdatedAt,
@@ -2267,7 +2267,7 @@ namespace Helios.Core.Controllers
                     Order = page.Order,
                     IsActive = page.IsActive,
                     IsDeleted = page.IsDeleted,
-                    StudyVisitPageModules = page.StudyVisitPageModules.Select(module=>new StudyVisitPageModule
+                    StudyVisitPageModules = page.StudyVisitPageModules.Select(module => new StudyVisitPageModule
                     {
                         Id = module.Id,
                         UpdatedAt = module.UpdatedAt,
@@ -2302,7 +2302,7 @@ namespace Helios.Core.Controllers
                             StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                             IsActive = element.IsActive,
                             IsDeleted = element.IsDeleted,
-                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu=>new StudyVisitPageModuleCalculationElementDetail
+                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu => new StudyVisitPageModuleCalculationElementDetail
                             {
                                 Id = calcu.Id,
                                 TenantId = calcu.TenantId,
@@ -2318,7 +2318,7 @@ namespace Helios.Core.Controllers
                                 IsActive = calcu.IsActive,
                                 IsDeleted = calcu.IsDeleted,
                             }).ToList(),
-                            StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events=>new StudyVisitPageModuleElementEvent
+                            StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events => new StudyVisitPageModuleElementEvent
                             {
                                 Id = events.Id,
                                 TenantId = events.TenantId,
@@ -2453,7 +2453,7 @@ namespace Helios.Core.Controllers
                     Order = x.Order,
                     UpdatedAt = x.UpdatedAt,
                     Status = visitStatus,
-                    Children = x.StudyVisitPages.OrderBy(page => page.Order).Select(page => 
+                    Children = x.StudyVisitPages.OrderBy(page => page.Order).Select(page =>
                     {
                         var pageStatus = GetStatusForPage(page, activeVisits.SelectMany(t => t.StudyVisitPages).ToList(), demoVisits.SelectMany(t => t.StudyVisitPages).ToList(), visitStatus);
                         if (pageStatus == null)
@@ -2486,15 +2486,15 @@ namespace Helios.Core.Controllers
                                 };
 
                                 return newModule;
-                            }).Where(x=>x!=null).ToList()
+                            }).Where(x => x != null).ToList()
                         };
 
                         return newPage;
-                       
-                    }).Where(x=>x!=null).ToList()
+
+                    }).Where(x => x != null).ToList()
                 };
                 return data;
-            }).Where(x=>x!=null).ToList();
+            }).Where(x => x != null).ToList();
 
             return result;
         }
@@ -2508,7 +2508,7 @@ namespace Helios.Core.Controllers
             {
                 return null;
             }
-            if ((activeVisit == null || (activeVisit.IsDeleted && !activeVisit.IsActive)) && (demoVisit == null || (demoVisit.IsDeleted && !demoVisit.IsActive )))
+            if ((activeVisit == null || (activeVisit.IsDeleted && !activeVisit.IsActive)) && (demoVisit == null || (demoVisit.IsDeleted && !demoVisit.IsActive)))
             {
                 return "";
             }
@@ -2516,14 +2516,14 @@ namespace Helios.Core.Controllers
             {
                 return TransferChangeType.Insert.GetDescription();
             }
-            else if (activeVisit != null && activeVisit.IsActive && !activeVisit.IsDeleted && (demoVisit == null || (demoVisit.IsDeleted && !demoVisit.IsActive )))
+            else if (activeVisit != null && activeVisit.IsActive && !activeVisit.IsDeleted && (demoVisit == null || (demoVisit.IsDeleted && !demoVisit.IsActive)))
             {
                 return TransferChangeType.Delete.GetDescription();
             }
             else if (activeVisit != null && activeVisit.IsActive && !activeVisit.IsDeleted && demoVisit != null && demoVisit.IsActive && !demoVisit.IsDeleted && (demoVisit.Name != activeVisit.Name || demoVisit.Order != activeVisit.Order))
             {
                 return TransferChangeType.Update.GetDescription();
-            } 
+            }
 
             return TransferChangeType.None.GetDescription();
         }
@@ -2539,8 +2539,8 @@ namespace Helios.Core.Controllers
               (visitStatus == TransferChangeType.Delete.ToString() && activePage == null && demoPage.IsDeleted && !demoPage.IsActive)
               ||
               ((activePage == null || activePage.IsDeleted && !activePage.IsActive) && demoPage.IsDeleted && !demoPage.IsActive)
-            ) 
-            { 
+            )
+            {
                 return null;
             }
             else if (
@@ -2574,8 +2574,8 @@ namespace Helios.Core.Controllers
 
             if (
                 (
-                    (visitStatus == TransferChangeType.Insert.ToString() || pageStatus == TransferChangeType.Insert.ToString()) 
-                    && 
+                    (visitStatus == TransferChangeType.Insert.ToString() || pageStatus == TransferChangeType.Insert.ToString())
+                    &&
                     (demoModule == null || (demoModule.IsDeleted && !demoModule.IsActive))
                 )
                 ||
@@ -2615,7 +2615,7 @@ namespace Helios.Core.Controllers
                 return true;
             }
 
-            if (AreModuleElementsEqual(aModule.StudyVisitPageModuleElements.ToList(), dModule.StudyVisitPageModuleElements.Where(x=>x.IsActive && !x.IsDeleted).ToList()))
+            if (AreModuleElementsEqual(aModule.StudyVisitPageModuleElements.ToList(), dModule.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted).ToList()))
             {
                 return true;
             }
@@ -3072,8 +3072,8 @@ namespace Helios.Core.Controllers
                             StudyId = visit.StudyId,
                             ReferenceKey = visit.ReferenceKey,
                             VersionKey = visit.VersionKey,
-                            VisitType =visit.VisitType,
-                            Name =visit.Name,
+                            VisitType = visit.VisitType,
+                            Name = visit.Name,
                             Order = visit.Order,
                             StudyVisitPages = visit.StudyVisitPages.Select(page => new StudyVisitPage
                             {
@@ -3088,7 +3088,7 @@ namespace Helios.Core.Controllers
                                 StudyVisitId = page.StudyVisitId,
                                 ReferenceKey = page.ReferenceKey,
                                 VersionKey = page.VersionKey,
-                                Name =page.Name,
+                                Name = page.Name,
                                 Order = page.Order,
                                 EPro = page.EPro,
                                 StudyVisitPageModules = page.StudyVisitPageModules.Select(module => new StudyVisitPageModule
@@ -3103,8 +3103,8 @@ namespace Helios.Core.Controllers
                                     TenantId = module.TenantId,
                                     StudyVisitPageId = module.StudyVisitPageId,
                                     Name = module.Name,
-                                    ReferenceKey=module.ReferenceKey,
-                                    VersionKey= module.VersionKey,
+                                    ReferenceKey = module.ReferenceKey,
+                                    VersionKey = module.VersionKey,
                                     Order = module.Order,
                                     StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
                                     {
@@ -3116,7 +3116,7 @@ namespace Helios.Core.Controllers
                                         IsActive = element.IsActive,
                                         IsDeleted = element.IsDeleted,
                                         TenantId = element.TenantId,
-                                        StudyVisitPageModuleId  = element.StudyVisitPageModuleId,
+                                        StudyVisitPageModuleId = element.StudyVisitPageModuleId,
                                         ElementType = element.ElementType,
                                         ElementName = element.ElementName,
                                         Title = element.Title,
@@ -3168,68 +3168,68 @@ namespace Helios.Core.Controllers
                     var page = await _context.StudyVisitPages
                        .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted).Select(page => new StudyVisitPage
                        {
-                            Id = page.Id,
-                            AddedById = page.AddedById,
-                            CreatedAt = page.CreatedAt,
-                            UpdatedAt = page.UpdatedAt,
-                            UpdatedById = page.UpdatedById,
-                            IsActive = page.IsActive,
-                            IsDeleted = page.IsDeleted,
-                            TenantId = page.TenantId,
-                            StudyVisitId = page.StudyVisitId,
-                            ReferenceKey = page.ReferenceKey,
-                            VersionKey = page.VersionKey,
-                            Name = page.Name,
-                            Order = page.Order,
-                            EPro = page.EPro,
-                            StudyVisitPageModules = page.StudyVisitPageModules.Select(module => new StudyVisitPageModule
-                            {
-                                Id = module.Id,
-                                AddedById = module.AddedById,
-                                CreatedAt = module.CreatedAt,
-                                UpdatedAt = module.UpdatedAt,
-                                UpdatedById = module.UpdatedById,
-                                IsActive = module.IsActive,
-                                IsDeleted = module.IsDeleted,
-                                TenantId = module.TenantId,
-                                StudyVisitPageId = module.StudyVisitPageId,
-                                Name = module.Name,
-                                ReferenceKey = module.ReferenceKey,
-                                VersionKey = module.VersionKey,
-                                Order = module.Order,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
-                                {
-                                    Id = element.Id,
-                                    CreatedAt = element.CreatedAt,
-                                    AddedById = element.AddedById,
-                                    UpdatedAt = element.UpdatedAt,
-                                    UpdatedById = element.UpdatedById,
-                                    IsActive = element.IsActive,
-                                    IsDeleted = element.IsDeleted,
-                                    TenantId = element.TenantId,
-                                    StudyVisitPageModuleId = element.StudyVisitPageModuleId,
-                                    ElementType = element.ElementType,
-                                    ElementName = element.ElementName,
-                                    Title = element.Title,
-                                    IsTitleHidden = element.IsTitleHidden,
-                                    Order = element.Order,
-                                    Description = element.Description,
-                                    Width = element.Width,
-                                    IsHidden = element.IsHidden,
-                                    IsRequired = element.IsRequired,
-                                    IsDependent = element.IsDependent,
-                                    IsRelated = element.IsRelated,
-                                    IsReadonly = element.IsReadonly,
-                                    CanMissing = element.CanMissing,
-                                    ReferenceKey = element.ReferenceKey,
-                                    StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
-                                    StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                    StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
-                                }).ToList(),
-                                StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
-                                StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
-                            }).ToList(),
-                            Permissions = page.Permissions
+                           Id = page.Id,
+                           AddedById = page.AddedById,
+                           CreatedAt = page.CreatedAt,
+                           UpdatedAt = page.UpdatedAt,
+                           UpdatedById = page.UpdatedById,
+                           IsActive = page.IsActive,
+                           IsDeleted = page.IsDeleted,
+                           TenantId = page.TenantId,
+                           StudyVisitId = page.StudyVisitId,
+                           ReferenceKey = page.ReferenceKey,
+                           VersionKey = page.VersionKey,
+                           Name = page.Name,
+                           Order = page.Order,
+                           EPro = page.EPro,
+                           StudyVisitPageModules = page.StudyVisitPageModules.Select(module => new StudyVisitPageModule
+                           {
+                               Id = module.Id,
+                               AddedById = module.AddedById,
+                               CreatedAt = module.CreatedAt,
+                               UpdatedAt = module.UpdatedAt,
+                               UpdatedById = module.UpdatedById,
+                               IsActive = module.IsActive,
+                               IsDeleted = module.IsDeleted,
+                               TenantId = module.TenantId,
+                               StudyVisitPageId = module.StudyVisitPageId,
+                               Name = module.Name,
+                               ReferenceKey = module.ReferenceKey,
+                               VersionKey = module.VersionKey,
+                               Order = module.Order,
+                               StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
+                               {
+                                   Id = element.Id,
+                                   CreatedAt = element.CreatedAt,
+                                   AddedById = element.AddedById,
+                                   UpdatedAt = element.UpdatedAt,
+                                   UpdatedById = element.UpdatedById,
+                                   IsActive = element.IsActive,
+                                   IsDeleted = element.IsDeleted,
+                                   TenantId = element.TenantId,
+                                   StudyVisitPageModuleId = element.StudyVisitPageModuleId,
+                                   ElementType = element.ElementType,
+                                   ElementName = element.ElementName,
+                                   Title = element.Title,
+                                   IsTitleHidden = element.IsTitleHidden,
+                                   Order = element.Order,
+                                   Description = element.Description,
+                                   Width = element.Width,
+                                   IsHidden = element.IsHidden,
+                                   IsRequired = element.IsRequired,
+                                   IsDependent = element.IsDependent,
+                                   IsRelated = element.IsRelated,
+                                   IsReadonly = element.IsReadonly,
+                                   CanMissing = element.CanMissing,
+                                   ReferenceKey = element.ReferenceKey,
+                                   StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
+                                   StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
+                                   StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                               }).ToList(),
+                               StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
+                               StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
+                           }).ToList(),
+                           Permissions = page.Permissions
                        }).AsSplitQuery().FirstOrDefaultAsync();
 
                     if (page != null)
@@ -3255,50 +3255,50 @@ namespace Helios.Core.Controllers
                     var module = await _context.StudyVisitPageModules
                        .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted).Select(module => new StudyVisitPageModule
                        {
-                            Id = module.Id,
-                            AddedById = module.AddedById,
-                            CreatedAt = module.CreatedAt,
-                            UpdatedAt = module.UpdatedAt,
-                            UpdatedById = module.UpdatedById,
-                            IsActive = module.IsActive,
-                            IsDeleted = module.IsDeleted,
-                            TenantId = module.TenantId,
-                            StudyVisitPageId = module.StudyVisitPageId,
-                            Name = module.Name,
-                            ReferenceKey = module.ReferenceKey,
-                            VersionKey = module.VersionKey,
-                            Order = module.Order,
-                            StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
-                            {
-                                Id = element.Id,
-                                CreatedAt = element.CreatedAt,
-                                AddedById = element.AddedById,
-                                UpdatedAt = element.UpdatedAt,
-                                UpdatedById = element.UpdatedById,
-                                IsActive = element.IsActive,
-                                IsDeleted = element.IsDeleted,
-                                TenantId = element.TenantId,
-                                StudyVisitPageModuleId = element.StudyVisitPageModuleId,
-                                ElementType = element.ElementType,
-                                ElementName = element.ElementName,
-                                Title = element.Title,
-                                IsTitleHidden = element.IsTitleHidden,
-                                Order = element.Order,
-                                Description = element.Description,
-                                Width = element.Width,
-                                IsHidden = element.IsHidden,
-                                IsRequired = element.IsRequired,
-                                IsDependent = element.IsDependent,
-                                IsRelated = element.IsRelated,
-                                IsReadonly = element.IsReadonly,
-                                CanMissing = element.CanMissing,
-                                ReferenceKey = element.ReferenceKey,
-                                StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
-                                StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
-                            }).ToList(),
-                            StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
-                            StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
+                           Id = module.Id,
+                           AddedById = module.AddedById,
+                           CreatedAt = module.CreatedAt,
+                           UpdatedAt = module.UpdatedAt,
+                           UpdatedById = module.UpdatedById,
+                           IsActive = module.IsActive,
+                           IsDeleted = module.IsDeleted,
+                           TenantId = module.TenantId,
+                           StudyVisitPageId = module.StudyVisitPageId,
+                           Name = module.Name,
+                           ReferenceKey = module.ReferenceKey,
+                           VersionKey = module.VersionKey,
+                           Order = module.Order,
+                           StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
+                           {
+                               Id = element.Id,
+                               CreatedAt = element.CreatedAt,
+                               AddedById = element.AddedById,
+                               UpdatedAt = element.UpdatedAt,
+                               UpdatedById = element.UpdatedById,
+                               IsActive = element.IsActive,
+                               IsDeleted = element.IsDeleted,
+                               TenantId = element.TenantId,
+                               StudyVisitPageModuleId = element.StudyVisitPageModuleId,
+                               ElementType = element.ElementType,
+                               ElementName = element.ElementName,
+                               Title = element.Title,
+                               IsTitleHidden = element.IsTitleHidden,
+                               Order = element.Order,
+                               Description = element.Description,
+                               Width = element.Width,
+                               IsHidden = element.IsHidden,
+                               IsRequired = element.IsRequired,
+                               IsDependent = element.IsDependent,
+                               IsRelated = element.IsRelated,
+                               IsReadonly = element.IsReadonly,
+                               CanMissing = element.CanMissing,
+                               ReferenceKey = element.ReferenceKey,
+                               StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
+                               StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
+                               StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                           }).ToList(),
+                           StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
+                           StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
                        }).AsSplitQuery().FirstOrDefaultAsync();
 
                     if (module != null)
@@ -3497,241 +3497,241 @@ namespace Helios.Core.Controllers
         }
 
         private List<StudyVisitPageModuleElement> MapElementDTOListToStudyVisitPageModuleElementList(List<ElementDTO> elementDTOList)
-{
-    var studyVisitPageModuleElementList = new List<StudyVisitPageModuleElement>();
-
-    foreach (var elementDTO in elementDTOList)
-    {
-        var elementDetailDTO = elementDTO.StudyVisitPageModuleElementDetails;
-
-        var studyVisitPageModuleElement = new StudyVisitPageModuleElement
         {
-            ElementId = elementDTO.Id,
-            ElementType = elementDTO.ElementType,
-            ElementName = elementDTO.ElementName,
-            Title = elementDTO.Title,
-            IsTitleHidden = elementDTO.IsTitleHidden,
-            Order = elementDTO.Order,
-            Description = elementDTO.Description,
-            Width = elementDTO.Width,
-            IsHidden = elementDTO.IsHidden,
-            IsRequired = elementDTO.IsRequired,
-            IsDependent = elementDTO.IsDependent,
-            IsRelated = elementDTO.IsRelated,
-            IsReadonly = elementDTO.IsReadonly,
-            CanMissing = elementDTO.CanMissing,
-            ReferenceKey = new Guid(),
-            StudyVisitPageModuleElementDetail = new StudyVisitPageModuleElementDetail
+            var studyVisitPageModuleElementList = new List<StudyVisitPageModuleElement>();
+
+            foreach (var elementDTO in elementDTOList)
             {
-                ParentId = elementDetailDTO.ParentId,
-                RowIndex = elementDetailDTO.RowIndex,
-                ColunmIndex = elementDetailDTO.ColunmIndex,
-                CanQuery = elementDetailDTO.CanQuery,
-                CanSdv = elementDetailDTO.CanSdv,
-                CanRemoteSdv = elementDetailDTO.CanRemoteSdv,
-                CanComment = elementDetailDTO.CanComment,
-                CanDataEntry = elementDetailDTO.CanDataEntry,
-                ParentElementEProPageNumber = elementDetailDTO.ParentElementEProPageNumber,
-                MetaDataTags = elementDetailDTO.MetaDataTags,
-                EProPageNumber = elementDetailDTO.EProPageNumber,
-                ButtonText = elementDetailDTO.ButtonText,
-                DefaultValue = elementDetailDTO.DefaultValue,
-                Unit = elementDetailDTO.Unit,
-                LowerLimit = elementDetailDTO.LowerLimit,
-                UpperLimit = elementDetailDTO.UpperLimit,
-                Mask = elementDetailDTO.Mask,
-                Layout = elementDetailDTO.Layout,
-                StartDay = elementDetailDTO.StartDay,
-                EndDay = elementDetailDTO.EndDay,
-                StartMonth = elementDetailDTO.StartMonth,
-                EndMonth = elementDetailDTO.EndMonth,
-                StartYear = elementDetailDTO.StartYear,
-                EndYear = elementDetailDTO.EndYear,
-                AddTodayDate = elementDetailDTO.AddTodayDate,
-                ElementOptions = elementDetailDTO.ElementOptions,
-                LeftText = elementDetailDTO.LeftText,
-                RightText = elementDetailDTO.RightText,
-                IsInCalculation = elementDetailDTO.IsInCalculation,
-                MainJs = elementDetailDTO.MainJs,
-                RelationMainJs = elementDetailDTO.RelationMainJs,
-                RowCount = elementDetailDTO.RowCount,
-                ColumnCount = elementDetailDTO.ColumnCount,
-                DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties,
-                ReferenceKey = new Guid(),
-            }
-        };
+                var elementDetailDTO = elementDTO.StudyVisitPageModuleElementDetails;
 
-        studyVisitPageModuleElementList.Add(studyVisitPageModuleElement);
-    };
+                var studyVisitPageModuleElement = new StudyVisitPageModuleElement
+                {
+                    ElementId = elementDTO.Id,
+                    ElementType = elementDTO.ElementType,
+                    ElementName = elementDTO.ElementName,
+                    Title = elementDTO.Title,
+                    IsTitleHidden = elementDTO.IsTitleHidden,
+                    Order = elementDTO.Order,
+                    Description = elementDTO.Description,
+                    Width = elementDTO.Width,
+                    IsHidden = elementDTO.IsHidden,
+                    IsRequired = elementDTO.IsRequired,
+                    IsDependent = elementDTO.IsDependent,
+                    IsRelated = elementDTO.IsRelated,
+                    IsReadonly = elementDTO.IsReadonly,
+                    CanMissing = elementDTO.CanMissing,
+                    ReferenceKey = new Guid(),
+                    StudyVisitPageModuleElementDetail = new StudyVisitPageModuleElementDetail
+                    {
+                        ParentId = elementDetailDTO.ParentId,
+                        RowIndex = elementDetailDTO.RowIndex,
+                        ColunmIndex = elementDetailDTO.ColunmIndex,
+                        CanQuery = elementDetailDTO.CanQuery,
+                        CanSdv = elementDetailDTO.CanSdv,
+                        CanRemoteSdv = elementDetailDTO.CanRemoteSdv,
+                        CanComment = elementDetailDTO.CanComment,
+                        CanDataEntry = elementDetailDTO.CanDataEntry,
+                        ParentElementEProPageNumber = elementDetailDTO.ParentElementEProPageNumber,
+                        MetaDataTags = elementDetailDTO.MetaDataTags,
+                        EProPageNumber = elementDetailDTO.EProPageNumber,
+                        ButtonText = elementDetailDTO.ButtonText,
+                        DefaultValue = elementDetailDTO.DefaultValue,
+                        Unit = elementDetailDTO.Unit,
+                        LowerLimit = elementDetailDTO.LowerLimit,
+                        UpperLimit = elementDetailDTO.UpperLimit,
+                        Mask = elementDetailDTO.Mask,
+                        Layout = elementDetailDTO.Layout,
+                        StartDay = elementDetailDTO.StartDay,
+                        EndDay = elementDetailDTO.EndDay,
+                        StartMonth = elementDetailDTO.StartMonth,
+                        EndMonth = elementDetailDTO.EndMonth,
+                        StartYear = elementDetailDTO.StartYear,
+                        EndYear = elementDetailDTO.EndYear,
+                        AddTodayDate = elementDetailDTO.AddTodayDate,
+                        ElementOptions = elementDetailDTO.ElementOptions,
+                        LeftText = elementDetailDTO.LeftText,
+                        RightText = elementDetailDTO.RightText,
+                        IsInCalculation = elementDetailDTO.IsInCalculation,
+                        MainJs = elementDetailDTO.MainJs,
+                        RelationMainJs = elementDetailDTO.RelationMainJs,
+                        RowCount = elementDetailDTO.RowCount,
+                        ColumnCount = elementDetailDTO.ColumnCount,
+                        DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties,
+                        ReferenceKey = new Guid(),
+                    }
+                };
 
-    return studyVisitPageModuleElementList;
-}
+                studyVisitPageModuleElementList.Add(studyVisitPageModuleElement);
+            };
+
+            return studyVisitPageModuleElementList;
+        }
 
         private async Task<ApiResponse<dynamic>> SetStudyModule(List<ModuleDTO> dto)
-{
-    var result = false;
-
-    try
-    {
-        List<StudyVisitPageModule> moduleList = MapModuleDTOListToStudyVisitPageModuleList(dto);
-
-        await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
-
-        BaseDTO baseDTO = Request.Headers.GetBaseInformation();
-
-        result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-
-        if (result)
         {
-            IEnumerable<StudyVisitPageModuleElement> stdVstPgMdlElements = moduleList.SelectMany(x => x.StudyVisitPageModuleElements);
+            var result = false;
 
-            //set parentElementId
-            foreach (var item in stdVstPgMdlElements)
+            try
             {
-                Int64? parentId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == item.StudyVisitPageModuleElementDetail.ParentId)?.Id;
-                item.StudyVisitPageModuleElementDetail.ParentId = parentId;
-                _context.StudyVisitPageModuleElements.Update(item);
-            }
+                List<StudyVisitPageModule> moduleList = MapModuleDTOListToStudyVisitPageModuleList(dto);
 
-            var elementDTOs = dto.SelectMany(x => x.StudyVisitPageModuleElements).ToList();
+                await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
 
-            foreach (var item in stdVstPgMdlElements)
-            {
-                var elementDTO = elementDTOs.FirstOrDefault(x => x.Id == item.ElementId);
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-                if (elementDTO.StudyVisitPageModuleCalculationElementDetails.Count > 0)
+                result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
                 {
-                    var studyVisitPageModuleCalculationElementDetailsList = new List<StudyVisitPageModuleCalculationElementDetail>();
+                    IEnumerable<StudyVisitPageModuleElement> stdVstPgMdlElements = moduleList.SelectMany(x => x.StudyVisitPageModuleElements);
 
-                    foreach (var calculationElementDetailDTO in elementDTO.StudyVisitPageModuleCalculationElementDetails)
+                    //set parentElementId
+                    foreach (var item in stdVstPgMdlElements)
                     {
-                        var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetail
+                        Int64? parentId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == item.StudyVisitPageModuleElementDetail.ParentId)?.Id;
+                        item.StudyVisitPageModuleElementDetail.ParentId = parentId;
+                        _context.StudyVisitPageModuleElements.Update(item);
+                    }
+
+                    var elementDTOs = dto.SelectMany(x => x.StudyVisitPageModuleElements).ToList();
+
+                    foreach (var item in stdVstPgMdlElements)
+                    {
+                        var elementDTO = elementDTOs.FirstOrDefault(x => x.Id == item.ElementId);
+
+                        if (elementDTO.StudyVisitPageModuleCalculationElementDetails.Count > 0)
                         {
-                            ReferenceKey = new Guid(),
-                            StudyVisitPageModuleId = item.StudyVisitPageModuleId,
-                            CalculationElementId = item.Id,
-                            TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
-                            VariableName = calculationElementDetailDTO.VariableName
-                        };
+                            var studyVisitPageModuleCalculationElementDetailsList = new List<StudyVisitPageModuleCalculationElementDetail>();
 
-                        studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
+                            foreach (var calculationElementDetailDTO in elementDTO.StudyVisitPageModuleCalculationElementDetails)
+                            {
+                                var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetail
+                                {
+                                    ReferenceKey = new Guid(),
+                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
+                                    CalculationElementId = item.Id,
+                                    TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
+                                    VariableName = calculationElementDetailDTO.VariableName
+                                };
+
+                                studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
+                            }
+
+                            item.studyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
+                        }
+
+                        if (elementDTO.StudyVisitPageModuleElementEvents.Count > 0)
+                        {
+                            var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
+
+                            foreach (var moduleElementEventDTO in elementDTO.StudyVisitPageModuleElementEvents)
+                            {
+                                var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
+                                {
+                                    ReferenceKey = new Guid(),
+                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
+                                    EventType = moduleElementEventDTO.EventType,
+                                    ActionType = moduleElementEventDTO.ActionType,
+                                    SourceElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == moduleElementEventDTO.SourceElementId).Id,
+                                    TargetElementId = item.Id,
+                                    ValueCondition = moduleElementEventDTO.ValueCondition,
+                                    ActionValue = moduleElementEventDTO.ActionValue,
+                                    VariableName = moduleElementEventDTO.VariableName,
+                                };
+
+                                studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
+                            }
+
+                            item.StudyVisitPageModuleElementEvents = studyVisitPageModuleElementEventList;
+                        }
+
+                        if (elementDTO.StudyVisitPageModuleElementValidationDetails.Count > 0)
+                        {
+                            var studyVisitPageModuleElementValidationDetailList = new List<StudyVisitPageModuleElementValidationDetail>();
+
+                            foreach (var val in elementDTO.StudyVisitPageModuleElementValidationDetails)
+                            {
+                                var studyVisitPageModuleElementValidationDetail = new StudyVisitPageModuleElementValidationDetail
+                                {
+                                    ReferenceKey = new Guid(),
+                                    StudyVisitPageModuleElementId = item.Id,
+                                    ActionType = val.ValidationActionType,
+                                    ValueCondition = val.ValidationCondition,
+                                    Value = val.ValidationValue,
+                                    Message = val.ValidationMessage
+                                };
+
+                                studyVisitPageModuleElementValidationDetailList.Add(studyVisitPageModuleElementValidationDetail);
+                            }
+
+                            item.StudyVisitPageModuleElementValidationDetails = studyVisitPageModuleElementValidationDetailList;
+                        }
                     }
 
-                    item.studyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
                 }
 
-                if (elementDTO.StudyVisitPageModuleElementEvents.Count > 0)
+                if (result)
                 {
-                    var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
-
-                    foreach (var moduleElementEventDTO in elementDTO.StudyVisitPageModuleElementEvents)
+                    return new ApiResponse<dynamic>
                     {
-                        var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
-                        {
-                            ReferenceKey = new Guid(),
-                            StudyVisitPageModuleId = item.StudyVisitPageModuleId,
-                            EventType = moduleElementEventDTO.EventType,
-                            ActionType = moduleElementEventDTO.ActionType,
-                            SourceElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == moduleElementEventDTO.SourceElementId).Id,
-                            TargetElementId = item.Id,
-                            ValueCondition = moduleElementEventDTO.ValueCondition,
-                            ActionValue = moduleElementEventDTO.ActionValue,
-                            VariableName = moduleElementEventDTO.VariableName,
-                        };
-
-                        studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
-                    }
-
-                    item.StudyVisitPageModuleElementEvents = studyVisitPageModuleElementEventList;
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
                 }
-
-                if (elementDTO.StudyVisitPageModuleElementValidationDetails.Count > 0)
+                else
                 {
-                    var studyVisitPageModuleElementValidationDetailList = new List<StudyVisitPageModuleElementValidationDetail>();
-
-                    foreach (var val in elementDTO.StudyVisitPageModuleElementValidationDetails)
+                    foreach (var item in moduleList)
                     {
-                        var studyVisitPageModuleElementValidationDetail = new StudyVisitPageModuleElementValidationDetail
+                        //remove all added module, moduleElement and moduleElementDetails
+                        foreach (var elm in item.StudyVisitPageModuleElements)
                         {
-                            ReferenceKey = new Guid(),
-                            StudyVisitPageModuleElementId = item.Id,
-                            ActionType = val.ValidationActionType,
-                            ValueCondition = val.ValidationCondition,
-                            Value = val.ValidationValue,
-                            Message = val.ValidationMessage
-                        };
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.StudyVisitPageModuleElements.Update(elm);
 
-                        studyVisitPageModuleElementValidationDetailList.Add(studyVisitPageModuleElementValidationDetail);
+                            elm.StudyVisitPageModuleElementDetail.IsActive = false;
+                            elm.StudyVisitPageModuleElementDetail.IsDeleted = true;
+                            _context.StudyVisitPageModuleElementDetails.Update(elm.StudyVisitPageModuleElementDetail);
+
+                            foreach (var dtl in elm.studyVisitPageModuleCalculationElementDetails)
+                            {
+                                dtl.IsActive = false;
+                                dtl.IsDeleted = true;
+                                _context.studyVisitPageModuleCalculationElementDetails.Update(dtl);
+                            }
+
+                            foreach (var evnt in elm.StudyVisitPageModuleElementEvents)
+                            {
+                                evnt.IsActive = false;
+                                evnt.IsDeleted = true;
+                                _context.StudyVisitPageModuleElementEvents.Update(evnt);
+                            }
+                        }
+
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+                        _context.StudyVisitPageModules.Update(item);
                     }
 
-                    item.StudyVisitPageModuleElementValidationDetails = studyVisitPageModuleElementValidationDetailList;
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
                 }
             }
-
-            result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-        }
-
-        if (result)
-        {
-            return new ApiResponse<dynamic>
+            catch (Exception e)
             {
-                IsSuccess = true,
-                Message = "Successful"
-            };
-        }
-        else
-        {
-            foreach (var item in moduleList)
-            {
-                //remove all added module, moduleElement and moduleElementDetails
-                foreach (var elm in item.StudyVisitPageModuleElements)
+                return new ApiResponse<dynamic>
                 {
-                    elm.IsActive = false;
-                    elm.IsDeleted = true;
-                    _context.StudyVisitPageModuleElements.Update(elm);
-
-                    elm.StudyVisitPageModuleElementDetail.IsActive = false;
-                    elm.StudyVisitPageModuleElementDetail.IsDeleted = true;
-                    _context.StudyVisitPageModuleElementDetails.Update(elm.StudyVisitPageModuleElementDetail);
-
-                    foreach (var dtl in elm.studyVisitPageModuleCalculationElementDetails)
-                    {
-                        dtl.IsActive = false;
-                        dtl.IsDeleted = true;
-                        _context.studyVisitPageModuleCalculationElementDetails.Update(dtl);
-                    }
-
-                    foreach (var evnt in elm.StudyVisitPageModuleElementEvents)
-                    {
-                        evnt.IsActive = false;
-                        evnt.IsDeleted = true;
-                        _context.StudyVisitPageModuleElementEvents.Update(evnt);
-                    }
-                }
-
-                item.IsActive = false;
-                item.IsDeleted = true;
-                _context.StudyVisitPageModules.Update(item);
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
             }
-
-            result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-
-            return new ApiResponse<dynamic>
-            {
-                IsSuccess = false,
-                Message = "Unsuccessful"
-            };
         }
-    }
-    catch (Exception e)
-    {
-        return new ApiResponse<dynamic>
-        {
-            IsSuccess = false,
-            Message = "Unsuccessful"
-        };
-    }
-}
         #endregion
 
         #region Module
@@ -3936,126 +3936,126 @@ namespace Helios.Core.Controllers
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> CopyElement(ElementShortModel model)
-{
-    var result = new ApiResponse<dynamic>();
-
-    try
-    {
-        var stdVstPgMdlElmnt = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-        if (stdVstPgMdlElmnt != null)
         {
-            var name = stdVstPgMdlElmnt.ElementName + "_1";
+            var result = new ApiResponse<dynamic>();
 
-            for (; ; )
+            try
             {
-                if (checkStudyElementName(stdVstPgMdlElmnt.StudyVisitPageModuleId, name).Result)
-                    break;
-                else
-                    name = name + "_1";
-            }
+                var stdVstPgMdlElmnt = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            stdVstPgMdlElmnt.Id = 0;
-            stdVstPgMdlElmnt.ElementName = name;
-            stdVstPgMdlElmnt.Order = stdVstPgMdlElmnt.Order + 1;
-
-            var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-            elementDetail.Id = 0;
-
-            _context.Add(stdVstPgMdlElmnt);
-            _context.Add(elementDetail);
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-            elementDetail.StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id;
-
-            _context.Update(elementDetail);
-
-            if (stdVstPgMdlElmnt.ElementType == ElementType.Calculated)
-            {
-                var calcdtls = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
-
-                foreach (var cal in calcdtls)
+                if (stdVstPgMdlElmnt != null)
                 {
-                    cal.CalculationElementId = stdVstPgMdlElmnt.Id;
-                    _context.Add(cal);
-                }
-
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-            }
-
-            if (stdVstPgMdlElmnt.ElementType == ElementType.DataGrid || stdVstPgMdlElmnt.ElementType == ElementType.Table)
-            {
-                var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
-                var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
-                var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
-
-                foreach (var child in children)
-                {
-                    var nm = child.ElementName + "_1";
+                    var name = stdVstPgMdlElmnt.ElementName + "_1";
 
                     for (; ; )
                     {
-                        if (checkStudyElementName(child.StudyVisitPageModuleId, nm).Result)
+                        if (checkStudyElementName(stdVstPgMdlElmnt.StudyVisitPageModuleId, name).Result)
                             break;
                         else
-                            nm = nm + "_1";
+                            name = name + "_1";
                     }
 
-                    var chDtl = childrenDtils.FirstOrDefault(x => x.StudyVisitPageModuleElementId == child.Id);
-                    chDtl.Id = 0;
+                    stdVstPgMdlElmnt.Id = 0;
+                    stdVstPgMdlElmnt.ElementName = name;
+                    stdVstPgMdlElmnt.Order = stdVstPgMdlElmnt.Order + 1;
 
-                    child.Id = 0;
-                    child.ElementName = nm;
-                    child.Order = child.Order + 1;
+                    var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    elementDetail.Id = 0;
 
-                    _context.Add(child);
-                    _context.Add(chDtl);
-
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    chDtl.Id = child.Id;
-                    chDtl.ParentId = stdVstPgMdlElmnt.Id;
-
-                    _context.Update(chDtl);
+                    _context.Add(stdVstPgMdlElmnt);
+                    _context.Add(elementDetail);
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    elementDetail.StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id;
+
+                    _context.Update(elementDetail);
+
+                    if (stdVstPgMdlElmnt.ElementType == ElementType.Calculated)
+                    {
+                        var calcdtls = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
+
+                        foreach (var cal in calcdtls)
+                        {
+                            cal.CalculationElementId = stdVstPgMdlElmnt.Id;
+                            _context.Add(cal);
+                        }
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+
+                    if (stdVstPgMdlElmnt.ElementType == ElementType.DataGrid || stdVstPgMdlElmnt.ElementType == ElementType.Table)
+                    {
+                        var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                        var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
+                        var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                        foreach (var child in children)
+                        {
+                            var nm = child.ElementName + "_1";
+
+                            for (; ; )
+                            {
+                                if (checkStudyElementName(child.StudyVisitPageModuleId, nm).Result)
+                                    break;
+                                else
+                                    nm = nm + "_1";
+                            }
+
+                            var chDtl = childrenDtils.FirstOrDefault(x => x.StudyVisitPageModuleElementId == child.Id);
+                            chDtl.Id = 0;
+
+                            child.Id = 0;
+                            child.ElementName = nm;
+                            child.Order = child.Order + 1;
+
+                            _context.Add(child);
+                            _context.Add(chDtl);
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            chDtl.Id = child.Id;
+                            chDtl.ParentId = stdVstPgMdlElmnt.Id;
+
+                            _context.Update(chDtl);
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+                    }
+
+                    var moduleElements = await _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == stdVstPgMdlElmnt.StudyVisitPageModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    foreach (var item in moduleElements)
+                    {
+                        if (item.Order >= stdVstPgMdlElmnt.Order && item.Id != stdVstPgMdlElmnt.Id)
+                        {
+                            item.Order = (item.Order + 1);
+                            _context.Update(item);
+                        }
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
-            }
-
-            var moduleElements = await _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == stdVstPgMdlElmnt.StudyVisitPageModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
-
-            foreach (var item in moduleElements)
-            {
-                if (item.Order >= stdVstPgMdlElmnt.Order && item.Id != stdVstPgMdlElmnt.Id)
+                else
                 {
-                    item.Order = (item.Order + 1);
-                    _context.Update(item);
+                    result.IsSuccess = false;
+                    result.Message = "Error";
                 }
             }
+            catch (Exception ex)
+            {
 
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-            result.Message = result.IsSuccess ? "Successful" : "Error";
+            }
+
+            return result;
         }
-        else
-        {
-            result.IsSuccess = false;
-            result.Message = "Error";
-        }
-    }
-    catch (Exception ex)
-    {
-
-    }
-
-    return result;
-}
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x=>x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
+            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x => x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
 
             if (element != null)
             {
@@ -4079,11 +4079,11 @@ namespace Helios.Core.Controllers
 
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
-                 
+
                     _context.StudyVisitPageModuleElements.Remove(element);
 
 
-                
+
                 }
 
                 if (element.ElementType == ElementType.Calculated)
@@ -4310,195 +4310,469 @@ namespace Helios.Core.Controllers
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveVisitPageModuleContent(ElementModel model)
-{
-    var result = new ApiResponse<dynamic>();
-    var calcList = new List<CalculationModel>();
-
-    var stdVstPgMdlElement = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-    if (model.ElementType == ElementType.Calculated)
-    {
-        if (model.CalculationSourceInputs == null || model.CalculationSourceInputs == "[]" || string.IsNullOrEmpty(model.CalculationSourceInputs))
         {
-            result.IsSuccess = false;
-            result.Message = "Error in calculation elements selection";
+            var result = new ApiResponse<dynamic>();
+            var calcList = new List<CalculationModel>();
 
-            return result;
-        }
+            var stdVstPgMdlElement = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-        try
-        {
-            calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
-        }
-        catch (Exception ex)
-        {
-            result.IsSuccess = false;
-            result.Message = "Error in calculation elements selection";
-
-            return result;
-        }
-    }
-
-    var moduleElements = _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
-
-    if (stdVstPgMdlElement == null)
-    {
-        if (!checkStudyElementName(model.ModuleId, model.ElementName, moduleElements).Result)
-        {
-            result.IsSuccess = false;
-            result.Message = "Duplicate element name";
-
-            return result;
-        }
-
-        var stdVstPgMdlElmnt = new StudyVisitPageModuleElement();
-
-        try
-        {
-            var moduleElementMaxOrder = moduleElements.Count() > 0 ? moduleElements.Select(x => x.Order).Max() : 1;
-
-            stdVstPgMdlElmnt = new StudyVisitPageModuleElement()
+            if (model.ElementType == ElementType.Calculated)
             {
-                Title = model.Title,
-                ElementName = model.ElementName.TrimStart().TrimEnd(),
-                Description = model.Description,
-                CanMissing = model.CanMissing,
-                ElementType = model.ElementType,
-                IsDependent = model.IsDependent,
-                IsHidden = model.IsHidden,
-                IsReadonly = model.IsReadonly,
-                IsRequired = model.IsRequired,
-                IsRelated = model.IsRelated,
-                IsTitleHidden = model.IsTitleHidden,
-                Width = model.ElementType != ElementType.Hidden ? model.Width : GridLayout.ColMd3,
-                StudyVisitPageModuleId = model.ModuleId,
-                TenantId = model.TenantId,
-                Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
-                //CreatedAt = DateTimeOffset.Now,
-                //AddedById = userId,
-            };
-
-            _context.StudyVisitPageModuleElements.Add(stdVstPgMdlElmnt);
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-            if (result.IsSuccess)
-            {
-                var stdVstPgMdlElementDetail = new StudyVisitPageModuleElementDetail()
+                if (model.CalculationSourceInputs == null || model.CalculationSourceInputs == "[]" || string.IsNullOrEmpty(model.CalculationSourceInputs))
                 {
-                    StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id,
-                    TenantId = model.TenantId,
-                    ParentId = model.ParentId,
-                    Unit = model.Unit,
-                    Mask = model.Mask,
-                    LowerLimit = model.LowerLimit,
-                    UpperLimit = model.UpperLimit,
-                    Layout = model.Layout,
-                    ElementOptions = model.ElementOptions,
-                    MetaDataTags = model.ElementName,
-                    DefaultValue = model.DefaultValue,
-                    AddTodayDate = model.AddTodayDate,
-                    MainJs = model.MainJs,
-                    RelationMainJs = model.RelationMainJs,
-                    StartDay = model.ElementType != ElementType.DateOption ? 0 : model.StartDay,
-                    EndDay = model.ElementType != ElementType.DateOption ? 0 : model.EndDay,
-                    StartMonth = model.ElementType != ElementType.DateOption ? 0 : model.StartMonth,
-                    EndMonth = model.ElementType != ElementType.DateOption ? 0 : model.EndMonth,
-                    StartYear = model.ElementType != ElementType.DateOption ? 0 : model.StartYear,
-                    EndYear = model.ElementType != ElementType.DateOption ? 0 : model.EndYear,
-                    IsInCalculation = model.ElementType == ElementType.Calculated,
-                    LeftText = model.LeftText,
-                    RightText = model.RightText,
-                    RowCount = model.RowCount,
-                    ColumnCount = model.ColumnCount,
-                    DatagridAndTableProperties = model.DatagridAndTableProperties,
-                    RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
-                    ColunmIndex = model.ColumnIndex,
-                    AdverseEventType = model.AdverseEventType,
-                    TargetElementId = model.TargetElementId,
-                    ButtonText = model.ButtonText
-                };
-
-                _context.StudyVisitPageModuleElementDetails.Add(stdVstPgMdlElementDetail);
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                if (!result.IsSuccess)
-                {
-                    stdVstPgMdlElmnt.IsActive = false;
-                    stdVstPgMdlElmnt.IsDeleted = true;
-                    _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
-                    var rslt = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
                     result.IsSuccess = false;
-                    result.Message = "Operation failed. Please try again.";
+                    result.Message = "Error in calculation elements selection";
 
                     return result;
                 }
 
-                if (model.IsDependent)
+                try
                 {
-                    var elementEvent = new StudyVisitPageModuleElementEvent()
+                    calcList = JsonSerializer.Deserialize<List<CalculationModel>>(model.CalculationSourceInputs);
+                }
+                catch (Exception ex)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Error in calculation elements selection";
+
+                    return result;
+                }
+            }
+
+            var moduleElements = _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
+
+            if (stdVstPgMdlElement == null)
+            {
+                if (!checkStudyElementName(model.ModuleId, model.ElementName, moduleElements).Result)
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Duplicate element name";
+
+                    return result;
+                }
+
+                var stdVstPgMdlElmnt = new StudyVisitPageModuleElement();
+
+                try
+                {
+                    var moduleElementMaxOrder = moduleElements.Count() > 0 ? moduleElements.Select(x => x.Order).Max() : 1;
+
+                    stdVstPgMdlElmnt = new StudyVisitPageModuleElement()
                     {
-                        SourceElementId = model.DependentTargetFieldId,
-                        TargetElementId = stdVstPgMdlElmnt.Id,
+                        Title = model.Title,
+                        ElementName = model.ElementName.TrimStart().TrimEnd(),
+                        Description = model.Description,
+                        CanMissing = model.CanMissing,
+                        ElementType = model.ElementType,
+                        IsDependent = model.IsDependent,
+                        IsHidden = model.IsHidden,
+                        IsReadonly = model.IsReadonly,
+                        IsRequired = model.IsRequired,
+                        IsRelated = model.IsRelated,
+                        IsTitleHidden = model.IsTitleHidden,
+                        Width = model.ElementType != ElementType.Hidden ? model.Width : GridLayout.ColMd3,
                         StudyVisitPageModuleId = model.ModuleId,
                         TenantId = model.TenantId,
-                        EventType = EventType.Dependency,
-                        ValueCondition = (ActionCondition)model.DependentCondition,
-                        ActionType = (ActionType)model.DependentAction,
-                        ActionValue = model.DependentFieldValue,
+                        Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
+                        //CreatedAt = DateTimeOffset.Now,
+                        //AddedById = userId,
                     };
 
-                    _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                    _context.StudyVisitPageModuleElements.Add(stdVstPgMdlElmnt);
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    if (result.IsSuccess)
+                    {
+                        var stdVstPgMdlElementDetail = new StudyVisitPageModuleElementDetail()
+                        {
+                            StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id,
+                            TenantId = model.TenantId,
+                            ParentId = model.ParentId,
+                            Unit = model.Unit,
+                            Mask = model.Mask,
+                            LowerLimit = model.LowerLimit,
+                            UpperLimit = model.UpperLimit,
+                            Layout = model.Layout,
+                            ElementOptions = model.ElementOptions,
+                            MetaDataTags = model.ElementName,
+                            DefaultValue = model.DefaultValue,
+                            AddTodayDate = model.AddTodayDate,
+                            MainJs = model.MainJs,
+                            RelationMainJs = model.RelationMainJs,
+                            StartDay = model.ElementType != ElementType.DateOption ? 0 : model.StartDay,
+                            EndDay = model.ElementType != ElementType.DateOption ? 0 : model.EndDay,
+                            StartMonth = model.ElementType != ElementType.DateOption ? 0 : model.StartMonth,
+                            EndMonth = model.ElementType != ElementType.DateOption ? 0 : model.EndMonth,
+                            StartYear = model.ElementType != ElementType.DateOption ? 0 : model.StartYear,
+                            EndYear = model.ElementType != ElementType.DateOption ? 0 : model.EndYear,
+                            IsInCalculation = model.ElementType == ElementType.Calculated,
+                            LeftText = model.LeftText,
+                            RightText = model.RightText,
+                            RowCount = model.RowCount,
+                            ColumnCount = model.ColumnCount,
+                            DatagridAndTableProperties = model.DatagridAndTableProperties,
+                            RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
+                            ColunmIndex = model.ColumnIndex,
+                            AdverseEventType = model.AdverseEventType,
+                            TargetElementId = model.TargetElementId,
+                            ButtonText = model.ButtonText
+                        };
+
+                        _context.StudyVisitPageModuleElementDetails.Add(stdVstPgMdlElementDetail);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!result.IsSuccess)
+                        {
+                            stdVstPgMdlElmnt.IsActive = false;
+                            stdVstPgMdlElmnt.IsDeleted = true;
+                            _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
+                            var rslt = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again.";
+
+                            return result;
+                        }
+
+                        if (model.IsDependent)
+                        {
+                            var elementEvent = new StudyVisitPageModuleElementEvent()
+                            {
+                                SourceElementId = model.DependentTargetFieldId,
+                                TargetElementId = stdVstPgMdlElmnt.Id,
+                                StudyVisitPageModuleId = model.ModuleId,
+                                TenantId = model.TenantId,
+                                EventType = EventType.Dependency,
+                                ValueCondition = (ActionCondition)model.DependentCondition,
+                                ActionType = (ActionType)model.DependentAction,
+                                ActionValue = model.DependentFieldValue,
+                            };
+
+                            _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+
+                        if (model.ElementType == ElementType.Calculated)
+                        {
+                            var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                            var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId)).ToListAsync();
+
+                            foreach (var item in calcList)
+                            {
+                                var calcDtil = new StudyVisitPageModuleCalculationElementDetail()
+                                {
+                                    TenantId = model.TenantId,
+                                    StudyVisitPageModuleId = model.ModuleId,
+                                    CalculationElementId = stdVstPgMdlElmnt.Id,
+                                    TargetElementId = item.elementFieldSelectedGroup.value,
+                                    VariableName = item.variableName
+                                };
+
+                                _context.studyVisitPageModuleCalculationElementDetails.Add(calcDtil);
+                            }
+
+                            foreach (var item in elementInCalList)
+                            {
+                                item.IsInCalculation = true;
+
+                                _context.StudyVisitPageModuleElementDetails.Update(item);
+                            }
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+
+                        if (model.IsRelated)
+                        {
+                            var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+
+                            foreach (var item in relList)
+                            {
+                                var elementEvent = new StudyVisitPageModuleElementEvent()
+                                {
+                                    StudyVisitPageModuleId = model.ModuleId,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    TargetElementId = stdVstPgMdlElmnt.Id,
+                                    TenantId = model.TenantId,
+                                    EventType = EventType.Relation,
+                                    VariableName = item.variableName
+                                };
+
+                                _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                            }
+
+                            var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            if (!isSuccess)
+                            {
+                                stdVstPgMdlElement.IsRelated = false;
+                                stdVstPgMdlElementDetail.RelationMainJs = "";
+
+                                _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElement);
+                                _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
+                                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                            }
+                        }
+
+                        if (!result.IsSuccess)//if dependent or calculation didn't save
+                        {
+                            stdVstPgMdlElmnt.IsActive = false;
+                            stdVstPgMdlElmnt.IsDeleted = true;
+                            _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
+
+                            stdVstPgMdlElementDetail.IsActive = false;
+                            stdVstPgMdlElementDetail.IsDeleted = true;
+                            _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
+
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again to save dependents or calculation part.";
+                        }
+                    }
+                    else
+                    {
+                        result.Message = "Error";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var elmDtl = await _context.StudyVisitPageModuleElementDetails.FirstOrDefaultAsync(x => x.StudyVisitPageModuleElementId == stdVstPgMdlElmnt.Id && x.IsActive && !x.IsDeleted);
+
+                    if (elmDtl == null)
+                    {
+                        stdVstPgMdlElmnt.IsActive = false;
+                        stdVstPgMdlElmnt.IsDeleted = true;
+                        _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
+                        var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        result.IsSuccess = false;
+                        result.Message = "Operation failed. Please try again.";
+                    }
+                }
+            }
+            else
+            {
+                if (stdVstPgMdlElement.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
+                {
+                    if (!checkStudyElementName(model.ModuleId, model.ElementName, moduleElements).Result)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = "Duplicate element name";
+
+                        return result;
+                    }
+                }
+
+                stdVstPgMdlElement.Title = model.Title;
+                stdVstPgMdlElement.ElementName = model.ElementName.TrimStart().TrimEnd();
+                stdVstPgMdlElement.Description = model.Description;
+                stdVstPgMdlElement.CanMissing = model.CanMissing;
+                stdVstPgMdlElement.ElementType = model.ElementType;
+                stdVstPgMdlElement.IsDependent = model.IsDependent;
+                stdVstPgMdlElement.IsHidden = model.IsHidden;
+                stdVstPgMdlElement.IsReadonly = model.IsReadonly;
+                stdVstPgMdlElement.IsRequired = model.IsRequired;
+                stdVstPgMdlElement.IsRelated = model.IsRelated;
+                stdVstPgMdlElement.IsTitleHidden = model.IsTitleHidden;
+                stdVstPgMdlElement.Width = model.Width;
+                stdVstPgMdlElement.StudyVisitPageModuleId = model.ModuleId;
+                stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
+                stdVstPgMdlElement.UpdatedById = model.UserId;
+
+                _context.Update(stdVstPgMdlElement);
+
+                var stdVstPgMdlElementDetail = await _context.StudyVisitPageModuleElementDetails.FirstOrDefaultAsync(x => x.StudyVisitPageModuleElementId == stdVstPgMdlElement.Id && x.IsActive && !x.IsDeleted);
+
+                stdVstPgMdlElementDetail.Unit = model.Unit;
+                stdVstPgMdlElementDetail.Mask = model.Mask;
+                stdVstPgMdlElementDetail.LowerLimit = model.LowerLimit;
+                stdVstPgMdlElementDetail.UpperLimit = model.UpperLimit;
+                stdVstPgMdlElementDetail.Layout = model.Layout;
+                stdVstPgMdlElementDetail.ElementOptions = model.ElementOptions;
+                stdVstPgMdlElementDetail.DefaultValue = model.DefaultValue;
+                stdVstPgMdlElementDetail.AddTodayDate = model.AddTodayDate;
+                stdVstPgMdlElementDetail.MainJs = model.MainJs;
+                stdVstPgMdlElementDetail.RelationMainJs = model.RelationMainJs;
+                stdVstPgMdlElementDetail.StartDay = model.StartDay;
+                stdVstPgMdlElementDetail.EndDay = model.EndDay;
+                stdVstPgMdlElementDetail.StartMonth = model.StartMonth;
+                stdVstPgMdlElementDetail.EndMonth = model.EndMonth;
+                stdVstPgMdlElementDetail.StartYear = model.StartYear;
+                stdVstPgMdlElementDetail.EndYear = model.EndYear;
+                stdVstPgMdlElementDetail.LeftText = model.LeftText;
+                stdVstPgMdlElementDetail.RightText = model.RightText;
+                stdVstPgMdlElementDetail.RowCount = model.RowCount;
+                stdVstPgMdlElementDetail.ColumnCount = model.ColumnCount;
+                stdVstPgMdlElementDetail.AdverseEventType = model.AdverseEventType;
+                stdVstPgMdlElementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
+                stdVstPgMdlElementDetail.TargetElementId = model.TargetElementId;
+                stdVstPgMdlElementDetail.ButtonText = model.ButtonText;
+                stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
+                stdVstPgMdlElement.UpdatedById = model.UserId;
+
+                _context.Update(stdVstPgMdlElementDetail);
+                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                if (model.IsDependent)
+                {
+                    var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted);
+
+                    if (dep == null)
+                    {
+                        var elementEvent = new StudyVisitPageModuleElementEvent()
+                        {
+                            SourceElementId = model.DependentSourceFieldId,
+                            TargetElementId = stdVstPgMdlElement.Id,
+                            EventType = EventType.Dependency,
+                            ValueCondition = (ActionCondition)model.DependentCondition,
+                            ActionType = (ActionType)model.DependentAction,
+                            ActionValue = model.DependentFieldValue,
+                            StudyVisitPageModuleId = stdVstPgMdlElement.StudyVisitPageModuleId
+                        };
+
+                        _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                    }
+                    else
+                    {
+                        dep.SourceElementId = model.DependentSourceFieldId;
+                        dep.TargetElementId = stdVstPgMdlElement.Id;
+                        dep.ValueCondition = (ActionCondition)model.DependentCondition;
+                        dep.ActionType = (ActionType)model.DependentAction;
+                        dep.ActionValue = model.DependentFieldValue;
+                        dep.StudyVisitPageModuleId = stdVstPgMdlElement.StudyVisitPageModuleId;
+
+                        _context.StudyVisitPageModuleElementEvents.Update(dep);
+                    }
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.ElementType == ElementType.Calculated)
                 {
+                    var existCalDtil = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == stdVstPgMdlElement.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
+                    var elementInExistCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => existCalElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
                     var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
-                    var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId)).ToListAsync();
 
-                    foreach (var item in calcList)
+                    //update updated variable list
+                    foreach (var item in existCalDtil)
                     {
-                        var calcDtil = new StudyVisitPageModuleCalculationElementDetail()
-                        {
-                            TenantId = model.TenantId,
-                            StudyVisitPageModuleId = model.ModuleId,
-                            CalculationElementId = stdVstPgMdlElmnt.Id,
-                            TargetElementId = item.elementFieldSelectedGroup.value,
-                            VariableName = item.variableName
-                        };
+                        var c = calcList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        _context.studyVisitPageModuleCalculationElementDetails.Add(calcDtil);
+                        if (c != null && c.elementFieldSelectedGroup.value != item.TargetElementId)
+                        {
+                            item.TargetElementId = c.elementFieldSelectedGroup.value;
+                            _context.studyVisitPageModuleCalculationElementDetails.Update(item);
+                        }
                     }
 
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    //change elementDetail first
+                    foreach (var item in elementInExistCalList)
+                    {
+                        item.IsInCalculation = false;
+                        _context.StudyVisitPageModuleElementDetails.Update(item);
+                    }
+
+                    var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    //then change new elementDetail flags
                     foreach (var item in elementInCalList)
                     {
                         item.IsInCalculation = true;
-
                         _context.StudyVisitPageModuleElementDetails.Update(item);
                     }
+
+                    existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
+
+                    //add new calcElementDetails
+                    foreach (var item in calcList)
+                    {
+                        if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
+                        {
+                            var calcDtil = new StudyVisitPageModuleCalculationElementDetail()
+                            {
+                                TenantId = model.TenantId,
+                                StudyVisitPageModuleId = model.ModuleId,
+                                CalculationElementId = stdVstPgMdlElement.Id,
+                                TargetElementId = item.elementFieldSelectedGroup.value,
+                            };
+
+                            _context.studyVisitPageModuleCalculationElementDetails.Add(calcDtil);
+                        }
+                    }
+
+                    //remove deleted items from calc
+                    foreach (var item in existCalDtil)
+                    {
+                        if (!calcElmIds.Contains(item.TargetElementId))
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.Update(item);
+                        }
+                    }
+
+                    _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.IsRelated)
                 {
-                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                    var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
+                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                    var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                    foreach (var item in rels)
+                    {
+                        var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
+
+                        if (r != null && r.relationFieldsSelectedGroup.value != item.TargetElementId)
+                        {
+                            item.TargetElementId = r.relationFieldsSelectedGroup.value;
+                            _context.StudyVisitPageModuleElementEvents.Update(item);
+                        }
+                    }
+
+                    var relIds = rels.Select(x => x.SourceElementId).ToList();
+
+                    //first add unadded rows to evet
                     foreach (var item in relList)
                     {
-                        var elementEvent = new StudyVisitPageModuleElementEvent()
+                        if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
                         {
-                            StudyVisitPageModuleId = model.ModuleId,
-                            SourceElementId = item.relationFieldsSelectedGroup.value,
-                            TargetElementId = stdVstPgMdlElmnt.Id,
-                            TenantId = model.TenantId,
-                            EventType = EventType.Relation,
-                            VariableName = item.variableName
-                        };
+                            var elementEvent = new StudyVisitPageModuleElementEvent()
+                            {
+                                StudyVisitPageModuleId = model.ModuleId,
+                                SourceElementId = item.relationFieldsSelectedGroup.value,
+                                TargetElementId = model.Id,
+                                TenantId = model.TenantId,
+                                EventType = EventType.Relation,
+                            };
 
-                        _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                            _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                        }
                     }
+
+                    //then remove deleted rows
+                    foreach (var item in rels)
+                    {
+                        var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+
+                        if (delRel == null)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.StudyVisitPageModuleElementEvents.Add(item);
+                        }
+                    }
+
+                    _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
 
                     var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
@@ -4512,284 +4786,10 @@ namespace Helios.Core.Controllers
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
                 }
-
-                if (!result.IsSuccess)//if dependent or calculation didn't save
-                {
-                    stdVstPgMdlElmnt.IsActive = false;
-                    stdVstPgMdlElmnt.IsDeleted = true;
-                    _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
-
-                    stdVstPgMdlElementDetail.IsActive = false;
-                    stdVstPgMdlElementDetail.IsDeleted = true;
-                    _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
-
-                    var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    result.IsSuccess = false;
-                    result.Message = "Operation failed. Please try again to save dependents or calculation part.";
-                }
             }
-            else
-            {
-                result.Message = "Error";
-            }
+
+            return result;
         }
-        catch (Exception ex)
-        {
-            var elmDtl = await _context.StudyVisitPageModuleElementDetails.FirstOrDefaultAsync(x => x.StudyVisitPageModuleElementId == stdVstPgMdlElmnt.Id && x.IsActive && !x.IsDeleted);
-
-            if (elmDtl == null)
-            {
-                stdVstPgMdlElmnt.IsActive = false;
-                stdVstPgMdlElmnt.IsDeleted = true;
-                _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElmnt);
-                var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                result.IsSuccess = false;
-                result.Message = "Operation failed. Please try again.";
-            }
-        }
-    }
-    else
-    {
-        if (stdVstPgMdlElement.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
-        {
-            if (!checkStudyElementName(model.ModuleId, model.ElementName, moduleElements).Result)
-            {
-                result.IsSuccess = false;
-                result.Message = "Duplicate element name";
-
-                return result;
-            }
-        }
-
-        stdVstPgMdlElement.Title = model.Title;
-        stdVstPgMdlElement.ElementName = model.ElementName.TrimStart().TrimEnd();
-        stdVstPgMdlElement.Description = model.Description;
-        stdVstPgMdlElement.CanMissing = model.CanMissing;
-        stdVstPgMdlElement.ElementType = model.ElementType;
-        stdVstPgMdlElement.IsDependent = model.IsDependent;
-        stdVstPgMdlElement.IsHidden = model.IsHidden;
-        stdVstPgMdlElement.IsReadonly = model.IsReadonly;
-        stdVstPgMdlElement.IsRequired = model.IsRequired;
-        stdVstPgMdlElement.IsRelated = model.IsRelated;
-        stdVstPgMdlElement.IsTitleHidden = model.IsTitleHidden;
-        stdVstPgMdlElement.Width = model.Width;
-        stdVstPgMdlElement.StudyVisitPageModuleId = model.ModuleId;
-        stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
-        stdVstPgMdlElement.UpdatedById = model.UserId;
-
-        _context.Update(stdVstPgMdlElement);
-
-        var stdVstPgMdlElementDetail = await _context.StudyVisitPageModuleElementDetails.FirstOrDefaultAsync(x => x.StudyVisitPageModuleElementId == stdVstPgMdlElement.Id && x.IsActive && !x.IsDeleted);
-
-        stdVstPgMdlElementDetail.Unit = model.Unit;
-        stdVstPgMdlElementDetail.Mask = model.Mask;
-        stdVstPgMdlElementDetail.LowerLimit = model.LowerLimit;
-        stdVstPgMdlElementDetail.UpperLimit = model.UpperLimit;
-        stdVstPgMdlElementDetail.Layout = model.Layout;
-        stdVstPgMdlElementDetail.ElementOptions = model.ElementOptions;
-        stdVstPgMdlElementDetail.DefaultValue = model.DefaultValue;
-        stdVstPgMdlElementDetail.AddTodayDate = model.AddTodayDate;
-        stdVstPgMdlElementDetail.MainJs = model.MainJs;
-        stdVstPgMdlElementDetail.RelationMainJs = model.RelationMainJs;
-        stdVstPgMdlElementDetail.StartDay = model.StartDay;
-        stdVstPgMdlElementDetail.EndDay = model.EndDay;
-        stdVstPgMdlElementDetail.StartMonth = model.StartMonth;
-        stdVstPgMdlElementDetail.EndMonth = model.EndMonth;
-        stdVstPgMdlElementDetail.StartYear = model.StartYear;
-        stdVstPgMdlElementDetail.EndYear = model.EndYear;
-        stdVstPgMdlElementDetail.LeftText = model.LeftText;
-        stdVstPgMdlElementDetail.RightText = model.RightText;
-        stdVstPgMdlElementDetail.RowCount = model.RowCount;
-        stdVstPgMdlElementDetail.ColumnCount = model.ColumnCount;
-        stdVstPgMdlElementDetail.AdverseEventType = model.AdverseEventType;
-        stdVstPgMdlElementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
-        stdVstPgMdlElementDetail.TargetElementId = model.TargetElementId;
-        stdVstPgMdlElementDetail.ButtonText = model.ButtonText;
-        stdVstPgMdlElement.UpdatedAt = DateTimeOffset.Now;
-        stdVstPgMdlElement.UpdatedById = model.UserId;
-
-        _context.Update(stdVstPgMdlElementDetail);
-        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-        if (model.IsDependent)
-        {
-            var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted);
-
-            if (dep == null)
-            {
-                var elementEvent = new StudyVisitPageModuleElementEvent()
-                {
-                    SourceElementId = model.DependentSourceFieldId,
-                    TargetElementId = stdVstPgMdlElement.Id,
-                    EventType = EventType.Dependency,
-                    ValueCondition = (ActionCondition)model.DependentCondition,
-                    ActionType = (ActionType)model.DependentAction,
-                    ActionValue = model.DependentFieldValue,
-                    StudyVisitPageModuleId = stdVstPgMdlElement.StudyVisitPageModuleId
-                };
-
-                _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
-            }
-            else
-            {
-                dep.SourceElementId = model.DependentSourceFieldId;
-                dep.TargetElementId = stdVstPgMdlElement.Id;
-                dep.ValueCondition = (ActionCondition)model.DependentCondition;
-                dep.ActionType = (ActionType)model.DependentAction;
-                dep.ActionValue = model.DependentFieldValue;
-                dep.StudyVisitPageModuleId = stdVstPgMdlElement.StudyVisitPageModuleId;
-
-                _context.StudyVisitPageModuleElementEvents.Update(dep);
-            }
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-        }
-
-        if (model.ElementType == ElementType.Calculated)
-        {
-            var existCalDtil = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == stdVstPgMdlElement.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-            var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
-            var elementInExistCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => existCalElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-            var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
-
-            //update updated variable list
-            foreach (var item in existCalDtil)
-            {
-                var c = calcList.FirstOrDefault(x => x.variableName == item.VariableName);
-
-                if (c != null && c.elementFieldSelectedGroup.value != item.TargetElementId)
-                {
-                    item.TargetElementId = c.elementFieldSelectedGroup.value;
-                    _context.studyVisitPageModuleCalculationElementDetails.Update(item);
-                }
-            }
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-            //change elementDetail first
-            foreach (var item in elementInExistCalList)
-            {
-                item.IsInCalculation = false;
-                _context.StudyVisitPageModuleElementDetails.Update(item);
-            }
-
-            var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-
-            //then change new elementDetail flags
-            foreach (var item in elementInCalList)
-            {
-                item.IsInCalculation = true;
-                _context.StudyVisitPageModuleElementDetails.Update(item);
-            }
-
-            existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
-
-            //add new calcElementDetails
-            foreach (var item in calcList)
-            {
-                if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
-                {
-                    var calcDtil = new StudyVisitPageModuleCalculationElementDetail()
-                    {
-                        TenantId = model.TenantId,
-                        StudyVisitPageModuleId = model.ModuleId,
-                        CalculationElementId = stdVstPgMdlElement.Id,
-                        TargetElementId = item.elementFieldSelectedGroup.value,
-                    };
-
-                    _context.studyVisitPageModuleCalculationElementDetails.Add(calcDtil);
-                }
-            }
-
-            //remove deleted items from calc
-            foreach (var item in existCalDtil)
-            {
-                if (!calcElmIds.Contains(item.TargetElementId))
-                {
-                    item.IsActive = false;
-                    item.IsDeleted = true;
-
-                    _context.Update(item);
-                }
-            }
-
-            _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-        }
-
-        if (model.IsRelated)
-        {
-            var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-
-            var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-            var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
-
-            foreach (var item in rels)
-            {
-                var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
-
-                if (r != null && r.relationFieldsSelectedGroup.value != item.TargetElementId)
-                {
-                    item.TargetElementId = r.relationFieldsSelectedGroup.value;
-                    _context.StudyVisitPageModuleElementEvents.Update(item);
-                }
-            }
-
-            var relIds = rels.Select(x => x.SourceElementId).ToList();
-
-            //first add unadded rows to evet
-            foreach (var item in relList)
-            {
-                if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
-                {
-                    var elementEvent = new StudyVisitPageModuleElementEvent()
-                    {
-                        StudyVisitPageModuleId = model.ModuleId,
-                        SourceElementId = item.relationFieldsSelectedGroup.value,
-                        TargetElementId = model.Id,
-                        TenantId = model.TenantId,
-                        EventType = EventType.Relation,
-                    };
-
-                    _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
-                }
-            }
-
-            //then remove deleted rows
-            foreach (var item in rels)
-            {
-                var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
-
-                if (delRel == null)
-                {
-                    item.IsActive = false;
-                    item.IsDeleted = true;
-
-                    _context.StudyVisitPageModuleElementEvents.Add(item);
-                }
-            }
-
-            _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
-
-            var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-            if (!isSuccess)
-            {
-                stdVstPgMdlElement.IsRelated = false;
-                stdVstPgMdlElementDetail.RelationMainJs = "";
-
-                _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElement);
-                _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-            }
-        }
-    }
-
-    return result;
-}
 
         private async Task<bool> checkStudyElementName(Int64 moduleId, string elementName, List<StudyVisitPageModuleElement> moduleElements = null)
         {
