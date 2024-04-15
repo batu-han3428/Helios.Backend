@@ -3617,7 +3617,7 @@ namespace Helios.Core.Controllers
                                 studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
                             }
 
-                            item.studyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
+                            item.StudyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
                         }
 
                         if (elementDTO.StudyVisitPageModuleElementEvents.Count > 0)
@@ -3694,7 +3694,7 @@ namespace Helios.Core.Controllers
                             elm.StudyVisitPageModuleElementDetail.IsDeleted = true;
                             _context.StudyVisitPageModuleElementDetails.Update(elm.StudyVisitPageModuleElementDetail);
 
-                            foreach (var dtl in elm.studyVisitPageModuleCalculationElementDetails)
+                            foreach (var dtl in elm.StudyVisitPageModuleCalculationElementDetails)
                             {
                                 dtl.IsActive = false;
                                 dtl.IsDeleted = true;
@@ -4299,6 +4299,13 @@ namespace Helios.Core.Controllers
 
                     result.CalculationSourceInputs = calStr;
                 }
+
+                var validations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == result.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                if (validations != null)
+                {
+                    result.ValidationList = JsonSerializer.Serialize(validations);
+                }
             }
             catch (Exception ex)
             {
@@ -4511,6 +4518,27 @@ namespace Helios.Core.Controllers
                                 _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
                                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                             }
+                        }
+
+                        if (model.HasValidation)
+                        {
+                            var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
+
+                            foreach (var item in validations)
+                            {
+                                var validation = new StudyVisitPageModuleElementValidationDetail
+                                {
+                                    StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id,
+                                    ActionType = item.ValidationActionType,
+                                    ValueCondition = item.ValidationCondition,
+                                    Value = item.ValidationValue,
+                                    Message = item.ValidationMessage,
+                                };
+
+                                _context.StudyVisitPageModuleElementValidationDetails.Add(validation);
+                            }
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
 
                         if (!result.IsSuccess)//if dependent or calculation didn't save
@@ -4783,6 +4811,75 @@ namespace Helios.Core.Controllers
 
                         _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElement);
                         _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
+
+                if (model.HasValidation)
+                {
+                    var dbValidations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id).ToListAsync();
+                    var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
+
+                    //add or update
+                    foreach (var item in validations)
+                    {
+                        var existVal = dbValidations.FirstOrDefault(x => x.Id == item.Id && x.IsActive && !x.IsDeleted);
+
+                        if (existVal != null)
+                        {
+                            existVal.Value = item.ValidationValue;
+                            existVal.ValueCondition = item.ValidationCondition;
+                            existVal.Message = item.ValidationMessage;
+                            existVal.ActionType = item.ValidationActionType;
+
+                            _context.StudyVisitPageModuleElementValidationDetails.Update(existVal);
+                        }
+                        else
+                        {
+                            var validation = new StudyVisitPageModuleElementValidationDetail
+                            {
+                                StudyVisitPageModuleElementId = stdVstPgMdlElement.Id,
+                                ActionType = item.ValidationActionType,
+                                ValueCondition = item.ValidationCondition,
+                                Value = item.ValidationValue,
+                                Message = item.ValidationMessage,
+                            };
+
+                            _context.StudyVisitPageModuleElementValidationDetails.Add(validation);
+                        }
+
+                    }
+
+                    //delete
+                    foreach (var item in dbValidations)
+                    {
+                        var existVal = validations.FirstOrDefault(x => x.Id == item.Id);
+
+                        if (existVal == null)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.StudyVisitPageModuleElementValidationDetails.Update(item);
+                        }
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+                else
+                {
+                    var dbValidations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id).ToListAsync();
+
+                    if (dbValidations.Count > 0)
+                    {
+                        foreach (var item in dbValidations)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.StudyVisitPageModuleElementValidationDetails.Update(item);
+                        }
+
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
                 }
