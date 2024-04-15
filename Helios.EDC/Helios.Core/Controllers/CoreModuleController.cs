@@ -511,10 +511,6 @@ namespace Helios.Core.Controllers
                             return result;
                         }
 
-                        elm.ElementDetailId = elementDetail.Id;
-                        _context.Elements.Update(elm);
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
                         if (model.IsDependent)
                         {
                             var elementEvent = new ModuleElementEvent()
@@ -995,9 +991,6 @@ namespace Helios.Core.Controllers
                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                 elementDetail.ElementId = element.Id;
-                element.ElementDetailId = elementDetail.Id;
-
-                _context.Update(element);
                 _context.Update(elementDetail);
 
                 if (element.ElementType == ElementType.Calculated)
@@ -1043,9 +1036,10 @@ namespace Helios.Core.Controllers
 
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
-                        child.ElementDetailId = chDtl.Id;
                         chDtl.Id = child.Id;
                         chDtl.ParentId = element.Id;
+
+                        _context.Update(chDtl);
 
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
