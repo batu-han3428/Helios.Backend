@@ -106,6 +106,7 @@ namespace Helios.Core.Contexts
         public DbSet<StudyVisitPageModuleElementDetail> StudyVisitPageModuleElementDetails { get; set; }
         public DbSet<StudyVisitPageModuleElementEvent> StudyVisitPageModuleElementEvents { get; set; }
         public DbSet<StudyVisitPageModuleElement> StudyVisitPageModuleElements { get; set; }
+        public DbSet<StudyVisitPageModuleElementValidationDetail> StudyVisitPageModuleElementValidationDetails { get; set; }
         public DbSet<StudyVisitPageModule> StudyVisitPageModules { get; set; }
         public DbSet<StudyVisitPage> StudyVisitPages { get; set; }
         public DbSet<StudyVisit> StudyVisits { get; set; }

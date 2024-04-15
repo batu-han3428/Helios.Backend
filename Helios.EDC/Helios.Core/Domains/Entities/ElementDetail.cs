@@ -1,9 +1,11 @@
 ﻿using Helios.Common.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
 {
     public class ElementDetail : EntityBase
     {
+        [ForeignKey("Element")]
         public Int64 ElementId { get; set; }
         public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }

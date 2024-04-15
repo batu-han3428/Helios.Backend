@@ -6,8 +6,6 @@ namespace Helios.Core.Domains.Entities
     public class Element : EntityBase
     {
         public Int64 ModuleId { get; set; }
-        [ForeignKey("ElementDetail")]
-        public Int64? ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
         public string ElementName { get; set; }
         public string Title { get; set; }
@@ -25,5 +23,6 @@ namespace Helios.Core.Domains.Entities
         public ElementDetail? ElementDetail { get; set; }
         public ICollection<CalculatationElementDetail>? CalculatationElementDetails { get; set; }
         public ICollection<ModuleElementEvent>? ModuleElementEvents { get; set; }
+        public ICollection<ElementValidationDetail>? ElementValidationDetails { get; set; }
     }
 }

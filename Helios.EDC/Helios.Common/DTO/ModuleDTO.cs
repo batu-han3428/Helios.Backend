@@ -8,7 +8,7 @@ namespace Helios.Common.DTO
         public Int64 StudyVisitPageId { get; set; }
         public string Name { get; set; }
         public List<ElementDTO> StudyVisitPageModuleElements { get; set; }        
-        public Int64 ReferenceKey { get; set; }
+        public Guid ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public int Order { get; set; }
     }
@@ -31,7 +31,8 @@ namespace Helios.Common.DTO
         public bool CanMissing { get; set; }
         public ElementDetailDTO? StudyVisitPageModuleElementDetails { get; set; }
         public List<CalculatationElementDetailDTO>? StudyVisitPageModuleCalculationElementDetails { get; set; } = new List<CalculatationElementDetailDTO>();
-        public List<ModuleElementEventDTO>? StudyVisitPageModuleElementEvent { get; set; }
+        public List<ModuleElementEventDTO>? StudyVisitPageModuleElementEvents { get; set; }
+        public List<ElementValidationDTO>? StudyVisitPageModuleElementValidationDetails { get; set; }
     }
 
     public class ElementDetailDTO
@@ -89,6 +90,14 @@ namespace Helios.Common.DTO
         public ActionCondition ValueCondition { get; set; }
         public string? ActionValue { get; set; }
         public string? VariableName { get; set; }
+    }
+
+public class ElementValidationDTO
+    {
+        public ValidationActionType ValidationActionType { get; set; } = 0;
+        public ActionCondition ValidationCondition { get; set; } = 0;
+        public string ValidationValue { get; set; } = "";
+        public string ValidationMessage { get; set; } = "";
     }
 
 }
