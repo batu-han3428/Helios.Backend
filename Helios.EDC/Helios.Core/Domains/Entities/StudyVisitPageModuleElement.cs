@@ -21,8 +21,8 @@ namespace Helios.Core.Domains.Entities
         public bool IsReadonly { get; set; }
         public bool CanMissing { get; set; }
         public StudyVisitPageModule StudyVisitPageModule { get; set; }
-        public StudyVisitPageModuleElementDetail StudyVisitPageModuleElementDetail { get; set; }
-        public ICollection<StudyVisitPageModuleCalculationElementDetail>? studyVisitPageModuleCalculationElementDetails { get; set; }
+        public StudyVisitPageModuleElementDetail? StudyVisitPageModuleElementDetail { get; set; }
+        public ICollection<StudyVisitPageModuleCalculationElementDetail>? StudyVisitPageModuleCalculationElementDetails { get; set; }
         public ICollection<StudyVisitPageModuleElementEvent>? StudyVisitPageModuleElementEvents { get; set; }
         public ICollection<StudyVisitPageModuleElementValidationDetail>? StudyVisitPageModuleElementValidationDetails { get; set; }
 

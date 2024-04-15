@@ -2,7 +2,7 @@
 {
     public class StudyVisitPage : EntityBase
     {
-        public StudyVisitPage() { Permissions = new List<Permission>(); }
+        public StudyVisitPage() { Permissions = new List<Permission>(); StudyVisitPageModules = new List<StudyVisitPageModule>(); }
         public Int64 StudyVisitId { get; set; }
         public Guid ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }

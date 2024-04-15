@@ -37,6 +37,7 @@ namespace Helios.Common.DTO
 
     public class ElementDetailDTO
     {
+        public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColunmIndex { get; set; }

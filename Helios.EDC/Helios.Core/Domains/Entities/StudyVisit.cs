@@ -4,7 +4,7 @@ namespace Helios.Core.Domains.Entities
 {
     public class StudyVisit : EntityBase
     {
-        public StudyVisit() { Permissions = new List<Permission>(); }
+        public StudyVisit() { Permissions = new List<Permission>(); StudyVisitPages = new List<StudyVisitPage>(); }
         public Int64 StudyId { get; set; }
         public Guid ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }

@@ -15,6 +15,7 @@ namespace Helios.Common.Model
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
         public List<VisitModel> Children { get; set; }
+        public string Status { get; set; }
     }
 
     public class RoleVisitPermissionsModel
