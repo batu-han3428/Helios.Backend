@@ -389,7 +389,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
-            var result = new ApiResponse<dynamic>();
+            var result = new ApiResponse<dynamic>() { Message = "Operation is successfully."};
             var calcList = new List<CalculationModel>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -541,7 +541,7 @@ namespace Helios.Core.Controllers
                                     TenantId = model.TenantId,
                                     ModuleId = model.ModuleId,
                                     CalculationElementId = elm.Id,
-                                    TargetElementId = item.elementFieldSelectedGroup.value,
+                                    TargetElementId = item.elementFieldSelectedGroup.value != 0 ? item.elementFieldSelectedGroup.value : elm.Id,//own element is in calculation list
                                     VariableName = item.variableName
                                 };
 
@@ -567,7 +567,7 @@ namespace Helios.Core.Controllers
                                 var elementEvent = new ModuleElementEvent()
                                 {
                                     ModuleId = model.ModuleId,
-                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value != 0 ? item.relationFieldsSelectedGroup.value: elm.Id,//element related to own
                                     TargetElementId = elm.Id,
                                     TenantId = model.TenantId,
                                     EventType = EventType.Relation,
