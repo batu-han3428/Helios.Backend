@@ -4318,7 +4318,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveVisitPageModuleContent(ElementModel model)
         {
-            var result = new ApiResponse<dynamic>();
+            var result = new ApiResponse<dynamic>() { Message = "Operation is successfully." };
             var calcList = new List<CalculationModel>();
 
             var stdVstPgMdlElement = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -4471,7 +4471,7 @@ namespace Helios.Core.Controllers
                                     TenantId = model.TenantId,
                                     StudyVisitPageModuleId = model.ModuleId,
                                     CalculationElementId = stdVstPgMdlElmnt.Id,
-                                    TargetElementId = item.elementFieldSelectedGroup.value,
+                                    TargetElementId = item.elementFieldSelectedGroup.value != 0 ? item.elementFieldSelectedGroup.value : stdVstPgMdlElmnt.Id,//own element is in calculation list
                                     VariableName = item.variableName
                                 };
 
@@ -4497,7 +4497,7 @@ namespace Helios.Core.Controllers
                                 var elementEvent = new StudyVisitPageModuleElementEvent()
                                 {
                                     StudyVisitPageModuleId = model.ModuleId,
-                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value != 0 ? item.relationFieldsSelectedGroup.value : stdVstPgMdlElmnt.Id,//element related to own
                                     TargetElementId = stdVstPgMdlElmnt.Id,
                                     TenantId = model.TenantId,
                                     EventType = EventType.Relation,
