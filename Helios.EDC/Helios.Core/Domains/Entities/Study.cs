@@ -2,7 +2,7 @@
 {
     public class Study : EntityBase
     {
-        public Int64 ReferenceKey { get; set; }
+        public Guid ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public Int64? EquivalentStudyId { get; set; }
         public string? StudyState { get; set; }

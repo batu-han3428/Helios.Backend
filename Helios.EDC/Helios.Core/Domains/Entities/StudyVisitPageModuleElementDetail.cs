@@ -8,7 +8,6 @@ namespace Helios.Core.Domains.Entities
         [ForeignKey("StudyVisitPageModuleElement")]
         public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64? ParentId { get; set; }
-        public Guid ReferenceKey { get; set; }
         public int? RowIndex { get; set; }
         public int? ColunmIndex { get; set; }
         public bool? CanQuery { get; set; }
