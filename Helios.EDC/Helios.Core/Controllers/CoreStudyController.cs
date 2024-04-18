@@ -8,9 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Helios.Core.Controllers
 {
@@ -89,7 +87,7 @@ namespace Helios.Core.Controllers
                 }
 
                 Int64 _versionKey = 0;
-                Int64 _refKey = 0;
+                Guid _refKey = Guid.NewGuid();
 
                 studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
                 var checkShortName = _context.Studies.Any(c => c.StudyLink == studyModel.StudyLink);
@@ -887,6 +885,7 @@ namespace Helios.Core.Controllers
                                 Width = element.Width,
                                 IsHidden = element.IsHidden,
                                 IsRequired = element.IsRequired,
+                                IsReadonly = element.IsReadonly,
                                 IsDependent = element.IsDependent,
                                 IsRelated = element.IsRelated,
                                 CanMissing = element.CanMissing,
@@ -917,6 +916,17 @@ namespace Helios.Core.Controllers
                                     TenantId = events.TenantId,
                                     IsDeleted = events.IsDeleted,
                                     IsActive = events.IsActive
+                                }).ToList(),
+                                StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                                {
+                                    ActionType = val.ActionType,
+                                    ValueCondition = val.ValueCondition,
+                                    Value = val.Value,
+                                    Message = val.Message,
+                                    ReferenceKey = val.ReferenceKey,
+                                    TenantId = val.TenantId,
+                                    IsDeleted = val.IsDeleted,
+                                    IsActive = val.IsActive
                                 }).ToList()
                             }).ToList()
                         }).ToList(),
@@ -1057,6 +1067,21 @@ namespace Helios.Core.Controllers
                                         newModule.StudyVisitPageModuleElementEvent.Add(newEvents);
                                         return newEvents;
                                     }).ToList();
+
+                                    newModuleElements.StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Where(x => x.IsActive && !x.IsDeleted).Select(val =>
+                                    {
+                                        var newVal = new StudyVisitPageModuleElementValidationDetail
+                                        {
+                                            Message = val.Message,
+                                            ActionType = val.ActionType,
+                                            Value = val.Value,
+                                            ValueCondition = val.ValueCondition,
+                                            ReferenceKey = val.ReferenceKey,
+                                            TenantId = val.TenantId
+                                        };
+                                        return newVal;
+                                    }).ToList();
+
                                     return newModuleElements;
                                 }).ToList();
                                 return newModule;
@@ -1179,7 +1204,8 @@ namespace Helios.Core.Controllers
                                     ReferenceKey = element.ReferenceKey,
                                     StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                                     StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                    StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                                    StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                                    StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                                 }).ToList(),
                                 StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                                 StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
@@ -1238,6 +1264,11 @@ namespace Helios.Core.Controllers
                                         eEvent.IsActive = true;
                                         eEvent.IsDeleted = false;
                                     });
+                                    element.StudyVisitPageModuleElementValidationDetails.ToList().ForEach(val =>
+                                    {
+                                        val.IsActive = true;
+                                        val.IsDeleted = false;
+                                    });
                                 });
                             });
                             page.Permissions.ForEach(pPer =>
@@ -1289,6 +1320,7 @@ namespace Helios.Core.Controllers
                             IsHidden = element.IsHidden,
                             IsRequired = element.IsRequired,
                             IsDependent = element.IsDependent,
+                            IsReadonly = element.IsReadonly,
                             IsRelated = element.IsRelated,
                             CanMissing = element.CanMissing,
                             ReferenceKey = element.ReferenceKey,
@@ -1318,12 +1350,22 @@ namespace Helios.Core.Controllers
                                 TenantId = events.TenantId,
                                 IsDeleted = events.IsDeleted,
                                 IsActive = events.IsActive
+                            }).ToList(),
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                            {
+                                ActionType = val.ActionType,
+                                ValueCondition = val.ValueCondition,
+                                Value = val.Value,
+                                Message = val.Message,
+                                ReferenceKey = val.ReferenceKey,
+                                TenantId = val.TenantId,
+                                IsDeleted = val.IsDeleted,
+                                IsActive = val.IsActive
                             }).ToList()
                         }).ToList()
                     }).ToList(),
                     Permissions = page.Permissions
                 }).AsSplitQuery().ToListAsync();
-
 
                 #region Page insert
                 var insertPages = pageDTOs.Where(x => x.Statu == TransferChangeType.Insert);
@@ -1454,6 +1496,21 @@ namespace Helios.Core.Controllers
                                         newModule.StudyVisitPageModuleElementEvent.Add(newEvents);
                                         return newEvents;
                                     }).ToList();
+
+                                    newModuleElements.StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Where(x => x.IsActive && !x.IsDeleted).Select(val =>
+                                    {
+                                        var newVal = new StudyVisitPageModuleElementValidationDetail
+                                        {
+                                            Message = val.Message,
+                                            ActionType = val.ActionType,
+                                            Value = val.Value,
+                                            ValueCondition = val.ValueCondition,
+                                            ReferenceKey = val.ReferenceKey,
+                                            TenantId = val.TenantId
+                                        };
+                                        return newVal;
+                                    }).ToList();
+
                                     return newModuleElements;
                                 }).ToList();
                                 return newModule;
@@ -1559,7 +1616,8 @@ namespace Helios.Core.Controllers
                                 ReferenceKey = element.ReferenceKey,
                                 StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                                 StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                                StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                                StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                             }).ToList(),
                             StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                             StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
@@ -1605,6 +1663,11 @@ namespace Helios.Core.Controllers
                                     eEvent.IsActive = true;
                                     eEvent.IsDeleted = false;
                                 });
+                                element.StudyVisitPageModuleElementValidationDetails.ToList().ForEach(val =>
+                                {
+                                    val.IsActive = true;
+                                    val.IsDeleted = false;
+                                });
                             });
                         });
                         page.Permissions.ForEach(pPer =>
@@ -1645,12 +1708,17 @@ namespace Helios.Core.Controllers
                         IsHidden = element.IsHidden,
                         IsRequired = element.IsRequired,
                         IsDependent = element.IsDependent,
+                        IsReadonly = element.IsReadonly,
                         IsRelated = element.IsRelated,
                         CanMissing = element.CanMissing,
                         ReferenceKey = element.ReferenceKey,
                         TenantId = element.TenantId,
                         IsActive = element.IsActive,
                         IsDeleted = element.IsDeleted,
+                        CreatedAt = element.CreatedAt,
+                        UpdatedAt = element.UpdatedAt,
+                        UpdatedById = element.UpdatedById,
+                        AddedById = element.AddedById,
                         StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                         StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu => new StudyVisitPageModuleCalculationElementDetail
                         {
@@ -1659,7 +1727,13 @@ namespace Helios.Core.Controllers
                             ReferenceKey = calcu.ReferenceKey,
                             TenantId = calcu.TenantId,
                             IsDeleted = calcu.IsDeleted,
-                            IsActive = calcu.IsActive
+                            IsActive = calcu.IsActive,
+                            CalculationElementId = calcu.CalculationElementId,
+                            StudyVisitPageModule = calcu.StudyVisitPageModule,
+                            CreatedAt = calcu.CreatedAt,
+                            UpdatedAt = calcu.UpdatedAt,
+                            UpdatedById = calcu.UpdatedById,
+                            AddedById = calcu.AddedById,
                         }).ToList(),
                         StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events => new StudyVisitPageModuleElementEvent
                         {
@@ -1673,7 +1747,26 @@ namespace Helios.Core.Controllers
                             ReferenceKey = events.ReferenceKey,
                             TenantId = events.TenantId,
                             IsDeleted = events.IsDeleted,
-                            IsActive = events.IsActive
+                            IsActive = events.IsActive,
+                            CreatedAt = events.CreatedAt,
+                            UpdatedAt = events.UpdatedAt,
+                            UpdatedById = events.UpdatedById,
+                            AddedById = events.AddedById,
+                        }).ToList(),
+                        StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                        {
+                            ActionType = val.ActionType,
+                            ValueCondition = val.ValueCondition,
+                            Value = val.Value,
+                            Message = val.Message,
+                            ReferenceKey = val.ReferenceKey,
+                            TenantId = val.TenantId,
+                            IsDeleted = val.IsDeleted,
+                            IsActive = val.IsActive,
+                            CreatedAt = val.CreatedAt,
+                            UpdatedAt = val.UpdatedAt,
+                            UpdatedById = val.UpdatedById,
+                            AddedById = val.AddedById,
                         }).ToList()
                     }).ToList()
                 }).AsSplitQuery().ToListAsync();
@@ -1794,6 +1887,21 @@ namespace Helios.Core.Controllers
                                 newModule.StudyVisitPageModuleElementEvent.Add(newEvents);
                                 return newEvents;
                             }).ToList();
+
+                            newModuleElements.StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Where(x => x.IsActive && !x.IsDeleted).Select(val =>
+                            {
+                                var newVal = new StudyVisitPageModuleElementValidationDetail
+                                {
+                                    Message = val.Message,
+                                    ActionType = val.ActionType,
+                                    Value = val.Value,
+                                    ValueCondition = val.ValueCondition,
+                                    ReferenceKey = val.ReferenceKey,
+                                    TenantId = val.TenantId
+                                };
+                                return newVal;
+                            }).ToList();
+
                             return newModuleElements;
                         }).ToList();
 
@@ -1816,7 +1924,104 @@ namespace Helios.Core.Controllers
                 {
                     var updatedModules = moduleDatas.Where(x => x.IsActive && !x.IsDeleted && updateModules.Select(a => a.Id).Contains(x.Id)).ToList();
 
-                    var newUpModules = await _context.StudyVisitPageModules.Where(x => x.IsActive && !x.IsDeleted && updatedModules.Select(a => a.ReferenceKey).Contains(x.ReferenceKey) && !updateModules.Select(a => a.Id).Contains(x.Id)).ToListAsync();
+                    var newUpModules = await _context.StudyVisitPageModules.Where(x => x.IsActive && !x.IsDeleted && updatedModules.Select(a => a.ReferenceKey).Contains(x.ReferenceKey) && !updateModules.Select(a => a.Id).Contains(x.Id)).Select(module => new StudyVisitPageModule
+                    {
+                        Id = module.Id,
+                        Name = module.Name,
+                        ReferenceKey = module.ReferenceKey,
+                        VersionKey = module.VersionKey,
+                        Order = module.Order,
+                        TenantId = module.TenantId,
+                        IsActive = module.IsActive,
+                        IsDeleted = module.IsDeleted,
+                        StudyVisitPage = module.StudyVisitPage,
+                        UpdatedAt = module.UpdatedAt,
+                        AddedById = module.AddedById,
+                        UpdatedById = module.UpdatedById,
+                        CreatedAt = module.CreatedAt,
+                        StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement
+                        {
+                            Id = element.Id,
+                            //StudyVisitPageModule = element.StudyVisitPageModule,
+                            StudyVisitPageModuleId = element.StudyVisitPageModuleId,
+                            ElementType = element.ElementType,
+                            ElementName = element.ElementName,
+                            Title = element.Title,
+                            IsTitleHidden = element.IsTitleHidden,
+                            Order = element.Order,
+                            Description = element.Description,
+                            Width = element.Width,
+                            IsHidden = element.IsHidden,
+                            IsRequired = element.IsRequired,
+                            IsDependent = element.IsDependent,
+                            IsRelated = element.IsRelated,
+                            CanMissing = element.CanMissing,
+                            ReferenceKey = element.ReferenceKey,
+                            TenantId = element.TenantId,
+                            IsActive = element.IsActive,
+                            IsDeleted = element.IsDeleted,
+                            IsReadonly = element.IsReadonly,
+                            CreatedAt = element.CreatedAt,
+                            UpdatedAt = element.UpdatedAt,
+                            UpdatedById = element.UpdatedById,
+                            AddedById = element.AddedById,
+                            StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
+                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails.Select(calcu => new StudyVisitPageModuleCalculationElementDetail
+                            {
+                                Id = calcu.Id,
+                                TargetElementId = calcu.TargetElementId,
+                                VariableName = calcu.VariableName,
+                                ReferenceKey = calcu.ReferenceKey,
+                                TenantId = calcu.TenantId,
+                                IsDeleted = calcu.IsDeleted,
+                                IsActive = calcu.IsActive,
+                                CalculationElementId = calcu.CalculationElementId,
+                                StudyVisitPageModuleId = calcu.StudyVisitPageModuleId,
+                                //StudyVisitPageModule = calcu.StudyVisitPageModule,
+                                CreatedAt = calcu.CreatedAt,
+                                UpdatedAt = calcu.UpdatedAt,
+                                UpdatedById = calcu.UpdatedById,
+                                AddedById = calcu.AddedById,
+                            }).ToList(),
+                            StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents.Select(events => new StudyVisitPageModuleElementEvent
+                            {
+                                Id = events.Id,
+                                EventType = events.EventType,
+                                ActionType = events.ActionType,
+                                SourceElementId = events.SourceElementId,
+                                TargetElementId = events.TargetElementId,
+                                ValueCondition = events.ValueCondition,
+                                ActionValue = events.ActionValue,
+                                VariableName = events.VariableName,
+                                ReferenceKey = events.ReferenceKey,
+                                TenantId = events.TenantId,
+                                IsDeleted = events.IsDeleted,
+                                IsActive = events.IsActive,
+                                CreatedAt = events.CreatedAt,
+                                UpdatedAt = events.UpdatedAt,
+                                UpdatedById = events.UpdatedById,
+                                AddedById = events.AddedById,
+                                StudyVisitPageModuleId = events.StudyVisitPageModuleId
+                                //StudyVisitPageModule = events.StudyVisitPageModule
+                            }).ToList(),
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                            {
+                                Id = val.Id,
+                                ActionType = val.ActionType,
+                                ValueCondition = val.ValueCondition,
+                                Value = val.Value,
+                                Message = val.Message,
+                                ReferenceKey = val.ReferenceKey,
+                                TenantId = val.TenantId,
+                                IsDeleted = val.IsDeleted,
+                                IsActive = val.IsActive,
+                                CreatedAt = val.CreatedAt,
+                                UpdatedAt = val.UpdatedAt,
+                                UpdatedById = val.UpdatedById,
+                                AddedById = val.AddedById,
+                            }).ToList()
+                        }).ToList()
+                    }).AsSplitQuery().ToListAsync();
 
                     foreach (var item in newUpModules)
                     {
@@ -1825,6 +2030,108 @@ namespace Helios.Core.Controllers
                         {
                             item.Name = p.Name;
                             item.Order = p.Order;
+                            foreach (var element in item.StudyVisitPageModuleElements)
+                            {
+                                var element1 = p.StudyVisitPageModuleElements.FirstOrDefault(x => x.ReferenceKey == element.ReferenceKey);
+                                if (element1 != null)
+                                {
+                                    element.IsActive = element1.IsActive;
+                                    element.IsDeleted = element1.IsDeleted;
+                                    element.ElementType = element1.ElementType;
+                                    element.ElementName = element1.ElementName;
+                                    element.Title = element1.Title;
+                                    element.IsTitleHidden = element1.IsTitleHidden;
+                                    element.Order = element1.Order;
+                                    element.Description = element1.Description;
+                                    element.Width = element1.Width;
+                                    element.IsHidden = element1.IsHidden;
+                                    element.IsRequired = element1.IsRequired;
+                                    element.IsDependent = element1.IsDependent;
+                                    element.IsRelated = element1.IsRelated;
+                                    element.IsReadonly = element1.IsReadonly;
+                                    element.CanMissing = element1.CanMissing;
+                                    element.StudyVisitPageModuleElementDetail.ParentId = element1.StudyVisitPageModuleElementDetail.ParentId;
+                                    element.StudyVisitPageModuleElementDetail.RowIndex = element1.StudyVisitPageModuleElementDetail.RowIndex;
+                                    element.StudyVisitPageModuleElementDetail.ColunmIndex = element1.StudyVisitPageModuleElementDetail.ColunmIndex;
+                                    element.StudyVisitPageModuleElementDetail.CanQuery = element1.StudyVisitPageModuleElementDetail.CanQuery;
+                                    element.StudyVisitPageModuleElementDetail.CanSdv = element1.StudyVisitPageModuleElementDetail.CanSdv;
+                                    element.StudyVisitPageModuleElementDetail.CanRemoteSdv = element1.StudyVisitPageModuleElementDetail.CanRemoteSdv;
+                                    element.StudyVisitPageModuleElementDetail.CanComment = element1.StudyVisitPageModuleElementDetail.CanComment;
+                                    element.StudyVisitPageModuleElementDetail.CanDataEntry = element1.StudyVisitPageModuleElementDetail.CanDataEntry;
+                                    element.StudyVisitPageModuleElementDetail.ParentElementEProPageNumber = element1.StudyVisitPageModuleElementDetail.ParentElementEProPageNumber;
+                                    element.StudyVisitPageModuleElementDetail.MetaDataTags = element1.StudyVisitPageModuleElementDetail.MetaDataTags;
+                                    element.StudyVisitPageModuleElementDetail.EProPageNumber = element1.StudyVisitPageModuleElementDetail.EProPageNumber;
+                                    element.StudyVisitPageModuleElementDetail.ButtonText = element1.StudyVisitPageModuleElementDetail.ButtonText;
+                                    element.StudyVisitPageModuleElementDetail.DefaultValue = element1.StudyVisitPageModuleElementDetail.DefaultValue;
+                                    element.StudyVisitPageModuleElementDetail.Unit = element1.StudyVisitPageModuleElementDetail.Unit;
+                                    element.StudyVisitPageModuleElementDetail.LowerLimit = element1.StudyVisitPageModuleElementDetail.LowerLimit;
+                                    element.StudyVisitPageModuleElementDetail.UpperLimit = element1.StudyVisitPageModuleElementDetail.UpperLimit;
+                                    element.StudyVisitPageModuleElementDetail.Mask = element1.StudyVisitPageModuleElementDetail.Mask;
+                                    element.StudyVisitPageModuleElementDetail.Layout = element1.StudyVisitPageModuleElementDetail.Layout;
+                                    element.StudyVisitPageModuleElementDetail.StartDay = element1.StudyVisitPageModuleElementDetail.StartDay;
+                                    element.StudyVisitPageModuleElementDetail.EndDay = element1.StudyVisitPageModuleElementDetail.EndDay;
+                                    element.StudyVisitPageModuleElementDetail.StartMonth = element1.StudyVisitPageModuleElementDetail.StartMonth;
+                                    element.StudyVisitPageModuleElementDetail.EndMonth = element1.StudyVisitPageModuleElementDetail.EndMonth;
+                                    element.StudyVisitPageModuleElementDetail.StartYear = element1.StudyVisitPageModuleElementDetail.StartYear;
+                                    element.StudyVisitPageModuleElementDetail.EndYear = element1.StudyVisitPageModuleElementDetail.EndYear;
+                                    element.StudyVisitPageModuleElementDetail.AddTodayDate = element1.StudyVisitPageModuleElementDetail.AddTodayDate;
+                                    element.StudyVisitPageModuleElementDetail.ElementOptions = element1.StudyVisitPageModuleElementDetail.ElementOptions;
+                                    element.StudyVisitPageModuleElementDetail.TargetElementId = element1.StudyVisitPageModuleElementDetail.TargetElementId;
+                                    element.StudyVisitPageModuleElementDetail.LeftText = element1.StudyVisitPageModuleElementDetail.LeftText;
+                                    element.StudyVisitPageModuleElementDetail.RightText = element1.StudyVisitPageModuleElementDetail.RightText;
+                                    element.StudyVisitPageModuleElementDetail.IsInCalculation = element1.StudyVisitPageModuleElementDetail.IsInCalculation;
+                                    element.StudyVisitPageModuleElementDetail.MainJs = element1.StudyVisitPageModuleElementDetail.MainJs;
+                                    element.StudyVisitPageModuleElementDetail.RelationMainJs = element1.StudyVisitPageModuleElementDetail.RelationMainJs;
+                                    element.StudyVisitPageModuleElementDetail.RowCount = element1.StudyVisitPageModuleElementDetail.RowCount;
+                                    element.StudyVisitPageModuleElementDetail.ColumnCount = element1.StudyVisitPageModuleElementDetail.ColumnCount;
+                                    element.StudyVisitPageModuleElementDetail.DatagridAndTableProperties = element1.StudyVisitPageModuleElementDetail.DatagridAndTableProperties;
+                                    element.StudyVisitPageModuleElementDetail.AdverseEventType = element1.StudyVisitPageModuleElementDetail.AdverseEventType;
+                                    element.StudyVisitPageModuleElementDetail.IsActive = element1.StudyVisitPageModuleElementDetail.IsActive;
+                                    element.StudyVisitPageModuleElementDetail.IsDeleted = element1.StudyVisitPageModuleElementDetail.IsDeleted;
+
+                                    foreach (var calc in element.StudyVisitPageModuleCalculationElementDetails)
+                                    {
+                                        var calc1 = element1.StudyVisitPageModuleCalculationElementDetails.FirstOrDefault(x => x.ReferenceKey == calc.ReferenceKey);
+                                        if (calc1 != null)
+                                        {
+                                            calc.IsActive = calc1.IsActive;
+                                            calc.IsDeleted = calc1.IsDeleted;
+                                            //calc.CalculationElementId = calc1.CalculationElementId;
+                                            //calc.TargetElementId = calc1.TargetElementId;
+                                            calc.VariableName = calc1.VariableName;
+                                        }
+                                    }
+                                    foreach (var tEvent in element.StudyVisitPageModuleElementEvents)
+                                    {
+                                        var tEvent1 = element1.StudyVisitPageModuleElementEvents.FirstOrDefault(x => x.ReferenceKey == tEvent.ReferenceKey);
+                                        if (tEvent1 != null)
+                                        {
+                                            tEvent.IsActive = tEvent1.IsActive;
+                                            tEvent.IsDeleted = tEvent1.IsDeleted;
+                                            tEvent.EventType = tEvent1.EventType;
+                                            //tEvent.TargetElementId = tEvent1.TargetElementId;
+                                            tEvent.VariableName = tEvent1.VariableName;
+                                            tEvent.ActionType = tEvent1.ActionType;
+                                            //tEvent.SourceElementId = tEvent1.SourceElementId;
+                                            tEvent.ValueCondition = tEvent1.ValueCondition;
+                                            tEvent.ActionValue = tEvent1.ActionValue;
+                                        }
+                                    }
+                                    foreach (var val in element.StudyVisitPageModuleElementValidationDetails)
+                                    {
+                                        var val1 = element1.StudyVisitPageModuleElementValidationDetails.FirstOrDefault(x => x.ReferenceKey == val.ReferenceKey);
+                                        if (val1 != null)
+                                        {
+                                            val.IsActive = val1.IsActive;
+                                            val.IsDeleted = val1.IsDeleted;
+                                            val.ActionType = val1.ActionType;
+                                            val.Message = val1.Message;
+                                            val.ValueCondition = val1.ValueCondition;
+                                            val.Value = val1.Value;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1881,7 +2188,8 @@ namespace Helios.Core.Controllers
                             ReferenceKey = element.ReferenceKey,
                             StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                             StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                         }).ToList(),
                         StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                         StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
@@ -1918,6 +2226,11 @@ namespace Helios.Core.Controllers
                             {
                                 eEvent.IsActive = true;
                                 eEvent.IsDeleted = false;
+                            });
+                            element.StudyVisitPageModuleElementValidationDetails.ToList().ForEach(val =>
+                            {
+                                val.IsActive = true;
+                                val.IsDeleted = false;
                             });
                         });
                     });
@@ -2337,6 +2650,23 @@ namespace Helios.Core.Controllers
                                 ReferenceKey = events.ReferenceKey,
                                 IsActive = events.IsActive,
                                 IsDeleted = events.IsDeleted,
+                            }).ToList(),
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                            {
+                                Id = val.Id,
+                                TenantId = val.TenantId,
+                                AddedById = val.AddedById,
+                                CreatedAt = val.CreatedAt,
+                                UpdatedAt = val.UpdatedAt,
+                                UpdatedById = val.UpdatedById,
+                                IsActive = val.IsActive,
+                                IsDeleted = val.IsDeleted,
+                                StudyVisitPageModuleElementId = val.StudyVisitPageModuleElementId,
+                                ReferenceKey = val.ReferenceKey,
+                                ActionType = val.ActionType,
+                                ValueCondition = val.ValueCondition,
+                                Value = val.Value,
+                                Message = val.Message
                             }).ToList()
                         }).ToList()
                     }).ToList()
@@ -2432,6 +2762,23 @@ namespace Helios.Core.Controllers
                                 ReferenceKey = events.ReferenceKey,
                                 IsActive = events.IsActive,
                                 IsDeleted = events.IsDeleted,
+                            }).ToList(),
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Select(val => new StudyVisitPageModuleElementValidationDetail
+                            {
+                                Id = val.Id,
+                                TenantId = val.TenantId,
+                                AddedById = val.AddedById,
+                                CreatedAt = val.CreatedAt,
+                                UpdatedAt = val.UpdatedAt,
+                                UpdatedById = val.UpdatedById,
+                                IsActive = val.IsActive,
+                                IsDeleted = val.IsDeleted,
+                                StudyVisitPageModuleElementId = val.StudyVisitPageModuleElementId,
+                                ReferenceKey = val.ReferenceKey,
+                                ActionType = val.ActionType,
+                                ValueCondition = val.ValueCondition,
+                                Value = val.Value,
+                                Message = val.Message
                             }).ToList()
                         }).ToList()
                     }).ToList()
@@ -2637,9 +2984,13 @@ namespace Helios.Core.Controllers
                 {
                     return true;
                 }
-                if (AreModuleDetailsEqual(aElement.StudyVisitPageModuleElementDetail, dElement.StudyVisitPageModuleElementDetail) ||
-                    AreModuleCalculationDetailsEqual(aElement.StudyVisitPageModuleCalculationElementDetails.ToList(), dElement.StudyVisitPageModuleCalculationElementDetails.ToList(), aElements, dElements) ||
+                if (AreModuleDetailsEqual(aElement.StudyVisitPageModuleElementDetail, dElement.StudyVisitPageModuleElementDetail) 
+                    ||
+                    AreModuleCalculationDetailsEqual(aElement.StudyVisitPageModuleCalculationElementDetails.ToList(), dElement.StudyVisitPageModuleCalculationElementDetails.ToList(), aElements, dElements) 
+                    ||
                     AreModuleEventsEqual(aElement.StudyVisitPageModuleElementEvents.ToList(), dElement.StudyVisitPageModuleElementEvents.ToList(), aElements, dElements)
+                    ||
+                    AreModuleElementValidationEqual(aElement.StudyVisitPageModuleElementValidationDetails.ToList(), dElement.StudyVisitPageModuleElementValidationDetails.ToList())
                    )
                 {
                     return true;
@@ -2811,6 +3162,39 @@ namespace Helios.Core.Controllers
                 aEvent.ValueCondition != dEvent.ValueCondition ||
                 aEvent.ActionValue != dEvent.ActionValue ||
                 aEvent.VariableName != dEvent.VariableName
+            )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool AreModuleElementValidationEqual(List<StudyVisitPageModuleElementValidationDetail> aVals, List<StudyVisitPageModuleElementValidationDetail> dVals)
+        {
+            if ((aVals == null && dVals != null) || (aVals != null && dVals == null) || (aVals != null && dVals != null && aVals.Count != dVals.Count))
+            {
+                return true;
+            }
+
+            foreach (var aVal in aVals)
+            {
+                var dVal = dVals.FirstOrDefault(d => d.ReferenceKey == aVal.ReferenceKey);
+                if (AreModuleElementValidationPropertiesEqual(aVal, dVal))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool AreModuleElementValidationPropertiesEqual(StudyVisitPageModuleElementValidationDetail aVal, StudyVisitPageModuleElementValidationDetail dVal)
+        {
+            if (
+                aVal.ActionType != dVal.ActionType ||
+                aVal.ValueCondition != dVal.ValueCondition ||
+                aVal.Value != dVal.Value ||
+                aVal.Message != dVal.Value
             )
             {
                 return true;
@@ -3520,7 +3904,7 @@ namespace Helios.Core.Controllers
                     IsRelated = elementDTO.IsRelated,
                     IsReadonly = elementDTO.IsReadonly,
                     CanMissing = elementDTO.CanMissing,
-                    ReferenceKey = new Guid(),
+                    ReferenceKey = Guid.NewGuid(),
                     StudyVisitPageModuleElementDetail = new StudyVisitPageModuleElementDetail
                     {
                         ParentId = elementDetailDTO.ParentId,
@@ -3556,8 +3940,7 @@ namespace Helios.Core.Controllers
                         RelationMainJs = elementDetailDTO.RelationMainJs,
                         RowCount = elementDetailDTO.RowCount,
                         ColumnCount = elementDetailDTO.ColumnCount,
-                        DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties,
-                        ReferenceKey = new Guid(),
+                        DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties
                     }
                 };
 
@@ -3607,7 +3990,7 @@ namespace Helios.Core.Controllers
                             {
                                 var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetail
                                 {
-                                    ReferenceKey = new Guid(),
+                                    ReferenceKey = Guid.NewGuid(),
                                     StudyVisitPageModuleId = item.StudyVisitPageModuleId,
                                     CalculationElementId = item.Id,
                                     TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
@@ -3628,7 +4011,7 @@ namespace Helios.Core.Controllers
                             {
                                 var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
                                 {
-                                    ReferenceKey = new Guid(),
+                                    ReferenceKey = Guid.NewGuid(),
                                     StudyVisitPageModuleId = item.StudyVisitPageModuleId,
                                     EventType = moduleElementEventDTO.EventType,
                                     ActionType = moduleElementEventDTO.ActionType,
@@ -3653,7 +4036,7 @@ namespace Helios.Core.Controllers
                             {
                                 var studyVisitPageModuleElementValidationDetail = new StudyVisitPageModuleElementValidationDetail
                                 {
-                                    ReferenceKey = new Guid(),
+                                    ReferenceKey = Guid.NewGuid(),
                                     StudyVisitPageModuleElementId = item.Id,
                                     ActionType = val.ValidationActionType,
                                     ValueCondition = val.ValidationCondition,
