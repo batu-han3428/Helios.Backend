@@ -435,7 +435,7 @@ namespace Helios.Core.Controllers
                     await _context.StudyUserSites.AddRangeAsync(userSites);
                 }
 
-                var result1 = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
+                var result1 = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > -1;
 
                 if (result1)
                 {

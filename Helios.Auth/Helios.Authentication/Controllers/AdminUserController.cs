@@ -429,12 +429,33 @@ namespace Helios.Authentication.Controllers
 
                     if (oldEmail != model.Email)
                     {
-                        await _emailService.UserResetPasswordMail(new StudyUserModel
+                        user.ChangePassword = false;
+                        var changePassword = await _userManager.UpdateAsync(user);
+                        if (changePassword.Succeeded)
                         {
-                            Name = user.Name,
-                            LastName = user.LastName,
-                            Email = user.Email
-                        });
+                            string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                            var removeResult = await _userManager.RemovePasswordAsync(user);
+                            if (removeResult.Succeeded)
+                            {
+                                var passResult = await _userManager.AddPasswordAsync(user, newPassword);
+                                if (passResult.Succeeded)
+                                {
+                                    await _emailService.SystemAdminUserMail(new SystemAdminDTO
+                                    {
+                                        Email = user.Email,
+                                        Name = user.Name,
+                                        LastName = user.LastName,
+                                        Password = newPassword
+
+                                    });
+                                    return new ApiResponse<dynamic>
+                                    {
+                                        IsSuccess = true,
+                                        Message = "Successful"
+                                    };
+                                }
+                            }
+                        }
                     }
 
                     return new ApiResponse<dynamic>

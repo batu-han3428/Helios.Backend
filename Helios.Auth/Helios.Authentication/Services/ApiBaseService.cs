@@ -14,12 +14,12 @@ namespace Helios.Authentication.Services
 
         protected RestClient AuthServiceClient
         {
-            get { return new RestClient(new Uri("https://localhost:5200/")); }
+            get { return new RestClient(new Uri("http://authentication:8080")); }
         }
 
         protected RestClient CoreServiceClient
         {
-            get { return new RestClient(new Uri("https://localhost:4200/")); }
+            get { return new RestClient(new Uri("http://core:8080")); }
         }
 
         public string ClientIp { get; set; }
