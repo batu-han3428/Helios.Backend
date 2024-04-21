@@ -4056,6 +4056,7 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
             var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x => x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
+            var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (element != null)
             {
@@ -4067,7 +4068,7 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                var moduleEvent = _context.StudyVisitPageModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+                var moduleEvent = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
 
                 if (moduleEvent != null)
                 {
@@ -4079,11 +4080,37 @@ namespace Helios.Core.Controllers
 
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
+                    var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
 
-                    _context.StudyVisitPageModuleElements.Remove(element);
+                    foreach (var item in childrenDtils)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
 
+                        _context.StudyVisitPageModuleElementDetails.Update(item);
+                    }
 
+                    var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
 
+                    foreach (var item in children)
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+
+                        _context.StudyVisitPageModuleElements.Update(item);
+                    }
+                }
+
+                //remove events
+                var moduleEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var item in moduleEvents)
+                {
+                    item.IsActive = false;
+                    item.IsDeleted = true;
+
+                    _context.StudyVisitPageModuleElementEvents.Update(item);
                 }
 
                 if (element.ElementType == ElementType.Calculated)
@@ -4122,13 +4149,27 @@ namespace Helios.Core.Controllers
                     }
                 }
 
+                //remove validations
+                var validations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                if (validations != null && validations.Count > 0)
+                {
+                    foreach (var validation in validations)
+                    {
+                        validation.IsActive = false;
+                        validation.IsDeleted = true;
+
+                        _context.StudyVisitPageModuleElementValidationDetails.Update(validation);
+                    }
+                }
+
                 element.IsDeleted = true;
                 element.IsActive = false;
-                //elementDetail.IsDeleted = true;
-                //elementDetail.IsActive = false;
+                elementDetail.IsDeleted = true;
+                elementDetail.IsActive = false;
 
-                //_context.Update(element);
-                //_context.Update(elementDetail);
+                _context.Update(element);
+                _context.Update(elementDetail);
 
                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 result.Message = result.IsSuccess ? "Successful" : "Error";
@@ -4445,7 +4486,7 @@ namespace Helios.Core.Controllers
                         {
                             var elementEvent = new StudyVisitPageModuleElementEvent()
                             {
-                                SourceElementId = model.DependentTargetFieldId,
+                                SourceElementId = model.DependentSourceFieldId,
                                 TargetElementId = stdVstPgMdlElmnt.Id,
                                 StudyVisitPageModuleId = model.ModuleId,
                                 TenantId = model.TenantId,
@@ -4674,6 +4715,18 @@ namespace Helios.Core.Controllers
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
+                else
+                {
+                    var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted);
+
+                    if (dep != null)
+                    {
+                        dep.IsActive = false;
+                        dep.IsDeleted = true;
+
+                        _context.StudyVisitPageModuleElementEvents.Update(dep);
+                    }
+                }
 
                 if (model.ElementType == ElementType.Calculated)
                 {
@@ -4759,16 +4812,16 @@ namespace Helios.Core.Controllers
                     {
                         var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.TargetElementId)
+                        if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
                         {
-                            item.TargetElementId = r.relationFieldsSelectedGroup.value;
+                            item.SourceElementId = r.relationFieldsSelectedGroup.value;
                             _context.StudyVisitPageModuleElementEvents.Update(item);
                         }
                     }
 
                     var relIds = rels.Select(x => x.SourceElementId).ToList();
 
-                    //first add unadded rows to evet
+                    //add unadded rows to evet
                     foreach (var item in relList)
                     {
                         if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
@@ -4786,7 +4839,7 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    //then remove deleted rows
+                    //remove deleted rows
                     foreach (var item in rels)
                     {
                         var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
@@ -4812,6 +4865,21 @@ namespace Helios.Core.Controllers
                         _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElement);
                         _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
+                else
+                {
+                    var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    if (rels.Count > 0)
+                    {
+                        foreach (var item in rels)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.StudyVisitPageModuleElementEvents.Update(item);
+                        }
                     }
                 }
 
