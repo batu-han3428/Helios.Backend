@@ -515,7 +515,7 @@ namespace Helios.Core.Controllers
                         {
                             var elementEvent = new ModuleElementEvent()
                             {
-                                SourceElementId = model.DependentTargetFieldId,
+                                SourceElementId = model.DependentSourceFieldId,
                                 TargetElementId = elm.Id,
                                 ModuleId = model.ModuleId,
                                 TenantId = model.TenantId,
@@ -743,6 +743,18 @@ namespace Helios.Core.Controllers
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
+                else
+                {
+                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
+
+                    if(dep != null)
+                    {
+                        dep.IsActive = false;
+                        dep.IsDeleted = true;
+
+                        _context.ModuleElementEvents.Update(dep);
+                    }
+                }
 
                 if (model.ElementType == ElementType.Calculated)
                 {
@@ -821,23 +833,24 @@ namespace Helios.Core.Controllers
                 {
                     var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                    var orgRelList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                    var relList = orgRelList;
                     var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
 
                     foreach (var item in rels)
                     {
                         var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.TargetElementId)
+                        if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
                         {
-                            item.TargetElementId = r.relationFieldsSelectedGroup.value;
+                            item.SourceElementId = r.relationFieldsSelectedGroup.value;
                             _context.ModuleElementEvents.Update(item);
                         }
                     }
 
                     var relIds = rels.Select(x => x.SourceElementId).ToList();
 
-                    //first add unadded rows to evet
+                    //add unadded rows to evet
                     foreach (var item in relList)
                     {
                         if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
@@ -856,10 +869,10 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    //then remove deleted rows
+                    //remove deleted rows
                     foreach (var item in rels)
                     {
-                        var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+                        var delRel = orgRelList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
 
                         if (delRel == null)
                         {
@@ -882,6 +895,21 @@ namespace Helios.Core.Controllers
                         _context.Elements.Update(element);
                         _context.ElementDetails.Update(elementDetail);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
+                else
+                {
+                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    if(rels.Count > 0)
+                    {
+                        foreach (var item in rels)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ModuleElementEvents.Update(item);
+                        }
                     }
                 }
 
@@ -1085,7 +1113,7 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                var moduleEvent = _context.ModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+                var moduleEvent = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
 
                 if (moduleEvent != null)
                 {
@@ -1117,6 +1145,17 @@ namespace Helios.Core.Controllers
 
                         _context.Elements.Update(item);
                     }
+                }
+                
+                //remove events
+                var moduleEvents = await _context.ModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var item in moduleEvents)
+                {
+                    item.IsActive = false;
+                    item.IsDeleted = true;
+
+                    _context.ModuleElementEvents.Update(item);
                 }
 
                 if (element.ElementType == ElementType.Calculated)
@@ -1155,6 +1194,7 @@ namespace Helios.Core.Controllers
                     }
                 }
 
+                //remove validations
                 var validations = await _context.ElementValidationDetails.Where(x => x.ElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 if (validations != null && validations.Count > 0)
