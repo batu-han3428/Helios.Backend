@@ -4717,7 +4717,7 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted);
+                    var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
 
                     if (dep != null)
                     {
@@ -4869,7 +4869,7 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     if (rels.Count > 0)
                     {
