@@ -899,7 +899,7 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     if(rels.Count > 0)
                     {
