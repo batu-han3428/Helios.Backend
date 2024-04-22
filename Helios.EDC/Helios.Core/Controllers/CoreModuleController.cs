@@ -745,7 +745,7 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted);
+                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
 
                     if(dep != null)
                     {
