@@ -2111,6 +2111,8 @@ namespace Helios.Core.Controllers
 
                                 newModuleElements.StudyVisitPageModuleCalculationElementDetails = calcus;
 
+                                item.StudyVisitPageModuleCalculationElementDetail = calcus;
+
                                 var events = element.StudyVisitPageModuleElementEvents.Where(x => x.IsActive && !x.IsDeleted).Select(events =>
                                 {
                                     var newEvents = new StudyVisitPageModuleElementEvent
@@ -2130,6 +2132,8 @@ namespace Helios.Core.Controllers
                                 }).ToList();
 
                                 newModuleElements.StudyVisitPageModuleElementEvents = events;
+
+                                item.StudyVisitPageModuleElementEvent = events;
 
                                 newModuleElements.StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails.Where(x => x.IsActive && !x.IsDeleted).Select(val =>
                                 {
@@ -2223,7 +2227,7 @@ namespace Helios.Core.Controllers
 
                                         var demoCalDeletedElements = element1.StudyVisitPageModuleCalculationElementDetails.Where(e => !e.IsActive && e.IsDeleted).ToList();
 
-                                        _context.studyVisitPageModuleCalculationElementDetails.RemoveRange(element.StudyVisitPageModuleCalculationElementDetails.Where(x => demoDeletedElements.Select(a => a.ReferenceKey).Contains(x.ReferenceKey)));
+                                        _context.studyVisitPageModuleCalculationElementDetails.RemoveRange(element.StudyVisitPageModuleCalculationElementDetails.Where(x => demoCalDeletedElements.Select(a => a.ReferenceKey).Contains(x.ReferenceKey)));
 
                                         var demoCalAddedElements = element1.StudyVisitPageModuleCalculationElementDetails.Where(e => e.IsActive && !e.IsDeleted && !element.StudyVisitPageModuleCalculationElementDetails.Any(n => n.ReferenceKey == e.ReferenceKey)).Select(calculation =>
                                         {
@@ -2655,7 +2659,7 @@ namespace Helios.Core.Controllers
                    .Select(element => element.ReferenceKey)
                    .Distinct();
 
-                var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).ToListAsync();
+                var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).Include(x=>x.StudyVisitPageModuleElementDetail).ToListAsync();
 
                 var addedCalcuTargetElement = calcus.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails).ToList();
                 var oldCalcu = moduleDatas.SelectMany(x=>x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails);
@@ -2708,6 +2712,19 @@ namespace Helios.Core.Controllers
                                 item.ParentId = nItem.Id;
                             }
                         }
+                    }
+                }
+                var ddd = await _context.StudyVisitPageModuleElements.Where(x => addedCalcuTargetElement.Select(a => a.TargetElementId).Contains(x.Id)).Include(x=>x.StudyVisitPageModuleElementDetail).ToListAsync();
+                
+                var addedParentIds1 = addedModules.SelectMany(x => x.StudyVisitPageModuleElements).Where(x => x.StudyVisitPageModuleElementDetail != null).Select(x => x.StudyVisitPageModuleElementDetail).ToList();
+                var oldDetailst1 = moduleDatas.SelectMany(x => x.StudyVisitPageModuleElements).Select(x => x.StudyVisitPageModuleElementDetail);
+                foreach (var item in ddd)
+                {
+                    var ggg = elementsData.FirstOrDefault(x => item.ReferenceKey == x.ReferenceKey);
+                    if (ggg != null)
+                    {
+                        item.StudyVisitPageModuleElementDetail.IsInCalculation = ggg.StudyVisitPageModuleElementDetail.IsInCalculation;
+                      
                     }
                 }
 
@@ -3168,7 +3185,7 @@ namespace Helios.Core.Controllers
                 }
                 if (AreModuleDetailsEqual(aElement.StudyVisitPageModuleElementDetail, dElement.StudyVisitPageModuleElementDetail)
                     ||
-                    AreModuleCalculationDetailsEqual(aElement.StudyVisitPageModuleCalculationElementDetails.ToList(), dElement.StudyVisitPageModuleCalculationElementDetails.ToList(), aElements, dElements)
+                    ((aElement.StudyVisitPageModuleCalculationElementDetails.Count > 0 || dElement.StudyVisitPageModuleCalculationElementDetails.Count > 0) && AreModuleCalculationDetailsEqual(aElement.StudyVisitPageModuleCalculationElementDetails.ToList(), dElement.StudyVisitPageModuleCalculationElementDetails/*.Where(x=>x.IsActive && !x.IsDeleted)*/.ToList(), aElements, dElements))
                     ||
                     AreModuleEventsEqual(aElement.StudyVisitPageModuleElementEvents.ToList(), dElement.StudyVisitPageModuleElementEvents.ToList(), aElements, dElements)
                     ||
