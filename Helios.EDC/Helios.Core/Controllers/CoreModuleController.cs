@@ -879,7 +879,7 @@ namespace Helios.Core.Controllers
                             item.IsActive = false;
                             item.IsDeleted = true;
 
-                            _context.ModuleElementEvents.Add(item);
+                            _context.ModuleElementEvents.Update(item);
                         }
                     }
 

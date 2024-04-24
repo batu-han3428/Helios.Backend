@@ -5422,7 +5422,7 @@ namespace Helios.Core.Controllers
                             item.IsActive = false;
                             item.IsDeleted = true;
 
-                            _context.StudyVisitPageModuleElementEvents.Add(item);
+                            _context.StudyVisitPageModuleElementEvents.Update(item);
                         }
                     }
 
