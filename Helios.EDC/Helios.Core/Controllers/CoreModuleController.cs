@@ -831,63 +831,75 @@ namespace Helios.Core.Controllers
 
                 if (model.IsRelated)
                 {
-                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                    var orgRelList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                    var relList = orgRelList;
-                    var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
-
-                    foreach (var item in rels)
+                    try
                     {
-                        var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
+                        var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
+                        var orgRelList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                        var relList = orgRelList;
+                        var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                        foreach (var item in rels)
                         {
-                            item.SourceElementId = r.relationFieldsSelectedGroup.value;
-                            _context.ModuleElementEvents.Update(item);
-                        }
-                    }
+                            var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                    var relIds = rels.Select(x => x.SourceElementId).ToList();
-
-                    //add unadded rows to evet
-                    foreach (var item in relList)
-                    {
-                        if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
-                        {
-                            var elementEvent = new ModuleElementEvent()
+                            if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
                             {
-                                ModuleId = model.ModuleId,
-                                SourceElementId = item.relationFieldsSelectedGroup.value,
-                                TargetElementId = model.Id,
-                                TenantId = model.TenantId,
-                                EventType = EventType.Relation,
-                                VariableName = item.variableName
-                            };
-
-                            _context.ModuleElementEvents.Add(elementEvent);
+                                item.SourceElementId = r.relationFieldsSelectedGroup.value;
+                                _context.ModuleElementEvents.Update(item);
+                            }
                         }
-                    }
 
-                    //remove deleted rows
-                    foreach (var item in rels)
-                    {
-                        var delRel = orgRelList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+                        var relIds = rels.Select(x => x.SourceElementId).ToList();
 
-                        if (delRel == null)
+                        //add unadded rows to evet
+                        foreach (var item in relList)
                         {
-                            item.IsActive = false;
-                            item.IsDeleted = true;
+                            if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
+                            {
+                                var elementEvent = new ModuleElementEvent()
+                                {
+                                    ModuleId = model.ModuleId,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    TargetElementId = model.Id,
+                                    TenantId = model.TenantId,
+                                    EventType = EventType.Relation,
+                                    VariableName = item.variableName
+                                };
 
-                            _context.ModuleElementEvents.Update(item);
+                                _context.ModuleElementEvents.Add(elementEvent);
+                            }
+                        }
+
+                        //remove deleted rows
+                        foreach (var item in rels)
+                        {
+                            var delRel = orgRelList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+
+                            if (delRel == null)
+                            {
+                                item.IsActive = false;
+                                item.IsDeleted = true;
+
+                                _context.ModuleElementEvents.Update(item);
+                            }
+                        }
+
+                        _context.ElementDetails.Update(elementDetail);
+
+                        var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!isSuccess)
+                        {
+                            element.IsRelated = false;
+                            elementDetail.RelationMainJs = "";
+
+                            _context.Elements.Update(element);
+                            _context.ElementDetails.Update(elementDetail);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
                     }
-
-                    _context.ElementDetails.Update(elementDetail);
-
-                    var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    if (!isSuccess)
+                    catch (Exception ex)
                     {
                         element.IsRelated = false;
                         elementDetail.RelationMainJs = "";

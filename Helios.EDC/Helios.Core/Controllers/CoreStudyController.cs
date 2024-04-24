@@ -2256,7 +2256,7 @@ namespace Helios.Core.Controllers
                                                     calc.VariableName = calc1.VariableName;
                                                 }
                                             }
-                                        }                                        
+                                        }
                                     }
                                 }
                             }
@@ -2658,7 +2658,7 @@ namespace Helios.Core.Controllers
                 var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).ToListAsync();
 
                 var addedCalcuTargetElement = calcus.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails).ToList();
-                var oldCalcu = moduleDatas.SelectMany(x=>x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails);
+                var oldCalcu = moduleDatas.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails);
                 foreach (var item in addedCalcuTargetElement)
                 {
                     if (oldCalcu.Any(x => x.ReferenceKey == item.ReferenceKey && x.Id != item.Id && x.TargetElementId == item.TargetElementId))
@@ -2676,10 +2676,10 @@ namespace Helios.Core.Controllers
                 }
 
                 var addedEventTargetElement = events.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleElementEvents).ToList();
-                var oldEvent = moduleDatas.SelectMany(x=>x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleElementEvents);
+                var oldEvent = moduleDatas.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleElementEvents);
                 foreach (var item in addedEventTargetElement)
                 {
-                    if(oldEvent.Any(x=>x.ReferenceKey == item.ReferenceKey && x.Id != item.Id && x.SourceElementId == item.SourceElementId))
+                    if (oldEvent.Any(x => x.ReferenceKey == item.ReferenceKey && x.Id != item.Id && x.SourceElementId == item.SourceElementId))
                     {
                         var ggg = elementsData.FirstOrDefault(x => item.SourceElementId == x.Id);
                         if (ggg != null)
@@ -2700,7 +2700,7 @@ namespace Helios.Core.Controllers
                     var ggg = elementsData.FirstOrDefault(x => item?.ParentId == x.Id);
                     if (ggg != null)
                     {
-                        if(oldDetailst.Any(x => ggg.StudyVisitPageModuleElementDetail.Id == x.Id && item.ParentId == x.ParentId))
+                        if (oldDetailst.Any(x => ggg.StudyVisitPageModuleElementDetail.Id == x.Id && item.ParentId == x.ParentId))
                         {
                             var nItem = elementsData.FirstOrDefault(x => x.Id != ggg.Id && x.ReferenceKey == ggg.ReferenceKey);
                             if (nItem != null)
@@ -3144,7 +3144,7 @@ namespace Helios.Core.Controllers
                 return true;
             }
 
-            if (AreModuleElementsEqual(aModule.StudyVisitPageModuleElements.Where(x=>x.IsActive && !x.IsDeleted).ToList(), dModule.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted).ToList()))
+            if (AreModuleElementsEqual(aModule.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted).ToList(), dModule.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted).ToList()))
             {
                 return true;
             }
@@ -5375,62 +5375,74 @@ namespace Helios.Core.Controllers
 
                 if (model.IsRelated)
                 {
-                    var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                    var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
-
-                    foreach (var item in rels)
+                    try
                     {
-                        var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
+                        var rels = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
+                        var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                        var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                        foreach (var item in rels)
                         {
-                            item.SourceElementId = r.relationFieldsSelectedGroup.value;
-                            _context.StudyVisitPageModuleElementEvents.Update(item);
-                        }
-                    }
+                            var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                    var relIds = rels.Select(x => x.SourceElementId).ToList();
-
-                    //add unadded rows to evet
-                    foreach (var item in relList)
-                    {
-                        if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
-                        {
-                            var elementEvent = new StudyVisitPageModuleElementEvent()
+                            if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
                             {
-                                StudyVisitPageModuleId = model.ModuleId,
-                                SourceElementId = item.relationFieldsSelectedGroup.value,
-                                TargetElementId = model.Id,
-                                TenantId = model.TenantId,
-                                EventType = EventType.Relation,
-                                ReferenceKey = Guid.NewGuid()
-                            };
-
-                            _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                                item.SourceElementId = r.relationFieldsSelectedGroup.value;
+                                _context.StudyVisitPageModuleElementEvents.Update(item);
+                            }
                         }
-                    }
 
-                    //remove deleted rows
-                    foreach (var item in rels)
-                    {
-                        var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+                        var relIds = rels.Select(x => x.SourceElementId).ToList();
 
-                        if (delRel == null)
+                        //add unadded rows to evet
+                        foreach (var item in relList)
                         {
-                            item.IsActive = false;
-                            item.IsDeleted = true;
+                            if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
+                            {
+                                var elementEvent = new StudyVisitPageModuleElementEvent()
+                                {
+                                    StudyVisitPageModuleId = model.ModuleId,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    TargetElementId = model.Id,
+                                    TenantId = model.TenantId,
+                                    EventType = EventType.Relation,
+                                    ReferenceKey = Guid.NewGuid()
+                                };
 
-                            _context.StudyVisitPageModuleElementEvents.Update(item);
+                                _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
+                            }
+                        }
+
+                        //remove deleted rows
+                        foreach (var item in rels)
+                        {
+                            var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+
+                            if (delRel == null)
+                            {
+                                item.IsActive = false;
+                                item.IsDeleted = true;
+
+                                _context.StudyVisitPageModuleElementEvents.Update(item);
+                            }
+                        }
+
+                        _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
+
+                        var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!isSuccess)
+                        {
+                            stdVstPgMdlElement.IsRelated = false;
+                            stdVstPgMdlElementDetail.RelationMainJs = "";
+
+                            _context.StudyVisitPageModuleElements.Update(stdVstPgMdlElement);
+                            _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
                     }
-
-                    _context.StudyVisitPageModuleElementDetails.Update(stdVstPgMdlElementDetail);
-
-                    var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    if (!isSuccess)
+                    catch (Exception ex)
                     {
                         stdVstPgMdlElement.IsRelated = false;
                         stdVstPgMdlElementDetail.RelationMainJs = "";
