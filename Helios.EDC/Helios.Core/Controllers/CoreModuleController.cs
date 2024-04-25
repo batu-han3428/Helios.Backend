@@ -389,7 +389,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
-            var result = new ApiResponse<dynamic>() { Message = "Operation is successfully."};
+            var result = new ApiResponse<dynamic>() { Message = "Operation is successfully." };
             var calcList = new List<CalculationModel>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -567,7 +567,7 @@ namespace Helios.Core.Controllers
                                 var elementEvent = new ModuleElementEvent()
                                 {
                                     ModuleId = model.ModuleId,
-                                    SourceElementId = item.relationFieldsSelectedGroup.value != 0 ? item.relationFieldsSelectedGroup.value: elm.Id,//element related to own
+                                    SourceElementId = item.relationFieldsSelectedGroup.value != 0 ? item.relationFieldsSelectedGroup.value : elm.Id,//element related to own
                                     TargetElementId = elm.Id,
                                     TenantId = model.TenantId,
                                     EventType = EventType.Relation,
@@ -747,7 +747,7 @@ namespace Helios.Core.Controllers
                 {
                     var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
 
-                    if(dep != null)
+                    if (dep != null)
                     {
                         dep.IsActive = false;
                         dep.IsDeleted = true;
@@ -763,6 +763,9 @@ namespace Helios.Core.Controllers
                     var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
                     var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
 
+                    var elementInExistCalListIds = elementInExistCalList.Select(x => x.ElementId).ToList();
+                    var allCalDtil = await _context.CalculatationElementDetails.Where(x => elementInExistCalListIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
                     //update updated variable list
                     foreach (var item in existCalDtil)
                     {
@@ -773,6 +776,14 @@ namespace Helios.Core.Controllers
                             item.TargetElementId = c.elementFieldSelectedGroup.value;
                             _context.CalculatationElementDetails.Update(item);
                         }
+
+                        var cc = calcList.FirstOrDefault(x => x.elementFieldSelectedGroup.value == item.TargetElementId);
+
+                        if (cc != null && cc.variableName != item.VariableName)
+                        {
+                            item.VariableName = cc.variableName;
+                            _context.CalculatationElementDetails.Update(item);
+                        }
                     }
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -780,8 +791,13 @@ namespace Helios.Core.Controllers
                     //change elementDetail first
                     foreach (var item in elementInExistCalList)
                     {
-                        item.IsInCalculation = false;
-                        _context.ElementDetails.Update(item);
+                        var a = allCalDtil.Count(x => x.TargetElementId == item.ElementId);
+
+                        if (a == 1)//if element used in another calculation element too, IsInCalculation must remain true.
+                        {
+                            item.IsInCalculation = false;
+                            _context.ElementDetails.Update(item);
+                        }
                     }
 
                     var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -806,6 +822,7 @@ namespace Helios.Core.Controllers
                                 ModuleId = model.ModuleId,
                                 CalculationElementId = element.Id,
                                 TargetElementId = item.elementFieldSelectedGroup.value,
+                                VariableName = item.variableName
                             };
 
                             _context.CalculatationElementDetails.Add(calcDtil);
@@ -913,7 +930,7 @@ namespace Helios.Core.Controllers
                 {
                     var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    if(rels.Count > 0)
+                    if (rels.Count > 0)
                     {
                         foreach (var item in rels)
                         {
@@ -1158,7 +1175,7 @@ namespace Helios.Core.Controllers
                         _context.Elements.Update(item);
                     }
                 }
-                
+
                 //remove events
                 var moduleEvents = await _context.ModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
@@ -1189,7 +1206,9 @@ namespace Helios.Core.Controllers
 
                     foreach (var item in elmDtils)
                     {
-                        if (chngIds.Contains(item.ElementId))
+                        var elmCnt = elmDtils.Where(x => x.Id == item.Id).Count();
+
+                        if (chngIds.Contains(item.ElementId) && elmCnt == 1)
                         {
                             item.IsInCalculation = false;
 
