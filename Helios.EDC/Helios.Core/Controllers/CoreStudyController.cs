@@ -4710,17 +4710,19 @@ namespace Helios.Core.Controllers
                             chngIds.Add(item.FirstOrDefault().TargetElementId);
                     }
 
-                    //var elmDtils = _context.StudyVisitPageModuleElementDetails.Where(x => targetElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToList();
+                    var elmDtils = _context.StudyVisitPageModuleElementDetails.Where(x => targetElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToList();
 
-                    //foreach (var item in elmDtils)
-                    //{
-                    //    if (chngIds.Contains(item.StudyVisitPageModuleElementId))
-                    //    {
-                    //        item.IsInCalculation = false;
+                    foreach (var item in elmDtils)
+                    {
+                        var elmCnt = elmDtils.Where(x => x.Id == item.Id).Count();
 
-                    //        _context.StudyVisitPageModuleElementDetails.Update(item);
-                    //    }
-                    //}
+                        if (chngIds.Contains(item.StudyVisitPageModuleElementId) && elmCnt == 1)
+                        {
+                            item.IsInCalculation = false;
+
+                            _context.StudyVisitPageModuleElementDetails.Update(item);
+                        }
+                    }
 
                     foreach (var item in childrenDtils)
                     {
@@ -5323,6 +5325,9 @@ namespace Helios.Core.Controllers
                     var elementInExistCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => existCalElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
                     var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
 
+                    var elementInExistCalListIds = elementInExistCalList.Select(x => x.StudyVisitPageModuleElementId).ToList();
+                    var allCalDtil = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => elementInExistCalListIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
                     //update updated variable list
                     foreach (var item in existCalDtil)
                     {
@@ -5333,6 +5338,14 @@ namespace Helios.Core.Controllers
                             item.TargetElementId = c.elementFieldSelectedGroup.value;
                             _context.studyVisitPageModuleCalculationElementDetails.Update(item);
                         }
+
+                        var cc = calcList.FirstOrDefault(x => x.elementFieldSelectedGroup.value == item.TargetElementId);
+
+                        if (cc != null && cc.variableName != item.VariableName)
+                        {
+                            item.VariableName = cc.variableName;
+                            _context.studyVisitPageModuleCalculationElementDetails.Update(item);
+                        }
                     }
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -5340,8 +5353,13 @@ namespace Helios.Core.Controllers
                     //change elementDetail first
                     foreach (var item in elementInExistCalList)
                     {
-                        item.IsInCalculation = false;
-                        _context.StudyVisitPageModuleElementDetails.Update(item);
+                        var a = allCalDtil.Count(x => x.TargetElementId == item.StudyVisitPageModuleElementId);
+
+                        if (a == 1)
+                        {
+                            item.IsInCalculation = false;
+                            _context.StudyVisitPageModuleElementDetails.Update(item);
+                        }
                     }
 
                     var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -5366,6 +5384,7 @@ namespace Helios.Core.Controllers
                                 StudyVisitPageModuleId = model.ModuleId,
                                 CalculationElementId = stdVstPgMdlElement.Id,
                                 TargetElementId = item.elementFieldSelectedGroup.value,
+                                VariableName = item.variableName,
                                 ReferenceKey = Guid.NewGuid()
                             };
 
