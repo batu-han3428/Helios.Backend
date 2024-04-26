@@ -3716,7 +3716,8 @@ namespace Helios.Core.Controllers
                                         ReferenceKey = element.ReferenceKey,
                                         StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                                         StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                        StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                                        StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                                        StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                                     }).ToList(),
                                     StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                                     StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
@@ -3807,7 +3808,8 @@ namespace Helios.Core.Controllers
                                    ReferenceKey = element.ReferenceKey,
                                    StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                                    StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                                   StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                                   StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                                   StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                                }).ToList(),
                                StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                                StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
@@ -3878,7 +3880,8 @@ namespace Helios.Core.Controllers
                                ReferenceKey = element.ReferenceKey,
                                StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
                                StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                               StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails
+                               StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                               StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
                            }).ToList(),
                            StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
                            StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
