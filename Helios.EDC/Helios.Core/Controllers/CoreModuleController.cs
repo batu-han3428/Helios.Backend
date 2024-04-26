@@ -1240,6 +1240,57 @@ namespace Helios.Core.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> RemoveMultipleTagList([FromBody] JsonElement data)
+        {
+            try
+            {
+                if (!data.TryGetProperty("id", out var idElement) || idElement.ValueKind != JsonValueKind.Number)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+
+                long id = idElement.GetInt64();
+
+                var tag = await _context.MultipleChoiceTag.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (tag != null)
+                {
+                    BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+                    _context.MultipleChoiceTag.Remove(tag);
+
+                    var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > -1;
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                }
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
         [HttpGet]
         public async Task<List<TagModel>> GetMultipleTagList(Int64 id)
         {
@@ -1284,7 +1335,7 @@ namespace Helios.Core.Controllers
             }
 
             result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
-            result.Message = result.IsSuccess ? "Successful" : "Error";
+            result.Message = result.IsSuccess ? "Successful" : "There is a list of tags registered with this name. Please try again with a different name.";
             return result;
         }
 
