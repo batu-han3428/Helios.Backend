@@ -4,6 +4,7 @@
     {
         public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64 SubjectVisitModuleId { get; set; }
+        public int? DataGridRowId { get; set; }
         public string UserValue { get; set; }
         public bool ShowOnScreen { get; set; }
         public bool MissingData { get; set; }
