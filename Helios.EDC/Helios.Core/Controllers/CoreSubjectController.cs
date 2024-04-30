@@ -126,7 +126,7 @@ namespace Helios.Core.Controllers
             };
         }
 
-        private string getSubjectNumber(string countryCode, string site, int subjectNumberInSite, int subjectNumberDigitCOunt = 4)
+        private string getSubjectNumber(string countryCode, string site, int subjectNumberInSite, int? subjectNumberDigitCOunt = 4)
         {
             var subjectNumber = "";
 
