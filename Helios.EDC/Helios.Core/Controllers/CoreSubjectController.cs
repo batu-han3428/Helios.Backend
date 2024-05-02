@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Helios.Core.Controllers
 {
+    [ApiController]
+    [Route("[controller]/[action]")]
     public class CoreSubjectController : Controller
     {
         private CoreContext _context;
@@ -140,6 +143,26 @@ namespace Helios.Core.Controllers
             }
 
             return subjectNumber;
+        }
+
+        [HttpGet]
+        public async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 subjectId)
+        {
+            return await _context.SubjectVisits.Include(sv => sv.SubjectVisitPages.Where(page => page.IsActive && !page.IsDeleted))
+                .Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                .Select(visit => new SubjectDetailMenuModel
+                {
+                    Id = visit.Id,
+                    Title = visit.StudyVisit.Name,
+                    Children = visit.SubjectVisitPages
+                        .Where(page => page.IsActive && !page.IsDeleted)
+                        .Select(page => new SubjectDetailMenuModel
+                        {
+                            Id = page.Id,
+                            Title = page.StudyVisitPage.Name
+                        })
+                        .ToList()
+                }).ToListAsync();
         }
     }
 }
