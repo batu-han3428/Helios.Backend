@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 
 namespace Helios.Common.Model
 {
-    public class ElementModel
+    public class SubjectElementModel
     {
         public Int64 Id { get; set; }
-        public Int64 ModuleId { get; set; }
-        public Int64 TenantId { get; set; }
+        public Int64 SubjectId { get; set; }
+        public Int64 SubjectVisitId { get; set; }
+        public Int64 SubjectVisitPageId { get; set; }
+        public Int64 StudyVisitPageModuleElementId { get; set; }
         public Int64 UserId { get; set; }
-        public Int64 ElementDetailId { get; set; }
+        public Int64 StudyVisitPageModuleElementDetailId { get; set; }
         public Int64? ParentId { get; set; }
         public ElementType ElementType { get; set; } = 0;
         public string ElementName { get; set; } = "";
@@ -35,7 +37,6 @@ namespace Helios.Common.Model
         public string? LowerLimit { get; set; } = "";
         public string? UpperLimit { get; set; } = "";
         public AlignLayout? Layout { get; set; } = 0;
-        //public string Extension { get; set; } //numeric description
         public int? StartDay { get; set; } = 0;
         public int? EndDay { get; set; } = 0;
         public int? StartMonth { get; set; } = 0;
@@ -82,23 +83,13 @@ namespace Helios.Common.Model
         public bool HasValidation { get; set; }
         public string ValidationList { get; set; }
 
+        public string UserValue { get; set; }
+        public bool ShowOnScreen { get; set; }
+        public bool MissingData { get; set; }
+        public bool Sdv { get; set; }
+        public bool Query { get; set; }
+
         //public bool? HasChildren { get; set; } = false;
-        public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
-    }
-
-    public class ElementShortModel
-    {
-        public Int64 Id { get; set; }
-        public Int64 UserId { get; set; }
-        public string Value { get; set; }
-    }
-
-    public class ElementValidationModel
-    {
-        public Int64 Id { get; set; }
-        public ValidationActionType ValidationActionType { get; set; } = 0;
-        public ActionCondition ValidationCondition { get; set; } = 0;
-        public string ValidationValue { get; set; } = "";
-        public string ValidationMessage { get; set; } = "";
+        public List<SubjectElementModel>? ChildElements { get; set; } = new List<SubjectElementModel>();
     }
 }
