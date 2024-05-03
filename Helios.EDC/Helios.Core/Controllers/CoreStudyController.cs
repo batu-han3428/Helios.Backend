@@ -73,172 +73,92 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> StudySave(StudyModel studyModel)
         {
-            if (studyModel.StudyId == 0)
+            try
             {
-                int studiesCount = await _context.Studies.Where(x => x.TenantId == studyModel.TenantId && !x.IsDemo).CountAsync();
-
-                if ((studyModel.StudyLimit != null ? Convert.ToInt32(studyModel.StudyLimit) : 0) <= studiesCount)
+                if (studyModel.StudyId == 0)
                 {
-                    return new ApiResponse<dynamic>
+                    int studiesCount = await _context.Studies.Where(x => x.TenantId == studyModel.TenantId && !x.IsDemo).CountAsync();
+
+                    if ((studyModel.StudyLimit != null ? Convert.ToInt32(studyModel.StudyLimit) : 0) <= studiesCount)
                     {
-                        IsSuccess = false,
-                        Message = "Your limit for adding study has been reached. Please contact the system administrator."
-                    };
-                }
-
-                Int64 _versionKey = 0;
-                Guid _refKey = Guid.NewGuid();
-
-                studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
-                var checkShortName = _context.Studies.Any(c => c.StudyLink == studyModel.StudyLink);
-                if (checkShortName)
-                {
-                    return new ApiResponse<dynamic>
-                    {
-                        IsSuccess = false,
-                        Message = "The research short name cannot be the same as another research."
-                    };
-                }
-
-                var setting = new ResearchSettingDto();
-                setting.SubjectNumberDigits = studyModel.SubjectNumberDigist;
-
-                var activeResearch = new Study()
-                {
-                    TenantId = studyModel.TenantId,
-                    IsDemo = false,
-                    StudyName = studyModel.StudyName,
-                    ProtocolCode = studyModel.ProtocolCode,
-                    AskSubjectInitial = studyModel.AskSubjectInitial,
-                    StudyLink = studyModel.StudyLink,
-                    //RandomizationAlgorithm = (RandomizationAlgorithm)research.RandomizationAlgorithm,
-                    StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
-                    SubDescription = studyModel.SubDescription,
-                    Description = studyModel.Description,
-                    //DataLock = false,
-                    //SignDescription = research.SignDescription,
-                    //WillBeSigned = research.WillBeSigned,
-                    ReasonForChange = studyModel.ReasonForChange,
-                    //PatientState = research.PatientState,
-                    StudyLanguage = studyModel.StudyLanguage,
-                    VersionKey = _versionKey,
-                    ReferenceKey = _refKey,
-                    IsActive = true,
-                    IsDeleted = false
-                    //SettingsJson = stJson,
-                    //CompanyLogoPath = !string.IsNullOrEmpty(path) ? path : null,
-                };
-                var demoResearch = new Study
-                {
-                    TenantId = studyModel.TenantId,
-                    IsDemo = true,
-                    StudyName = "DEMO-" + studyModel.StudyName,
-                    ProtocolCode = "DEMO-" + studyModel.ProtocolCode,
-                    StudyLink = "DEMO-" + studyModel.StudyLink,
-                    AskSubjectInitial = studyModel.AskSubjectInitial,
-                    //RandomizationAlgorithm = (RandomizationAlgorithm)research.RandomizationAlgorithm,
-                    StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
-                    SubDescription = studyModel.SubDescription,
-                    Description = studyModel.Description,
-                    //DataLock = false,
-                    //SignDescription = research.SignDescription,
-                    //WillBeSigned = research.WillBeSigned,
-                    ReasonForChange = studyModel.ReasonForChange,
-                    //PatientState = research.PatientState,
-                    StudyLanguage = studyModel.StudyLanguage,
-                    VersionKey = _versionKey,
-                    ReferenceKey = _refKey,
-                    IsActive = true,
-                    IsDeleted = false
-                    //SettingsJson = stJson,
-                    //CompanyLogoPath = !string.IsNullOrEmpty(path) ? path : null,
-                };
-                _context.Studies.Add(activeResearch);
-                _context.Studies.Add(demoResearch);
-
-                var tenantResult = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
-
-                if (tenantResult)
-                {
-                    demoResearch.EquivalentStudyId = activeResearch.Id;
-                    activeResearch.EquivalentStudyId = demoResearch.Id;
-                    _context.Studies.Update(activeResearch);
-                    _context.Studies.Update(demoResearch);
-
-                    var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
-
-                    return new ApiResponse<dynamic>
-                    {
-                        IsSuccess = true,
-                        Message = "Successful",
-                        Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
-                    };
-                }
-                return new ApiResponse<dynamic>
-                {
-                    IsSuccess = false,
-                    Message = "Unsuccessful"
-                };
-            }
-            else
-            {
-                try
-                {
-                    var oldEntity = _context.Studies.Include(x => x.EquivalentStudy).FirstOrDefault(p => p.Id == studyModel.StudyId && p.IsActive && !p.IsDeleted);
-                    if (oldEntity != null)
-                    {
-                        studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
-                        oldEntity.ProtocolCode = studyModel.ProtocolCode;
-                        oldEntity.StudyName = studyModel.StudyName;
-                        oldEntity.AskSubjectInitial = studyModel.AskSubjectInitial;
-                        oldEntity.StudyLink = studyModel.StudyLink;
-                        //oldEntity.WillBeSigned = studyModel.WillBeSigned;
-                        oldEntity.ReasonForChange = studyModel.ReasonForChange;
-                        //oldEntity.SignDescription = studyModel.SignDescription;
-                        //oldEntity.RandomizationAlgorithm = (RandomizationAlgorithm)research.RandomizationAlgorithm;
-                        oldEntity.Description = studyModel.Description;
-                        oldEntity.SubDescription = studyModel.SubDescription;
-                        oldEntity.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
-                        oldEntity.VersionKey = 0;
-                        //oldEntity.PatientState = research.PatientState;
-                        oldEntity.StudyLanguage = studyModel.StudyLanguage;
-                        //if (!string.IsNullOrEmpty(path))
-                        //{
-                        //    oldEntity.CompanyLogoPath = path;
-                        //    oldEntity.EquivalentStudy.CompanyLogoPath = path;
-                        //}
-                        //if (!oldEntity.IsDemo)
-                        //    oldEntity.TermsOfUseFilePath = research.TermsOfUseFilePath;
-                        //oldEntity.SettingsJson = stJson;
-
-                        _context.Studies.Update(oldEntity);
-                        var ss = await _context.SaveChangesAsync() > 0;
-                        //Demo
-                        oldEntity.EquivalentStudy.ProtocolCode = "DEMO-" + studyModel.ProtocolCode;
-                        oldEntity.EquivalentStudy.StudyName = "DEMO-" + studyModel.StudyName;
-                        oldEntity.EquivalentStudy.StudyLink = "DEMO-" + studyModel.StudyLink;
-                        oldEntity.EquivalentStudy.AskSubjectInitial = studyModel.AskSubjectInitial;
-                        //oldEntity.EquivalentStudy.WillBeSigned = research.WillBeSigned;
-                        oldEntity.EquivalentStudy.ReasonForChange = studyModel.ReasonForChange;
-                        //oldEntity.EquivalentStudy.SignDescription = research.SignDescription;
-                        //oldEntity.EquivalentStudy.RandomizationAlgorithm = (RandomizationAlgorithm)research.RandomizationAlgorithm;
-                        oldEntity.EquivalentStudy.Description = studyModel.Description;
-                        oldEntity.EquivalentStudy.SubDescription = studyModel.SubDescription;
-                        oldEntity.EquivalentStudy.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
-                        oldEntity.EquivalentStudy.VersionKey = 0;
-                        //oldEntity.EquivalentStudy.PatientState = research.PatientState;
-                        oldEntity.EquivalentStudy.StudyLanguage = studyModel.StudyLanguage;
-                        //if (oldEntity.IsDemo)
-                        //    oldEntity.TermsOfUseFilePath = research.TermsOfUseFilePath;
-                        //oldEntity.EquivalentStudy.SettingsJson = stJson;
-
-                        _context.Studies.Update(oldEntity);
-
-                        var result = await _context.SaveChangesAsync() > 0;
                         return new ApiResponse<dynamic>
                         {
-                            IsSuccess = result,
-                            Message = "Successful"
+                            IsSuccess = false,
+                            Message = "Your limit for adding study has been reached. Please contact the system administrator."
+                        };
+                    }
+
+                    Int64 _versionKey = 0;
+                    Guid _refKey = Guid.NewGuid();
+
+                    studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
+                    var checkShortName = _context.Studies.Any(c => c.StudyLink == studyModel.StudyLink);
+                    if (checkShortName)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = false,
+                            Message = "The research short name cannot be the same as another research."
+                        };
+                    }
+
+                    var activeResearch = new Study()
+                    {
+                        TenantId = studyModel.TenantId,
+                        IsDemo = false,
+                        StudyName = studyModel.StudyName,
+                        ProtocolCode = studyModel.ProtocolCode,
+                        AskSubjectInitial = studyModel.AskSubjectInitial,
+                        StudyLink = studyModel.StudyLink,
+                        StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
+                        SubDescription = studyModel.SubDescription,
+                        Description = studyModel.Description,
+                        ReasonForChange = studyModel.ReasonForChange,
+                        StudyLanguage = studyModel.StudyLanguage,
+                        VersionKey = _versionKey,
+                        ReferenceKey = _refKey,
+                        IsActive = true,
+                        IsDeleted = false,
+                        SubjectNumberDigitCount = studyModel.SubjectNumberDigist
+                    };
+                    var demoResearch = new Study
+                    {
+                        TenantId = studyModel.TenantId,
+                        IsDemo = true,
+                        StudyName = "DEMO-" + studyModel.StudyName,
+                        ProtocolCode = "DEMO-" + studyModel.ProtocolCode,
+                        StudyLink = "DEMO-" + studyModel.StudyLink,
+                        AskSubjectInitial = studyModel.AskSubjectInitial,
+                        StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
+                        SubDescription = studyModel.SubDescription,
+                        Description = studyModel.Description,
+                        ReasonForChange = studyModel.ReasonForChange,
+                        StudyLanguage = studyModel.StudyLanguage,
+                        VersionKey = _versionKey,
+                        ReferenceKey = _refKey,
+                        IsActive = true,
+                        IsDeleted = false,
+                        SubjectNumberDigitCount = studyModel.SubjectNumberDigist
+                    };
+                    _context.Studies.Add(activeResearch);
+                    _context.Studies.Add(demoResearch);
+
+                    var tenantResult = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+
+                    if (tenantResult)
+                    {
+                        demoResearch.EquivalentStudyId = activeResearch.Id;
+                        activeResearch.EquivalentStudyId = demoResearch.Id;
+                        _context.Studies.Update(activeResearch);
+                        _context.Studies.Update(demoResearch);
+
+                        var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful",
+                            Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
                         };
                     }
                     return new ApiResponse<dynamic>
@@ -247,12 +167,98 @@ namespace Helios.Core.Controllers
                         Message = "Unsuccessful"
                     };
                 }
-                catch (Exception e)
+                else
                 {
+                    var oldEntity = _context.Studies.Include(x => x.EquivalentStudy).FirstOrDefault(p => p.Id == studyModel.StudyId && p.IsActive && !p.IsDeleted);
+                    if (oldEntity != null)
+                    {
+                        studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
+                        if (oldEntity.ProtocolCode != studyModel.ProtocolCode)
+                        {
+                            oldEntity.ProtocolCode = studyModel.ProtocolCode;
+                            oldEntity.EquivalentStudy.ProtocolCode = "DEMO-" + studyModel.ProtocolCode;
+                        }
+                        if (oldEntity.StudyName != studyModel.StudyName)
+                        {
+                            oldEntity.StudyName = studyModel.StudyName;
+                            oldEntity.EquivalentStudy.StudyName = "DEMO-" + studyModel.StudyName;
+                        }
+                        if (oldEntity.AskSubjectInitial != studyModel.AskSubjectInitial)
+                        {
+                            oldEntity.AskSubjectInitial = studyModel.AskSubjectInitial;
+                            oldEntity.EquivalentStudy.AskSubjectInitial = studyModel.AskSubjectInitial;
+                        }
+                        if (oldEntity.StudyLink != studyModel.StudyLink)
+                        {
+                            oldEntity.StudyLink = studyModel.StudyLink;
+                            oldEntity.EquivalentStudy.StudyLink = "DEMO-" + studyModel.StudyLink;
+                        }
+                        if (oldEntity.ReasonForChange != studyModel.ReasonForChange)
+                        {
+                            oldEntity.ReasonForChange = studyModel.ReasonForChange;
+                            oldEntity.EquivalentStudy.ReasonForChange = studyModel.ReasonForChange;
+                        }
+                        if (oldEntity.Description != studyModel.Description)
+                        {
+                            oldEntity.Description = studyModel.Description;
+                            oldEntity.EquivalentStudy.Description = studyModel.Description;
+                        }
+                        if (oldEntity.SubDescription != studyModel.SubDescription)
+                        {
+                            oldEntity.SubDescription = studyModel.SubDescription;
+                            oldEntity.EquivalentStudy.SubDescription = studyModel.SubDescription;
+                        }
+                        if (oldEntity.StudyType != (studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal))
+                        {
+                            oldEntity.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
+                            oldEntity.EquivalentStudy.StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal;
+                        }
+                        if (oldEntity.StudyLanguage != studyModel.StudyLanguage)
+                        {
+                            oldEntity.StudyLanguage = studyModel.StudyLanguage;
+                            oldEntity.EquivalentStudy.StudyLanguage = studyModel.StudyLanguage;
+                        }
+                        if (oldEntity.SubjectNumberDigitCount != studyModel.SubjectNumberDigist)
+                        {
+                            oldEntity.SubjectNumberDigitCount = studyModel.SubjectNumberDigist;
+                            oldEntity.EquivalentStudy.SubjectNumberDigitCount = studyModel.SubjectNumberDigist;
+                        }
 
-                    throw;
+                        _context.Studies.Update(oldEntity);
+                        var result = await _context.SaveChangesAsync();
+
+                        if (result > 0)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful"
+                            };
+                        }
+                        else if (result == 0)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "No changes were made. Please make changes to save."
+                            };
+                        }
+                    }
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
                 }
-
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
             }
         }
 
