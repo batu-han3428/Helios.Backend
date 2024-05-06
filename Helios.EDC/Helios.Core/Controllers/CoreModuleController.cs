@@ -76,7 +76,7 @@ namespace Helios.Core.Controllers
             if (module == null)
             {
                 result.IsSuccess = false;
-                result.Message = "Unsuccessfully.";
+                result.Message = "Unsuccessful";
             }
 
             module.UpdatedAt = DateTimeOffset.Now;
@@ -119,12 +119,12 @@ namespace Helios.Core.Controllers
             if (res)
             {
                 result.IsSuccess = true;
-                result.Message = "Successfully.";
+                result.Message = "Successful";
             }
             else
             {
                 result.IsSuccess = false;
-                result.Message = "Unsuccessfully.";
+                result.Message = "Unsuccessful";
             }
 
             return result;
