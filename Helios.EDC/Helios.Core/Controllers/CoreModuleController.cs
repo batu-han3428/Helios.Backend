@@ -1197,7 +1197,7 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
-
+               
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
                     var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -1210,11 +1210,21 @@ namespace Helios.Core.Controllers
 
                     foreach (var child in children)
                     {
+                        var nm = child.ElementName + "_1";
+
+                        for (; ; )
+                        {
+                            if (checkElementName(child.ModuleId, nm).Result)
+                                break;
+                            else
+                                nm = nm + "_1";
+                        }
+
                         var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
                         if (chDtl.RowIndex == model.RowIndex)
                         {
                             child.Id = 0;
-                         
+                            child.ElementName = nm;
 
                             chDtl.Id = 0;
                             chDtl.RowIndex = chDtl.RowIndex + 1;
