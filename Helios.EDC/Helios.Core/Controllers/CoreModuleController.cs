@@ -1041,6 +1041,7 @@ namespace Helios.Core.Controllers
 
                 var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                 elementDetail.Id = 0;
+                elementDetail.IsInCalculation = false;
 
                 _context.Add(element);
                 _context.Add(elementDetail);
