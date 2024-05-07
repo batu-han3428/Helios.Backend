@@ -4557,7 +4557,7 @@ namespace Helios.Core.Controllers
                                 nm = nm + "_1";
                         }
                         var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
-                        if (chDtl.RowIndex == model.RowIndex)
+                        if (chDtl!=null && chDtl.RowIndex == model.RowIndex)
                         {
                             child.Id = 0;
                             child.ElementName = nm;
@@ -4572,7 +4572,7 @@ namespace Helios.Core.Controllers
                             chDtl.ElementId = child.Id;
                             _context.Update(chDtl);
                         }
-                        else if (chDtl.RowIndex > model.RowIndex)
+                        else if (chDtl != null && chDtl.RowIndex > model.RowIndex)
                         {
                             chDtl.RowIndex = chDtl.RowIndex + 1;
                             _context.Update(chDtl);
@@ -4646,22 +4646,29 @@ namespace Helios.Core.Controllers
                     }
 
                 }
-
-                var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.ElementId).ToList();
-                var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                if (validations != null && validations.Count > 0)
+                if (childrenDtils.Count() > 0)
                 {
-                    foreach (var validation in validations)
-                    {
-                        validation.IsActive = false;
-                        validation.IsDeleted = true;
+                    var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.ElementId).ToList();
+                    var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                        _context.ElementValidationDetails.Update(validation);
+                    if (validations != null && validations.Count > 0)
+                    {
+                        foreach (var validation in validations)
+                        {
+                            validation.IsActive = false;
+                            validation.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(validation);
+                        }
                     }
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                result.Message = result.IsSuccess ? "Successful" : "Error";
+                else
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Error";
+                }
             }
             else
             {
