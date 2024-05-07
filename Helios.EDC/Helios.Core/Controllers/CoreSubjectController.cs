@@ -20,15 +20,19 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId)
+        public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId, Int64 userId)
         {
-            var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted).AsNoTracking().Select(x => new SubjectDTO()
-            {
-                Id = x.Id,
-                SubjectNumber = x.SubjectNumber,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt
-            }).ToListAsync();
+            var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
+                .Include(x => x.SubjectVisits)
+                .ThenInclude(x=>x.SubjectVisitPages)
+                .AsNoTracking().Select(x => new SubjectDTO()
+                {
+                    Id = x.Id,
+                    FirstPageId = x.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().Id,
+                    SubjectNumber = x.SubjectNumber,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt
+                }).ToListAsync();
 
             return result;
         }

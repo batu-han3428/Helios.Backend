@@ -90,6 +90,7 @@ namespace Helios.Common.Model
     {
         public Int64 Id { get; set; }
         public Int64 UserId { get; set; }
+        public int? RowIndex { get; set; } = 0;
         public string Value { get; set; }
     }
 
