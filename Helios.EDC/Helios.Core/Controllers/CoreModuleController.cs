@@ -8,6 +8,7 @@ using Helios.Common.Model;
 using Helios.Core.helpers;
 using Helios.Core.Domains.Entities;
 using Helios.Common.Helpers.Api;
+using Microsoft.AspNetCore.Identity;
 
 namespace Helios.Core.Controllers
 {
@@ -15,8 +16,7 @@ namespace Helios.Core.Controllers
     [Route("[controller]/[action]")]
     public class CoreModuleController : Controller
     {
-        private CoreContext _context;
-
+        private CoreContext _context;      
         public CoreModuleController(CoreContext context)
         {
             _context = context;
@@ -156,7 +156,9 @@ namespace Helios.Core.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt
+                UpdatedAt = x.UpdatedAt,
+                AddedById=x.AddedById,
+                UpdatedById=x.UpdatedById
             }).AsNoTracking().ToListAsync();
 
             return result;
