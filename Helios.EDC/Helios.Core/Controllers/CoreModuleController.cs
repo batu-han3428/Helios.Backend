@@ -1282,7 +1282,7 @@ namespace Helios.Core.Controllers
                     }
                     else
                     {
-                        elementDetail.RowCount = elementDetail.RowCount - 1;
+                        elementDetail.RowCount = elementDetail.RowCount!=1 ? elementDetail.RowCount - 1 :elementDetail.RowCount;
                         _context.Update(elementDetail);
                     }
                     

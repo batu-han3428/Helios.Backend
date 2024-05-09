@@ -4530,20 +4530,20 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
 
-            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (element != null)
             {
 
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
-                    var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                     elementDetail.RowCount = elementDetail.RowCount + 1;
                     _context.Update(elementDetail);
 
-                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
-                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+                    var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
+                    var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
 
                     foreach (var child in children)
                     {
@@ -4551,12 +4551,12 @@ namespace Helios.Core.Controllers
 
                         for (; ; )
                         {
-                            if (checkStudyElementName(child.ModuleId, nm).Result)
+                            if (checkStudyElementName(child.StudyVisitPageModuleId, nm).Result)
                                 break;
                             else
                                 nm = nm + "_1";
                         }
-                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                        var chDtl = childrenDtils.FirstOrDefault(x => x.StudyVisitPageModuleElementId == child.Id);
                         if (chDtl!=null && chDtl.RowIndex == model.RowIndex)
                         {
                             child.Id = 0;
@@ -4569,7 +4569,7 @@ namespace Helios.Core.Controllers
                             _context.Add(chDtl);
                             result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
-                            chDtl.ElementId = child.Id;
+                            chDtl.StudyVisitPageModuleElementId = child.Id;
                             _context.Update(chDtl);
                         }
                         else if (chDtl != null && chDtl.RowIndex > model.RowIndex)
@@ -4595,19 +4595,19 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> DeleteTableRowElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-            var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
 
             if (element != null)
             {
-                var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
-                var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+                var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
+                var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
 
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
-                    var moduleEvent = _context.ModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+                    var moduleEvent = _context.StudyVisitPageModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
 
                     if (moduleEvent != null)
                     {
@@ -4618,7 +4618,7 @@ namespace Helios.Core.Controllers
                     }
                     else
                     {
-                        elementDetail.RowCount = elementDetail.RowCount - 1;
+                        elementDetail.RowCount =elementDetail.RowCount!=1 ? elementDetail.RowCount - 1 : elementDetail.RowCount;
                         _context.Update(elementDetail);
                     }
 
@@ -4632,35 +4632,35 @@ namespace Helios.Core.Controllers
                             item.IsActive = false;
                             item.IsDeleted = true;
 
-                            var chld = children.FirstOrDefault(x => x.Id == item.ElementId);
+                            var chld = children.FirstOrDefault(x => x.Id == item.StudyVisitPageModuleElementId);
                             chld.IsActive = false;
                             chld.IsDeleted = true;
-                            _context.Elements.Update(chld);
+                            _context.StudyVisitPageModuleElements.Update(chld);
                         }
                         else if (item.RowIndex > model.RowIndex)
                         {
                             item.RowIndex = item.RowIndex - 1;
                         }
-                        _context.ElementDetails.Update(item);
+                        _context.StudyVisitPageModuleElementDetails.Update(item);
 
                     }
 
                 }
                 if (childrenDtils.Count() > 0)
                 {
-                    var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.ElementId).ToList();
-                    var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.StudyVisitPageModuleElementId).ToList();
+                    //var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    if (validations != null && validations.Count > 0)
-                    {
-                        foreach (var validation in validations)
-                        {
-                            validation.IsActive = false;
-                            validation.IsDeleted = true;
+                    //if (validations != null && validations.Count > 0)
+                    //{
+                    //    foreach (var validation in validations)
+                    //    {
+                    //        validation.IsActive = false;
+                    //        validation.IsDeleted = true;
 
-                            _context.ElementValidationDetails.Update(validation);
-                        }
-                    }
+                    //        _context.ElementValidationDetails.Update(validation);
+                    //    }
+                    //}
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
