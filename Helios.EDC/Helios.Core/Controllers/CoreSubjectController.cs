@@ -166,7 +166,8 @@ namespace Helios.Core.Controllers
                 {
                     SubjectId = subjectId,
                     SubjectVisitPageId = pageId,
-                    StudyVisitPageModuleElementId = e.Id,
+                    SubjectVisitPageModuleElementId = e.Id,
+                    StudyVisitPageModuleElementId = e.StudyVisitPageModuleElementId,
                     StudyVisitPageModuleElementDetailId = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.Id,
                     ParentId = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId,
                     ElementType = e.StudyVisitPageModuleElement.ElementType,
@@ -220,13 +221,20 @@ namespace Helios.Core.Controllers
                     finalList.Add(item);
                 else
                 {
-                    var parent = result.FirstOrDefault(x => x.Id == item.ParentId);
+                    var parent = result.FirstOrDefault(x => x.StudyVisitPageModuleElementId == item.ParentId);
 
                     parent.ChildElements.Add(item);
                 }
             }
 
             return finalList;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AutoSaveSubjectData(SubjectElementShortModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            return result;
         }
     }
 }
