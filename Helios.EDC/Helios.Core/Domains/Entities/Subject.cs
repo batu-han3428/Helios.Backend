@@ -7,7 +7,7 @@ namespace Helios.Core.Domains.Entities
     {
         public Int64 SiteId { get; set; }
         public Int64 StudyId { get; set; }
-        public string InitialName { get; set; }
+        public string? InitialName { get; set; }
         public string SubjectNumber { get; set; }
         public DataStatus DataStatus { get; set; }
         public SubjectValidationStatus ValidationStatus { get; set; }
@@ -15,9 +15,9 @@ namespace Helios.Core.Domains.Entities
         public bool Signature { get; set; }
         public bool Lock { get; set; }
         public bool Freeze { get; set; }
-        public string RandomData { get; set; }
+        public string? RandomData { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTimeOffset RandomDataDate { get; set; }
+        public DateTimeOffset? RandomDataDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset? UserValueUpdateDate { get; set; }
         public Site Site { get; set; }

@@ -4148,7 +4148,8 @@ namespace Helios.Core.Controllers
                         RelationMainJs = elementDetailDTO.RelationMainJs,
                         RowCount = elementDetailDTO.RowCount,
                         ColumnCount = elementDetailDTO.ColumnCount,
-                        DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties
+                        DatagridAndTableProperties = elementDetailDTO.DatagridAndTableProperties,
+                        AdverseEventType = elementDetailDTO.AdverseEventType
                     }
                 };
 
