@@ -4553,6 +4553,7 @@ namespace Helios.Core.Controllers
 
                     var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                     elementDetail.Id = 0;
+                    elementDetail.IsInCalculation = false;
 
                     _context.Add(stdVstPgMdlElmnt);
                     _context.Add(elementDetail);
