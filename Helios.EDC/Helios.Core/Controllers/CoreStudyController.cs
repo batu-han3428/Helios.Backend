@@ -35,6 +35,7 @@ namespace Helios.Core.Controllers
                 ProtocolCode = x.ProtocolCode,
                 AskSubjectInitial = x.AskSubjectInitial,
                 StudyLink = x.StudyLink,
+                CreatedAt=x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
                 IsLock = x.IsLock
             }).ToListAsync();
@@ -4553,7 +4554,6 @@ namespace Helios.Core.Controllers
 
                     var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
                     elementDetail.Id = 0;
-                    elementDetail.IsInCalculation = false;
 
                     _context.Add(stdVstPgMdlElmnt);
                     _context.Add(elementDetail);
@@ -4778,159 +4778,6 @@ namespace Helios.Core.Controllers
             return result;
         }
 
-        [HttpPost]
-        public async Task<ApiResponse<dynamic>> CopyTableRowElement(ElementShortModel model)
-        {
-            var result = new ApiResponse<dynamic>();
-
-            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (element != null)
-            {
-
-                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
-                {
-                    var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-                    elementDetail.RowCount = elementDetail.RowCount + 1;
-                    _context.Update(elementDetail);
-
-                    var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
-                    var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
-
-                    foreach (var child in children)
-                    {
-                        var nm = child.ElementName + "_1";
-
-                        for (; ; )
-                        {
-                            if (checkStudyElementName(child.StudyVisitPageModuleId, nm).Result)
-                                break;
-                            else
-                                nm = nm + "_1";
-                        }
-                        var chDtl = childrenDtils.FirstOrDefault(x => x.StudyVisitPageModuleElementId == child.Id);
-                        if (chDtl!=null && chDtl.RowIndex == model.RowIndex)
-                        {
-                            child.Id = 0;
-                            child.ElementName = nm;
-
-                            chDtl.Id = 0;
-                            chDtl.RowIndex = chDtl.RowIndex + 1;
-
-                            _context.Add(child);
-                            _context.Add(chDtl);
-                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                            chDtl.StudyVisitPageModuleElementId = child.Id;
-                            _context.Update(chDtl);
-                        }
-                        else if (chDtl != null && chDtl.RowIndex > model.RowIndex)
-                        {
-                            chDtl.RowIndex = chDtl.RowIndex + 1;
-                            _context.Update(chDtl);
-                        }
-                    }
-                }
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                result.Message = result.IsSuccess ? "Successful" : "Error";
-            }
-            else
-            {
-                result.IsSuccess = false;
-                result.Message = "Error";
-            }
-
-            return result;
-        }
-
-        [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteTableRowElement(ElementShortModel model)
-        {
-            var result = new ApiResponse<dynamic>();
-            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-            var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-
-            if (element != null)
-            {
-                var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
-                var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
-
-                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
-                {
-                    var moduleEvent = _context.StudyVisitPageModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
-
-                    if (moduleEvent != null)
-                    {
-                        result.IsSuccess = false;
-                        result.Message = "This element used as relation or dependent in another element. Please remove it first and try again.";
-
-                        return result;
-                    }
-                    else
-                    {
-                        elementDetail.RowCount =elementDetail.RowCount!=1 ? elementDetail.RowCount - 1 : elementDetail.RowCount;
-                        _context.Update(elementDetail);
-                    }
-
-
-
-                    foreach (var item in childrenDtils)
-                    {
-
-                        if (item.RowIndex == model.RowIndex)
-                        {
-                            item.IsActive = false;
-                            item.IsDeleted = true;
-
-                            var chld = children.FirstOrDefault(x => x.Id == item.StudyVisitPageModuleElementId);
-                            chld.IsActive = false;
-                            chld.IsDeleted = true;
-                            _context.StudyVisitPageModuleElements.Update(chld);
-                        }
-                        else if (item.RowIndex > model.RowIndex)
-                        {
-                            item.RowIndex = item.RowIndex - 1;
-                        }
-                        _context.StudyVisitPageModuleElementDetails.Update(item);
-
-                    }
-
-                }
-                if (childrenDtils.Count() > 0)
-                {
-                    var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.StudyVisitPageModuleElementId).ToList();
-                    //var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                    //if (validations != null && validations.Count > 0)
-                    //{
-                    //    foreach (var validation in validations)
-                    //    {
-                    //        validation.IsActive = false;
-                    //        validation.IsDeleted = true;
-
-                    //        _context.ElementValidationDetails.Update(validation);
-                    //    }
-                    //}
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    result.Message = result.IsSuccess ? "Successful" : "Error";
-                }
-                else
-                {
-                    result.IsSuccess = false;
-                    result.Message = "Error";
-                }
-            }
-            else
-            {
-                result.IsSuccess = false;
-                result.Message = "Error";
-            }
-
-            return result;
-        }
         [HttpGet]
         public async Task<List<ElementModel>> GetVisitPageModuleAllElements(Int64 visitPageModuleId)
         {
