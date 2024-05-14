@@ -1536,7 +1536,177 @@ namespace Helios.Core.Controllers
                 return true;
         }
 
+        [HttpGet]
+        public async Task<List<ElementRankingModel>> GetElementRankingList(Int64 moduleId)
+        {
+            var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).Select(element => new Element
+            {
+                Id = element.Id,
+                ElementName = element.ElementName,
+                Order = element.Order,
+                ElementType = element.ElementType,
+                ElementDetail = element.ElementDetail != null ? new ElementDetail
+                {
+                    Id = element.ElementDetail.Id,
+                    ParentId = element.ElementDetail.ParentId,
+                    RowIndex = element.ElementDetail.RowIndex,
+                    ColunmIndex = element.ElementDetail.ColunmIndex,
+                    RowCount = element.ElementDetail.RowCount,
+                    ColumnCount = element.ElementDetail.ColumnCount
+                } : null
+            }).ToListAsync();
 
+            var result = data.Where(x => x.ElementDetail != null && x.ElementDetail.ParentId == 0).Select(element =>
+            {
+                var newElement = new ElementRankingModel
+                {
+                    Id = element.Id,
+                    Key = Guid.NewGuid().ToString(),
+                    Title = element.ElementName,
+                    Order = element.Order.ToString(),
+                };
 
+                if (element.ElementType == ElementType.Table || element.ElementType == ElementType.DataGrid)
+                {
+                    var children = data.Where(x => x.ElementDetail != null && x.ElementDetail.ParentId == element.Id);
+
+                    var newChildren = children.Select(child =>
+                    {
+                        var newChild = new ElementRankingModel
+                        {
+                            Id = child.Id,
+                            Key = Guid.NewGuid().ToString(),
+                            Title = child.ElementName,
+                            Order = $"{child.ElementDetail.RowIndex}-{child.ElementDetail.ColunmIndex}"
+                        };
+                        return newChild;
+                    }).ToList();
+
+                    for (int i = 1; i < element.ElementDetail.RowCount; i++)
+                    {
+                        var rowChildren = children.Where(x => x.ElementDetail.RowIndex == i).ToList();
+
+                        var existingColumnIndexes = rowChildren.Select(x => x.ElementDetail.ColunmIndex.GetValueOrDefault()).ToList();
+                        var missingColumnIndexes = Enumerable.Range(1, element.ElementDetail.ColumnCount.GetValueOrDefault()).Except(existingColumnIndexes).ToList();
+
+                        foreach (var missingColumnIndex in missingColumnIndexes)
+                        {
+                            var newChild = new ElementRankingModel
+                            {
+                                Id = -1,
+                                Key = Guid.NewGuid().ToString(),
+                                Title = "Empty",
+                                Order = $"{i}-{missingColumnIndex}"
+                            };
+                            newChildren.Add(newChild);
+                        }
+                    }
+                    newElement.Children = newChildren;
+                }
+                return newElement;
+            }).OrderBy(e => StringExtensionsHelper.ParseOrder(e.Order)).ToList();
+
+            foreach (var item in result.Where(e => e.Children != null))
+            {
+                item.Children = item.Children.OrderBy(child => StringExtensionsHelper.ParseOrder(child.Order)).ToList();
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetElementRankingList(List<ElementRankingModel> elements, Int64 moduleId)
+        {
+            try
+            {
+                var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).ToListAsync();
+
+                var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
+
+                data.ForEach(element =>
+                {
+                    var elm = elements.FirstOrDefault(x => x.Id == element.Id);
+                    if (elm != null)
+                    {
+                        var elmOrder = Convert.ToInt32(elm.Order);
+                        if (elmOrder != element.Order)
+                        {
+                            element.Order = elmOrder;
+                        }
+                        if (element.ElementDetail != null && element.ElementDetail.RowIndex != 0)
+                        {
+                            element.ElementDetail.RowIndex = 0;
+                        }
+                        if (element.ElementDetail != null && element.ElementDetail.ColunmIndex != 0)
+                        {
+                            element.ElementDetail.ColunmIndex = 0;
+                        }
+                        if (element.ElementDetail != null && element.ElementDetail.ParentId != 0)
+                        {
+                            element.ElementDetail.ParentId = 0;
+                        }
+                    }
+                    else if (newChildren != null)
+                    {
+                        var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
+                        if (child != null)
+                        {
+                            if (element.Order != 0)
+                            {
+                                element.Order = 0;
+                            }
+                            string[] parts = child.Order.Split('-');
+                            int rowIndex = Convert.ToInt32(parts[0]);
+                            int columnIndex = Convert.ToInt32(parts[1]);
+                            if (element.ElementDetail != null && rowIndex != element.ElementDetail.RowIndex)
+                            {
+                                element.ElementDetail.RowIndex = rowIndex;
+                            }
+                            if (element.ElementDetail != null && columnIndex != element.ElementDetail.ColunmIndex)
+                            {
+                                element.ElementDetail.ColunmIndex = columnIndex;
+                            }
+                        }
+                    }
+                });
+
+                _context.Elements.UpdateRange(data);
+
+                var result = await _context.SaveCoreContextAsync(0, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else if (result == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "No changes were made. Please make changes to save."
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }  
+        }
     }
 }

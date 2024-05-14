@@ -242,5 +242,10 @@ namespace Helios.Core.helpers
 
             return attribute == null ? value.ToString() : attribute.Description;
         }
+
+        public static int ParseOrder(string order)
+        {
+            return int.Parse(order.Replace("-", ""));
+        }
     }
 }
