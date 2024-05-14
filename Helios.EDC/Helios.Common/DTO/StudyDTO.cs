@@ -18,6 +18,7 @@ namespace Helios.Common.DTO
         public string StudyLink { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
         public int StudyLanguage { get; set; }
         public string? Description { get; set; }
         public string? SubDescription { get; set; }
