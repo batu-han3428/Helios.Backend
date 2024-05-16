@@ -10,14 +10,12 @@ namespace Helios.Core.Extension
         public static IServiceCollection DefaultConfigurationService(this IServiceCollection services, IConfiguration Configuration)
         {
             services.AddHttpContextAccessor();
-            services.AddSingleton<IConnectionMultiplexer>(provider =>
-            {
-                var redisOptions = Configuration.GetSection("Redis").Get<RedisOptions>();
-                var connectionString = $"{redisOptions.Host}:{redisOptions.Port},password={redisOptions.Password},abortConnect=false";
-                return ConnectionMultiplexer.Connect(connectionString);
-            });
-
-            services.AddScoped<ICacheService, CacheService>();
+            //services.AddSingleton<IConnectionMultiplexer>(provider =>
+            //{
+            //    var redisOptions = Configuration.GetSection("Redis").Get<RedisOptions>();
+            //    var connectionString = $"{redisOptions.Host}:{redisOptions.Port},password={redisOptions.Password},abortConnect=false";
+            //    return ConnectionMultiplexer.Connect(connectionString);
+            //});
 
             services.AddSignalR();
             return services;

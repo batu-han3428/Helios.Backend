@@ -18,12 +18,10 @@ namespace Helios.Core.Controllers
     public class CoreStudyController : Controller
     {
         private CoreContext _context;
-        private ICacheService _cacheService;
 
-        public CoreStudyController(CoreContext context, ICacheService cacheService)
+        public CoreStudyController(CoreContext context)
         {
             _context = context;
-            _cacheService = cacheService;
         }
 
         #region Study
@@ -3464,8 +3462,6 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3524,8 +3520,6 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3563,8 +3557,6 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3591,8 +3583,6 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3619,8 +3609,6 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3758,8 +3746,6 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3848,8 +3834,6 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3918,8 +3902,6 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            _cacheService.SetSubjectDetailMenu(visitDTO.StudyId);
-
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,

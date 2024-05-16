@@ -14,12 +14,10 @@ namespace Helios.Core.Controllers
     public class CoreSubjectController : Controller
     {
         private CoreContext _context;
-        private ICacheService _cacheService;
 
-        public CoreSubjectController(CoreContext context, ICacheService cacheService)
+        public CoreSubjectController(CoreContext context)
         {
             _context = context;
-            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -27,7 +25,7 @@ namespace Helios.Core.Controllers
         {
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
                 .Include(x => x.SubjectVisits)
-                .ThenInclude(x=>x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
@@ -136,27 +134,23 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 studyId)
+        public async Task<List<SubjectDetailMenuModel>> SetSubjectDetailMenu(Int64 studyId)
         {
-            var result = await _cacheService.GetSubjectDetailMenu(studyId);
-
-            return result;
-
-            //return await _context.SubjectVisits.Include(sv => sv.SubjectVisitPages.Where(page => page.IsActive && !page.IsDeleted))
-            //    .Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
-            //    .Select(visit => new SubjectDetailMenuModel
-            //    {
-            //        Id = visit.Id,
-            //        Title = visit.StudyVisit.Name,
-            //        Children = visit.SubjectVisitPages
-            //            .Where(page => page.IsActive && !page.IsDeleted)
-            //            .Select(page => new SubjectDetailMenuModel
-            //            {
-            //                Id = page.Id,
-            //                Title = page.StudyVisitPage.Name
-            //            })
-            //            .ToList()
-            //    }).ToListAsync();
+            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted)
+                .Include(x => x.StudyVisitPages)
+                .Select(visit => new SubjectDetailMenuModel
+                {
+                    Id = visit.Id,
+                    Title = visit.Name,
+                    Children = visit.StudyVisitPages
+                        .Where(page => page.IsActive && !page.IsDeleted)
+                        .Select(page => new SubjectDetailMenuModel
+                        {
+                            Id = page.Id,
+                            Title = page.Name
+                        })
+                        .ToList()
+                }).ToListAsync();
         }
 
         [HttpGet]

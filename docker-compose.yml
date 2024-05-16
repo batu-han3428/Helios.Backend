@@ -8,16 +8,6 @@ networks:
 
 services:
 
-  redis_image:
-    image: redis
-    container_name: redis.cache
-    command: redis-server --requirepass heliosredis
-    ports:
-      - 6379:6379
-    networks:
-      - v3network
-
-
   rabbitmq:
       image: rabbitmq:3-management-alpine
       ports:
