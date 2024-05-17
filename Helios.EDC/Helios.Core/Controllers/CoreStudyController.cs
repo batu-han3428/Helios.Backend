@@ -4057,7 +4057,7 @@ namespace Helios.Core.Controllers
             Int64 pageId = moduleDTOList.First().StudyVisitPageId;
 
             int lastOrder = _context.StudyVisitPageModules
-                .Where(x => x.StudyVisitPageId == pageId)
+                .Where(x => x.StudyVisitPageId == pageId && x.IsActive && !x.IsDeleted)
                 .Select(module => module.Order)
                 .DefaultIfEmpty()
                 .Max();
