@@ -50,3 +50,17 @@ services:
         aliases:
           - core
 
+  helios.shared:
+    image: ${DOCKER_REGISTRY-}heliosshared
+    container_name: helios.shared
+    build:
+      context: .
+      dockerfile: Helios.Common/Helios.shared/Dockerfile
+    ports:
+      - "4500:8080"
+      - "4501:3501"
+    networks:
+      v3network:
+        aliases:
+          - shared
+

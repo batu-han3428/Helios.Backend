@@ -50,7 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Helios.Common\Helios.Common.csproj" />
+    <ProjectReference Include="..\..\Helios.Common\Helios.Common.csproj" />
   </ItemGroup>
 
 </Project>

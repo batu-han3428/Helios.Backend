@@ -16,6 +16,13 @@ services:
       - "3500:8080"
       - "3501:3501"
 
+  helios.shared:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "4500:8080"
+      - "4501:3501"
+
 networks:
   v3network:
      name: v3network
