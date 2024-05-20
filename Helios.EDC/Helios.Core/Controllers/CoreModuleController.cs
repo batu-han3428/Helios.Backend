@@ -8,8 +8,6 @@ using Helios.Common.Model;
 using Helios.Core.helpers;
 using Helios.Core.Domains.Entities;
 using Helios.Common.Helpers.Api;
-using Microsoft.AspNetCore.Identity;
-
 
 namespace Helios.Core.Controllers
 {
@@ -1537,24 +1535,44 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ElementRankingModel>> GetElementRankingList(Int64 moduleId)
+        public async Task<List<ElementRankingModel>> GetElementRankingList(Int64 moduleId, bool isStudy)
         {
-            var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).Select(element => new Element
-            {
-                Id = element.Id,
-                ElementName = element.ElementName,
-                Order = element.Order,
-                ElementType = element.ElementType,
-                ElementDetail = element.ElementDetail != null ? new ElementDetail
+            var detailTableName = isStudy ? "StudyVisitPageModuleElementDetail" : "ElementDetail";
+
+            IQueryable<object> baseQuery = isStudy
+                ? _context.Set<StudyVisitPageModuleElement>().Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageModuleId == moduleId)
+                : _context.Set<Element>().Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId);
+
+            var query = baseQuery.Include(detailTableName);
+
+            var data = await query
+                .Select(element => new
                 {
-                    Id = element.ElementDetail.Id,
-                    ParentId = element.ElementDetail.ParentId,
-                    RowIndex = element.ElementDetail.RowIndex,
-                    ColunmIndex = element.ElementDetail.ColunmIndex,
-                    RowCount = element.ElementDetail.RowCount,
-                    ColumnCount = element.ElementDetail.ColumnCount
-                } : null
-            }).ToListAsync();
+                    Id = isStudy ? ((StudyVisitPageModuleElement)element).Id : ((Element)element).Id,
+                    ElementName = isStudy ? ((StudyVisitPageModuleElement)element).ElementName : ((Element)element).ElementName,
+                    Order = isStudy ? ((StudyVisitPageModuleElement)element).Order : ((Element)element).Order,
+                    ElementType = isStudy ? ((StudyVisitPageModuleElement)element).ElementType : ((Element)element).ElementType,
+                    ElementDetail = isStudy ? (((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail != null ?
+                    new ElementDetail
+                    {
+                        Id = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.Id,
+                        ParentId = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ParentId,
+                        RowIndex = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.RowIndex,
+                        ColunmIndex = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ColunmIndex,
+                        RowCount = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.RowCount,
+                        ColumnCount = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ColumnCount,
+                    } : null) :
+                    (((Element)element).ElementDetail != null ?
+                    new ElementDetail
+                    {
+                        Id = ((Element)element).ElementDetail.Id,
+                        ParentId = ((Element)element).ElementDetail.ParentId,
+                        RowIndex = ((Element)element).ElementDetail.RowIndex,
+                        ColunmIndex = ((Element)element).ElementDetail.ColunmIndex,
+                        RowCount = ((Element)element).ElementDetail.RowCount,
+                        ColumnCount = ((Element)element).ElementDetail.ColumnCount,
+                    } : null)
+                }).ToListAsync();
 
             var result = data.Where(x => x.ElementDetail != null && x.ElementDetail.ParentId == 0).Select(element =>
             {
@@ -1615,62 +1633,120 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> SetElementRankingList(List<ElementRankingModel> elements, Int64 moduleId)
+        public async Task<ApiResponse<dynamic>> SetElementRankingList(List<ElementRankingModel> elements, Int64 moduleId, bool isStudy)
         {
             try
             {
-                var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).ToListAsync();
-
-                var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
-
-                data.ForEach(element =>
+                if (isStudy)
                 {
-                    var elm = elements.FirstOrDefault(x => x.Id == element.Id);
-                    if (elm != null)
-                    {
-                        var elmOrder = Convert.ToInt32(elm.Order);
-                        if (elmOrder != element.Order)
-                        {
-                            element.Order = elmOrder;
-                        }
-                        if (element.ElementDetail != null && element.ElementDetail.RowIndex != 0)
-                        {
-                            element.ElementDetail.RowIndex = 0;
-                        }
-                        if (element.ElementDetail != null && element.ElementDetail.ColunmIndex != 0)
-                        {
-                            element.ElementDetail.ColunmIndex = 0;
-                        }
-                        if (element.ElementDetail != null && element.ElementDetail.ParentId != 0)
-                        {
-                            element.ElementDetail.ParentId = 0;
-                        }
-                    }
-                    else if (newChildren != null)
-                    {
-                        var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
-                        if (child != null)
-                        {
-                            if (element.Order != 0)
-                            {
-                                element.Order = 0;
-                            }
-                            string[] parts = child.Order.Split('-');
-                            int rowIndex = Convert.ToInt32(parts[0]);
-                            int columnIndex = Convert.ToInt32(parts[1]);
-                            if (element.ElementDetail != null && rowIndex != element.ElementDetail.RowIndex)
-                            {
-                                element.ElementDetail.RowIndex = rowIndex;
-                            }
-                            if (element.ElementDetail != null && columnIndex != element.ElementDetail.ColunmIndex)
-                            {
-                                element.ElementDetail.ColunmIndex = columnIndex;
-                            }
-                        }
-                    }
-                });
+                    var data = await _context.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageModuleId == moduleId).Include(x => x.StudyVisitPageModuleElementDetail).ToListAsync();
 
-                _context.Elements.UpdateRange(data);
+                    var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
+
+                    data.ForEach(element =>
+                    {
+                        var elm = elements.FirstOrDefault(x => x.Id == element.Id);
+                        if (elm != null)
+                        {
+                            var elmOrder = Convert.ToInt32(elm.Order);
+                            if (elmOrder != element.Order)
+                            {
+                                element.Order = elmOrder;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.RowIndex != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.RowIndex = 0;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.ColunmIndex != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.ColunmIndex = 0;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.ParentId != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.ParentId = 0;
+                            }
+                        }
+                        else if (newChildren != null)
+                        {
+                            var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
+                            if (child != null)
+                            {
+                                if (element.Order != 0)
+                                {
+                                    element.Order = 0;
+                                }
+                                string[] parts = child.Order.Split('-');
+                                int rowIndex = Convert.ToInt32(parts[0]);
+                                int columnIndex = Convert.ToInt32(parts[1]);
+                                if (element.StudyVisitPageModuleElementDetail != null && rowIndex != element.StudyVisitPageModuleElementDetail.RowIndex)
+                                {
+                                    element.StudyVisitPageModuleElementDetail.RowIndex = rowIndex;
+                                }
+                                if (element.StudyVisitPageModuleElementDetail != null && columnIndex != element.StudyVisitPageModuleElementDetail.ColunmIndex)
+                                {
+                                    element.StudyVisitPageModuleElementDetail.ColunmIndex = columnIndex;
+                                }
+                            }
+                        }
+                    });
+
+                    _context.StudyVisitPageModuleElements.UpdateRange(data);
+                }
+                else
+                {
+                    var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).ToListAsync();
+
+                    var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
+
+                    data.ForEach(element =>
+                    {
+                        var elm = elements.FirstOrDefault(x => x.Id == element.Id);
+                        if (elm != null)
+                        {
+                            var elmOrder = Convert.ToInt32(elm.Order);
+                            if (elmOrder != element.Order)
+                            {
+                                element.Order = elmOrder;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.RowIndex != 0)
+                            {
+                                element.ElementDetail.RowIndex = 0;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.ColunmIndex != 0)
+                            {
+                                element.ElementDetail.ColunmIndex = 0;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.ParentId != 0)
+                            {
+                                element.ElementDetail.ParentId = 0;
+                            }
+                        }
+                        else if (newChildren != null)
+                        {
+                            var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
+                            if (child != null)
+                            {
+                                if (element.Order != 0)
+                                {
+                                    element.Order = 0;
+                                }
+                                string[] parts = child.Order.Split('-');
+                                int rowIndex = Convert.ToInt32(parts[0]);
+                                int columnIndex = Convert.ToInt32(parts[1]);
+                                if (element.ElementDetail != null && rowIndex != element.ElementDetail.RowIndex)
+                                {
+                                    element.ElementDetail.RowIndex = rowIndex;
+                                }
+                                if (element.ElementDetail != null && columnIndex != element.ElementDetail.ColunmIndex)
+                                {
+                                    element.ElementDetail.ColunmIndex = columnIndex;
+                                }
+                            }
+                        }
+                    });
+
+                    _context.Elements.UpdateRange(data);
+                }
 
                 var result = await _context.SaveCoreContextAsync(0, DateTimeOffset.Now);
 
