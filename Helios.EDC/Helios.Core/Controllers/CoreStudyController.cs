@@ -4182,7 +4182,7 @@ namespace Helios.Core.Controllers
                     foreach (var item in stdVstPgMdlElements)
                     {
                         Int64? parentId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == item.StudyVisitPageModuleElementDetail.ParentId)?.Id;
-                        item.StudyVisitPageModuleElementDetail.ParentId = parentId;
+                        item.StudyVisitPageModuleElementDetail.ParentId = parentId == null ? 0 : parentId;
                         _context.StudyVisitPageModuleElements.Update(item);
                     }
 
