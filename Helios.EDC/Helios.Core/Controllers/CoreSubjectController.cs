@@ -24,7 +24,7 @@ namespace Helios.Core.Controllers
         {
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
                 .Include(x => x.SubjectVisits)
-                .ThenInclude(x=>x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
@@ -115,7 +115,17 @@ namespace Helios.Core.Controllers
                 Message = "Successful",
             };
         }
-
+        [HttpPost]
+        public async Task<List<SiteModel>> GetSites(SubjectDTO model)
+        {
+            var aa= await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
+              .Select(site => new SiteModel
+              {
+                  Id = site.Id,
+                  Name = site.Name,
+              }).ToListAsync();
+            return aa;
+        }
         private string getSubjectNumber(string countryCode, string site, int subjectNumberInSite, int? subjectNumberDigitCount = 4)
         {
             var subjectNumber = "";
