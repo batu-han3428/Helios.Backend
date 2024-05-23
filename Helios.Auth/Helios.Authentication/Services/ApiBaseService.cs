@@ -22,11 +22,8 @@ namespace Helios.Authentication.Services
             get { return new RestClient(new Uri("http://core:8080")); }
         }
 
-        public string ClientIp { get; set; }
-        public string HttpContextRequestPath { get; set; }
         public Int64 UserId { get; set; }
-        public Int64 ResearchId { get; set; }
+        public Int64 StudyId { get; set; }
         public Int64 TenantId { get; set; }
-        public Int64 ResearcherId { get; set; }
     }
 }

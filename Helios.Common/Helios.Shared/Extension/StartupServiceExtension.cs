@@ -1,21 +1,20 @@
-﻿using Helios.eCRF.Models;
+﻿using Helios.Common.Model;
+using Helios.Shared.Services;
+using Helios.Shared.Services.Interfaces;
 using StackExchange.Redis;
 
 namespace Helios.Shared.Extension
 {
     public static class StartupServiceExtension
     {
-        public static IServiceCollection SharedDefaultConfigurationService(this IServiceCollection services, IConfiguration Configuration)
+        public static IServiceCollection DefaultConfigurationService(this IServiceCollection services, IConfiguration Configuration)
         {
             services.AddHttpContextAccessor();
-            services.AddSingleton<IConnectionMultiplexer>(provider =>
-            {
-                var redisOptions = Configuration.GetSection("Redis").Get<RedisOptions>();
-                var connectionString = $"{redisOptions.Host}:{redisOptions.Port},password={redisOptions.Password},abortConnect=false";
-                return ConnectionMultiplexer.Connect(connectionString);
-            });
 
-            services.AddSignalR();
+            services.AddMemoryCache();
+
+            services.AddScoped<ICacheService, CacheService>();
+
             return services;
         }
     }

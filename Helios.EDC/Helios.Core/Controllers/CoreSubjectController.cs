@@ -235,6 +235,25 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> AutoSaveSubjectData(SubjectElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
+
+            var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x=>x.Id == model.Id && x.IsActive && !x.IsDeleted);
+
+            if (element != null)
+            {
+                element.UserValue = model.Value;
+
+                _context.SubjectVisitPageModuleElements.Update(element);
+                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+                if (result.IsSuccess)
+                    result.Message = "Successfully.";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Operation failed!";
+            }
+
             return result;
         }
     }

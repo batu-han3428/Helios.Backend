@@ -21,7 +21,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "4500:8080"
-      - "4501:3501"
+      - "4501:4501"
 
 networks:
   v3network:

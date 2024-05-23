@@ -17,6 +17,8 @@ namespace Helios.Core.Extension
             //    return ConnectionMultiplexer.Connect(connectionString);
             //});
 
+            services.AddScoped<IStudyService, StudyService>();
+
             services.AddSignalR();
             return services;
         }

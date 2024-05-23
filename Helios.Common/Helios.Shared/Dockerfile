@@ -1,18 +1,21 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
 WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
-EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["nuget.config", "."]
+
 COPY ["Helios.Common/Helios.Shared/Helios.Shared.csproj", "Helios.Common/Helios.Shared/"]
+COPY ["Helios.Common/Helios.Common/Helios.Common.csproj", "Helios.Common/Helios.Common/"]
+COPY ./nuget.config .
+
 RUN dotnet restore "./Helios.Common/Helios.Shared/./Helios.Shared.csproj"
 COPY . .
+
 WORKDIR "/src/Helios.Common/Helios.Shared"
 RUN dotnet build "./Helios.Shared.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -20,7 +23,8 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Helios.Shared.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Helios.Shared.dll"]

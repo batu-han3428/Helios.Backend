@@ -1,5 +1,11 @@
 ﻿namespace Helios.Common.Model
 {
+    public class SubjectMenuModel
+    {
+        public Int64 StudyId { get; set; }
+        public List<SubjectDetailMenuModel> DetailMenuModels{ get; set; }
+    }
+
     public class SubjectDetailMenuModel
     {
         public Int64 Id { get; set; }
