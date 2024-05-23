@@ -4325,6 +4325,165 @@ namespace Helios.Core.Controllers
                 };
             }
         }
+
+        private Int64 GetSourcePage(List<StudyVisitRelationSourcePageModel> data, Int64 elementId)
+        {
+            var page = data.Where(x => x.options != null).SelectMany(x => x.options)
+                .FirstOrDefault(page => page.options != null && page.options.Any(elm => elm.Id == elementId));
+
+            return page?.Id ?? 0;
+        }
+
+        [HttpGet]
+        public async Task<StudyVisitRelationModel> GetVisitRelation()
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var sourcePageData = await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).Include(x => x.StudyVisitPages).ThenInclude(x => x.StudyVisitPageModules).ThenInclude(x => x.StudyVisitPageModuleElements).Select(visit => new StudyVisitRelationSourcePageModel
+            {
+               Id = visit.Id,
+               Label = visit.Name,
+               options = visit.StudyVisitPages.Where(page=>page.IsActive && !page.IsDeleted).Select(page=> new StudyVisitRelationSourcePageModel
+               {
+                   Id = page.Id,
+                   Label = page.Name,
+                   options = page.StudyVisitPageModules.Where(mod=>mod.IsActive && !mod.IsDeleted).SelectMany(mod=>mod.StudyVisitPageModuleElements.Where(elm=>elm.IsActive && !elm.IsDeleted)).Select(elm => new StudyVisitRelationSourcePageModel
+                   {
+                       Id = elm.Id,
+                       Label = elm.ElementName
+                   }).ToList()
+               }).ToList()
+            }).ToListAsync();
+
+            var result = await _context.StudyVisitRelation
+            .Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId)
+            .Select(x => new
+            {
+                x.Id,
+                x.ElementId,
+                x.ActionCondition,
+                x.ActionValue,
+                x.TargetPage,
+                x.ActionType
+            }).ToListAsync();
+
+            var relationData = result.Select(x => new VisitRelationModel
+            {
+                Key = Guid.NewGuid(),
+                Id = x.Id,
+                SourcePageId = GetSourcePage(sourcePageData, x.ElementId),
+                ElementId = x.ElementId,
+                ActionCondition = x.ActionCondition,
+                ActionValue = JsonSerializer.Deserialize<List<string>>(x.ActionValue),
+                TargetPage = JsonSerializer.Deserialize<List<Int64>>(x.TargetPage),
+                ActionType = x.ActionType
+            }).ToList();
+
+            var fieldOperationData = Enum.GetValues(typeof(ActionCondition))
+                          .Cast<ActionCondition>()
+                          .Select(e => new { label = e.GetDescription(), value = Convert.ToInt32(e) })
+                          .ToList<object>();
+
+            return new StudyVisitRelationModel {
+                visitRelationModels = relationData,
+                studyVisitRelationSourcePageModels = sourcePageData,
+                fieldOperationData = fieldOperationData
+            };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetVisitRelation(List<StudyVisitRelationDTO> dto)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var data = await _context.StudyVisitRelation.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).ToListAsync();
+
+            var add = dto.Where(i => !data.Any(e => e.Id == i.Id)).ToList();
+
+            var update = dto.Where(i => data.Any(e => e.Id == i.Id && 
+            (
+                e.ElementId != i.ElementId ||
+                e.ActionCondition != i.ActionCondition ||
+                AreJsonStringsDifferent(e.ActionValue, i.ActionValue) ||
+                AreJsonStringsDifferent(e.TargetPage, i.TargetPage) ||
+                e.ActionType != i.ActionType
+            ))).ToList();
+
+            var delete = data.Where(e => !dto.Any(i => i.Id == e.Id)).ToList();
+
+            if (add.Any())
+            {
+                await _context.StudyVisitRelation.AddRangeAsync(add.Select(x => new StudyVisitRelation
+                {
+                    ElementId = x.ElementId,
+                    ActionCondition = x.ActionCondition,
+                    ActionValue = x.ActionValue,
+                    TargetPage = x.TargetPage,
+                    ActionType = x.ActionType,
+                    StudyId = baseDTO.StudyId,
+                    TenantId = baseDTO.TenantId
+                }));
+            }
+
+            if (update.Any())
+            {
+                foreach (var updateEntity in update)
+                {
+                    var entity = data.First(e => e.Id == updateEntity.Id);
+                    entity.ElementId = updateEntity.ElementId;
+                    entity.ActionCondition = updateEntity.ActionCondition;
+                    entity.ActionValue = updateEntity.ActionValue;
+                    entity.TargetPage = updateEntity.TargetPage;
+                    entity.ActionType = updateEntity.ActionType;
+                }
+            }
+
+            if (delete.Any())
+            {
+                _context.StudyVisitRelation.RemoveRange(delete);
+            }
+
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now);
+
+            if (result > 0)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Successful"
+                };
+            }
+            else if (result == 0)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "No changes were made. Please make changes to save."
+                };
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
+        private bool AreJsonStringsDifferent(string json1, string json2)
+        {
+            if (string.IsNullOrEmpty(json1) && string.IsNullOrEmpty(json2))
+                return false;
+
+            if (string.IsNullOrEmpty(json1) || string.IsNullOrEmpty(json2))
+                return true;
+
+            var obj1 = JsonSerializer.Deserialize<object>(json1);
+            var obj2 = JsonSerializer.Deserialize<object>(json2);
+
+            return !obj1.Equals(obj2);
+        }
         #endregion
 
         #region Module
