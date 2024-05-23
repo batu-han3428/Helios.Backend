@@ -85,6 +85,7 @@ namespace Helios.Core.Controllers
                     StudyId = study.Id,
                     SiteId = model.SiteId,
                     SubjectNumber = subjectNo,
+                    InitialName = model.InitialName,
                     SubjectVisits = study.StudyVisits.Select(studyVisit => new SubjectVisit
                     {
                         StudyVisitId = studyVisit.Id,
@@ -162,6 +163,12 @@ namespace Helios.Core.Controllers
                 }).ToListAsync();
         }
 
+        [HttpGet]
+        public async Task<bool> GetStudyAskSubjectInitial(Int64 studyId)
+        {
+            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyId && x.IsActive && !x.IsDeleted);
+            return study.AskSubjectInitial;
+        }
         [HttpGet]
         public async Task<List<SubjectElementModel>> GetSubjectElementList(Int64 subjectId, Int64 pageId)
         {
