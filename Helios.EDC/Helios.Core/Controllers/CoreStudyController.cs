@@ -25,9 +25,9 @@ namespace Helios.Core.Controllers
 
         #region Study
         [HttpGet]
-        public async Task<List<StudyDTO>> GetStudyList(bool isLock)
+        public async Task<List<StudyDTO>> GetStudyList(bool isLock, Int64 tenantId)
         {
-            var result = await _context.Studies.Where(x => !x.IsDemo && x.IsActive && !x.IsDeleted && x.IsLock == isLock).Select(x => new StudyDTO()
+            var result = await _context.Studies.Where(x =>x.TenantId==tenantId &&  !x.IsDemo && x.IsActive && !x.IsDeleted && x.IsLock == isLock).Select(x => new StudyDTO()
             {
                 Id = x.Id,
                 EquivalentStudyId = x.EquivalentStudyId,
