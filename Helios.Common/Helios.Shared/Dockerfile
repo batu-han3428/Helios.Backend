@@ -2,28 +2,29 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY ["Helios.Auth/Helios.Authentication/Helios.Authentication.csproj", "Helios.Auth/Helios.Authentication/"]
+COPY ["Helios.Common/Helios.Shared/Helios.Shared.csproj", "Helios.Common/Helios.Shared/"]
 COPY ["Helios.Common/Helios.Common/Helios.Common.csproj", "Helios.Common/Helios.Common/"]
-COPY ["Helios.Auth/Helios.EventBus.Base/Helios.EventBus.Base.csproj", "Helios.Auth/Helios.EventBus.Base/"]
 COPY ./nuget.config .
 
-RUN dotnet restore "./Helios.Auth/Helios.Authentication/./Helios.Authentication.csproj"
+RUN dotnet restore "./Helios.Common/Helios.Shared/./Helios.Shared.csproj"
 COPY . .
 
-WORKDIR "/src/Helios.Auth/Helios.Authentication"
-RUN dotnet build "./Helios.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Helios.Common/Helios.Shared"
+RUN dotnet build "./Helios.Shared.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Helios.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Helios.Shared.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Helios.Authentication.dll"]
+ENTRYPOINT ["dotnet", "Helios.Shared.dll"]

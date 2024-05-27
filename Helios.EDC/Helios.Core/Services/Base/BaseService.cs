@@ -3,20 +3,20 @@ using System.Net.Mail;
 using Helios.Common.Enums;
 using Helios.Core.Services.Interfaces;
 
-namespace Helios.Core.Services
+namespace Helios.Core.Services.Base
 {
-    public class BaseService: IBaseService
+    public class BaseService : IBaseService
     {
         private CoreContext _context;
         private readonly SmtpClient _smtpClient;
         private readonly IConfiguration _config;
-        public BaseService(CoreContext context, SmtpClient smtpClient, IConfiguration config)
+        public BaseService(CoreContext context, /*SmtpClient smtpClient,*/ IConfiguration config)
         {
             _context = context;
-            _smtpClient = smtpClient;
+            //_smtpClient = smtpClient;
             _config = config;
         }
-        public void SaveSystemAuditTrail(Int64 TenantId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, Int64 UserId, string ClientIp)
+        public void SaveSystemAuditTrail(long TenantId, SystemAuditChangeType SystemAuditChangeType, string detail, string previousValues, string newValues, long UserId, string ClientIp)
         {
             //var changer = _context.Users.Where(s => s.Id == UserId).AsNoTracking().Select(a => a.Name + " " + a.LastName).FirstOrDefault();
 
@@ -37,11 +37,11 @@ namespace Helios.Core.Services
 
         public async Task SendMail(string mail, string subject, string content)
         {
-            var mailMessage = new MailMessage(_config["EmailSender:UserName"], mail, subject, content)
-            { IsBodyHtml = true, Sender = new MailAddress(_config["EmailSender:UserName"]) };
+            //var mailMessage = new MailMessage(_config["EmailSender:UserName"], mail, subject, content)
+            //{ IsBodyHtml = true, Sender = new MailAddress(_config["EmailSender:UserName"]) };
 
-            var isSend = _smtpClient.SendMailAsync(mailMessage);
-            isSend.Wait();
+            //var isSend = _smtpClient.SendMailAsync(mailMessage);
+            //isSend.Wait();
         }
     }
 }

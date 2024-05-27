@@ -4,9 +4,9 @@ using System.Net.Mail;
 using System.Net;
 using Helios.Core.Contexts;
 using MassTransit;
-using Helios.Core.Services;
 using Helios.Core.Services.Interfaces;
 using Helios.Common.Helpers.AutoMapper;
+using Helios.Core.Services.Base;
 
 namespace Helios.Core.Extension
 {

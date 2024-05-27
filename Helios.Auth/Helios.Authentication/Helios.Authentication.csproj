@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Helios.EDC\Helios.Common\Helios.Common.csproj" />
+    <ProjectReference Include="..\..\Helios.Common\Helios.Common\Helios.Common.csproj" />
     <ProjectReference Include="..\Helios.EventBus.Base\Helios.EventBus.Base.csproj" />
   </ItemGroup>
 

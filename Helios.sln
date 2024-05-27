@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Authentication", "He
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.EventBus.Base", "Helios.Auth\Helios.EventBus.Base\Helios.EventBus.Base.csproj", "{A59A4B16-B8DA-4720-A953-0D91868276D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Common", "Helios.EDC\Helios.Common\Helios.Common.csproj", "{66167D55-90BD-4340-971D-EA70A5C74BC0}"
-EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{80AFFF7E-8F43-4AA5-8CC3-897F61134917}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Documentation", "_Documentation", "{BEA4E709-006F-4CC1-ACA6-740D97E01099}"
@@ -29,6 +27,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Documentation", "_Document
 		nuget.config = nuget.config
 		Readme.txt = Readme.txt
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helios.Common", "Helios.Common", "{DB7CC980-4508-434F-8807-2AF51157193F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Common", "Helios.Common\Helios.Common\Helios.Common.csproj", "{94879A6E-5867-4314-8A58-99B0D2524682}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helios.Shared", "Helios.Common\Helios.Shared\Helios.Shared.csproj", "{C66DADFB-2B2D-441F-82F9-09927A93FA2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,14 +52,18 @@ Global
 		{A59A4B16-B8DA-4720-A953-0D91868276D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A59A4B16-B8DA-4720-A953-0D91868276D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A59A4B16-B8DA-4720-A953-0D91868276D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66167D55-90BD-4340-971D-EA70A5C74BC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66167D55-90BD-4340-971D-EA70A5C74BC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66167D55-90BD-4340-971D-EA70A5C74BC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66167D55-90BD-4340-971D-EA70A5C74BC0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{80AFFF7E-8F43-4AA5-8CC3-897F61134917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{80AFFF7E-8F43-4AA5-8CC3-897F61134917}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80AFFF7E-8F43-4AA5-8CC3-897F61134917}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80AFFF7E-8F43-4AA5-8CC3-897F61134917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94879A6E-5867-4314-8A58-99B0D2524682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94879A6E-5867-4314-8A58-99B0D2524682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94879A6E-5867-4314-8A58-99B0D2524682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94879A6E-5867-4314-8A58-99B0D2524682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C66DADFB-2B2D-441F-82F9-09927A93FA2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C66DADFB-2B2D-441F-82F9-09927A93FA2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C66DADFB-2B2D-441F-82F9-09927A93FA2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C66DADFB-2B2D-441F-82F9-09927A93FA2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,7 +72,8 @@ Global
 		{062E4F46-3A14-4168-8F79-BE0BF79C3A23} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
 		{5EE0E258-E763-43F9-8242-24322BAAD35B} = {BD2D47D5-F36F-4963-BDDA-0A46AB73D956}
 		{A59A4B16-B8DA-4720-A953-0D91868276D3} = {BD2D47D5-F36F-4963-BDDA-0A46AB73D956}
-		{66167D55-90BD-4340-971D-EA70A5C74BC0} = {337B2306-BC1D-4EEA-A62E-590DE8C28DA8}
+		{94879A6E-5867-4314-8A58-99B0D2524682} = {DB7CC980-4508-434F-8807-2AF51157193F}
+		{C66DADFB-2B2D-441F-82F9-09927A93FA2A} = {DB7CC980-4508-434F-8807-2AF51157193F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {88E65DC4-AECE-4811-99C8-D2802F83B1E1}

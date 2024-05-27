@@ -2,6 +2,7 @@
 using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
+using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,22 +14,27 @@ namespace Helios.Core.Controllers
     public class CoreSubjectController : Controller
     {
         private CoreContext _context;
+        private IStudyService _studyService;
 
-        public CoreSubjectController(CoreContext context)
+        public CoreSubjectController(CoreContext context, IStudyService studyService)
         {
             _context = context;
+            _studyService = studyService;
         }
 
         [HttpGet]
         public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId, Int64 userId)
         {
+            var menu = await GetSubjectDetailMenuLocal(studyId);
+            var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
+
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
                 .Include(x => x.SubjectVisits)
-                .ThenInclude(x=>x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
-                    FirstPageId = x.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().Id,
+                    FirstPageId = x.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId,
                     SubjectNumber = x.SubjectNumber,
                     CreatedAt = x.CreatedAt,
                     UpdatedAt = x.UpdatedAt
@@ -133,31 +139,13 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 subjectId)
-        {
-            return await _context.SubjectVisits.Include(sv => sv.SubjectVisitPages.Where(page => page.IsActive && !page.IsDeleted))
-                .Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
-                .Select(visit => new SubjectDetailMenuModel
-                {
-                    Id = visit.Id,
-                    Title = visit.StudyVisit.Name,
-                    Children = visit.SubjectVisitPages
-                        .Where(page => page.IsActive && !page.IsDeleted)
-                        .Select(page => new SubjectDetailMenuModel
-                        {
-                            Id = page.Id,
-                            Title = page.StudyVisitPage.Name
-                        })
-                        .ToList()
-                }).ToListAsync();
-        }
-
-        [HttpGet]
         public async Task<List<SubjectElementModel>> GetSubjectElementList(Int64 subjectId, Int64 pageId)
         {
             var finalList = new List<SubjectElementModel>();
 
-            var result = await _context.SubjectVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted)
+            var studyVisit = await _context.StudyVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.IsActive && !x.IsDeleted)
                 .SelectMany(x => x.SubjectVisitPageModules)
                 .SelectMany(x => x.SubjectVisitPageModuleElements)
                 .Include(x => x.StudyVisitPageModuleElement)
@@ -234,7 +222,45 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> AutoSaveSubjectData(SubjectElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
+
+            var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
+
+            if (element != null)
+            {
+                element.UserValue = model.Value;
+
+                _context.SubjectVisitPageModuleElements.Update(element);
+                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+                if (result.IsSuccess)
+                    result.Message = "Successfully.";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Operation failed!";
+            }
+
             return result;
+        }
+
+        private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
+        {
+            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted)
+                .Include(x => x.StudyVisitPages)
+                .Select(visit => new SubjectDetailMenuModel
+                {
+                    Id = visit.Id,
+                    Title = visit.Name,
+                    Children = visit.StudyVisitPages
+                        .Where(page => page.IsActive && !page.IsDeleted)
+                        .Select(page => new SubjectDetailMenuModel
+                        {
+                            Id = page.Id,
+                            Title = page.Name
+                        })
+                        .ToList()
+                }).ToListAsync();
         }
     }
 }

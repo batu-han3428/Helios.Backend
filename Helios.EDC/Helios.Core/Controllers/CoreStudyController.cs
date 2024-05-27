@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
 using System.Text.Json;
+using Helios.Core.Services.Interfaces;
 
 namespace Helios.Core.Controllers
 {
@@ -17,10 +18,12 @@ namespace Helios.Core.Controllers
     public class CoreStudyController : Controller
     {
         private CoreContext _context;
+        private IStudyService _studyService;
 
-        public CoreStudyController(CoreContext context)
+        public CoreStudyController(CoreContext context, IStudyService studyService)
         {
             _context = context;
+            _studyService = studyService;
         }
 
         #region Study
@@ -2666,7 +2669,7 @@ namespace Helios.Core.Controllers
                    .Select(element => element.ReferenceKey)
                    .Distinct();
 
-                var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).Include(x=>x.StudyVisitPageModuleElementDetail).ToListAsync();
+                var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).Include(x => x.StudyVisitPageModuleElementDetail).ToListAsync();
 
                 var addedCalcuTargetElement = calcus.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails).ToList();
                 var oldCalcu = moduleDatas.SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails);
@@ -2721,8 +2724,8 @@ namespace Helios.Core.Controllers
                         }
                     }
                 }
-                var ddd = await _context.StudyVisitPageModuleElements.Where(x => addedCalcuTargetElement.Select(a => a.TargetElementId).Contains(x.Id)).Include(x=>x.StudyVisitPageModuleElementDetail).ToListAsync();
-                
+                var ddd = await _context.StudyVisitPageModuleElements.Where(x => addedCalcuTargetElement.Select(a => a.TargetElementId).Contains(x.Id)).Include(x => x.StudyVisitPageModuleElementDetail).ToListAsync();
+
                 var addedParentIds1 = addedModules.SelectMany(x => x.StudyVisitPageModuleElements).Where(x => x.StudyVisitPageModuleElementDetail != null).Select(x => x.StudyVisitPageModuleElementDetail).ToList();
                 var oldDetailst1 = moduleDatas.SelectMany(x => x.StudyVisitPageModuleElements).Select(x => x.StudyVisitPageModuleElementDetail);
                 foreach (var item in ddd)
@@ -2731,7 +2734,7 @@ namespace Helios.Core.Controllers
                     if (ggg != null)
                     {
                         item.StudyVisitPageModuleElementDetail.IsInCalculation = ggg.StudyVisitPageModuleElementDetail.IsInCalculation;
-                      
+
                     }
                 }
 
@@ -3462,6 +3465,8 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3520,6 +3525,8 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3557,6 +3564,8 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3583,6 +3592,8 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3609,6 +3620,8 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = true,
@@ -3746,6 +3759,8 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3834,6 +3849,8 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -3902,6 +3919,8 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = true,
@@ -4484,6 +4503,7 @@ namespace Helios.Core.Controllers
 
             return !obj1.Equals(obj2);
         }
+        
         #endregion
 
         #region Module
