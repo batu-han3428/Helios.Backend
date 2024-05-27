@@ -8,5 +8,6 @@ namespace Helios.Core.Services.Interfaces
     {
         Task<ApiResponse<dynamic>> SetSubjectDetailMenu(Int64 studyId, List<SubjectDetailMenuModel> detailMenuModels);
         Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 studyId);
+        Task<ApiResponse<dynamic>> RemoveSubjectDetailMenu(Int64 studyId);
     }
 }

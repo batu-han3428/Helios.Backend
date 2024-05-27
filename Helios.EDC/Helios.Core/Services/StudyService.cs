@@ -41,5 +41,23 @@ namespace Helios.Core.Services
                 return result.Data;
             }
         }
+
+        public async Task<ApiResponse<dynamic>> RemoveSubjectDetailMenu(Int64 studyId)
+        {
+            var model = new SubjectMenuModel()
+            {
+                StudyId = studyId,
+            };
+
+            using (var client = SharedServiceClient)
+            {
+                var req = new RestRequest("Cache/RemoveSubjectDetailMenu", Method.Post);
+                req.AddJsonBody(model);
+
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+
+        }
     }
 }

@@ -51,13 +51,25 @@ namespace Helios.Shared.Controllers
             //return result;
             bool v = _localCache.TryGetValue(localCacheKey, out List<SubjectDetailMenuModel> SubjectDetailMenu);
 
-            if (v)
+            if (SubjectDetailMenu != null)
             {
                 return SubjectDetailMenu;
             }
 
             return null;
         }
-        
+
+        [HttpPost]
+        public ApiResponse<dynamic> RemoveSubjectDetailMenu(Int64 studyId)
+        {
+            var response = new ApiResponse<dynamic>();
+            string prefix = "Study";
+
+            var localCacheKey = prefix + ":" + studyId;
+            _localCache.Remove(localCacheKey);
+
+            return response;
+        }
+
     }
 }

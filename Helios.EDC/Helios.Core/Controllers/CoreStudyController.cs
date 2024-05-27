@@ -3464,8 +3464,7 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                            _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3525,8 +3524,7 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                            _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3565,8 +3563,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                                _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3594,8 +3591,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                                _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3623,8 +3619,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                                _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3763,8 +3758,7 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                            _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3854,8 +3848,7 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                            _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3925,8 +3918,7 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
-                            var menu = await GetSubjectDetailMenu(visitDTO.StudyId);
-                            _studyService.SetSubjectDetailMenu(visitDTO.StudyId, menu);
+                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4351,25 +4343,7 @@ namespace Helios.Core.Controllers
                 };
             }
         }
-
-        private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 studyId)
-        {
-            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted)
-                .Include(x => x.StudyVisitPages)
-                .Select(visit => new SubjectDetailMenuModel
-                {
-                    Id = visit.Id,
-                    Title = visit.Name,
-                    Children = visit.StudyVisitPages
-                        .Where(page => page.IsActive && !page.IsDeleted)
-                        .Select(page => new SubjectDetailMenuModel
-                        {
-                            Id = page.Id,
-                            Title = page.Name
-                        })
-                        .ToList()
-                }).ToListAsync();
-        }
+        
         #endregion
 
         #region Module
