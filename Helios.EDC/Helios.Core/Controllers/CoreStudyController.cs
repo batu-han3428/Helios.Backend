@@ -5197,8 +5197,8 @@ namespace Helios.Core.Controllers
                         TenantId = model.TenantId,
                         Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
                         ReferenceKey = Guid.NewGuid(),
-                        //CreatedAt = DateTimeOffset.Now,
-                        //AddedById = userId,
+                        CreatedAt = DateTimeOffset.Now,
+                        AddedById = model.UserId,
                     };
 
                     _context.StudyVisitPageModuleElements.Add(stdVstPgMdlElmnt);

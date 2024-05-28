@@ -151,7 +151,7 @@ namespace Helios.Authentication.Controllers
         {
             try
             {
-                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);
+                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);             
                 if (user != null)
                 {
                     if (!user.IsActive)
@@ -159,7 +159,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Please contact the system administrator to open your account."
+                            Message = "Your account has been deactivated, please contact the system administrator."
                         };
                     }
 
@@ -184,7 +184,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Please contact the system administrator to open your account."
+                            Message = "Your account has been deactivated, please contact the system administrator."
                         };
                     }
 
@@ -289,12 +289,12 @@ namespace Helios.Authentication.Controllers
                             };
                         }
                     }
-                }
+                }               
 
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Invalid user"
+                    Message = "Invalid user!"
                 };
             }
             catch (Exception e)
