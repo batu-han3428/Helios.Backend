@@ -687,13 +687,15 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<TenantUserDTO>> GetTenantUsers(Int64 tenantId)
         {
-            return await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x=>x.Study).AsNoTracking().Select(x => new TenantUserDTO
+            var aa = await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x => x.Study).Include(x => x.Study).Include(x => x.StudyRole).AsNoTracking().ToListAsync();
+            return await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x=>x.Study).Include(x => x.Study).Include(x => x.StudyRole).AsNoTracking().Select(x => new TenantUserDTO
             {
                 StudyUserId = x.Id,
                 AuthUserId = x.AuthUserId,
                 StudyId = x.StudyId,
                 IsActive = x.IsActive,
                 StudyName = x.Study.StudyName,
+                UserRoleName = x.StudyRole.Name,
                 StudyDemoLive = x.Study.IsDemo,
                 CreatedOn = x.CreatedAt,
                 LastUpdatedOn = x.UpdatedAt

@@ -22,5 +22,6 @@ namespace Helios.Common.DTO
         public DateTimeOffset CreatedOn { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset LastUpdatedOn { get; set; }
+        public string UserRoleName { get; set; }
     }
 }

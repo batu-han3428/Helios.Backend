@@ -1582,6 +1582,7 @@ namespace Helios.Core.Controllers
                     Key = Guid.NewGuid().ToString(),
                     Title = element.ElementName,
                     Order = element.Order.ToString(),
+                    ElementType = element.ElementType.GetDescription(),
                 };
 
                 if (element.ElementType == ElementType.Table || element.ElementType == ElementType.DataGrid)
@@ -1595,7 +1596,8 @@ namespace Helios.Core.Controllers
                             Id = child.Id,
                             Key = Guid.NewGuid().ToString(),
                             Title = child.ElementName,
-                            Order = $"{child.ElementDetail.RowIndex}-{child.ElementDetail.ColunmIndex}"
+                            Order = $"{child.ElementDetail.RowIndex}-{child.ElementDetail.ColunmIndex}",
+                            ElementType=child.ElementType.GetDescription(),
                         };
                         return newChild;
                     }).ToList();
@@ -1614,7 +1616,7 @@ namespace Helios.Core.Controllers
                                 Id = -1,
                                 Key = Guid.NewGuid().ToString(),
                                 Title = "Empty",
-                                Order = $"{i}-{missingColumnIndex}"
+                                Order = $"{i}-{missingColumnIndex}",
                             };
                             newChildren.Add(newChild);
                         }
