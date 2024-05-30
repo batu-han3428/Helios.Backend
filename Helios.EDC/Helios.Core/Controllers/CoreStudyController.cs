@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
 using System.Text.Json;
 using Helios.Core.Services.Interfaces;
+using System.Xml.Linq;
 
 namespace Helios.Core.Controllers
 {
@@ -38,7 +39,7 @@ namespace Helios.Core.Controllers
                 ProtocolCode = x.ProtocolCode,
                 AskSubjectInitial = x.AskSubjectInitial,
                 StudyLink = x.StudyLink,
-                CreatedAt=x.CreatedAt,
+                CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
                 IsLock = x.IsLock
             }).ToListAsync();
@@ -4360,18 +4361,18 @@ namespace Helios.Core.Controllers
 
             var sourcePageData = await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).Include(x => x.StudyVisitPages).ThenInclude(x => x.StudyVisitPageModules).ThenInclude(x => x.StudyVisitPageModuleElements).Select(visit => new StudyVisitRelationSourcePageModel
             {
-               Id = visit.Id,
-               Label = visit.Name,
-               options = visit.StudyVisitPages.Where(page=>page.IsActive && !page.IsDeleted).Select(page=> new StudyVisitRelationSourcePageModel
-               {
-                   Id = page.Id,
-                   Label = page.Name,
-                   options = page.StudyVisitPageModules.Where(mod=>mod.IsActive && !mod.IsDeleted).SelectMany(mod=>mod.StudyVisitPageModuleElements.Where(elm=>elm.IsActive && !elm.IsDeleted)).Select(elm => new StudyVisitRelationSourcePageModel
-                   {
-                       Id = elm.Id,
-                       Label = elm.ElementName
-                   }).ToList()
-               }).ToList()
+                Id = visit.Id,
+                Label = visit.Name,
+                options = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new StudyVisitRelationSourcePageModel
+                {
+                    Id = page.Id,
+                    Label = page.Name,
+                    options = page.StudyVisitPageModules.Where(mod => mod.IsActive && !mod.IsDeleted).SelectMany(mod => mod.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted)).Select(elm => new StudyVisitRelationSourcePageModel
+                    {
+                        Id = elm.Id,
+                        Label = elm.ElementName
+                    }).ToList()
+                }).ToList()
             }).ToListAsync();
 
             var result = await _context.StudyVisitRelation
@@ -4403,7 +4404,8 @@ namespace Helios.Core.Controllers
                           .Select(e => new { label = e.GetDescription(), value = Convert.ToInt32(e) })
                           .ToList<object>();
 
-            return new StudyVisitRelationModel {
+            return new StudyVisitRelationModel
+            {
                 visitRelationModels = relationData,
                 studyVisitRelationSourcePageModels = sourcePageData,
                 fieldOperationData = fieldOperationData
@@ -4419,7 +4421,7 @@ namespace Helios.Core.Controllers
 
             var add = dto.Where(i => !data.Any(e => e.Id == i.Id)).ToList();
 
-            var update = dto.Where(i => data.Any(e => e.Id == i.Id && 
+            var update = dto.Where(i => data.Any(e => e.Id == i.Id &&
             (
                 e.ElementId != i.ElementId ||
                 e.ActionCondition != i.ActionCondition ||
@@ -4503,7 +4505,7 @@ namespace Helios.Core.Controllers
 
             return !obj1.Equals(obj2);
         }
-        
+
         #endregion
 
         #region Module
@@ -4749,8 +4751,16 @@ namespace Helios.Core.Controllers
 
                         foreach (var cal in calcdtls)
                         {
-                            cal.CalculationElementId = stdVstPgMdlElmnt.Id;
-                            _context.Add(cal);
+                            var newdtl = new StudyVisitPageModuleCalculationElementDetail()
+                            {
+                                TenantId = cal.TenantId,
+                                StudyVisitPageModuleId = cal.StudyVisitPageModuleId,
+                                TargetElementId = cal.TargetElementId,
+                                CalculationElementId = stdVstPgMdlElmnt.Id,
+                                VariableName = cal.VariableName,
+                            };
+
+                            _context.Add(newdtl);
                         }
 
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -4817,7 +4827,8 @@ namespace Helios.Core.Controllers
             }
             catch (Exception ex)
             {
-
+                result.IsSuccess = false;
+                result.Message = "Error";
             }
 
             return result;
@@ -5513,7 +5524,8 @@ namespace Helios.Core.Controllers
                     var existCalDtil = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == stdVstPgMdlElement.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
                     var elementInExistCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => existCalElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                    var calcElmSgs = calcList.Select(x => x.elementFieldSelectedGroup).ToList();
+                    var calcElmIds1 = calcElmSgs.Select(x => x.value).ToList();
 
                     var elementInExistCalListIds = elementInExistCalList.Select(x => x.StudyVisitPageModuleElementId).ToList();
                     var allCalDtil = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => elementInExistCalListIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -5552,7 +5564,7 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var elementInCalList = await _context.StudyVisitPageModuleElementDetails.Where(x => calcElmIds1.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     //then change new elementDetail flags
                     foreach (var item in elementInCalList)
@@ -5585,7 +5597,7 @@ namespace Helios.Core.Controllers
                     //remove deleted items from calc
                     foreach (var item in existCalDtil)
                     {
-                        if (!calcElmIds.Contains(item.TargetElementId))
+                        if (!calcElmIds1.Contains(item.TargetElementId))
                         {
                             item.IsActive = false;
                             item.IsDeleted = true;
