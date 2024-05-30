@@ -15,7 +15,7 @@ namespace Helios.Core.Controllers
     [Route("[controller]/[action]")]
     public class CoreModuleController : Controller
     {
-        private CoreContext _context;      
+        private CoreContext _context;
         public CoreModuleController(CoreContext context)
         {
             _context = context;
@@ -156,8 +156,8 @@ namespace Helios.Core.Controllers
                 Name = x.Name,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                AddedById=x.AddedById,
-                UpdatedById=x.UpdatedById
+                AddedById = x.AddedById,
+                UpdatedById = x.UpdatedById
             }).AsNoTracking().ToListAsync();
 
             return result;
@@ -762,7 +762,8 @@ namespace Helios.Core.Controllers
                     var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
                     var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                    var calcElmSgs = calcList.Select(x => x.elementFieldSelectedGroup).ToList();
+                    var calcElmIds1 = calcElmSgs.Select(x => x.value).ToList();
 
                     var elementInExistCalListIds = elementInExistCalList.Select(x => x.ElementId).ToList();
                     var allCalDtil = await _context.CalculatationElementDetails.Where(x => elementInExistCalListIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -801,7 +802,7 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds1.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     //then change new elementDetail flags
                     foreach (var item in elementInCalList)
@@ -833,7 +834,7 @@ namespace Helios.Core.Controllers
                     //remove deleted items from calc
                     foreach (var item in existCalDtil)
                     {
-                        if (!calcElmIds.Contains(item.TargetElementId))
+                        if (!calcElmIds1.Contains(item.TargetElementId))
                         {
                             item.IsActive = false;
                             item.IsDeleted = true;
@@ -1022,103 +1023,119 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
 
-            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (element != null)
+            try
             {
-                var name = element.ElementName + "_1";
+                var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-                for (; ; )
+                if (element != null)
                 {
-                    if (checkElementName(element.ModuleId, name).Result)
-                        break;
-                    else
-                        name = name + "_1";
-                }
+                    var name = element.ElementName + "_1";
 
-                element.Id = 0;
-                element.ElementName = name;
-                element.Order = element.Order + 1;
-
-                var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-                elementDetail.Id = 0;
-                elementDetail.IsInCalculation = false;
-
-                _context.Add(element);
-                _context.Add(elementDetail);
-
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                elementDetail.ElementId = element.Id;
-                _context.Update(elementDetail);
-
-                if (element.ElementType == ElementType.Calculated)
-                {
-                    var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
-
-                    foreach (var cal in calcdtls)
+                    for (; ; )
                     {
-                        cal.CalculationElementId = element.Id;
-                        _context.Add(cal);
+                        if (checkElementName(element.ModuleId, name).Result)
+                            break;
+                        else
+                            name = name + "_1";
+                    }
+
+                    element.Id = 0;
+                    element.ElementName = name;
+                    element.Order = element.Order + 1;
+
+                    var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    elementDetail.Id = 0;
+                    elementDetail.IsInCalculation = false;
+
+                    _context.Add(element);
+                    _context.Add(elementDetail);
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    elementDetail.ElementId = element.Id;
+                    _context.Update(elementDetail);
+
+                    if (element.ElementType == ElementType.Calculated)
+                    {
+                        var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                        foreach (var cal in calcdtls)
+                        {
+                            var newdtl = new CalculatationElementDetail()
+                            {
+                                TenantId = cal.TenantId,
+                                ModuleId = cal.ModuleId,
+                                TargetElementId = cal.TargetElementId,
+                                CalculationElementId = element.Id,
+                                VariableName = cal.VariableName,
+                            };
+
+                            _context.Add(newdtl);
+                        }
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+
+                    if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                    {
+                        var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
+                        var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+                        var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                        foreach (var child in children)
+                        {
+                            var nm = child.ElementName + "_1";
+
+                            for (; ; )
+                            {
+                                if (checkElementName(child.ModuleId, nm).Result)
+                                    break;
+                                else
+                                    nm = nm + "_1";
+                            }
+
+                            var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                            chDtl.Id = 0;
+
+                            child.Id = 0;
+                            child.ElementName = nm;
+                            child.Order = child.Order + 1;
+
+                            _context.Add(child);
+                            _context.Add(chDtl);
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            chDtl.Id = child.Id;
+                            chDtl.ParentId = element.Id;
+
+                            _context.Update(chDtl);
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+                    }
+
+                    var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    foreach (var item in moduleElements)
+                    {
+                        if (item.Order >= element.Order && item.Id != element.Id)
+                        {
+                            item.Order = (item.Order + 1);
+                            _context.Update(item);
+                        }
                     }
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
-
-                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                else
                 {
-                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
-                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
-                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
-
-                    foreach (var child in children)
-                    {
-                        var nm = child.ElementName + "_1";
-
-                        for (; ; )
-                        {
-                            if (checkElementName(child.ModuleId, nm).Result)
-                                break;
-                            else
-                                nm = nm + "_1";
-                        }
-
-                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
-                        chDtl.Id = 0;
-
-                        child.Id = 0;
-                        child.ElementName = nm;
-                        child.Order = child.Order + 1;
-
-                        _context.Add(child);
-                        _context.Add(chDtl);
-
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                        chDtl.Id = child.Id;
-                        chDtl.ParentId = element.Id;
-
-                        _context.Update(chDtl);
-
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    }
+                    result.IsSuccess = false;
+                    result.Message = "Error";
                 }
-
-                var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                foreach (var item in moduleElements)
-                {
-                    if (item.Order >= element.Order && item.Id != element.Id)
-                    {
-                        item.Order = (item.Order + 1);
-                        _context.Update(item);
-                    }
-                }
-
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                result.Message = result.IsSuccess ? "Successful" : "Error";
             }
-            else
+            catch (Exception ex)
             {
                 result.IsSuccess = false;
                 result.Message = "Error";
@@ -1269,7 +1286,7 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
-               
+
                 if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                 {
                     var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -1312,7 +1329,7 @@ namespace Helios.Core.Controllers
                         {
                             chDtl.RowIndex = chDtl.RowIndex + 1;
                             _context.Update(chDtl);
-                        }                    
+                        }
                     }
                 }
                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -1337,7 +1354,7 @@ namespace Helios.Core.Controllers
 
             if (element != null)
             {
-                var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id  && x.IsActive && !x.IsDeleted).ToListAsync();
+                var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                 var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
                 var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
 
@@ -1354,13 +1371,13 @@ namespace Helios.Core.Controllers
                     }
                     else
                     {
-                        elementDetail.RowCount = elementDetail.RowCount!=1 ? elementDetail.RowCount - 1 :elementDetail.RowCount;
+                        elementDetail.RowCount = elementDetail.RowCount != 1 ? elementDetail.RowCount - 1 : elementDetail.RowCount;
                         _context.Update(elementDetail);
                     }
-                    
+
                     foreach (var item in childrenDtils)
                     {
-                        
+
                         if (item.RowIndex == model.RowIndex)
                         {
                             item.IsActive = false;
@@ -1376,9 +1393,9 @@ namespace Helios.Core.Controllers
                             item.RowIndex = item.RowIndex - 1;
                         }
                         _context.ElementDetails.Update(item);
-                        
-                    }                  
-                    
+
+                    }
+
                 }
                 if (childrenDtils.Count() > 0)
                 {
@@ -1784,7 +1801,7 @@ namespace Helios.Core.Controllers
                     IsSuccess = false,
                     Message = "Unsuccessful"
                 };
-            }  
+            }
         }
     }
 }
