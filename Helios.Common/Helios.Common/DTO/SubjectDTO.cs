@@ -13,5 +13,13 @@ namespace Helios.Common.DTO
         public DateTimeOffset CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
+        public string Country { get; set; }
+        public string SiteName { get; set; }
+        public string RandomData { get; set; }
+        public Int64 AddedById { get; set; }
+        public string AddedByName { get; set; }
+        public bool SDV { get; set; }
+        public int Query { get; set; }
+       
     }
 }
