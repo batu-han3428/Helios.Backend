@@ -69,17 +69,25 @@ namespace Helios.Authentication.Controllers
             {
                 if (!string.IsNullOrEmpty(tenant.Path))
                 {
-                    BlobClient blobClient = await _blobStorage.GetBlob(tenant.Path);
-                    var contentType = blobClient.GetProperties();
-                    var ddd = contentType.Value.ContentType;
-                    if (blobClient != null)
+                    try
                     {
-                        using (MemoryStream ms = new MemoryStream())
+                        BlobClient blobClient = await _blobStorage.GetBlob(tenant.Path);
+                        var contentType = blobClient.GetProperties();
+                        var ddd = contentType.Value.ContentType;
+                        if (blobClient != null)
                         {
-                            await blobClient.DownloadToAsync(ms);
-                            tenant.Logo = Convert.ToBase64String(ms.ToArray());
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                await blobClient.DownloadToAsync(ms);
+                                tenant.Logo = Convert.ToBase64String(ms.ToArray());
+                            }
                         }
                     }
+                    catch (Exception)
+                    {
+                        return tenant;
+                    }
+                   
                 }
                 
                 return tenant;
