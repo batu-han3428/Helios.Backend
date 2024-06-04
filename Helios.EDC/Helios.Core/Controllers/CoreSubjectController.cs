@@ -43,6 +43,7 @@ namespace Helios.Core.Controllers
                     SiteName = x.Site.Name,
                     RandomData = x.RandomData,  
                     AddedById = x.AddedById,
+                    InitialName=x.InitialName
                 }).ToListAsync();
 
             return result;
