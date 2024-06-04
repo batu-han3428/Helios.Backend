@@ -1,4 +1,5 @@
 ﻿using Helios.Common.DTO;
+using Helios.Common.Enums;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
@@ -27,8 +28,8 @@ namespace Helios.Core.Controllers
         {
             var menu = await GetSubjectDetailMenuLocal(studyId);
             var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
-
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
+                .Include(x => x.Site)            
                 .Include(x => x.SubjectVisits)
                 .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
@@ -37,7 +38,11 @@ namespace Helios.Core.Controllers
                     FirstPageId = x.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId,
                     SubjectNumber = x.SubjectNumber,
                     CreatedAt = x.CreatedAt,
-                    UpdatedAt = x.UpdatedAt
+                    UpdatedAt = x.UpdatedAt,
+                    Country = x.Site.Country,
+                    SiteName = x.Site.Name,
+                    RandomData = x.RandomData,  
+                    AddedById = x.AddedById,
                 }).ToListAsync();
 
             return result;

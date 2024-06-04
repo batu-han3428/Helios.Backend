@@ -20,11 +20,7 @@ dotnet restore --interactive .\Helios.sln
 To push package:
 ---dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg --source "helios-v3" --api-key az --interactive
 
-<<<<<<< Updated upstream
-./nuget.exe push -Source "helios-v3" -ApiKey az Helios.Common\Helios.Common\bin\Debug\Helios.Common.1.0.0.61.nupkg
-=======
 ./nuget.exe push -Source "helios-v3" -ApiKey az Helios.Common\Helios.Common\bin\Debug\Helios.Common.1.0.0.64.nupkg
->>>>>>> Stashed changes
 
 
 ---dotnet nuget push --source "helios-v3" --api-key az <package-path>
