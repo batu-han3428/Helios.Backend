@@ -47,6 +47,7 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = user.Name;
+            securityToken.Payload["lastName"] = user.LastName;
             securityToken.Payload["roles"] = roles;
             securityToken.Payload["mail"] = user.Email;
             securityToken.Payload["userId"] = user.Id;
@@ -139,6 +140,7 @@ namespace Helios.Authentication.Helpers
                 .Select(c => c.Value)
                 .ToList();
             var oldName = oldToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            var oldLastName = oldToken?.Claims.FirstOrDefault(c => c.Type == "lastName")?.Value;
             var oldMail = oldToken?.Claims.FirstOrDefault(c => c.Type == "mail")?.Value;
             var oldUserId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
             var oldTenantId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "tenantId")?.Value);
@@ -163,6 +165,7 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = jwtToken.Name != null && oldName != jwtToken.Name ? jwtToken.Name : oldName;
+            securityToken.Payload["lastName"] = jwtToken.LastName != null && oldLastName != jwtToken.LastName ? jwtToken.LastName : oldLastName;
             securityToken.Payload["roles"] = jwtToken?.Roles != null ? roles.OrderBy(x => x).SequenceEqual(jwtToken?.Roles?.OrderBy(x => x)) ? roles : jwtToken.Roles : roles;
             securityToken.Payload["mail"] = jwtToken.Mail != null && oldMail != jwtToken.Mail ? jwtToken.Mail : oldMail;
             securityToken.Payload["userId"] = jwtToken.UserId != null && oldUserId != jwtToken.UserId ? jwtToken.UserId : oldUserId;
