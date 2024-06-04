@@ -96,6 +96,7 @@ namespace Helios.Core.Controllers
                     StudyId = study.Id,
                     SiteId = model.SiteId,
                     SubjectNumber = subjectNo,
+                    InitialName = model.InitialName,
                     SubjectVisits = study.StudyVisits.Select(studyVisit => new SubjectVisit
                     {
                         StudyVisitId = studyVisit.Id,
@@ -126,7 +127,17 @@ namespace Helios.Core.Controllers
                 Message = "Successful",
             };
         }
-
+        [HttpPost]
+        public async Task<List<SiteModel>> GetSites(SubjectDTO model)
+        {
+            var aa= await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
+              .Select(site => new SiteModel
+              {
+                  Id = site.Id,
+                  Name = site.Name,
+              }).ToListAsync();
+            return aa;
+        }
         private string getSubjectNumber(string countryCode, string site, int subjectNumberInSite, int? subjectNumberDigitCount = 4)
         {
             var subjectNumber = "";
@@ -143,6 +154,32 @@ namespace Helios.Core.Controllers
             return subjectNumber;
         }
 
+        [HttpGet]
+        public async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 subjectId)
+        {
+            return await _context.SubjectVisits.Include(sv => sv.SubjectVisitPages.Where(page => page.IsActive && !page.IsDeleted))
+                .Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                .Select(visit => new SubjectDetailMenuModel
+                {
+                    Id = visit.Id,
+                    Title = visit.StudyVisit.Name,
+                    Children = visit.SubjectVisitPages
+                        .Where(page => page.IsActive && !page.IsDeleted)
+                        .Select(page => new SubjectDetailMenuModel
+                        {
+                            Id = page.Id,
+                            Title = page.StudyVisitPage.Name
+                        })
+                        .ToList()
+                }).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<bool> GetStudyAskSubjectInitial(Int64 studyId)
+        {
+            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyId && x.IsActive && !x.IsDeleted);
+            return study.AskSubjectInitial;
+        }
         [HttpGet]
         public async Task<List<SubjectElementModel>> GetSubjectElementList(Int64 subjectId, Int64 pageId)
         {
