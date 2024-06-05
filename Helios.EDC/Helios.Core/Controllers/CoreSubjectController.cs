@@ -24,12 +24,13 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId, Int64 userId)
+        public async Task<SubjectListModel> GetSubjectList(Int64 studyId, Int64 userId)
         {
+            var subjectListModel = new SubjectListModel();
             var menu = await GetSubjectDetailMenuLocal(studyId);
             var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
-                .Include(x => x.Site)            
+                .Include(x => x.Site)
                 .Include(x => x.SubjectVisits)
                 .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
@@ -41,12 +42,22 @@ namespace Helios.Core.Controllers
                     UpdatedAt = x.UpdatedAt,
                     Country = x.Site.Country,
                     SiteName = x.Site.Name,
-                    RandomData = x.RandomData,  
+                    RandomData = x.RandomData,
                     AddedById = x.AddedById,
-                    InitialName=x.InitialName
+                    InitialName = x.InitialName
                 }).ToListAsync();
 
-            return result;
+            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
+            {
+                RoleId = x.StudyRole.Id,
+                RoleName = x.StudyRole.Name
+            }).ToListAsync();
+            var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
+            subjectListModel.SubjectList = result;
+            subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
+            subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize && x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
+            subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv && x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification && x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
+            return subjectListModel;
         }
 
         [HttpPost]
@@ -131,7 +142,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<List<SiteModel>> GetSites(SubjectDTO model)
         {
-            var aa= await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
+            var aa = await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
               .Select(site => new SiteModel
               {
                   Id = site.Id,
