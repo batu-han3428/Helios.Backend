@@ -109,6 +109,7 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            securityToken.Payload["lastName"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "lastName")?.Value;
             securityToken.Payload["roles"] = roles;
             securityToken.Payload["mail"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "mail")?.Value;
             securityToken.Payload["userId"] = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
