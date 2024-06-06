@@ -21,6 +21,13 @@ namespace Helios.Common.DTO
         public string AddedByName { get; set; }
         public bool SDV { get; set; }
         public int Query { get; set; }
-       
+
+    }
+    public class SubjectListModel
+    {
+        public List<SubjectDTO> SubjectList { get; set; }
+        public bool HasSdv { get; set; }
+        public bool HasQuery { get; set; }
+        public bool HasRandomizasyon { get; set; }
     }
 }
