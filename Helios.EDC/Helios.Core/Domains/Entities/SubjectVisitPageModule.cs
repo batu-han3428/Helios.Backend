@@ -8,6 +8,7 @@ namespace Helios.Core.Domains.Entities
         public ModuleStatus Status { get; set; }
 
         public StudyVisitPageModule StudyVisitPageModule { get; set; }
+        public SubjectVisitPage SubjectVisitPage { get; set; }
         public ICollection<SubjectVisitPageModuleElement> SubjectVisitPageModuleElements { get; set; }
     }
 }
