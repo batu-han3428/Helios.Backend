@@ -55,8 +55,8 @@ namespace Helios.Core.Controllers
             var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
             subjectListModel.SubjectList = result;
             subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
-            subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize && x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
-            subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv && x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification && x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
+            subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
+            subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
             return subjectListModel;
         }
 
