@@ -6,6 +6,7 @@ using Helios.Core.Domains.Entities;
 using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
 
 namespace Helios.Core.Controllers
@@ -199,7 +200,7 @@ namespace Helios.Core.Controllers
 
             var studyVisit = await _context.StudyVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.IsActive && !x.IsDeleted)
+            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
                 .SelectMany(x => x.SubjectVisitPageModules)
                 .SelectMany(x => x.SubjectVisitPageModuleElements)
                 .Include(x => x.StudyVisitPageModuleElement)
@@ -279,12 +280,14 @@ namespace Helios.Core.Controllers
 
             var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
 
-            if (element != null)
+            if (element != null && model.Value != "" && model.Value != element.UserValue)
             {
                 element.UserValue = model.Value;
 
                 _context.SubjectVisitPageModuleElements.Update(element);
                 result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+                var aa = await SetCalculation(model.Id);
 
                 if (result.IsSuccess)
                     result.Message = "Successfully.";
@@ -293,6 +296,117 @@ namespace Helios.Core.Controllers
             {
                 result.IsSuccess = false;
                 result.Message = "Operation failed!";
+            }
+
+            return result;
+        }
+
+        private async Task<bool> SetCalculation(Int64 elementId)
+        {
+            var result = false;
+
+            var element = await _context.SubjectVisitPageModuleElements
+                .Include(x => x.SubjectVisitModule)
+                .ThenInclude(x => x.SubjectVisitPage)
+                .ThenInclude(x => x.SubjectVisit)
+                .ThenInclude(x => x.Subject)
+                .Include(x => x.StudyVisitPageModuleElement)
+                .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
+                .FirstOrDefaultAsync(x => x.Id == elementId && x.IsActive && !x.IsDeleted);
+
+            if (element.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.IsInCalculation)
+            {
+                var finalCalcVal = "";
+                var subjectId = element.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId;
+
+                var hiddens = await _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleCalculationElementDetails.Any(y => y.TargetElementId == element.StudyVisitPageModuleElementId) && x.ElementType == Common.Enums.ElementType.Hidden).ToListAsync();
+                var hiddenIds = hiddens.Select(x => x.Id).ToList();
+
+                var allUsedCalcDetails = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => (x.TargetElementId == element.StudyVisitPageModuleElementId || hiddenIds.Contains(x.TargetElementId)) && x.IsActive && !x.IsDeleted).ToListAsync();// bu element hangi calculationlerde kullanilmis.
+
+                var calcIdsInCalcDtils = allUsedCalcDetails.Select(x => x.CalculationElementId).ToList();
+                var allTargetIdsInCalcDtils = allUsedCalcDetails.Select(x => x.TargetElementId).ToList();
+
+                var allStdCalcElements = await _context.StudyVisitPageModuleElements
+                    .Include(x => x.StudyVisitPageModuleElementDetail)
+                    .Include(x => x.StudyVisitPageModuleCalculationElementDetails)
+                    .Where(x => calcIdsInCalcDtils.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                //var allStdTarElements = await _context.StudyVisitPageModuleElements
+                //    .Include(x => x.StudyVisitPageModuleElementDetail)
+                //    .Include(x => x.StudyVisitPageModuleCalculationElementDetails)
+                //    .Where(x => allTargetIdsInCalcDtils.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                //var allStdTarElementsIds = allStdTarElements.Select(x => x.Id).ToList();
+
+                //allStdCalcElements.AddRange(hiddens);
+                var allCalcElementsIds = allStdCalcElements.Select(x => x.Id).ToList();
+                var allOtherStdTarElements = await _context.studyVisitPageModuleCalculationElementDetails
+                    .Where(x => allCalcElementsIds.Contains(x.CalculationElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                var allStdTarElementsIds = allOtherStdTarElements.Select(x => x.TargetElementId).ToList();
+
+                //var allUsedSbjElements = await _context.SubjectVisitPageModuleElements
+                //        .Include(x => x.StudyVisitPageModuleElement)
+                //        .ThenInclude(x => x.StudyVisitPageModuleCalculationElementDetails.Where(x => allCalcElementsIds.Contains(x.CalculationElementId) && x.IsActive && !x.IsDeleted))
+                //        .Include(x => x.SubjectVisitModule)
+                //        .ThenInclude(x => x.SubjectVisitPage)
+                //        .ThenInclude(x => x.SubjectVisit)
+                //        .ThenInclude(x => x.Subject)
+                //        .Where(x=>x.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
+                //        .ToListAsync();
+
+                var allUsedSbjElements = await _context.SubjectVisitPageModuleElements
+                        .Include(x => x.StudyVisitPageModuleElement)
+                        .Include(x => x.SubjectVisitModule)
+                        .ThenInclude(x => x.SubjectVisitPage)
+                        .ThenInclude(x => x.SubjectVisit)
+                        .ThenInclude(x => x.Subject)
+                        .Where(x => allStdTarElementsIds.Contains(x.StudyVisitPageModuleElementId)
+                        && x.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId == subjectId
+                        && x.IsActive && !x.IsDeleted)
+                        .ToListAsync();
+
+                //var allStdUsedElement = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => allCalcElementsIds.Contains(x.CalculationElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var cal in allStdCalcElements)
+                {
+                    var thisCalElms = allOtherStdTarElements.Where(y => y.CalculationElementId == cal.Id).ToList();
+                    var thisCalElmIds = thisCalElms.Select(x => x.TargetElementId).ToList();
+                    var thisCalTarElms = allUsedSbjElements.Where(x => thisCalElmIds.Contains(x.StudyVisitPageModuleElementId)
+                    && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated).ToList();
+
+                    var thisCalSbjElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == cal.Id);
+
+                    if (thisCalTarElms.Any(x => x.UserValue == "" || x.UserValue == null))
+                    {
+                        thisCalSbjElm.UserValue = "NaN";
+                    }
+                    else
+                    {
+                        var finalJs = "function executeScript(){";
+                        var javascriptCode = cal.StudyVisitPageModuleElementDetail.MainJs;
+
+                        foreach (var dtl in thisCalElms)
+                        {
+                            var sbjctElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == dtl.TargetElementId && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated);
+
+                            if (sbjctElm != null && sbjctElm.UserValue != "")
+                                finalJs += "var " + dtl.VariableName + "=" + sbjctElm.UserValue + ";";
+                        }
+
+                        finalJs += javascriptCode + "}";
+
+                        using (var engine = new V8ScriptEngine())
+                        {
+                            var mathfnCall = " executeScript();";
+                            var mathResult = engine.Evaluate(finalJs + mathfnCall);
+                            thisCalSbjElm.UserValue = mathResult.ToString();
+                        }
+
+                        _context.SubjectVisitPageModuleElements.Update(thisCalSbjElm);
+                        result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                    }
+                }
             }
 
             return result;

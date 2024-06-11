@@ -1614,7 +1614,7 @@ namespace Helios.Core.Controllers
                             Key = Guid.NewGuid().ToString(),
                             Title = child.ElementName,
                             Order = $"{child.ElementDetail.RowIndex}-{child.ElementDetail.ColunmIndex}",
-                            ElementType=child.ElementType.GetDescription(),
+                            ElementType = child.ElementType.GetDescription(),
                         };
                         return newChild;
                     }).ToList();
