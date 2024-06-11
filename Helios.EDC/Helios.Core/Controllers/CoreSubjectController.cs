@@ -146,7 +146,7 @@ namespace Helios.Core.Controllers
 
             var studyVisit = await _context.StudyVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.IsActive && !x.IsDeleted)
+            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
                 .SelectMany(x => x.SubjectVisitPageModules)
                 .SelectMany(x => x.SubjectVisitPageModuleElements)
                 .Include(x => x.StudyVisitPageModuleElement)
@@ -318,7 +318,7 @@ namespace Helios.Core.Controllers
                 {
                     var thisCalElms = allOtherStdTarElements.Where(y => y.CalculationElementId == cal.Id).ToList();
                     var thisCalElmIds = thisCalElms.Select(x => x.TargetElementId).ToList();
-                    var thisCalTarElms = allUsedSbjElements.Where(x => thisCalElmIds.Contains(x.StudyVisitPageModuleElementId) 
+                    var thisCalTarElms = allUsedSbjElements.Where(x => thisCalElmIds.Contains(x.StudyVisitPageModuleElementId)
                     && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated).ToList();
 
                     var thisCalSbjElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == cal.Id);
