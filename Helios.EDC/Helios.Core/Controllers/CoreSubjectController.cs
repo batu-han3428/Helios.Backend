@@ -287,6 +287,7 @@ namespace Helios.Core.Controllers
                 _context.SubjectVisitPageModuleElements.Update(element);
                 result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
 
+                var hh = await SetHidden(model.Id);
                 var aa = await SetCalculation(model.Id);
 
                 if (result.IsSuccess)
@@ -296,6 +297,37 @@ namespace Helios.Core.Controllers
             {
                 result.IsSuccess = false;
                 result.Message = "Operation failed!";
+            }
+
+            return result;
+        }
+
+        private async Task<bool> SetHidden(Int64 elementId)
+        {
+            var result = false;
+
+            var element = await _context.SubjectVisitPageModuleElements
+                .Include(x => x.StudyVisitPageModuleElement)
+                .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
+                .Include(x => x.SubjectVisitModule)
+                .ThenInclude(x => x.SubjectVisitPage)
+                .ThenInclude(x => x.SubjectVisit)
+                .FirstOrDefaultAsync(x => x.Id == elementId && x.IsActive && !x.IsDeleted);
+
+            var targets = await _context.StudyVisitPageModuleElementDetails.Where(x => x.TargetElementId == element.StudyVisitPageModuleElementId).ToListAsync();
+
+            if (targets != null && targets.Count > 0)
+            {
+                var targetIds = targets.Select(x => x.Id).ToList();
+                var targetSbjcts = await _context.SubjectVisitPageModuleElements.Where(x => targetIds.Contains(x.StudyVisitPageModuleElementId) && x.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId == element.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var item in targetSbjcts)
+                {
+                    item.UserValue = element.UserValue;
+                    _context.SubjectVisitPageModuleElements.Update(item);
+                }
+
+                result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
             }
 
             return result;
@@ -377,7 +409,7 @@ namespace Helios.Core.Controllers
 
                     var thisCalSbjElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == cal.Id);
 
-                    if (thisCalTarElms.Any(x => x.UserValue == "" || x.UserValue == null))
+                    if (thisCalSbjElm != null && thisCalTarElms.Any(x => x.UserValue == "" || x.UserValue == null))
                     {
                         thisCalSbjElm.UserValue = "NaN";
                     }
@@ -385,22 +417,29 @@ namespace Helios.Core.Controllers
                     {
                         var finalJs = "function executeScript(){";
                         var javascriptCode = cal.StudyVisitPageModuleElementDetail.MainJs;
-
-                        foreach (var dtl in thisCalElms)
+                        
+                        try
                         {
-                            var sbjctElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == dtl.TargetElementId && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated);
+                            foreach (var dtl in thisCalElms)
+                            {
+                                var sbjctElm = allUsedSbjElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == dtl.TargetElementId && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated);
 
-                            if (sbjctElm != null && sbjctElm.UserValue != "")
-                                finalJs += "var " + dtl.VariableName + "=" + sbjctElm.UserValue + ";";
+                                if (sbjctElm != null && sbjctElm.UserValue != null && sbjctElm.UserValue != "")
+                                    finalJs += "var " + dtl.VariableName + "=" + sbjctElm.UserValue + ";";
+                            }
+
+                            finalJs += javascriptCode + "}";
+
+                            using (var engine = new V8ScriptEngine())
+                            {
+                                var mathfnCall = " executeScript();";
+                                var mathResult = engine.Evaluate(finalJs + mathfnCall);
+                                thisCalSbjElm.UserValue = mathResult.ToString();
+                            }
                         }
-
-                        finalJs += javascriptCode + "}";
-
-                        using (var engine = new V8ScriptEngine())
+                        catch (Exception ex)
                         {
-                            var mathfnCall = " executeScript();";
-                            var mathResult = engine.Evaluate(finalJs + mathfnCall);
-                            thisCalSbjElm.UserValue = mathResult.ToString();
+                            return false;
                         }
 
                         _context.SubjectVisitPageModuleElements.Update(thisCalSbjElm);
