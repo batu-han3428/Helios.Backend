@@ -432,6 +432,7 @@ namespace Helios.Authentication.Controllers
                     user.Name = model.Name;
                     user.LastName = model.LastName;
                     user.Email = model.Email;
+                    user.PhoneNumber = model.PhoneNumber;
                    
                     await _userManager.UpdateAsync(user);
 

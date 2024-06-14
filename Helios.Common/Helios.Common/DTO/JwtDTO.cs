@@ -6,6 +6,7 @@
         public string?  LastName { get; set; }
         public List<string>? Roles { get; set; }
         public string? Mail { get; set; }
+        public string? PhoneNumber { get; set; }
         public Int64? UserId { get; set; }
         public Int64? TenantId { get; set; }
         public Int64? StudyId { get; set; }
