@@ -142,26 +142,31 @@ namespace Helios.Core.Controllers
 
                 _context.Subjects.Add(newSubject);
                 var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
-
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Successful",
+                    Values = new SubjectDTO()
+                    {
+                        StudyId = study.Id,
+                        Id = newSubject.Id,
+                        FirstPageId = newSubject.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId
+                    }
+                };
             }
-
-            return new ApiResponse<dynamic>
-            {
-                IsSuccess = true,
-                Message = "Successful",
-            };
         }
 
         [HttpPost]
         public async Task<List<SiteModel>> GetSites(SubjectDTO model)
         {
-            var aa = await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
+            var sites = await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
               .Select(site => new SiteModel
               {
                   Id = site.Id,
                   Name = site.Name,
               }).ToListAsync();
-            return aa;
+
+            return sites;
         }
 
         private string getSubjectNumber(string countryCode, string site, int subjectNumberInSite, int? subjectNumberDigitCount = 4)
