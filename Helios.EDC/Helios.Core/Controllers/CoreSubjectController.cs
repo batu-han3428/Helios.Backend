@@ -307,11 +307,11 @@ namespace Helios.Core.Controllers
                 if (result.IsSuccess)
                     result.Message = "Successfully.";
             }
-            else
-            {
-                result.IsSuccess = false;
-                result.Message = "Operation failed!";
-            }
+            //else
+            //{
+            //    result.IsSuccess = false;
+            //    result.Message = "Operation failed!";
+            //}
 
             return result;
         }
