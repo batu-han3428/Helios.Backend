@@ -63,6 +63,15 @@ namespace Helios.Core.Controllers
             return subjectListModel;
         }
 
+        [HttpGet]
+        public async Task<List<SubjectDetailMenuModel>> SetSubjectDetailMenu(Int64 studyId)
+        {
+            var menu = await GetSubjectDetailMenuLocal(studyId);
+            var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
+
+            return menu;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AddSubject(SubjectDTO model)
         {
@@ -77,13 +86,13 @@ namespace Helios.Core.Controllers
             else
             {
                 var study = await _context.Studies
-                    .Include(x => x.Sites)
-                    .Include(x => x.StudyVisits)
-                    .ThenInclude(x => x.StudyVisitPages)
-                    .ThenInclude(x => x.StudyVisitPageModules)
-                    .ThenInclude(x => x.StudyVisitPageModuleElements)
+                    .Include(x => x.Sites.Where(y => y.IsActive && !y.IsDeleted))
+                    .Include(x => x.StudyVisits.Where(y => y.IsActive && !y.IsDeleted))
+                    .ThenInclude(x => x.StudyVisitPages.Where(y => y.IsActive && !y.IsDeleted))
+                    .ThenInclude(x => x.StudyVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
+                    .ThenInclude(x => x.StudyVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
                     .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
-                    .FirstOrDefaultAsync(x => x.Id == model.StudyId);
+                    .FirstOrDefaultAsync(x => x.Id == model.StudyId && x.IsActive && !x.IsDeleted);
 
                 var site = study.Sites.FirstOrDefault(x => x.Id == model.SiteId);
                 var subjectsInSite = await _context.Subjects.Where(x => x.SiteId == model.SiteId && x.IsActive && !x.IsDeleted).ToListAsync();
