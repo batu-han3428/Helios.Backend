@@ -53,13 +53,20 @@ namespace Helios.Core.Controllers
                 RoleId = x.StudyRole.Id,
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
-
-            var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
-            subjectListModel.SubjectList = result;
-            subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
-            subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
-            subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
-
+         
+            if (role.Count() != 0)
+            {
+                subjectListModel.SubjectList = result;
+                var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
+                subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
+                subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
+                subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
+                subjectListModel.HasRole = true;
+            }
+            else
+            {
+                subjectListModel.HasRole = false;
+            }
             return subjectListModel;
         }
 

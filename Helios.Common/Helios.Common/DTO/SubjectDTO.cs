@@ -29,6 +29,7 @@ namespace Helios.Common.DTO
         public bool HasSdv { get; set; }
         public bool HasQuery { get; set; }
         public bool HasRandomizasyon { get; set; }
+        public bool HasRole { get; set; }
     }
 
     public class PermissionListModel
