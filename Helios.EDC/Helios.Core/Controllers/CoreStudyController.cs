@@ -3077,7 +3077,7 @@ namespace Helios.Core.Controllers
             {
                 return TransferChangeType.Delete.GetDescription();
             }
-            else if (activeVisit != null && activeVisit.IsActive && !activeVisit.IsDeleted && demoVisit != null && demoVisit.IsActive && !demoVisit.IsDeleted && (demoVisit.Name != activeVisit.Name || demoVisit.Order != activeVisit.Order))
+            else if (activeVisit != null && activeVisit.IsActive && !activeVisit.IsDeleted && demoVisit != null && demoVisit.IsActive && !demoVisit.IsDeleted && (demoVisit.Name != activeVisit.Name || demoVisit.Order != activeVisit.Order || demoVisit.VisitType!=activeVisit.VisitType))
             {
                 return TransferChangeType.Update.GetDescription();
             }
