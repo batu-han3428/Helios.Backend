@@ -408,6 +408,17 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
+        public async Task<StudyUserDTO> GetStudyUserSites(Int64 authUserId, Int64 studyId)
+        {         
+            return await _context.StudyUsers.Where(x => x.StudyId == studyId && x.AuthUserId == authUserId && !x.IsDeleted).Include(x => x.StudyUserSites).AsNoTracking().Select(x => new StudyUserDTO
+            {
+                StudyUserId = x.Id,
+                AuthUserId = x.AuthUserId,              
+                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, SiteFullName = s.Site.FullName }).ToList(),             
+            }).FirstOrDefaultAsync();
+        }
+
+        [HttpGet]
         public async Task<bool> GetCheckStudyUser(Int64 authUserId, Int64 studyId)
         {
             return await _context.StudyUsers.AnyAsync(x => x.StudyId == studyId && x.AuthUserId == authUserId && !x.IsDeleted);
