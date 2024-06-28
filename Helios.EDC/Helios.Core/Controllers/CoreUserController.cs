@@ -414,7 +414,7 @@ namespace Helios.Core.Controllers
             {
                 StudyUserId = x.Id,
                 AuthUserId = x.AuthUserId,              
-                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, SiteFullName = s.Site.FullName }).ToList(),             
+                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, Name = s.Site.Name }).ToList(),             
             }).FirstOrDefaultAsync();
         }
 
