@@ -11,6 +11,7 @@ using Helios.Common.Helpers.Api;
 using System.Text.Json;
 using Helios.Core.Services.Interfaces;
 using System.Xml.Linq;
+using MassTransit.Initializers;
 
 namespace Helios.Core.Controllers
 {
@@ -31,7 +32,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<StudyDTO>> GetStudyList(bool isLock, Int64 tenantId)
         {
-            var result = await _context.Studies.Where(x =>x.TenantId==tenantId &&  !x.IsDemo && x.IsActive && !x.IsDeleted && x.IsLock == isLock).Select(x => new StudyDTO()
+            var result = await _context.Studies.Where(x => x.TenantId == tenantId && !x.IsDemo && x.IsActive && !x.IsDeleted && x.IsLock == isLock).Select(x => new StudyDTO()
             {
                 Id = x.Id,
                 EquivalentStudyId = x.EquivalentStudyId,
@@ -3466,6 +3467,9 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            addNewVisitToSubjects(visitDTO.StudyId, visit.Id);
+                            result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
                             _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
@@ -3526,6 +3530,9 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            addNewPageToSubjects(page.StudyVisitId, page.Id);
+                            result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
                             _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
@@ -3655,6 +3662,44 @@ namespace Helios.Core.Controllers
             }
         }
 
+        private bool addNewVisitToSubjects(Int64 studyId, Int64 visitId)
+        {
+            var result = false;
+            var subjects = _context.Subjects.Where(x => x.StudyId == studyId).ToList();
+
+            foreach (var item in subjects)
+            {
+                var subjectVisit = new SubjectVisit()
+                {
+                    SubjectId = item.Id,
+                    StudyVisitId = visitId
+                };
+
+                _context.SubjectVisits.Add(subjectVisit);
+            }
+
+            return result;
+        }
+
+        private bool addNewPageToSubjects(Int64 visitId, Int64 pageId)
+        {
+            var result = false;
+            var subjectVisits = _context.SubjectVisits.Where(x => x.StudyVisitId == visitId).ToList();
+
+            foreach (var item in subjectVisits)
+            {
+                var subjectVisitPage = new SubjectVisitPage()
+                {
+                    SubjectVisitId = item.Id,
+                    StudyVisitPageId = pageId
+                };
+
+                _context.SubjectVisitPages.Add(subjectVisitPage);
+            }
+
+            return result;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteVisits(VisitDTO visitDTO)
         {
@@ -3760,6 +3805,9 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            removeVisitFromSubjects(visit.Id);
+                            result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
                             _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
@@ -3850,6 +3898,9 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            removePageFromSubjects(page.Id);
+                            result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
                             _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
@@ -3920,6 +3971,9 @@ namespace Helios.Core.Controllers
 
                         if (result)
                         {
+                            removeModuleFromSubjects(module.Id);
+                            result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
+
                             _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
@@ -3946,6 +4000,110 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        private bool removeVisitFromSubjects(Int64 studyVisitId)
+        {
+            var result = false;
+            var subjectVisits = _context.SubjectVisits
+                .Include(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.StudyVisitId == studyVisitId).ToList();
+
+            foreach (var subjectVisit in subjectVisits)
+            {
+                subjectVisit.IsActive = false;
+                subjectVisit.IsDeleted = true;
+
+                _context.SubjectVisits.Update(subjectVisit);
+
+                foreach (var subjectVisitPage in subjectVisit.SubjectVisitPages)
+                {
+                    subjectVisitPage.IsActive = false;
+                    subjectVisitPage.IsDeleted = true;
+
+                    _context.SubjectVisitPages.Update(subjectVisitPage);
+
+                    foreach (var svpm in subjectVisitPage.SubjectVisitPageModules)
+                    {
+                        svpm.IsActive = false;
+                        svpm.IsDeleted = true;
+
+                        _context.SubjectVisitPageModules.Update(svpm);
+
+                        foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                        {
+                            svpme.IsActive = false;
+                            svpme.IsDeleted = true;
+
+                            _context.SubjectVisitPageModuleElements.Update(svpme);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private bool removePageFromSubjects(Int64 studyVisitPageId)
+        {
+            var result = false;
+            var subjectVisitPages = _context.SubjectVisitPages
+                .Include(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.StudyVisitPageId == studyVisitPageId).ToList();
+
+            foreach (var subjectVisitPage in subjectVisitPages)
+            {
+                subjectVisitPage.IsActive = false;
+                subjectVisitPage.IsDeleted = true;
+
+                _context.SubjectVisitPages.Update(subjectVisitPage);
+
+                foreach (var svpm in subjectVisitPage.SubjectVisitPageModules)
+                {
+                    svpm.IsActive = false;
+                    svpm.IsDeleted = true;
+
+                    _context.SubjectVisitPageModules.Update(svpm);
+
+                    foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                    {
+                        svpme.IsActive = false;
+                        svpme.IsDeleted = true;
+
+                        _context.SubjectVisitPageModuleElements.Update(svpme);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private bool removeModuleFromSubjects(Int64 studyVisitPageModuleId)
+        {
+            var result = false;
+            var subjectVisitPageModules = _context.SubjectVisitPageModules
+                .Include(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.StudyVisitPageModuleId == studyVisitPageModuleId).ToList();
+
+            foreach (var svpm in subjectVisitPageModules)
+            {
+                svpm.IsActive = false;
+                svpm.IsDeleted = true;
+
+                _context.SubjectVisitPageModules.Update(svpm);
+
+                foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                {
+                    svpme.IsActive = false;
+                    svpme.IsDeleted = true;
+
+                    _context.SubjectVisitPageModuleElements.Update(svpme);
+                }
+            }
+            return result;
         }
 
         [HttpPost]
@@ -4070,6 +4228,189 @@ namespace Helios.Core.Controllers
             };
         }
 
+        private async Task<ApiResponse<dynamic>> SetStudyModule(List<ModuleDTO> dto)
+        {
+            var result = false;
+
+            try
+            {
+                List<StudyVisitPageModule> moduleList = MapModuleDTOListToStudyVisitPageModuleList(dto);
+
+                await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    IEnumerable<StudyVisitPageModuleElement> stdVstPgMdlElements = moduleList.SelectMany(x => x.StudyVisitPageModuleElements);
+
+                    //set parentElementId
+                    foreach (var item in stdVstPgMdlElements)
+                    {
+                        Int64? parentId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == item.StudyVisitPageModuleElementDetail.ParentId)?.Id;
+                        item.StudyVisitPageModuleElementDetail.ParentId = parentId == null ? 0 : parentId;
+                        _context.StudyVisitPageModuleElements.Update(item);
+                    }
+
+                    var elementDTOs = dto.SelectMany(x => x.StudyVisitPageModuleElements).ToList();
+
+                    foreach (var item in stdVstPgMdlElements)
+                    {
+                        var elementDTO = elementDTOs.FirstOrDefault(x => x.Id == item.ElementId);
+
+                        if (elementDTO.StudyVisitPageModuleCalculationElementDetails.Count > 0)
+                        {
+                            var studyVisitPageModuleCalculationElementDetailsList = new List<StudyVisitPageModuleCalculationElementDetail>();
+
+                            foreach (var calculationElementDetailDTO in elementDTO.StudyVisitPageModuleCalculationElementDetails)
+                            {
+                                var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetail
+                                {
+                                    ReferenceKey = Guid.NewGuid(),
+                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
+                                    CalculationElementId = item.Id,
+                                    TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
+                                    VariableName = calculationElementDetailDTO.VariableName
+                                };
+
+                                studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
+                            }
+
+                            item.StudyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
+                        }
+
+                        if (elementDTO.StudyVisitPageModuleElementEvents.Count > 0)
+                        {
+                            var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
+
+                            foreach (var moduleElementEventDTO in elementDTO.StudyVisitPageModuleElementEvents)
+                            {
+                                var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
+                                {
+                                    ReferenceKey = Guid.NewGuid(),
+                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
+                                    EventType = moduleElementEventDTO.EventType,
+                                    ActionType = moduleElementEventDTO.ActionType,
+                                    SourceElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == moduleElementEventDTO.SourceElementId).Id,
+                                    TargetElementId = item.Id,
+                                    ValueCondition = moduleElementEventDTO.ValueCondition,
+                                    ActionValue = moduleElementEventDTO.ActionValue,
+                                    VariableName = moduleElementEventDTO.VariableName,
+                                };
+
+                                studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
+                            }
+
+                            item.StudyVisitPageModuleElementEvents = studyVisitPageModuleElementEventList;
+                        }
+
+                        if (elementDTO.StudyVisitPageModuleElementValidationDetails.Count > 0)
+                        {
+                            var studyVisitPageModuleElementValidationDetailList = new List<StudyVisitPageModuleElementValidationDetail>();
+
+                            foreach (var val in elementDTO.StudyVisitPageModuleElementValidationDetails)
+                            {
+                                var studyVisitPageModuleElementValidationDetail = new StudyVisitPageModuleElementValidationDetail
+                                {
+                                    ReferenceKey = Guid.NewGuid(),
+                                    StudyVisitPageModuleElementId = item.Id,
+                                    ActionType = val.ValidationActionType,
+                                    ValueCondition = val.ValidationCondition,
+                                    Value = val.ValidationValue,
+                                    Message = val.ValidationMessage
+                                };
+
+                                studyVisitPageModuleElementValidationDetailList.Add(studyVisitPageModuleElementValidationDetail);
+                            }
+
+                            item.StudyVisitPageModuleElementValidationDetails = studyVisitPageModuleElementValidationDetailList;
+                        }
+                    }
+
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+                }
+
+                if (result)
+                {
+                    var studyVisitPageId = moduleList.Select(x => x.StudyVisitPageId).FirstOrDefault();
+                    var studyVisitPageModuleIds = moduleList.Select(x => x.Id).ToList();
+
+                    addNewModuleToSubjects(studyVisitPageId, studyVisitPageModuleIds);
+
+                    foreach (var item in moduleList)
+                    {
+                        var studyVisitPageModuleElementIds = item.StudyVisitPageModuleElements.Select(x => x.Id).ToList();
+
+                        addNewElementsToSubjects(studyVisitPageModuleElementIds, item.Id);
+                    }
+
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    var studyId = _context.StudyVisitPages.FirstOrDefault(x => x.Id == studyVisitPageId).StudyVisit.StudyId;
+                    _studyService.RemoveSubjectDetailMenu(studyId);
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    foreach (var item in moduleList)
+                    {
+                        //remove all added module, moduleElement and moduleElementDetails
+                        foreach (var elm in item.StudyVisitPageModuleElements)
+                        {
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.StudyVisitPageModuleElements.Update(elm);
+
+                            elm.StudyVisitPageModuleElementDetail.IsActive = false;
+                            elm.StudyVisitPageModuleElementDetail.IsDeleted = true;
+                            _context.StudyVisitPageModuleElementDetails.Update(elm.StudyVisitPageModuleElementDetail);
+
+                            foreach (var dtl in elm.StudyVisitPageModuleCalculationElementDetails)
+                            {
+                                dtl.IsActive = false;
+                                dtl.IsDeleted = true;
+                                _context.studyVisitPageModuleCalculationElementDetails.Update(dtl);
+                            }
+
+                            foreach (var evnt in elm.StudyVisitPageModuleElementEvents)
+                            {
+                                evnt.IsActive = false;
+                                evnt.IsDeleted = true;
+                                _context.StudyVisitPageModuleElementEvents.Update(evnt);
+                            }
+                        }
+
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+                        _context.StudyVisitPageModules.Update(item);
+                    }
+
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
+
         private List<StudyVisitPageModule> MapModuleDTOListToStudyVisitPageModuleList(List<ModuleDTO> moduleDTOList)
         {
             var studyVisitPageModuleList = new List<StudyVisitPageModule>();
@@ -4180,170 +4521,26 @@ namespace Helios.Core.Controllers
             return studyVisitPageModuleElementList;
         }
 
-        private async Task<ApiResponse<dynamic>> SetStudyModule(List<ModuleDTO> dto)
+        private bool addNewModuleToSubjects(Int64 studyVisitPageId, List<Int64> studyVisitPageModuleIds)
         {
             var result = false;
+            var subjectVisitPages = _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisitPageId).ToList();
 
-            try
+            foreach (var mdlId in studyVisitPageModuleIds)
             {
-                List<StudyVisitPageModule> moduleList = MapModuleDTOListToStudyVisitPageModuleList(dto);
-
-                await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
-
-                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
-
-                result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-
-                if (result)
+                foreach (var item in subjectVisitPages)
                 {
-                    IEnumerable<StudyVisitPageModuleElement> stdVstPgMdlElements = moduleList.SelectMany(x => x.StudyVisitPageModuleElements);
-
-                    //set parentElementId
-                    foreach (var item in stdVstPgMdlElements)
+                    var subjectVisitPageModule = new SubjectVisitPageModule()
                     {
-                        Int64? parentId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == item.StudyVisitPageModuleElementDetail.ParentId)?.Id;
-                        item.StudyVisitPageModuleElementDetail.ParentId = parentId == null ? 0 : parentId;
-                        _context.StudyVisitPageModuleElements.Update(item);
-                    }
-
-                    var elementDTOs = dto.SelectMany(x => x.StudyVisitPageModuleElements).ToList();
-
-                    foreach (var item in stdVstPgMdlElements)
-                    {
-                        var elementDTO = elementDTOs.FirstOrDefault(x => x.Id == item.ElementId);
-
-                        if (elementDTO.StudyVisitPageModuleCalculationElementDetails.Count > 0)
-                        {
-                            var studyVisitPageModuleCalculationElementDetailsList = new List<StudyVisitPageModuleCalculationElementDetail>();
-
-                            foreach (var calculationElementDetailDTO in elementDTO.StudyVisitPageModuleCalculationElementDetails)
-                            {
-                                var studyVisitPageModuleCalculationElementDetail = new StudyVisitPageModuleCalculationElementDetail
-                                {
-                                    ReferenceKey = Guid.NewGuid(),
-                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
-                                    CalculationElementId = item.Id,
-                                    TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
-                                    VariableName = calculationElementDetailDTO.VariableName
-                                };
-
-                                studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
-                            }
-
-                            item.StudyVisitPageModuleCalculationElementDetails = studyVisitPageModuleCalculationElementDetailsList;
-                        }
-
-                        if (elementDTO.StudyVisitPageModuleElementEvents.Count > 0)
-                        {
-                            var studyVisitPageModuleElementEventList = new List<StudyVisitPageModuleElementEvent>();
-
-                            foreach (var moduleElementEventDTO in elementDTO.StudyVisitPageModuleElementEvents)
-                            {
-                                var studyVisitPageModuleElementEvent = new StudyVisitPageModuleElementEvent
-                                {
-                                    ReferenceKey = Guid.NewGuid(),
-                                    StudyVisitPageModuleId = item.StudyVisitPageModuleId,
-                                    EventType = moduleElementEventDTO.EventType,
-                                    ActionType = moduleElementEventDTO.ActionType,
-                                    SourceElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == moduleElementEventDTO.SourceElementId).Id,
-                                    TargetElementId = item.Id,
-                                    ValueCondition = moduleElementEventDTO.ValueCondition,
-                                    ActionValue = moduleElementEventDTO.ActionValue,
-                                    VariableName = moduleElementEventDTO.VariableName,
-                                };
-
-                                studyVisitPageModuleElementEventList.Add(studyVisitPageModuleElementEvent);
-                            }
-
-                            item.StudyVisitPageModuleElementEvents = studyVisitPageModuleElementEventList;
-                        }
-
-                        if (elementDTO.StudyVisitPageModuleElementValidationDetails.Count > 0)
-                        {
-                            var studyVisitPageModuleElementValidationDetailList = new List<StudyVisitPageModuleElementValidationDetail>();
-
-                            foreach (var val in elementDTO.StudyVisitPageModuleElementValidationDetails)
-                            {
-                                var studyVisitPageModuleElementValidationDetail = new StudyVisitPageModuleElementValidationDetail
-                                {
-                                    ReferenceKey = Guid.NewGuid(),
-                                    StudyVisitPageModuleElementId = item.Id,
-                                    ActionType = val.ValidationActionType,
-                                    ValueCondition = val.ValidationCondition,
-                                    Value = val.ValidationValue,
-                                    Message = val.ValidationMessage
-                                };
-
-                                studyVisitPageModuleElementValidationDetailList.Add(studyVisitPageModuleElementValidationDetail);
-                            }
-
-                            item.StudyVisitPageModuleElementValidationDetails = studyVisitPageModuleElementValidationDetailList;
-                        }
-                    }
-
-                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-                }
-
-                if (result)
-                {
-                    return new ApiResponse<dynamic>
-                    {
-                        IsSuccess = true,
-                        Message = "Successful"
+                        StudyVisitPageModuleId = mdlId,
+                        SubjectVisitPageId = item.Id
                     };
-                }
-                else
-                {
-                    foreach (var item in moduleList)
-                    {
-                        //remove all added module, moduleElement and moduleElementDetails
-                        foreach (var elm in item.StudyVisitPageModuleElements)
-                        {
-                            elm.IsActive = false;
-                            elm.IsDeleted = true;
-                            _context.StudyVisitPageModuleElements.Update(elm);
 
-                            elm.StudyVisitPageModuleElementDetail.IsActive = false;
-                            elm.StudyVisitPageModuleElementDetail.IsDeleted = true;
-                            _context.StudyVisitPageModuleElementDetails.Update(elm.StudyVisitPageModuleElementDetail);
-
-                            foreach (var dtl in elm.StudyVisitPageModuleCalculationElementDetails)
-                            {
-                                dtl.IsActive = false;
-                                dtl.IsDeleted = true;
-                                _context.studyVisitPageModuleCalculationElementDetails.Update(dtl);
-                            }
-
-                            foreach (var evnt in elm.StudyVisitPageModuleElementEvents)
-                            {
-                                evnt.IsActive = false;
-                                evnt.IsDeleted = true;
-                                _context.StudyVisitPageModuleElementEvents.Update(evnt);
-                            }
-                        }
-
-                        item.IsActive = false;
-                        item.IsDeleted = true;
-                        _context.StudyVisitPageModules.Update(item);
-                    }
-
-                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
-
-                    return new ApiResponse<dynamic>
-                    {
-                        IsSuccess = false,
-                        Message = "Unsuccessful"
-                    };
+                    _context.SubjectVisitPageModules.Add(subjectVisitPageModule);
                 }
             }
-            catch (Exception e)
-            {
-                return new ApiResponse<dynamic>
-                {
-                    IsSuccess = false,
-                    Message = "Unsuccessful"
-                };
-            }
+
+            return result;
         }
 
         private Int64 GetSourcePage(List<StudyVisitRelationSourcePageModel> data, Int64 elementId)
@@ -4766,6 +4963,8 @@ namespace Helios.Core.Controllers
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
 
+                    var studyVisitPageModuleElementIds = new List<Int64>();
+
                     if (stdVstPgMdlElmnt.ElementType == ElementType.DataGrid || stdVstPgMdlElmnt.ElementType == ElementType.Table)
                     {
                         var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
@@ -4802,6 +5001,11 @@ namespace Helios.Core.Controllers
                             _context.Update(chDtl);
 
                             result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            if (result.IsSuccess)
+                            {
+                                studyVisitPageModuleElementIds.Add(child.Id);
+                            }
                         }
                     }
 
@@ -4818,6 +5022,13 @@ namespace Helios.Core.Controllers
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     result.Message = result.IsSuccess ? "Successful" : "Error";
+
+                    if (result.IsSuccess)
+                    {
+                        studyVisitPageModuleElementIds.Add(stdVstPgMdlElmnt.Id);
+                        addNewElementsToSubjects(studyVisitPageModuleElementIds, stdVstPgMdlElmnt.StudyVisitPageModuleId);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
                 }
                 else
                 {
@@ -4834,16 +5045,46 @@ namespace Helios.Core.Controllers
             return result;
         }
 
+        private bool addNewElementsToSubjects(List<Int64> stdVstPgMdlElmntIds, Int64 stdVstPgMdlId)
+        {
+            var result = false;
+
+            var stdVstPgMdlElmnts = _context.StudyVisitPageModuleElements
+                .Include(x => x.StudyVisitPageModuleElementDetail)
+                .Where(x => stdVstPgMdlElmntIds.Contains(x.Id))
+                .ToList();
+
+            var subjectVisitPageModules = _context.SubjectVisitPageModules.Where(t => t.StudyVisitPageModuleId == stdVstPgMdlId).ToList();
+
+            foreach (var mdl in subjectVisitPageModules)
+            {
+                foreach (var elmnt in stdVstPgMdlElmnts)
+                {
+                    var subjectVisitPageModuleElement = new SubjectVisitPageModuleElement()
+                    {
+                        SubjectVisitModuleId = mdl.Id,
+                        StudyVisitPageModuleElementId = elmnt.Id,
+                        DataGridRowId = elmnt.StudyVisitPageModuleElementDetail.RowIndex
+                    };
+
+                    _context.SubjectVisitPageModuleElements.Add(subjectVisitPageModuleElement);
+                }
+            }
+
+            return result;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> DeleteElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var element = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x => x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
-            var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var studyVisitPageModuleElement = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x => x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
+            var studyVisitPageModuleElementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var studyVisitPageModuleElementIds = new List<Int64>();
 
-            if (element != null)
+            if (studyVisitPageModuleElement != null)
             {
-                if (element.StudyVisitPageModuleElementDetail.IsInCalculation && element.ElementType != ElementType.Calculated)
+                if (studyVisitPageModuleElement.StudyVisitPageModuleElementDetail.IsInCalculation && studyVisitPageModuleElement.ElementType != ElementType.Calculated)
                 {
                     result.IsSuccess = false;
                     result.Message = "This element used in a calculation element formul. Please remove it first from calculation element.";
@@ -4861,7 +5102,7 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                if (studyVisitPageModuleElement.ElementType == ElementType.DataGrid || studyVisitPageModuleElement.ElementType == ElementType.Table)
                 {
                     var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
                     var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
@@ -4883,20 +5124,22 @@ namespace Helios.Core.Controllers
 
                         _context.StudyVisitPageModuleElements.Update(item);
                     }
+
+                    studyVisitPageModuleElementIds.AddRange(chldrnIds);
                 }
 
                 //remove events
-                var moduleEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                //var moduleEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                foreach (var item in moduleEvents)
-                {
-                    item.IsActive = false;
-                    item.IsDeleted = true;
+                //foreach (var item in moduleEvents)
+                //{
+                //    item.IsActive = false;
+                //    item.IsDeleted = true;
 
-                    _context.StudyVisitPageModuleElementEvents.Update(item);
-                }
+                //    _context.StudyVisitPageModuleElementEvents.Update(item);
+                //}
 
-                if (element.ElementType == ElementType.Calculated)
+                if (studyVisitPageModuleElement.ElementType == ElementType.Calculated)
                 {
                     var childrenDtils = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var targetElmIds = childrenDtils.Select(x => x.TargetElementId).ToList();
@@ -4935,7 +5178,7 @@ namespace Helios.Core.Controllers
                 }
 
                 //remove validations
-                var validations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var validations = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => x.StudyVisitPageModuleElementId == studyVisitPageModuleElement.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 if (validations != null && validations.Count > 0)
                 {
@@ -4948,21 +5191,47 @@ namespace Helios.Core.Controllers
                     }
                 }
 
-                element.IsDeleted = true;
-                element.IsActive = false;
-                elementDetail.IsDeleted = true;
-                elementDetail.IsActive = false;
+                studyVisitPageModuleElement.IsDeleted = true;
+                studyVisitPageModuleElement.IsActive = false;
+                studyVisitPageModuleElementDetail.IsDeleted = true;
+                studyVisitPageModuleElementDetail.IsActive = false;
 
-                _context.Update(element);
-                _context.Update(elementDetail);
+                _context.Update(studyVisitPageModuleElement);
+                _context.Update(studyVisitPageModuleElementDetail);
 
                 result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 result.Message = result.IsSuccess ? "Successful" : "Error";
+
+                if (result.IsSuccess)
+                {
+                    studyVisitPageModuleElementIds.Add(studyVisitPageModuleElement.Id);
+                    removeElementsFromSubjects(studyVisitPageModuleElementIds, studyVisitPageModuleElement.StudyVisitPageModuleId);
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
             }
             else
             {
                 result.IsSuccess = false;
                 result.Message = "Error";
+            }
+
+            return result;
+        }
+
+        private bool removeElementsFromSubjects(List<Int64> stdVstPgMdlElmntIds, Int64 stdVstPgMdlId)
+        {
+            var result = false;
+
+            var stdVstPgMdlElmnts = _context.SubjectVisitPageModuleElements
+                .Where(x => stdVstPgMdlElmntIds.Contains(x.StudyVisitPageModuleElementId))
+                .ToList();
+
+            foreach (var elmnt in stdVstPgMdlElmnts)
+            {
+                elmnt.IsActive = false;
+                elmnt.IsDeleted = true;
+
+                _context.SubjectVisitPageModuleElements.Update(elmnt);
             }
 
             return result;
@@ -5174,6 +5443,7 @@ namespace Helios.Core.Controllers
 
             var moduleElements = _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == model.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync().Result;
 
+            //add new element
             if (stdVstPgMdlElement == null)
             {
                 if (!checkStudyElementName(model.ModuleId, model.ElementName, moduleElements).Result)
@@ -5387,6 +5657,15 @@ namespace Helios.Core.Controllers
                             result.IsSuccess = false;
                             result.Message = "Operation failed. Please try again to save dependents or calculation part.";
                         }
+
+                        if (result.IsSuccess)
+                        {
+                            var stdVstPgMdlElmntIds = new List<Int64>();
+                            stdVstPgMdlElmntIds.Add(stdVstPgMdlElmnt.Id);
+
+                            addNewElementsToSubjects(stdVstPgMdlElmntIds, stdVstPgMdlElmnt.StudyVisitPageModuleId);
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
                     }
                     else
                     {
@@ -5409,7 +5688,7 @@ namespace Helios.Core.Controllers
                     }
                 }
             }
-            else
+            else//update existing element
             {
                 if (stdVstPgMdlElement.ElementName.TrimStart().TrimEnd() != model.ElementName.TrimStart().TrimEnd())
                 {
@@ -5908,7 +6187,7 @@ namespace Helios.Core.Controllers
 
             return result;
         }
-        #endregion
 
+        #endregion
     }
 }

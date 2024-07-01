@@ -220,8 +220,8 @@ namespace Helios.Core.Controllers
             var studyVisit = await _context.StudyVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
-                .SelectMany(x => x.SubjectVisitPageModules)
-                .SelectMany(x => x.SubjectVisitPageModuleElements)
+                .SelectMany(x => x.SubjectVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
+                .SelectMany(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
                 .Include(x => x.StudyVisitPageModuleElement)
                 .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
                 .Select(e => new SubjectElementModel
