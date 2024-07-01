@@ -3665,7 +3665,7 @@ namespace Helios.Core.Controllers
         private bool addNewVisitToSubjects(Int64 studyId, Int64 visitId)
         {
             var result = false;
-            var subjects = _context.Subjects.Where(x => x.StudyId == studyId).ToList();
+            var subjects = _context.Subjects.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).ToList();
 
             foreach (var item in subjects)
             {
@@ -3684,7 +3684,7 @@ namespace Helios.Core.Controllers
         private bool addNewPageToSubjects(Int64 visitId, Int64 pageId)
         {
             var result = false;
-            var subjectVisits = _context.SubjectVisits.Where(x => x.StudyVisitId == visitId).ToList();
+            var subjectVisits = _context.SubjectVisits.Where(x => x.StudyVisitId == visitId && x.IsActive && !x.IsDeleted).ToList();
 
             foreach (var item in subjectVisits)
             {
@@ -4006,9 +4006,9 @@ namespace Helios.Core.Controllers
         {
             var result = false;
             var subjectVisits = _context.SubjectVisits
-                .Include(x => x.SubjectVisitPages)
-                .ThenInclude(x => x.SubjectVisitPageModules)
-                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Include(x => x.SubjectVisitPages.Where(y => y.IsActive && !y.IsDeleted))
+                .ThenInclude(x => x.SubjectVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
+                .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
                 .Where(x => x.StudyVisitId == studyVisitId).ToList();
 
             foreach (var subjectVisit in subjectVisits)
@@ -4050,9 +4050,9 @@ namespace Helios.Core.Controllers
         {
             var result = false;
             var subjectVisitPages = _context.SubjectVisitPages
-                .Include(x => x.SubjectVisitPageModules)
-                .ThenInclude(x => x.SubjectVisitPageModuleElements)
-                .Where(x => x.StudyVisitPageId == studyVisitPageId).ToList();
+                .Include(x => x.SubjectVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
+                .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
+                .Where(x => x.StudyVisitPageId == studyVisitPageId && x.IsActive && !x.IsDeleted).ToList();
 
             foreach (var subjectVisitPage in subjectVisitPages)
             {
@@ -4085,8 +4085,8 @@ namespace Helios.Core.Controllers
         {
             var result = false;
             var subjectVisitPageModules = _context.SubjectVisitPageModules
-                .Include(x => x.SubjectVisitPageModuleElements)
-                .Where(x => x.StudyVisitPageModuleId == studyVisitPageModuleId).ToList();
+                .Include(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
+                .Where(x => x.StudyVisitPageModuleId == studyVisitPageModuleId && x.IsActive && !x.IsDeleted).ToList();
 
             foreach (var svpm in subjectVisitPageModules)
             {
@@ -4338,6 +4338,7 @@ namespace Helios.Core.Controllers
                     var studyVisitPageModuleIds = moduleList.Select(x => x.Id).ToList();
 
                     addNewModuleToSubjects(studyVisitPageId, studyVisitPageModuleIds);
+                    result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
                     foreach (var item in moduleList)
                     {
@@ -4348,7 +4349,11 @@ namespace Helios.Core.Controllers
 
                     result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
-                    var studyId = _context.StudyVisitPages.FirstOrDefault(x => x.Id == studyVisitPageId).StudyVisit.StudyId;
+                    StudyVisitPage? studyVisitPage = _context.StudyVisitPages
+                        .Include(x => x.StudyVisit)
+                        .FirstOrDefault(x => x.Id == studyVisitPageId);
+
+                    var studyId = studyVisitPage.StudyVisit.StudyId;
                     _studyService.RemoveSubjectDetailMenu(studyId);
 
                     return new ApiResponse<dynamic>
@@ -4524,7 +4529,7 @@ namespace Helios.Core.Controllers
         private bool addNewModuleToSubjects(Int64 studyVisitPageId, List<Int64> studyVisitPageModuleIds)
         {
             var result = false;
-            var subjectVisitPages = _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisitPageId).ToList();
+            var subjectVisitPages = _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisitPageId && x.IsActive && !x.IsDeleted).ToList();
 
             foreach (var mdlId in studyVisitPageModuleIds)
             {
@@ -5051,10 +5056,10 @@ namespace Helios.Core.Controllers
 
             var stdVstPgMdlElmnts = _context.StudyVisitPageModuleElements
                 .Include(x => x.StudyVisitPageModuleElementDetail)
-                .Where(x => stdVstPgMdlElmntIds.Contains(x.Id))
+                .Where(x => stdVstPgMdlElmntIds.Contains(x.Id) && x.IsActive && !x.IsDeleted)
                 .ToList();
 
-            var subjectVisitPageModules = _context.SubjectVisitPageModules.Where(t => t.StudyVisitPageModuleId == stdVstPgMdlId).ToList();
+            var subjectVisitPageModules = _context.SubjectVisitPageModules.Where(t => t.StudyVisitPageModuleId == stdVstPgMdlId && t.IsActive && !t.IsDeleted).ToList();
 
             foreach (var mdl in subjectVisitPageModules)
             {
@@ -5223,7 +5228,7 @@ namespace Helios.Core.Controllers
             var result = false;
 
             var stdVstPgMdlElmnts = _context.SubjectVisitPageModuleElements
-                .Where(x => stdVstPgMdlElmntIds.Contains(x.StudyVisitPageModuleElementId))
+                .Where(x => stdVstPgMdlElmntIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted)
                 .ToList();
 
             foreach (var elmnt in stdVstPgMdlElmnts)
