@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
 using System.Text.Json;
+using Helios.Common;
 
 namespace Helios.Core.Controllers
 {
@@ -4324,6 +4325,216 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        class DatagridAndTableProperties
+        {
+            public string title { get; set; }
+            public string width { get; set; }
+        }
+
+        [HttpGet]
+        public async Task<StudyVisitAnnotatedCrfModel> GetStudyVisitAnnotatedCrf(AnnotatedDTO dto)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var study = await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.Id == baseDTO.StudyId).Select(study => new Study
+                {
+                    StudyName = study.StudyName,
+                    ProtocolCode = study.ProtocolCode,
+                    Description = study.Description,
+                    SubDescription = study.SubDescription,
+                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).Select(visit => new StudyVisit
+                    {
+                        Name = visit.Name,
+                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new StudyVisitPage
+                        {
+                            Name = dto.IsPage ? page.Name : null,
+                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new StudyVisitPageModule
+                            {
+                                Name = module.Name,
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label)).Select(elm => new StudyVisitPageModuleElement
+                                {
+                                    Id = elm.Id,
+                                    Title = elm.Title,
+                                    ElementName = elm.ElementName,
+                                    Description = dto.IsDesc ? elm.Description : null,
+                                    IsRequired = dto.IsAdditional ? elm.IsRequired : false,
+                                    ElementType = elm.ElementType,
+                                    StudyVisitPageModuleElementDetail = elm.StudyVisitPageModuleElementDetail != null && elm.StudyVisitPageModuleElementDetail.IsActive && !elm.StudyVisitPageModuleElementDetail.IsDeleted
+                                                ? new StudyVisitPageModuleElementDetail
+                                                {
+                                                    LowerLimit = dto.IsAdditional ? elm.StudyVisitPageModuleElementDetail.LowerLimit : "",
+                                                    UpperLimit = dto.IsAdditional ? elm.StudyVisitPageModuleElementDetail.UpperLimit : "",
+                                                    ParentId = elm.StudyVisitPageModuleElementDetail.ParentId,
+                                                    ElementOptions = elm.StudyVisitPageModuleElementDetail.ElementOptions,
+                                                    ColunmIndex = elm.StudyVisitPageModuleElementDetail.ColunmIndex,
+                                                    DatagridAndTableProperties = elm.StudyVisitPageModuleElementDetail.DatagridAndTableProperties
+                                                }
+                                                : null
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList()
+                }).AsNoTracking().AsSplitQuery().FirstOrDefaultAsync();
+
+                StudyVisitAnnotatedCrfModel model = new StudyVisitAnnotatedCrfModel();
+                if (study != null)
+                {
+                    StudyAnnotatedCrfModel studyModel = new StudyAnnotatedCrfModel
+                    {
+                        Title = study.StudyName,
+                        ProtocolCode = study.ProtocolCode,
+                        Description = study.Description,
+                        SubDescription = study.SubDescription
+                    };
+                    List<VisitAnnotatedCrfModel> visitModel = new List<VisitAnnotatedCrfModel>();
+
+                    var elements = study.StudyVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements);
+
+                    var chls = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId != 0).ToList();
+
+                    List<Int64> ids = new List<Int64>();
+
+                    chls.ForEach(chl =>
+                    {
+                        var parentElm = elements.FirstOrDefault(x => chl?.StudyVisitPageModuleElementDetail?.ParentId == x.Id);
+                        if (parentElm != null && parentElm.ElementType == ElementType.DataGrid)
+                        {
+                            ids.Add(chl.Id);
+                        }
+                    });
+
+                    visitModel.AddRange(study.StudyVisits.Select(visit => new VisitAnnotatedCrfModel
+                    {
+                        Title = visit.Name,
+                        Children = visit.StudyVisitPages.Select(page => new VisitAnnotatedCrfModel
+                        {
+                            Title = page.Name,
+                            Children = page.StudyVisitPageModules.Select(module => new VisitAnnotatedCrfModel
+                            {
+                                Title = module.Name,
+                                Children = module.StudyVisitPageModuleElements.Where(x => !ids.Contains(x.Id)).Select(elm =>
+                                {
+                                    VisitAnnotatedCrfModel newElm = new VisitAnnotatedCrfModel();
+                                    newElm.Title = elm.Title != "" ? elm.Title : elm.ElementName;
+                                    newElm.Input = elm.ElementType;
+                                    newElm.Description = elm.Description;
+                                    newElm.IsRequired = elm.IsRequired;
+                                    newElm.ElementOptions = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.ElementOptions : "";
+                                    newElm.LowerLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.LowerLimit : "";
+                                    newElm.UpperLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.UpperLimit : "";
+
+                                    if (elm.ElementType == ElementType.DataGrid)
+                                    {
+                                        var children = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId == elm.Id).OrderBy(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex != null ? int.Parse(x?.StudyVisitPageModuleElementDetail?.ColunmIndex.ToString()) : int.MaxValue).ToList();
+
+                                        var datp = JsonSerializer.Deserialize<List<DatagridAndTableProperties>>(elm?.StudyVisitPageModuleElementDetail?.DatagridAndTableProperties);
+                                        int index = 1;
+                                        Dictionary<string, string> datagridAndTableValue = new Dictionary<string, string>();
+                                        datp?.ForEach(d =>
+                                        {
+                                            //var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index && x.StudyVisitPageModuleElementDetail.IsActive && !x.StudyVisitPageModuleElementDetail.IsDeleted);
+                                            var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index);
+                                            string val = "";
+                                            if (chl != null)
+                                            {
+                                                if (chl.ElementType == ElementType.RadioList || chl.ElementType == ElementType.DropDown || chl.ElementType == ElementType.CheckList || chl.ElementType == ElementType.DropDownMulti)
+                                                {
+                                                    val = chl?.StudyVisitPageModuleElementDetail?.ElementOptions;
+                                                }
+                                                else
+                                                {
+                                                    val = chl.ElementType.ToString();
+                                                }
+                                                string key = $"{d.title}_{Guid.NewGuid()}";
+                                                datagridAndTableValue.Add(key, val);
+                                            }
+                                            else
+                                            {
+                                                string key = $"Empty_{Guid.NewGuid()}";
+                                                datagridAndTableValue.Add(key, val);
+                                            }
+                                            index++;
+                                        });
+                                        newElm.DatagridAndTableValue = datagridAndTableValue;
+                                    }
+                                    return newElm;
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList());
+                    model.StudyModel = studyModel;
+                    model.VisitModel = visitModel;
+                }
+
+                return model;
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddStudyVisitAnnotatedCrfVersion(AnnotatedVersionDTO dto)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                await _context.AnnotatedVersions.AddAsync(new AnnotatedVersions { Version = dto.Version, Pdf = dto.Pdf, TenantId = baseDTO.TenantId, StudyId = baseDTO.StudyId });
+
+                bool result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpGet]
+        public async Task<List<AnnotatedCrfHistoryModel>> GetStudyVisitAnnotatedCrfHistory()
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+               
+            return await _context.AnnotatedVersions.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId).Select(x => new AnnotatedCrfHistoryModel
+            {
+                Id = x.Id,
+                Version = x.Version,
+                CreatedBy = x.AddedById.ToString(),
+                CreatedOn = x.CreatedAt
+            }).ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<string?> GetStudyVisitAnnotatedCrfHistoryPdf(Int64 id)
+        {          
+            return await _context.AnnotatedVersions.Where(x => x.Id == id).Select(x => x.Pdf).FirstOrDefaultAsync();
         }
         #endregion
 
