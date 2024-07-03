@@ -30,9 +30,10 @@ namespace Helios.Core.Controllers
             var subjectListModel = new SubjectListModel();
             var menu = await GetSubjectDetailMenuLocal(studyId);
             var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
+
             var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
                 .Include(x => x.Site)
-                .Include(x => x.SubjectVisits)
+                .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
                 .ThenInclude(x => x.SubjectVisitPages)
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
@@ -55,6 +56,7 @@ namespace Helios.Core.Controllers
             }).ToListAsync();
 
             var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
+
             subjectListModel.SubjectList = result;
             subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
             subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
@@ -486,6 +488,48 @@ namespace Helios.Core.Controllers
                         })
                         .ToList()
                 }).ToListAsync();
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteOrArchiveSubject(SubjectArchiveOrDeleteModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            var subject = await _context.Subjects.Where(x => x.Id == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (subject != null)
+            {
+                if (model.IsDelete)
+                {
+                    subject.IsActive = false;
+                    subject.IsDeleted = true;
+                }
+                else
+                {
+                    subject.IsActive = false;
+                }
+
+                subject.Comment = model.Comment;
+
+                _context.Subjects.Update(subject);
+                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                
+                if (result.IsSuccess)
+                {
+                    result.Message = "Successfully";
+                }
+                else
+                {
+                    result.Message = "Error";
+                }
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Try again please!";
+            }
+
+            return result;
         }
     }
 }
