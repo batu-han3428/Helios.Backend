@@ -277,7 +277,7 @@ namespace Helios.Core.Controllers
                     MissingData = e.MissingData,
                     Sdv = e.Sdv,
                     Query = e.Query
-                }).ToListAsync();
+                }).OrderBy(x => x.Order).ToListAsync();
 
             foreach (var item in result)
             {
@@ -291,7 +291,7 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            return finalList;
+            return finalList; 
         }
 
         [HttpPost]
