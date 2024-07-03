@@ -20,6 +20,7 @@ namespace Helios.Core.Domains.Entities
         public DateTimeOffset? RandomDataDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset? UserValueUpdateDate { get; set; }
+        public string? Comment { get; set; }
         public Site Site { get; set; }
         public Study Study { get; set; }
         public ICollection<SubjectVisit> SubjectVisits { get; set; }
