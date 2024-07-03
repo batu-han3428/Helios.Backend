@@ -7,6 +7,7 @@
         public bool IsLabel { get; set; }
         public bool IsDesc { get; set; }
         public bool IsAdditional { get; set; }
+        public bool IsHiddenElement { get; set; }
         public string? IsVersion { get; set; }
     }
 }

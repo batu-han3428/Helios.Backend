@@ -13,6 +13,7 @@ using Helios.Core.Services.Interfaces;
 using System.Xml.Linq;
 using MassTransit.Initializers;
 using Helios.Common;
+using Helios.Common.Helpers;
 
 namespace Helios.Core.Controllers
 {
@@ -4695,12 +4696,6 @@ namespace Helios.Core.Controllers
             }
         }
 
-        class DatagridAndTableProperties
-        {
-            public string title { get; set; }
-            public string width { get; set; }
-        }
-
         [HttpGet]
         public async Task<StudyVisitAnnotatedCrfModel> GetStudyVisitAnnotatedCrf(AnnotatedDTO dto)
         {
@@ -4723,7 +4718,7 @@ namespace Helios.Core.Controllers
                             StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new StudyVisitPageModule
                             {
                                 Name = module.Name,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label)).Select(elm => new StudyVisitPageModuleElement
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label) && (dto.IsHiddenElement || elm.ElementType != ElementType.Hidden)).Select(elm => new StudyVisitPageModuleElement
                                 {
                                     Id = elm.Id,
                                     Title = elm.Title,
@@ -4847,7 +4842,6 @@ namespace Helios.Core.Controllers
                 throw;
             }
         }
-
 
         private bool AreJsonStringsDifferent(string json1, string json2)
         {
