@@ -23,13 +23,6 @@ namespace Helios.Common.DTO
         public int Query { get; set; }
 
     }
-    public class SubjectListModel
-    {
-        public List<SubjectDTO> SubjectList { get; set; }
-        public bool HasSdv { get; set; }
-        public bool HasQuery { get; set; }
-        public bool HasRandomizasyon { get; set; }
-    }
 
     public class PermissionListModel
     {       

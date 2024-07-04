@@ -23,11 +23,11 @@ namespace Helios.Common.Enums
         [Description("Edit")]
         Subject_Edit = 102,
         [Description("Archive")]
-        Subject_ArchivePatient = 103,
+        Subject_Archive = 103,
         [Description("Delete")]
         Subject_Delete = 104,
         [Description("Change state")]
-        Subject_PatientStateChange = 105,
+        Subject_ChangeState = 105,
         [Description("Randomize")]
         Subject_Randomize = 106,
         [Description("View randomization")]
@@ -35,9 +35,10 @@ namespace Helios.Common.Enums
         [Description("View e-Consent")]
         Subject_EConsentView = 108,
         [Description("Export subject form")]
-        Subject_ExportPatientForm = 109,
+        Subject_ExportForm = 109,
         [Description("Signature")]
         Subject_Sign = 110,
+
         [Description("On-site SDV")]
         Monitoring_Sdv = 111,
         [Description("Verification")]
@@ -49,7 +50,7 @@ namespace Helios.Common.Enums
         [Description("Close auto query")]
         Monitoring_AutoQueryClosed = 115,
         [Description("Lock")]
-        Monitoring_Lock = 116,
+        Monitoring_HasPageLock = 116,
         [Description("Unlock")]
         Monitoring_HasPageUnLock = 117,
         [Description("Freeze")]
@@ -61,6 +62,7 @@ namespace Helios.Common.Enums
         [Description("Input audit trail")]
         Monitoring_InputAuditTrail = 121,
         [Description("Missing data")]
+
         Monitoring_MarkAsNull = 122,
         [Description("Add multi-form")]
         Form_AddMultiVisit = 123,
@@ -74,6 +76,7 @@ namespace Helios.Common.Enums
         Form_AEArchive = 127,
         [Description("Remove adverse event")]
         Form_AERemove = 128,
+
         [Description("View")]
         FileUpload_CanFileView = 129,
         [Description("Upload")]
@@ -81,21 +84,11 @@ namespace Helios.Common.Enums
         [Description("Download")]
         FileUpload_CanFileDownload = 131,
         [Description("Delete")]
-        FileUpload_CanFileDeleted = 132,
+        FileUpload_CanFileDelete = 132,
+
         [Description("View")]
         StudyDocument_StudyFoldersView = 133,
-        [Description("Subject state")]
-        DashboardOld_SubjectState = 134,
-        [Description("Query status")]
-        DashboardOld_QueryStatus = 135,
-        [Description("Randomization")]
-        DashboardOld_Randomization = 136,
-        [Description("SDV status")]
-        DashboardOld_SdvStatus = 137,
-        [Description("Total subject number")]
-        DashboardOld_TotalSubjectNumber = 138,
-        [Description("Randomization Total subject number by country/ site")]
-        DashboardOld_RandomizationTotalSubjectNumberByCountrySite = 139,
+
         [Description("Full study report")]
         DataExport_FullStudyReport = 140,
         [Description("Study report")]
@@ -138,18 +131,22 @@ namespace Helios.Common.Enums
         DataExport_LocalLabReport = 159,
         [Description("Lock/Freeze status report")]
         DataExport_LockFreezeStatusReport = 160,
+
         [Description("Transfer")]
         IWRS_IwrsTransfer = 161,
         [Description("Receive")]
         IWRS_IwrsMarkAsRecieved = 162,
+
         [Description("Code")]
         MedicalCoding_CanCode = 163,
+
         [Description("Dashboard Admin")]
         Dashboard_DashboardBuilderAdmin = 164,
         [Description("Download Pivot")]
         Dashboard_DashboardBuilderPivotExport = 165,
         [Description("Download Source Data")]
         Dashboard_DashboardBuilderSourceExport = 166,
+
         [Description("Admin")]
         TMF_Admin = 167,
         [Description("View & Download")]

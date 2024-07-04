@@ -8,6 +8,7 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Helios.Core.Controllers
 {
@@ -25,9 +26,8 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<SubjectListModel> GetSubjectList(Int64 studyId, Int64 userId)
+        public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId, Int64 userId)
         {
-            var subjectListModel = new SubjectListModel();
             var menu = await GetSubjectDetailMenuLocal(studyId);
             var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
 
@@ -55,14 +55,98 @@ namespace Helios.Core.Controllers
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
 
-            var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
+            var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
+            var permRes = _studyService.SetUserPermissions(studyId, userPermissions);
 
-            subjectListModel.SubjectList = result;
-            subjectListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
-            subjectListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
-            subjectListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
+            return result;
+        }
 
-            return subjectListModel;
+        private async Task<UserPermissionModel> getUserPermission(Int64 roleId, Int64 studyId)
+        {
+            var permissions = await _context.Permissions.Where(x => x.StudyRoleId == roleId && x.StudyId == studyId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+            var retVal = new UserPermissionModel
+            {
+                CanSubjectAdd = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Add),
+                CanSubjectArchive = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Archive),
+                CanSubjectChangeState = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_ChangeState),
+                CanSubjectDelete = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Delete),
+                CanSubjectEdit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Edit),
+                CanSubjectExportForm = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_ExportForm),
+                CanSubjectRandomize = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Randomize),
+                CanSubjectSign = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_Sign),
+                CanSubjectView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_View),
+                CanSubjectViewEConsent = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_EConsentView),
+                CanSubjectViewRandomization = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization),
+                CanMonitoringAutoQueryClosed = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_AutoQueryClosed),
+                CanMonitoringInputAuditTrail = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_InputAuditTrail),
+                CanMonitoringMarkAsNull = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_MarkAsNull),
+                CanMonitoringPageFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageFreeze),
+                CanMonitoringPageLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageLock),
+                CanMonitoringPageUnFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnFreeze),
+                CanMonitoringPageUnLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnLock),
+                CanMonitoringQueryView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView),
+                CanMonitoringRemoteSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv),
+                CanMonitoringSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv),
+                CanMonitoringSeePageActionAudit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_SeePageActionAudit),
+                CanMonitoringVerification = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Verification),
+                CanFormAddAdverseEvent = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AddAdverseEvent),
+                CanFormAddMultiVisit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AddMultiVisit),
+                CanFormAEArchive = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AEArchive),
+                CanFormAERemove = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AERemove),
+                CanFormArchiveMultiVisit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_ArchiveMultiVisit),
+                CanFormRemoveMultiVisit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_RemoveMultiVisit),
+                CanFileDelete = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.FileUpload_CanFileDelete),
+                CanFileDownload = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.FileUpload_CanFileDownload),
+                CanFileUpload = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.FileUpload_CanFileUpload),
+                CanFileView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.FileUpload_CanFileView),
+                CanViewAdverseEventDetailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_AdverseEventDetailReport),
+                CanViewCommentReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_CommentReport),
+                CanViewCustomCodingReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_CustomCodingReport),
+                CanViewFileAttachmentDetailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_FileAttachmentDetailReport),
+                CanViewFormDataReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_FormDataReport),
+                CanViewFormDetailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_FormDetailReport),
+                CanViewFullStudyReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_FullStudyReport),
+                CanViewInputAuditTrailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_InputAuditTrailReport),
+                CanViewLocalLabReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_LocalLabReport),
+                CanViewLockFreezeStatusReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_LockFreezeStatusReport),
+                CanViewMetadataReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_MetadataReport),
+                CanViewMissingDataReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_MissingDataReport),
+                CanViewMissingDataSummary = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_MissingDataSummary),
+                CanViewMissingSdvDataReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_MissingSdvDataReport),
+                CanViewMriFileReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_MriFileReport),
+                CanViewQueryReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_QueryReport),
+                CanViewRandomizationAuditTrailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_RandomizationAuditTrailReport),
+                CanViewRandomizationTreatmentGroupReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_RandomizationTreatmentGroupReport),
+                CanViewSeriousAdverseEventDetailReport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_SeriousAdverseEventDetailReport),
+                CanViewStudyReports = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_StudyReports),
+                CanViewSubjectStateWithRandomization = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.DataExport_SubjectStateWithRandomization),
+                CanStudyFoldersView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.StudyDocument_StudyFoldersView),
+                CanDashboardBuilderAdmin = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Dashboard_DashboardBuilderAdmin),
+                CanDashboardBuilderPivotExport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Dashboard_DashboardBuilderPivotExport),
+                CanDashboardBuilderSourceExport = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Dashboard_DashboardBuilderSourceExport),
+                CanIwrsMarkAsRecieved = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.IWRS_IwrsMarkAsRecieved),
+                CanIwrsTransfer = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.IWRS_IwrsTransfer),
+                CanMedicalCodingCanCode = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.MedicalCoding_CanCode),
+                CanBeTMFAdmin = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Admin),
+                CanTMFAddPlaceholder = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_AddPlaceholder),
+                CanTMFAddUpload = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_AddUpload),
+                CanTMFApproveRejectFile = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_ApproveRejectFile),
+                CanTMFComment = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Comment),
+                CanTMFDelete = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Delete),
+                CanTMFHistory = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_History),
+                CanTMFPreview = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Preview),
+                CanTMFQualityApproval = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_QualityApproval),
+                CanTMFRequest = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Request),
+                CanTMFShare = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Share),
+                CanTMFUnblinded = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Unblinded),
+                CanTMFUpdate = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_Update),
+                CanTMFViewAuditTrail = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_ViewAuditTrail),
+                CanTMFViewDownload = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_ViewDownload),
+                CanTMFViewFileStatus = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.TMF_ViewFileStatus),
+            };
+
+            return retVal;
         }
 
         [HttpGet]
@@ -495,7 +579,12 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
 
-            var subject = await _context.Subjects.Where(x => x.Id == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var subject = await _context.Subjects
+                .Include(x => x.SubjectVisits)
+                .ThenInclude(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.Id == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (subject != null)
             {
@@ -503,17 +592,144 @@ namespace Helios.Core.Controllers
                 {
                     subject.IsActive = false;
                     subject.IsDeleted = true;
+
+                    foreach (var sv in subject.SubjectVisits)
+                    {
+                        sv.IsActive = false;
+                        sv.IsDeleted = true;
+
+                        _context.SubjectVisits.Update(sv);
+
+                        foreach (var svp in sv.SubjectVisitPages)
+                        {
+                            svp.IsActive = false;
+                            svp.IsDeleted = true;
+
+                            _context.SubjectVisitPages.Update(svp);
+
+                            foreach (var svpm in svp.SubjectVisitPageModules)
+                            {
+                                svpm.IsActive = false;
+                                svpm.IsDeleted = true;
+
+                                _context.SubjectVisitPageModules.Update(svpm);
+
+                                foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                                {
+                                    svpme.IsActive = false;
+                                    svpme.IsDeleted = true;
+
+                                    _context.SubjectVisitPageModuleElements.Update(svpme);
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
                     subject.IsActive = false;
+
+                    foreach (var sv in subject.SubjectVisits)
+                    {
+                        sv.IsActive = false;
+
+                        _context.SubjectVisits.Update(sv);
+
+                        foreach (var svp in sv.SubjectVisitPages)
+                        {
+                            svp.IsActive = false;
+
+                            _context.SubjectVisitPages.Update(svp);
+
+                            foreach (var svpm in svp.SubjectVisitPageModules)
+                            {
+                                svpm.IsActive = false;
+
+                                _context.SubjectVisitPageModules.Update(svpm);
+
+                                foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                                {
+                                    svpme.IsActive = false;
+
+                                    _context.SubjectVisitPageModuleElements.Update(svpme);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 subject.Comment = model.Comment;
 
                 _context.Subjects.Update(subject);
                 result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
-                
+
+                if (result.IsSuccess)
+                {
+                    result.Message = "Successfully";
+                }
+                else
+                {
+                    result.Message = "Error";
+                }
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Try again please!";
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> UnArchiveSubject(SubjectArchiveOrDeleteModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            var subject = await _context.Subjects
+                .Include(x => x.SubjectVisits)
+                .ThenInclude(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.Id == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (subject != null)
+            {
+                subject.IsActive = true;
+
+                foreach (var sv in subject.SubjectVisits)
+                {
+                    sv.IsActive = true;
+
+                    _context.SubjectVisits.Update(sv);
+
+                    foreach (var svp in sv.SubjectVisitPages)
+                    {
+                        svp.IsActive = true;
+
+                        _context.SubjectVisitPages.Update(svp);
+
+                        foreach (var svpm in svp.SubjectVisitPageModules)
+                        {
+                            svpm.IsActive = true;
+
+                            _context.SubjectVisitPageModules.Update(svpm);
+
+                            foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                            {
+                                svpme.IsActive = true;
+
+                                _context.SubjectVisitPageModuleElements.Update(svpme);
+                            }
+                        }
+                    }
+                }
+
+                subject.Comment = model.Comment;
+
+                _context.Subjects.Update(subject);
+                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
                 if (result.IsSuccess)
                 {
                     result.Message = "Successfully";

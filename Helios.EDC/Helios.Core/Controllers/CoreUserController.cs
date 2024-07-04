@@ -278,7 +278,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission)
+        public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRole(UserPermissionRoleModel userPermission)
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
@@ -347,7 +347,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionModel userPermission)
+        public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionRoleModel userPermission)
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
