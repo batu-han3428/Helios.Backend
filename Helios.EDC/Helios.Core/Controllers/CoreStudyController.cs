@@ -5102,6 +5102,23 @@ namespace Helios.Core.Controllers
                     ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
+            var tElmIds = result.Where(elm => elm.ElementType == ElementType.Hidden).Select(hElm => hElm.TargetElementId).ToList();
+            if (tElmIds.Count > 0)
+            {
+                var tElms = await _context.StudyVisitPageModuleElements.Where(elm => tElmIds.Contains(elm.Id)).AsNoTracking().ToListAsync();
+                if (tElms.Count > 0)
+                {
+                    result.Where(elm=>elm.ElementType == ElementType.Hidden).ToList().ForEach(elm =>
+                    {
+                        var tElm = tElms.FirstOrDefault(tElm => tElm.Id == elm.TargetElementId);
+                        if (tElm != null)
+                        {
+                            elm.TargetElementName = tElm.ElementName + " - " + StringExtensionsHelper.GetEnumDescription(tElm.ElementType);
+                        }
+                    });
+                }
+            }
+            
             foreach (var item in result)
             {
                 if (item.ParentId == 0 || item.ParentId == null)
