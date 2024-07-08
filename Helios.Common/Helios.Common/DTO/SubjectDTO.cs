@@ -23,15 +23,4 @@ namespace Helios.Common.DTO
         public int Query { get; set; }
 
     }
-
-    public class PermissionListModel
-    {       
-        public bool HasSdv { get; set; }
-        public bool HasQuery { get; set; }
-        public bool HasRandomizasyon { get; set; }
-        public bool HasSubject { get; set; }
-        public bool HasStudyDocument { get; set; }
-        public bool HasMedicalCoding { get; set; }
-        public bool HasIwrs { get; set; }
-    }
 }
