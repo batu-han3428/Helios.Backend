@@ -83,6 +83,7 @@ namespace Helios.Common.Model
         public string ValidationList { get; set; }
 
         //public bool? HasChildren { get; set; } = false;
+        public string TargetElementName { get; set; }
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
     }
 
