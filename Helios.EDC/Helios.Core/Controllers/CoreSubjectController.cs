@@ -26,12 +26,12 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDTO>> GetSubjectList(Int64 studyId, Int64 userId)
+        public async Task<List<SubjectDTO>> GetSubjectList(SubjectListFilterDTO dto)
         {
-            var menu = await GetSubjectDetailMenuLocal(studyId);
-            var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
+            var menu = await GetSubjectDetailMenuLocal(dto.StudyId);
+            var csRes = await _studyService.SetSubjectDetailMenu(dto.StudyId, menu);
 
-            var result = await _context.Subjects.Where(p => p.StudyId == studyId && p.IsActive && !p.IsDeleted)
+            var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted)
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
                 .ThenInclude(x => x.SubjectVisitPages)
@@ -46,17 +46,18 @@ namespace Helios.Core.Controllers
                     SiteName = x.Site.Name,
                     RandomData = x.RandomData,
                     AddedById = x.AddedById,
-                    InitialName = x.InitialName
+                    InitialName = x.InitialName, 
+                    IsActive = x.IsActive,
                 }).ToListAsync();
 
-            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
+            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == dto.StudyId && x.AuthUserId == dto.UserId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
             {
                 RoleId = x.StudyRole.Id,
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
 
-            var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
-            var permRes = _studyService.SetUserPermissions(studyId, userPermissions);
+            var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, dto.StudyId);
+            var permRes = _studyService.SetUserPermissions(dto.StudyId, userPermissions);
 
             return result;
         }
@@ -707,7 +708,7 @@ namespace Helios.Core.Controllers
                 .ThenInclude(x => x.SubjectVisitPages)
                 .ThenInclude(x => x.SubjectVisitPageModules)
                 .ThenInclude(x => x.SubjectVisitPageModuleElements)
-                .Where(x => x.Id == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                .Where(x => x.Id == model.SubjectId && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (subject != null)
             {

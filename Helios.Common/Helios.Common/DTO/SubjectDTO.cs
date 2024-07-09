@@ -14,6 +14,7 @@ namespace Helios.Common.DTO
         public DateTimeOffset CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
         public string Country { get; set; }
         public string SiteName { get; set; }
         public string RandomData { get; set; }

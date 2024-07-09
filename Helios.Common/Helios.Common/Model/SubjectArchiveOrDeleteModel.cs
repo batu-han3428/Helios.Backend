@@ -11,6 +11,7 @@ namespace Helios.Common.Model
     {
         public Int64 SubjectId { get; set; }
         public bool IsDelete { get; set; }
+        public bool IsArchived { get; set; }
         public string Comment { get; set; } = "";
     }
 }
