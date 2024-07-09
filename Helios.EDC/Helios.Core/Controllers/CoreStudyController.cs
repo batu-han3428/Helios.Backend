@@ -10,9 +10,7 @@ using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
 using System.Text.Json;
 using Helios.Core.Services.Interfaces;
-using System.Xml.Linq;
 using MassTransit.Initializers;
-using Helios.Common;
 using Helios.Common.Helpers;
 
 namespace Helios.Core.Controllers
@@ -3414,6 +3412,61 @@ namespace Helios.Core.Controllers
             }
 
             return false;
+        }
+
+        [HttpGet]
+        public async Task<List<Int64>> GetRelationHidePage(Int64 subjectId, Int64 studyId)
+        {
+            List<Int64> hidePages = new List<Int64>();
+
+            var relations = await _context.StudyVisitRelation.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).ToListAsync();
+
+            var elements = relations.Select(x => x.ElementId).ToList();
+
+            var subjectDatas = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId).Include(x => x.SubjectVisitPages.Where(a=>a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModules.Where(a=>a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a=>a.IsActive && !a.IsDeleted && elements.Contains(a.StudyVisitPageModuleElementId))).ToListAsync();
+
+            var subjectElements = subjectDatas.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+            foreach (var relation in relations)
+            {
+                var elm = subjectElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == relation.ElementId);
+                if (elm != null)
+                {
+                    var values = JsonSerializer.Deserialize<List<string>>(relation.ActionValue);
+
+                    if (relation.ActionCondition == ActionCondition.Less && values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                    else if (relation.ActionCondition == ActionCondition.More &&
+          values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                    else if (relation.ActionCondition == ActionCondition.Equal &&
+           values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                    else if (relation.ActionCondition == ActionCondition.MoreAndEqual &&
+           values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                    else if (relation.ActionCondition == ActionCondition.LessAndEqual &&
+           values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                    else if (relation.ActionCondition == ActionCondition.NotEqual &&
+            values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                    {
+                        hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                    }
+                }
+            }
+
+            return hidePages;
         }
 
         [HttpPost]
