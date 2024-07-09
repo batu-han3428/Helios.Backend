@@ -4,6 +4,7 @@ using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
+using Helios.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -12,13 +13,15 @@ namespace Helios.Core.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class CoreUserController: Controller
+    public class CoreUserController : Controller
     {
         private CoreContext _context;
+        private IUserService _userService;
 
-        public CoreUserController(CoreContext context)
+        public CoreUserController(CoreContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         #region Tenants     
@@ -49,7 +52,7 @@ namespace Helios.Core.Controllers
         #endregion
 
         #region Permissions
-         
+
         [HttpGet]
         public async Task<List<RoleVisitPermissionsModel>> GetPermissionsVisitList(Int64 roleId)
         {
@@ -63,7 +66,7 @@ namespace Helios.Core.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
-                Permissions = x.Permissions.Where(a=>a.StudyRoleId == null).Select(a=>new RolePermissions { IsActive=a.IsActive,Key=a.PermissionKey, IsDisabled = !a.IsActive }).ToList(),
+                Permissions = x.Permissions.Where(a => a.StudyRoleId == null).Select(a => new RolePermissions { IsActive = a.IsActive, Key = a.PermissionKey, IsDisabled = !a.IsActive }).ToList(),
                 Children = x.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new RoleVisitPermissionsModel
                 {
                     Id = page.Id,
@@ -170,45 +173,24 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<UserPermissionDTO>> GetPermissionRoleList(Int64 studyId)
         {
-            var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x=>x.Permissions).AsNoTracking().Select(x=> new UserPermissionDTO
+            var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x => x.Permissions).AsNoTracking().Select(x => new UserPermissionDTO
             {
                 Id = x.Id,
                 StudyId = x.StudyId,
                 RoleName = x.Name,
-                RolePermissions = x.Permissions.Where(a=>a.IsActive).Select(a=>a.PermissionKey)
+                RolePermissions = x.Permissions.Where(a => a.IsActive).Select(a => a.PermissionKey)
             }).ToListAsync();
 
             return result;
         }
 
-
         [HttpGet]
-        public async Task<PermissionListModel> GetUserPermissionsList(Int64 studyId, Int64 userId)
-        {
-            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
-            {
-                RoleId = x.StudyRole.Id,
-                RoleName = x.StudyRole.Name
-            }).ToListAsync();
-            var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
-            var permissionListModel = new PermissionListModel();                   
-            permissionListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
-            permissionListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
-            permissionListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
-            permissionListModel.HasSubject = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_View);
-            permissionListModel.HasStudyDocument = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.StudyDocument_StudyFoldersView);
-            permissionListModel.HasMedicalCoding = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.MedicalCoding_CanCode);
-            permissionListModel.HasIwrs = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.IWRS_IwrsMarkAsRecieved || x.PermissionKey == (int)StudyRolePermission.IWRS_IwrsTransfer);
-
-            return permissionListModel;
-        }
-            [HttpGet]
         public async Task<List<UserPermissionDTO>> GetRoleList(Int64 studyId)
         {
             var result = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).AsNoTracking().Select(x => new UserPermissionDTO
             {
                 Id = x.Id,
-                RoleName = x.Name, 
+                RoleName = x.Name,
             }).ToListAsync();
 
             return result;
@@ -261,6 +243,8 @@ namespace Helios.Core.Controllers
 
             if (result)
             {
+                await _userService.RemoveUserPermissions(baseDTO.StudyId);
+
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = true,
@@ -278,7 +262,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRol(UserPermissionModel userPermission)
+        public async Task<ApiResponse<dynamic>> AddOrUpdatePermissionRole(UserPermissionRoleModel userPermission)
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
@@ -347,7 +331,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionModel userPermission)
+        public async Task<ApiResponse<dynamic>> DeleteRole(UserPermissionRoleModel userPermission)
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
@@ -393,7 +377,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<StudyUserDTO>> GetStudyUsers(Int64 studyId)
         {
-            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Include(x => x.StudyRole).Include(x=>x.StudyUserSites).AsNoTracking().Select(x => new StudyUserDTO
+            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Include(x => x.StudyRole).Include(x => x.StudyUserSites).AsNoTracking().Select(x => new StudyUserDTO
             {
                 StudyUserId = x.Id,
                 AuthUserId = x.AuthUserId,
@@ -409,12 +393,12 @@ namespace Helios.Core.Controllers
 
         [HttpGet]
         public async Task<StudyUserDTO> GetStudyUserSites(Int64 authUserId, Int64 studyId)
-        {         
+        {
             return await _context.StudyUsers.Where(x => x.StudyId == studyId && x.AuthUserId == authUserId && !x.IsDeleted).Include(x => x.StudyUserSites).AsNoTracking().Select(x => new StudyUserDTO
             {
                 StudyUserId = x.Id,
-                AuthUserId = x.AuthUserId,              
-                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, Name = s.Site.Name }).ToList(),             
+                AuthUserId = x.AuthUserId,
+                Sites = x.StudyUserSites.Where(s => !s.IsDeleted).Select(s => new SiteDTO { Id = s.Site.Id, Name = s.Site.Name }).ToList(),
             }).FirstOrDefaultAsync();
         }
 
@@ -427,7 +411,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<Int64>> GetStudyUserIds(Int64 studyId)
         {
-            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Select(x=>x.AuthUserId).ToListAsync();
+            return await _context.StudyUsers.Where(x => x.StudyId == studyId && !x.IsDeleted).Select(x => x.AuthUserId).ToListAsync();
         }
 
         [HttpPost]
@@ -441,7 +425,7 @@ namespace Helios.Core.Controllers
                     AuthUserId = studyUserModel.AuthUserId,
                     SuperUserIdList = studyUserModel.ResponsiblePersonIds.Count > 0 ? JsonConvert.SerializeObject(studyUserModel.ResponsiblePersonIds) : "",
                     TenantId = studyUserModel.TenantId,
-                    StudyRoleId = studyUserModel.RoleId != 0 && studyUserModel.RoleId != null? studyUserModel.RoleId : null
+                    StudyRoleId = studyUserModel.RoleId != 0 && studyUserModel.RoleId != null ? studyUserModel.RoleId : null
                 };
                 await _context.StudyUsers.AddAsync(user);
 
@@ -497,18 +481,18 @@ namespace Helios.Core.Controllers
                     {
                         user.SuperUserIdList = studyUserModel.ResponsiblePersonIds.Count > 0 ? JsonConvert.SerializeObject(studyUserModel.ResponsiblePersonIds) : "";
                     }
-                   
+
                     if (user.StudyRoleId != studyUserModel.RoleId)
                     {
                         user.StudyRoleId = studyUserModel.RoleId != 0 && studyUserModel.RoleId != null ? studyUserModel.RoleId : null;
                         _context.StudyUsers.Update(user);
                     }
-                   
-                    var currentSiteIds = user.StudyUserSites.Where(x=>x.IsActive && !x.IsDeleted).Select(s => s.SiteId).ToList();
+
+                    var currentSiteIds = user.StudyUserSites.Where(x => x.IsActive && !x.IsDeleted).Select(s => s.SiteId).ToList();
                     var newSiteIds = studyUserModel.SiteIds.ToList();
 
                     if (!currentSiteIds.SequenceEqual(newSiteIds))
-                    {        
+                    {
                         _context.StudyUserSites.RemoveRange(user.StudyUserSites);
 
                         foreach (var siteId in newSiteIds)
@@ -556,7 +540,7 @@ namespace Helios.Core.Controllers
                         IsSuccess = false,
                         Message = "An unexpected error occurred."
                     };
-                }              
+                }
             }
         }
 
@@ -565,11 +549,11 @@ namespace Helios.Core.Controllers
         {
             if (studyUserModel.StudyUserId != 0)
             {
-                var user = await _context.StudyUsers.Where(x=>x.Id == studyUserModel.StudyUserId).Include(x=>x.StudyUserSites).FirstOrDefaultAsync();
+                var user = await _context.StudyUsers.Where(x => x.Id == studyUserModel.StudyUserId).Include(x => x.StudyUserSites).FirstOrDefaultAsync();
 
                 if (user != null)
                 {
-                    foreach (var site in user.StudyUserSites.Where(x=> !studyUserModel.IsActive ? !x.IsActive && !x.IsDeleted : x.IsActive && !x.IsDeleted))
+                    foreach (var site in user.StudyUserSites.Where(x => !studyUserModel.IsActive ? !x.IsActive && !x.IsDeleted : x.IsActive && !x.IsDeleted))
                     {
                         site.IsActive = !studyUserModel.IsActive;
                     }
@@ -636,7 +620,7 @@ namespace Helios.Core.Controllers
                         Message = "Successful"
                     };
                 }
-                else if(result == 0)
+                else if (result == 0)
                 {
                     return new ApiResponse<dynamic>
                     {
@@ -671,7 +655,7 @@ namespace Helios.Core.Controllers
                 var user = await _context.StudyUsers.Where(x => x.Id == studyUserModel.StudyUserId).Include(x => x.StudyUserSites).FirstOrDefaultAsync();
 
                 if (user != null)
-                {                 
+                {
                     _context.StudyUserSites.RemoveRange(user.StudyUserSites);
                     _context.StudyUsers.Remove(user);
                 }
@@ -720,7 +704,7 @@ namespace Helios.Core.Controllers
         public async Task<List<TenantUserDTO>> GetTenantUsers(Int64 tenantId)
         {
             var aa = await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x => x.Study).Include(x => x.Study).Include(x => x.StudyRole).AsNoTracking().ToListAsync();
-            return await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x=>x.Study).Include(x => x.Study).Include(x => x.StudyRole).AsNoTracking().Select(x => new TenantUserDTO
+            return await _context.StudyUsers.Where(x => x.TenantId == tenantId && !x.IsDeleted).Include(x => x.Study).Include(x => x.Study).Include(x => x.StudyRole).AsNoTracking().Select(x => new TenantUserDTO
             {
                 StudyUserId = x.Id,
                 AuthUserId = x.AuthUserId,
@@ -739,7 +723,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<Int64>> GetUserStudyIds(Int64 userId)
         {
-            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x=>x.StudyId).ToListAsync();
+            return await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x => x.StudyId).ToListAsync();
         }
 
         [HttpGet]

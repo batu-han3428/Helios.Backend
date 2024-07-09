@@ -59,5 +59,24 @@ namespace Helios.Core.Services
             }
 
         }
+
+        public async Task<ApiResponse<dynamic>> SetUserPermissions(Int64 studyId, UserPermissionModel userPermissionModel)
+        {
+            var model = new UserPermissionCacheModel()
+            {
+                StudyId = studyId,
+                UserPermissionModel = userPermissionModel
+            };
+
+            using (var client = SharedServiceClient)
+            {
+                var req = new RestRequest("Cache/SetUserPermissions", Method.Post);
+                req.AddJsonBody(model);
+
+                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
+                return result.Data;
+            }
+
+        }
     }
 }

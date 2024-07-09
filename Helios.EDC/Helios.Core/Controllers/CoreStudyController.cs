@@ -3472,7 +3472,7 @@ namespace Helios.Core.Controllers
                             addNewVisitToSubjects(visitDTO.StudyId, visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3535,7 +3535,7 @@ namespace Helios.Core.Controllers
                             addNewPageToSubjects(page.StudyVisitId, page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3574,7 +3574,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3602,7 +3602,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3630,7 +3630,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -3810,7 +3810,7 @@ namespace Helios.Core.Controllers
                             removeVisitFromSubjects(visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3903,7 +3903,7 @@ namespace Helios.Core.Controllers
                             removePageFromSubjects(page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -3976,7 +3976,7 @@ namespace Helios.Core.Controllers
                             removeModuleFromSubjects(module.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4356,7 +4356,7 @@ namespace Helios.Core.Controllers
                         .FirstOrDefault(x => x.Id == studyVisitPageId);
 
                     var studyId = studyVisitPage.StudyVisit.StudyId;
-                    _studyService.RemoveSubjectDetailMenu(studyId);
+                    await _studyService.RemoveSubjectDetailMenu(studyId);
 
                     return new ApiResponse<dynamic>
                     {

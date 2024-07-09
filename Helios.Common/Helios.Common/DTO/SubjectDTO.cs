@@ -14,6 +14,7 @@ namespace Helios.Common.DTO
         public DateTimeOffset CreatedAt { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
         public string Country { get; set; }
         public string SiteName { get; set; }
         public string RandomData { get; set; }
@@ -22,23 +23,5 @@ namespace Helios.Common.DTO
         public bool SDV { get; set; }
         public int Query { get; set; }
 
-    }
-    public class SubjectListModel
-    {
-        public List<SubjectDTO> SubjectList { get; set; }
-        public bool HasSdv { get; set; }
-        public bool HasQuery { get; set; }
-        public bool HasRandomizasyon { get; set; }
-    }
-
-    public class PermissionListModel
-    {       
-        public bool HasSdv { get; set; }
-        public bool HasQuery { get; set; }
-        public bool HasRandomizasyon { get; set; }
-        public bool HasSubject { get; set; }
-        public bool HasStudyDocument { get; set; }
-        public bool HasMedicalCoding { get; set; }
-        public bool HasIwrs { get; set; }
     }
 }

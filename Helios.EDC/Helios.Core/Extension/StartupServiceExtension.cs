@@ -18,6 +18,7 @@ namespace Helios.Core.Extension
             //});
 
             services.AddScoped<IStudyService, StudyService>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddSignalR();
             return services;
