@@ -159,10 +159,15 @@ namespace Helios.Core.Controllers
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
 
-            var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
-            var cRes = await _studyService.SetUserPermissions(studyId, userPermissions);
+            if (role != null && role.Count > 0)
+            {
+                var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
+                var cRes = await _studyService.SetUserPermissions(studyId, userPermissions);
 
-            return userPermissions;
+                return userPermissions;
+            }
+
+            return new UserPermissionModel();
         }
 
         [HttpGet]

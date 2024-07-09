@@ -77,13 +77,12 @@ namespace Helios.Common.Model
 
         //hidden
         public Int64? TargetElementId { get; set; } = 0;
+        public string? TargetElementName { get; set; } = "";
 
         //validation
         public bool HasValidation { get; set; }
         public string ValidationList { get; set; }
 
-        //public bool? HasChildren { get; set; } = false;
-        public string TargetElementName { get; set; }
         public List<ElementModel>? ChildElements { get; set; } = new List<ElementModel>();
     }
 
