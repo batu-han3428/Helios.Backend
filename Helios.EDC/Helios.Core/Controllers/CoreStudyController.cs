@@ -4771,7 +4771,8 @@ namespace Helios.Core.Controllers
                             StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new StudyVisitPageModule
                             {
                                 Name = module.Name,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label) && (dto.IsHiddenElement || elm.ElementType != ElementType.Hidden)).Select(elm => new StudyVisitPageModuleElement
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label) && (dto.IsHiddenElement || elm.ElementType != ElementType.Hidden) && (dto.IsHiddenFields || !elm.IsHidden)
+                                ).Select(elm => new StudyVisitPageModuleElement
                                 {
                                     Id = elm.Id,
                                     Title = elm.Title,

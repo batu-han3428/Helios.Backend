@@ -8,6 +8,7 @@
         public bool IsDesc { get; set; }
         public bool IsAdditional { get; set; }
         public bool IsHiddenElement { get; set; }
+        public bool IsHiddenFields { get; set; }
         public string? IsVersion { get; set; }
     }
 }
