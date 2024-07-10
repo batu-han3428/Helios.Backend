@@ -31,7 +31,16 @@ namespace Helios.Core.Controllers
             var menu = await GetSubjectDetailMenuLocal(dto.StudyId);
             var csRes = await _studyService.SetSubjectDetailMenu(dto.StudyId, menu);
 
-            var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted)
+            var roleSite = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == dto.StudyId && x.AuthUserId == dto.UserId && x.StudyRole != null).Include(x => x.StudyRole).Include(x => x.StudyUserSites).Select(x => new
+            {
+                RoleId = x.StudyRole.Id,
+                RoleName = x.StudyRole.Name,
+                Sites = x.StudyUserSites.Where(a => a.IsActive && !a.IsDeleted).Select(x => x.SiteId).ToList()
+            }).ToListAsync();
+
+            var sIds = roleSite.SelectMany(a => a.Sites).ToList();
+
+            var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted && sIds.Contains(p.SiteId))
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
                 .ThenInclude(x => x.SubjectVisitPages)
@@ -46,15 +55,15 @@ namespace Helios.Core.Controllers
                     SiteName = x.Site.Name,
                     RandomData = x.RandomData,
                     AddedById = x.AddedById,
-                    InitialName = x.InitialName, 
+                    InitialName = x.InitialName,
                     IsActive = x.IsActive,
                 }).ToListAsync();
 
-            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == dto.StudyId && x.AuthUserId == dto.UserId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
+            var role = roleSite.Select(x => new StudyUsersRolesDTO
             {
-                RoleId = x.StudyRole.Id,
-                RoleName = x.StudyRole.Name
-            }).ToListAsync();
+                RoleId = x.RoleId,
+                RoleName = x.RoleName
+            }).ToList();
 
             var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, dto.StudyId);
             var permRes = _studyService.SetUserPermissions(dto.StudyId, userPermissions);
