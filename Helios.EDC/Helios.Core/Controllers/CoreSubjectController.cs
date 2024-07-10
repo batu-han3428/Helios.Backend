@@ -501,11 +501,11 @@ namespace Helios.Core.Controllers
                 stdElmntIds.AddRange(relatadHdnStdElmntsIds);
                 //tu calcDetil bayad 2 ta query bezanim:
                 //1-cal ba targetId inayi ke darim(element va hiddenash)
-                var calcDtilTarElmnts = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => stdElmntIds.Contains(x.TargetElementId)).ToListAsync();
+                var calcDtilTarElmnts = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => stdElmntIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 //2-khode calc elementha ke tooshun targetha ro daran
                 var calcIds = calcDtilTarElmnts.Select(x => x.CalculationElementId).GroupBy(x => x).Select(x => x.Key).ToList();
-                var allCalcDtilCalElmnts = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => calcIds.Contains(x.CalculationElementId)).ToListAsync();
+                var allCalcDtilCalElmnts = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => calcIds.Contains(x.CalculationElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
                 var allCalcDtilCalElmntIds = allCalcDtilCalElmnts.Select(x => x.TargetElementId).ToList();
 
                 //get all subject elements that used in calculation. i need userValue of these elements. 
@@ -517,7 +517,7 @@ namespace Helios.Core.Controllers
 
                 var allCalcStdElmnts = await _context.StudyVisitPageModuleElements
                     .Include(x => x.StudyVisitPageModuleElementDetail)
-                    .Where(x => calcIds.Contains(x.Id)).ToListAsync();
+                    .Where(x => calcIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 //var allTarCalcStdElmnts = await _context.StudyVisitPageModuleElements
                 //    .Include(x => x.StudyVisitPageModuleElementDetail)
@@ -532,11 +532,11 @@ namespace Helios.Core.Controllers
                     //var thisCalTarElms = allSbjElmnts.Where(x => x.StudyVisitPageModuleElementId
                     && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated).ToList();
 
-                    var thisCalSbjElm = allSbjElmnts.FirstOrDefault(x => x.StudyVisitPageModuleElementId == cal.Id);
+                    var thisCalSbjElm = allSbjElmnts.FirstOrDefault(x => x.StudyVisitPageModuleElementId == cal.Id && x.Id != cal.Id);
 
                     if (thisCalSbjElm != null && thisCalTarElms.Any(x => x.UserValue == "" || x.UserValue == null))
                     {
-                        thisCalSbjElm.UserValue = "NaN";
+                        thisCalSbjElm.UserValue = "";
                     }
                     else
                     {
