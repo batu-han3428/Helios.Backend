@@ -261,12 +261,14 @@ namespace Helios.Core.Controllers
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = true,
-                    Message = "Successful",
+                    Message = site.MaxEnrolmentCount == 0 ? "This subject created with subject number {SubjectNo}." : "This subject created with subject number {SubjectNo}. Your remaining subject addition limit for this site : {n}",
                     Values = new SubjectDTO()
                     {
                         StudyId = study.Id,
                         Id = newSubject.Id,
-                        FirstPageId = newSubject.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId
+                        FirstPageId = newSubject.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId,
+                        SubjectNumber = newSubject.SubjectNumber,
+                        AddedById = site.MaxEnrolmentCount - subjectsInSite.Count
                     }
                 };
             }
@@ -696,7 +698,7 @@ namespace Helios.Core.Controllers
 
                 if (result.IsSuccess)
                 {
-                    result.Message = "Successfully";
+                    result.Message = "Successful";
                 }
                 else
                 {
