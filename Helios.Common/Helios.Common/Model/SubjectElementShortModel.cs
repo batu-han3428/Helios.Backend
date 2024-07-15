@@ -10,6 +10,14 @@ namespace Helios.Common.Model
     public class SubjectElementShortModel
     {
         public Int64 Id { get; set; }
+        public int DataGridRowId { get; set; }
         public string Value { get; set; } = "";
+    }
+
+    public class SubjectVisitPageModuleElementModel
+    {
+        public Int64 SubjectVisitPageModuleId { get; set; }
+        public Int64 StudyVisitPageModuleElementId { get; set; }
+        public int DataGridRowId { get; set; }
     }
 }

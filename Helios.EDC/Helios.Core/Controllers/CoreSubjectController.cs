@@ -273,6 +273,31 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddDatagridSubjectElements(List<SubjectVisitPageModuleElementModel> model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            foreach (var item in model)
+            {
+                var subjectElement = new SubjectVisitPageModuleElement
+                {
+                    SubjectVisitModuleId = item.SubjectVisitPageModuleId,
+                    StudyVisitPageModuleElementId = item.StudyVisitPageModuleElementId,
+                    DataGridRowId = item.DataGridRowId
+                };
+
+                _context.SubjectVisitPageModuleElements.Add(subjectElement);
+            }
+
+            result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+            return new ApiResponse<dynamic>
+            {
+                Message = result.IsSuccess ? "Successful" : "Operation failed!"
+            };
+        }
+
+        [HttpPost]
         public async Task<List<SiteModel>> GetSites(SubjectDTO model)
         {
             var sites = await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
@@ -321,7 +346,7 @@ namespace Helios.Core.Controllers
         //        }).ToListAsync();
         //}
 
-        
+
         [HttpGet]
         public async Task<bool> GetStudyAskSubjectInitial(Int64 studyId)
         {
@@ -346,6 +371,7 @@ namespace Helios.Core.Controllers
                     SubjectId = subjectId,
                     SubjectVisitPageId = pageId,
                     SubjectVisitPageModuleElementId = e.Id,
+                    SubjectVisitPageModuleId = e.SubjectVisitModuleId,
                     StudyVisitPageModuleElementId = e.StudyVisitPageModuleElementId,
                     StudyVisitPageModuleElementDetailId = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.Id,
                     ParentId = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId,
@@ -385,6 +411,7 @@ namespace Helios.Core.Controllers
                     DatagridAndTableProperties = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.DatagridAndTableProperties,
                     RowIndex = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.RowIndex,
                     ColumnIndex = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ColunmIndex,
+                    DataGridRowId = e.DataGridRowId,
                     AdverseEventType = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.AdverseEventType,
                     TargetElementId = e.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.TargetElementId,
                     UserValue = e.UserValue,
@@ -406,7 +433,17 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            return finalList; 
+            foreach (var item in finalList)
+            {
+                if (item.ElementType == ElementType.DataGrid)
+                {
+                    var cnt = item.ChildElements.GroupBy(x=>x.StudyVisitPageModuleElementId).FirstOrDefault().Count();
+
+                    item.RowCount = cnt;
+                }
+            }
+
+            return finalList;
         }
 
         [HttpPost]
