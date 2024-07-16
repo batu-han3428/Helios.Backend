@@ -231,7 +231,7 @@ namespace Helios.Core.Controllers
                         }
 
                         _context.Studies.Update(oldEntity);
-                        var result = await _context.SaveChangesAsync();
+                        var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now);
 
                         if (result > 0)
                         {
