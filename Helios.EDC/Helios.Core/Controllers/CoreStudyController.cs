@@ -3469,6 +3469,261 @@ namespace Helios.Core.Controllers
             return hidePages;
         }
 
+        [HttpGet]
+        public async Task<List<Int64>> GetDependentHideElement(string targetElementString, Int64 pageId, Int64 subjectId, string? pValue)
+        {
+            var a = new ApiResponse<dynamic>();
+            string[] targetIdsArray = targetElementString.Split(',');
+            List<Int64> targetElementIds = new List<Int64>();
+            foreach (string id in targetIdsArray)
+            {
+                if (Int64.TryParse(id, out Int64 l))
+                {
+                    targetElementIds.Add(l);
+                }
+            }
+
+            List<Int64> hideElements = new List<Int64>();
+
+            var events = await _context.StudyVisitPageModuleElementEvents.Where(x => x.IsActive && !x.IsDeleted && targetElementIds.Contains(x.TargetElementId)).ToListAsync();
+
+            if (subjectId != 0)
+            {
+                var elements = events.Select(x => x.SourceElementId).ToList();
+
+                var subjectElements = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                    .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => elements.Contains(x.StudyVisitPageModuleElementId))).ToListAsync();
+
+                var sourceElements = subjectElements.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+                foreach (var evnt in events)
+                {
+                    var elm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId);
+                    if (elm != null)
+                    {
+                        var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
+
+                        if (evnt.ValueCondition == ActionCondition.Less)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                        else if (evnt.ValueCondition == ActionCondition.More)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                        else if (evnt.ValueCondition == ActionCondition.Equal)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                        else if (evnt.ValueCondition == ActionCondition.MoreAndEqual)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                        else if (evnt.ValueCondition == ActionCondition.LessAndEqual)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                        else if (evnt.ValueCondition == ActionCondition.NotEqual)
+                        {
+                            if (evnt.ActionType == ActionType.HideTarget)
+                            {
+                                if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                            else
+                            {
+                                if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                {
+                                    hideElements.Add(evnt.TargetElementId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var evnt in events)
+                {
+                    var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
+
+                    if (evnt.ValueCondition == ActionCondition.Less)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue > userValueInt))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue > userValueInt))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                    else if (evnt.ValueCondition == ActionCondition.More)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue < userValueInt))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue < userValueInt))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                    else if (evnt.ValueCondition == ActionCondition.Equal)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue == userValueInt) || v == pValue))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue == userValueInt) || v == pValue))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                    else if (evnt.ValueCondition == ActionCondition.MoreAndEqual)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, pValue, StringComparison.Ordinal) <= 0))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, pValue, StringComparison.Ordinal) <= 0))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                    else if (evnt.ValueCondition == ActionCondition.LessAndEqual)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, pValue, StringComparison.Ordinal) >= 0))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, pValue, StringComparison.Ordinal) >= 0))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                    else if (evnt.ValueCondition == ActionCondition.NotEqual)
+                    {
+                        if (evnt.ActionType == ActionType.HideTarget)
+                        {
+                            if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue == userValueInt) || v == pValue)))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                        else
+                        {
+                            if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(pValue, out var userValueInt) && intValue == userValueInt) || v == pValue)))
+                            {
+                                hideElements.Add(evnt.TargetElementId);
+                            }
+                        }
+                    }
+                }
+            } 
+
+            return hideElements;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SetVisits(VisitDTO visitDTO)
         {
@@ -5116,6 +5371,7 @@ namespace Helios.Core.Controllers
 
             var result = await _context.StudyVisitPageModuleElements.Where(x => x.StudyVisitPageModuleId == studyModuleId && x.IsActive && !x.IsDeleted)
                 .Include(x => x.StudyVisitPageModuleElementDetail)
+                .Include(x=>x.StudyVisitPageModuleElementEvents)
                 .Select(x => new ElementModel()
                 {
                     Id = x.Id,
@@ -5153,7 +5409,8 @@ namespace Helios.Core.Controllers
                     RowIndex = x.StudyVisitPageModuleElementDetail.RowIndex,
                     AdverseEventType = x.StudyVisitPageModuleElementDetail.AdverseEventType,
                     TargetElementId = x.StudyVisitPageModuleElementDetail.TargetElementId,
-                    ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText
+                    ButtonText = x.StudyVisitPageModuleElementDetail.ButtonText,
+                    DependentSourceFieldId = x.IsDependent ? x.StudyVisitPageModuleElementEvents.Where(a=>a.IsActive && !a.IsDeleted && a.TargetElementId == x.Id).Select(a=>a.SourceElementId).FirstOrDefault() : 0
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             var tElmIds = result.Where(elm => elm.ElementType == ElementType.Hidden).Select(hElm => hElm.TargetElementId).ToList();
