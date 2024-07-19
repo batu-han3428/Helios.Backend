@@ -317,7 +317,7 @@ namespace Helios.Authentication.Controllers
                         //}
                         string mailContent = "";
 
-                        var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
+                        var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.jpg");
                         byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
                         string base64ImageRepresentation = Convert.ToBase64String(imageArray);
 
