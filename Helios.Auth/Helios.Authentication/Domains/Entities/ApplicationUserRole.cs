@@ -10,5 +10,6 @@ namespace Helios.Authentication.Domains.Entities
         public ApplicationRole Role { get; set; }
         public Int64 TenantId { get; set; }
         public Int64 StudyId { get; set; }
+        public string? Settings {  get; set; }
     }
 }

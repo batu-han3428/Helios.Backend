@@ -1,5 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Enums;
+using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
 using Helios.Core.Domains.Entities;
@@ -429,7 +430,7 @@ namespace Helios.Core.Controllers
                 {
                     var hdnResult = await SetHidden(model.Id);
                     var calcResult = await SetCalculation(model.Id);
-
+                  
                     var subject = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Select(x => x.SubjectVisitModule).Select(x => x.SubjectVisitPage).Select(x => x.SubjectVisit).Select(x => x.Subject);
 
                     subject.UpdatedAt = DateTimeOffset.UtcNow;
@@ -586,6 +587,48 @@ namespace Helios.Core.Controllers
             }
 
             return result;
+        }
+
+        [HttpPost]
+        public async Task<bool> SetDependentElementValue(string elementIdString, Int64 pageId, Int64 subjectId)
+        {
+            try
+            {
+                string[] elementIdsArray = elementIdString.Split(',');
+                if (elementIdsArray.Length < 1 || pageId == 0) return false;
+                List<Int64> elementIds = new List<Int64>();
+                foreach (string id in elementIdsArray)
+                {
+                    if (Int64.TryParse(id, out Int64 l))
+                    {
+                        elementIds.Add(l);
+                    }
+                }
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+              
+                var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                    .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.StudyVisitPageModuleElementId))).ToListAsync();
+
+                var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+                if (subjectElements.Count() < 1) return false;
+
+                subjectElements.ForEach(element =>
+                {
+                    if (element.UserValue != null && element.UserValue != "") element.UserValue = null;
+                });
+
+                _context.SubjectVisitPageModuleElements.UpdateRange(subjectElements);
+
+                return await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }            
         }
 
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)

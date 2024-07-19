@@ -3472,7 +3472,6 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<Int64>> GetDependentHideElement(string targetElementString, Int64 pageId, Int64 subjectId, string? pValue)
         {
-            var a = new ApiResponse<dynamic>();
             string[] targetIdsArray = targetElementString.Split(',');
             List<Int64> targetElementIds = new List<Int64>();
             foreach (string id in targetIdsArray)
