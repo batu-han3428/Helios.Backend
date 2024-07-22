@@ -12,6 +12,7 @@ using Azure.Storage.Blobs;
 using Helios.Common.Enums;
 using System.Data;
 using Helios.Authentication.Domains.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Helios.Authentication.Controllers
 {
@@ -87,9 +88,9 @@ namespace Helios.Authentication.Controllers
                     {
                         return tenant;
                     }
-                   
+
                 }
-                
+
                 return tenant;
             }
 
@@ -167,10 +168,10 @@ namespace Helios.Authentication.Controllers
                     }
 
                     if (oldEntity.Name != tenantDTO.TenantName) oldEntity.Name = tenantDTO.TenantName;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.StudyLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.StudyLimit)) oldEntity.StudyLimit = tenantDTO.StudyLimit;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.UserLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.UserLimit)) oldEntity.UserLimit = tenantDTO.UserLimit;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.TimeZone) != StringExtensionsHelper.NormalizeString(tenantDTO.TimeZone)) oldEntity.TimeZone = tenantDTO.TimeZone;
-                    if(oldEntity.Logo != (tenantDTO.TenantLogo?.FileName == null ? null : "TenantName/" + tenantDTO.TenantLogo?.FileName))
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.StudyLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.StudyLimit)) oldEntity.StudyLimit = tenantDTO.StudyLimit;
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.UserLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.UserLimit)) oldEntity.UserLimit = tenantDTO.UserLimit;
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.TimeZone) != StringExtensionsHelper.NormalizeString(tenantDTO.TimeZone)) oldEntity.TimeZone = tenantDTO.TimeZone;
+                    if (oldEntity.Logo != (tenantDTO.TenantLogo?.FileName == null ? null : "TenantName/" + tenantDTO.TenantLogo?.FileName))
                     {
                         string? removeFile = oldEntity.Logo;
 
@@ -251,7 +252,7 @@ namespace Helios.Authentication.Controllers
 
             return result;
         }
-       
+
         [HttpPost]
         public async Task<dynamic> AddUser(UserDTO model)
         {
@@ -433,7 +434,7 @@ namespace Helios.Authentication.Controllers
                     user.LastName = model.LastName;
                     user.Email = model.Email;
                     user.PhoneNumber = model.PhoneNumber;
-                   
+
                     await _userManager.UpdateAsync(user);
 
                     if (oldEmail != model.Email)
@@ -489,7 +490,7 @@ namespace Helios.Authentication.Controllers
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
                 };
-            }  
+            }
         }
 
         [HttpPost]
@@ -662,7 +663,7 @@ namespace Helios.Authentication.Controllers
                 var aspNetResult = await _userManager.RemoveFromRoleAsync(aspNetUser, Roles.StudyUser.ToString());
 
                 if (aspNetResult.Succeeded)
-                {                        
+                {
                     return new ApiResponse<DeleteStudyUserDTO>
                     {
                         IsSuccess = true,
@@ -685,7 +686,7 @@ namespace Helios.Authentication.Controllers
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
                 };
-            } 
+            }
         }
 
         [HttpPost]
@@ -702,14 +703,16 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "An unexpected error occurred."
                     };
-                }else if (!user.IsActive)
+                }
+                else if (!user.IsActive)
                 {
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
                         Message = "Please activate the account first and then try this process again."
                     };
-                }else
+                }
+                else
                 {
                     user.ChangePassword = false;
                     var changePassword = await _userManager.UpdateAsync(user);
@@ -739,6 +742,101 @@ namespace Helios.Authentication.Controllers
                 IsSuccess = false,
                 Message = "An unexpected error occurred."
             };
+        }
+
+        [HttpPost]   
+        public async Task<ApiResponse<dynamic>> UserProfileChangePassword(ResetUserProfileViewModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            if (!String.IsNullOrEmpty(model.Password))
+            {              
+                var user = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
+
+                if (user == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+                if (model.Password==null || model.NewPassword==null || model.ConfirmPassword==null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod1",
+                    };
+                }
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
+                if (!passwordCheck)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod0",                        
+                    };
+                }
+
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, model.NewPassword);
+                if (!validPassword.Succeeded)
+                {
+                    var message = "";
+                    foreach (var item in validPassword.Errors)
+                    {
+                        message += "<br>" + item.Description;
+                    }
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = message
+                    };                  
+                }
+
+                if (model.NewPassword == model.Password)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod2",
+                    };
+                }
+
+
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod3",
+                    };
+                }
+
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, code, model.NewPassword);
+                if (resetResult.Succeeded)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = resetResult.Errors.ToString()
+                    };
+                   
+                }
+
+            }
+            result.IsSuccess = false;
+            result.Message = "An unexpected error occurred.";
+            return result;
         }
 
         [HttpPost]
@@ -863,7 +961,7 @@ namespace Helios.Authentication.Controllers
                             IsSuccess = false,
                             Message = "Unsuccessful"
                         };
-                    }     
+                    }
                 }
                 else
                 {
@@ -914,7 +1012,7 @@ namespace Helios.Authentication.Controllers
                         {
                             IsSuccess = true,
                             Message = "Successful",
-                            Values = new SystemAdminDTO  { Password = model.Password}
+                            Values = new SystemAdminDTO { Password = model.Password }
                         };
                     }
                     else
@@ -927,13 +1025,13 @@ namespace Helios.Authentication.Controllers
                     }
                 }
 
-          
+
                 return new ApiResponse<SystemAdminDTO>
                 {
                     IsSuccess = false,
                     Message = "This user is already registered in the system.",
                 };
-                
+
             }
             else
             {
@@ -963,7 +1061,8 @@ namespace Helios.Authentication.Controllers
                         Message = result ? "Successful" : "Unsuccessful"
                     };
                 }
-                else {
+                else
+                {
                     return new ApiResponse<SystemAdminDTO>
                     {
                         IsSuccess = true,
@@ -1054,7 +1153,7 @@ namespace Helios.Authentication.Controllers
                         }
                     }
 
-                   return false;
+                    return false;
                 }
                 catch (Exception)
                 {
@@ -1108,7 +1207,7 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "Unsuccessful"
                     };
-                }              
+                }
             }
             else
             {
@@ -1310,7 +1409,7 @@ namespace Helios.Authentication.Controllers
                         };
                     }
                 }
-                else if(string.IsNullOrEmpty(model.Password))
+                else if (string.IsNullOrEmpty(model.Password))
                 {
                     var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Name).Substring(0, 1).ToLower();
                     var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
@@ -1456,7 +1555,8 @@ namespace Helios.Authentication.Controllers
                         {
                             var r = await _userManager.AddToRoleAsync(usr, Roles.TenantAdmin.ToString());
 
-                            if (!r.Succeeded) {
+                            if (!r.Succeeded)
+                            {
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = false,
@@ -1533,7 +1633,7 @@ namespace Helios.Authentication.Controllers
                 catch (Exception)
                 {
                     return false;
-                }              
+                }
             }
 
             bool AreArraysEqual<T>(IEnumerable<T> array1, IEnumerable<T> array2)
@@ -1582,7 +1682,7 @@ namespace Helios.Authentication.Controllers
                         RoleId = ur.RoleId,
                         RoleName = ur.Role.Name
                     }).ToList(),
-                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ? 
+                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ?
                         tenants.Where(t => !t.IsDeleted)
                                 .Select(t => new
                                 {
@@ -1625,7 +1725,7 @@ namespace Helios.Authentication.Controllers
 
             if (user.Count > 0)
             {
-                _context.TenantAdmins.RemoveRange(user.Where(x=>model.TenantIds.Contains(x.TenantId)));
+                _context.TenantAdmins.RemoveRange(user.Where(x => model.TenantIds.Contains(x.TenantId)));
 
                 var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
@@ -1726,7 +1826,7 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "Unsuccessful"
                     };
-                }              
+                }
             }
             else
             {

@@ -24,4 +24,13 @@ namespace Helios.Common.Model
         public List<Int64> SiteIds { get; set; }
         public List<Int64> ResponsiblePersonIds { get; set; }
     }
+    public class ResetUserProfileViewModel : BaseModel
+    {
+       
+        public Int64 AuthUserId { get; set; }        
+        public string Password { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
+
+    }
 }
