@@ -1025,7 +1025,9 @@ namespace Helios.Core.Controllers
 
             try
             {
-                var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                var element = await _context.Elements
+                    .Include(x => x.ElementDetail)
+                    .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
                 if (element != null)
                 {
@@ -1043,17 +1045,16 @@ namespace Helios.Core.Controllers
                     element.ElementName = name;
                     element.Order = element.Order + 1;
 
-                    var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    var elementDetail = element.ElementDetail;
                     elementDetail.Id = 0;
                     elementDetail.IsInCalculation = false;
-
-                    _context.Add(element);
+                    
                     _context.Add(elementDetail);
 
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    element.ElementDetail = elementDetail;
+                    _context.Add(element);
 
-                    elementDetail.ElementId = element.Id;
-                    _context.Update(elementDetail);
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                     if (element.ElementType == ElementType.Calculated)
                     {
@@ -1078,9 +1079,11 @@ namespace Helios.Core.Controllers
 
                     if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
                     {
-                        var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
-                        var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
-                        var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+                        var childrenDtils = await _context.ElementDetails
+                            .Include(x => x.Element)
+                            .Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                        var children = childrenDtils.Select(x => x.Element);
 
                         foreach (var child in children)
                         {
@@ -1096,20 +1099,17 @@ namespace Helios.Core.Controllers
 
                             var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
                             chDtl.Id = 0;
+                            chDtl.ParentId = element.Id;
+                            chDtl.IsInCalculation = false;
 
                             child.Id = 0;
                             child.ElementName = nm;
                             child.Order = child.Order + 1;
 
-                            _context.Add(child);
                             _context.Add(chDtl);
 
-                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                            chDtl.Id = child.Id;
-                            chDtl.ParentId = element.Id;
-
-                            _context.Update(chDtl);
+                            child.ElementDetail = chDtl;
+                            _context.Add(child);
 
                             result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }

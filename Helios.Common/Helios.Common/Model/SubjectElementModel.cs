@@ -10,6 +10,7 @@ namespace Helios.Common.Model
     public class SubjectElementModel
     {
         public Int64 SubjectVisitPageModuleElementId { get; set; }
+        public Int64 SubjectVisitPageModuleId { get; set; }
         public Int64 SubjectId { get; set; }
         public Int64 SubjectVisitId { get; set; }
         public Int64 SubjectVisitPageId { get; set; }
@@ -61,6 +62,7 @@ namespace Helios.Common.Model
         public string? DatagridAndTableProperties { get; set; } = "";
         public int? RowIndex { get; set; } = 0;
         public int? ColumnIndex { get; set; } = 0;
+        public int? DataGridRowId { get; set; } = 0;
 
         //dependent
         public Int64 DependentSourceFieldId { get; set; }
