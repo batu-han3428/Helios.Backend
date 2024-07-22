@@ -3423,7 +3423,7 @@ namespace Helios.Core.Controllers
 
             var elements = relations.Select(x => x.ElementId).ToList();
 
-            var subjectDatas = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId).Include(x => x.SubjectVisitPages.Where(a=>a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModules.Where(a=>a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a=>a.IsActive && !a.IsDeleted && elements.Contains(a.StudyVisitPageModuleElementId))).ToListAsync();
+            var subjectDatas = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId).Include(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted)).ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted && elements.Contains(a.StudyVisitPageModuleElementId))).ToListAsync();
 
             var subjectElements = subjectDatas.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
 
@@ -5162,7 +5162,7 @@ namespace Helios.Core.Controllers
                 var tElms = await _context.StudyVisitPageModuleElements.Where(elm => tElmIds.Contains(elm.Id)).AsNoTracking().ToListAsync();
                 if (tElms.Count > 0)
                 {
-                    result.Where(elm=>elm.ElementType == ElementType.Hidden).ToList().ForEach(elm =>
+                    result.Where(elm => elm.ElementType == ElementType.Hidden).ToList().ForEach(elm =>
                     {
                         var tElm = tElms.FirstOrDefault(tElm => tElm.Id == elm.TargetElementId);
                         if (tElm != null)
@@ -5172,7 +5172,7 @@ namespace Helios.Core.Controllers
                     });
                 }
             }
-            
+
             foreach (var item in result)
             {
                 if (item.ParentId == 0 || item.ParentId == null)
@@ -5195,7 +5195,9 @@ namespace Helios.Core.Controllers
 
             try
             {
-                var stdVstPgMdlElmnt = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                var stdVstPgMdlElmnt = await _context.StudyVisitPageModuleElements
+                    .Include(x => x.StudyVisitPageModuleElementDetail)
+                    .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
                 if (stdVstPgMdlElmnt != null)
                 {
@@ -5213,17 +5215,16 @@ namespace Helios.Core.Controllers
                     stdVstPgMdlElmnt.ElementName = name;
                     stdVstPgMdlElmnt.Order = stdVstPgMdlElmnt.Order + 1;
 
-                    var elementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    var elementDetail = stdVstPgMdlElmnt.StudyVisitPageModuleElementDetail;
                     elementDetail.Id = 0;
+                    elementDetail.IsInCalculation = false;
 
-                    _context.Add(stdVstPgMdlElmnt);
                     _context.Add(elementDetail);
 
+                    stdVstPgMdlElmnt.StudyVisitPageModuleElementDetail = elementDetail;
+                    _context.Add(stdVstPgMdlElmnt);
+
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    elementDetail.StudyVisitPageModuleElementId = stdVstPgMdlElmnt.Id;
-
-                    _context.Update(elementDetail);
 
                     if (stdVstPgMdlElmnt.ElementType == ElementType.Calculated)
                     {
@@ -5250,9 +5251,11 @@ namespace Helios.Core.Controllers
 
                     if (stdVstPgMdlElmnt.ElementType == ElementType.DataGrid || stdVstPgMdlElmnt.ElementType == ElementType.Table)
                     {
-                        var childrenDtils = await _context.StudyVisitPageModuleElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
-                        var chldrnIds = childrenDtils.Select(x => x.StudyVisitPageModuleElementId).ToList();
-                        var children = await _context.StudyVisitPageModuleElements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+                        var childrenDtils = await _context.StudyVisitPageModuleElementDetails
+                            .Include(x => x.StudyVisitPageModuleElement)
+                            .Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                        var children = childrenDtils.Select(x => x.StudyVisitPageModuleElement);
 
                         foreach (var child in children)
                         {
@@ -5268,20 +5271,17 @@ namespace Helios.Core.Controllers
 
                             var chDtl = childrenDtils.FirstOrDefault(x => x.StudyVisitPageModuleElementId == child.Id);
                             chDtl.Id = 0;
+                            chDtl.ParentId = stdVstPgMdlElmnt.Id;
+                            chDtl.IsInCalculation = false;
 
                             child.Id = 0;
                             child.ElementName = nm;
                             child.Order = child.Order + 1;
 
-                            _context.Add(child);
                             _context.Add(chDtl);
 
-                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                            chDtl.Id = child.Id;
-                            chDtl.ParentId = stdVstPgMdlElmnt.Id;
-
-                            _context.Update(chDtl);
+                            child.StudyVisitPageModuleElementDetail = chDtl;
+                            _context.Add(child);
 
                             result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
@@ -5299,11 +5299,11 @@ namespace Helios.Core.Controllers
                         if (item.Order >= stdVstPgMdlElmnt.Order && item.Id != stdVstPgMdlElmnt.Id)
                         {
                             item.Order = (item.Order + 1);
-                            _context.Update(item);
+                            _context.StudyVisitPageModuleElements.Update(item);
                         }
                     }
 
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    var a = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     result.Message = result.IsSuccess ? "Successful" : "Error";
 
                     if (result.IsSuccess)
@@ -5337,20 +5337,47 @@ namespace Helios.Core.Controllers
                 .Where(x => stdVstPgMdlElmntIds.Contains(x.Id) && x.IsActive && !x.IsDeleted)
                 .ToList();
 
+            var parentIds = stdVstPgMdlElmnts.Where(x=>x.StudyVisitPageModuleElementDetail.ParentId != 0).Select(x => x.StudyVisitPageModuleElementDetail.ParentId).ToList();
+            var siblingStdElmIds = _context.StudyVisitPageModuleElementDetails.Where(x => parentIds.Contains(x.ParentId)).Select(x => x.StudyVisitPageModuleElementId).ToList();
+
+            var siblings = _context.SubjectVisitPageModuleElements.Where(x => siblingStdElmIds.Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToList();
+
             var subjectVisitPageModules = _context.SubjectVisitPageModules.Where(t => t.StudyVisitPageModuleId == stdVstPgMdlId && t.IsActive && !t.IsDeleted).ToList();
 
             foreach (var mdl in subjectVisitPageModules)
             {
-                foreach (var elmnt in stdVstPgMdlElmnts)
-                {
-                    var subjectVisitPageModuleElement = new SubjectVisitPageModuleElement()
-                    {
-                        SubjectVisitModuleId = mdl.Id,
-                        StudyVisitPageModuleElementId = elmnt.Id,
-                        DataGridRowId = elmnt.StudyVisitPageModuleElementDetail.RowIndex
-                    };
+                var sb = siblings.Where(x => x.SubjectVisitModuleId == mdl.Id).Select(x => x.DataGridRowId).ToList();
 
-                    _context.SubjectVisitPageModuleElements.Add(subjectVisitPageModuleElement);
+                if (sb.Count > 0)
+                {
+                    foreach (var dgrId in sb)
+                    {
+                        foreach (var elmnt in stdVstPgMdlElmnts)
+                        {
+                            var subjectVisitPageModuleElement = new SubjectVisitPageModuleElement()
+                            {
+                                SubjectVisitModuleId = mdl.Id,
+                                StudyVisitPageModuleElementId = elmnt.Id,
+                                DataGridRowId = dgrId
+                            };
+
+                            _context.SubjectVisitPageModuleElements.Add(subjectVisitPageModuleElement);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var elmnt in stdVstPgMdlElmnts)
+                    {
+                        var subjectVisitPageModuleElement = new SubjectVisitPageModuleElement()
+                        {
+                            SubjectVisitModuleId = mdl.Id,
+                            StudyVisitPageModuleElementId = elmnt.Id,
+                            DataGridRowId = elmnt.StudyVisitPageModuleElementDetail.RowIndex
+                        };
+
+                        _context.SubjectVisitPageModuleElements.Add(subjectVisitPageModuleElement);
+                    }
                 }
             }
 
@@ -5489,7 +5516,7 @@ namespace Helios.Core.Controllers
                 {
                     studyVisitPageModuleElementIds.Add(studyVisitPageModuleElement.Id);
                     removeElementsFromSubjects(studyVisitPageModuleElementIds, studyVisitPageModuleElement.StudyVisitPageModuleId);
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    var a = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
             }
             else

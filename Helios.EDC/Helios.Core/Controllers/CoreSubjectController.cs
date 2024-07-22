@@ -298,6 +298,29 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<dynamic>> RemoveDatagridSubjectElements(List<Int64> elementIds)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x=> elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+            foreach (var item in subjectElements)
+            {
+                item.IsActive = false;
+                item.IsDeleted = true;
+
+                _context.SubjectVisitPageModuleElements.Update(item);
+            }
+
+            result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+            return new ApiResponse<dynamic>
+            {
+                Message = result.IsSuccess ? "Successful" : "Operation failed!"
+            };
+        }
+
+        [HttpPost]
         public async Task<List<SiteModel>> GetSites(SubjectDTO model)
         {
             var sites = await _context.Sites.Where(x => x.StudyId == model.StudyId && x.IsActive && !x.IsDeleted)
@@ -437,9 +460,16 @@ namespace Helios.Core.Controllers
             {
                 if (item.ElementType == ElementType.DataGrid)
                 {
-                    var cnt = item.ChildElements.GroupBy(x=>x.StudyVisitPageModuleElementId).FirstOrDefault().Count();
+                    if (item.ChildElements.Count > 0)
+                    {
+                        var cnt = item.ChildElements.GroupBy(x => x.StudyVisitPageModuleElementId).FirstOrDefault().Count();
 
-                    item.RowCount = cnt;
+                        item.RowCount = cnt;
+                    }
+                    else
+                    {
+                        item.RowCount = 0;
+                    }
                 }
             }
 
