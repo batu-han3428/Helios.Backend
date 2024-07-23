@@ -223,14 +223,33 @@ namespace Helios.Core.Controllers
                     };
                 }
 
-                //var sCode = site.CountryCode + "" + site.Code;
-                //var dd = subjectsInSite.Where(p => p.SubjectNumber.StartsWith(sCode));
-                //var spl = dd.Select(x=>x.SubjectNumber);
-                //var maxNumber = dd.Any() ? dd.Max(p => p.Number) : 0;
-                //var userResearchCountInSite = maxNumber + 1;
-                //var userResearchCountInSite = subjectsInSiteCount + 1;
+                var sCode = site.CountryCode + "" + site.Code;
+                var dd = subjectsInSite.Where(p => p.SubjectNumber.StartsWith(sCode));
+                var spl = dd.Select(x => x.SubjectNumber);
+                var maxNumber = 0;
 
-                var subjectNo = getSubjectNumber(site.CountryCode, site.Code, subjectsInSite.Count + 1, study.SubjectNumberDigitCount);
+                if (dd.Any())
+                {
+                    var nm = spl.Select(x => x.Substring(sCode.Length)).ToList();
+                    maxNumber = nm.Max(x => int.Parse(x));
+                }
+
+                var subjectCountInSite = maxNumber + 1;
+
+                var subjectNo = getSubjectNumber(site.CountryCode, site.Code, subjectCountInSite, study.SubjectNumberDigitCount);
+
+                for (; ; )
+                {
+                    var s = await _context.Subjects.Where(x => x.SubjectNumber == subjectNo && x.SiteId == model.SiteId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+                    if (s == null)
+                        break;
+                    else
+                    {
+                        subjectCountInSite++;
+                        subjectNo = getSubjectNumber(site.CountryCode, site.Code, subjectCountInSite, study.SubjectNumberDigitCount);
+                    }
+                }
 
                 var newSubject = new Subject
                 {
@@ -305,7 +324,7 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
 
-            var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x=> elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+            var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
 
             foreach (var item in subjectElements)
             {
@@ -497,7 +516,7 @@ namespace Helios.Core.Controllers
                 {
                     var hdnResult = await SetHidden(model.Id);
                     var calcResult = await SetCalculation(model.Id);
-                  
+
                     var subject = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Select(x => x.SubjectVisitModule).Select(x => x.SubjectVisitPage).Select(x => x.SubjectVisit).Select(x => x.Subject);
 
                     subject.UpdatedAt = DateTimeOffset.UtcNow;
@@ -673,7 +692,7 @@ namespace Helios.Core.Controllers
                 }
 
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
-              
+
                 var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
                     .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
                     .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
@@ -695,7 +714,7 @@ namespace Helios.Core.Controllers
             catch (Exception)
             {
                 return false;
-            }            
+            }
         }
 
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
