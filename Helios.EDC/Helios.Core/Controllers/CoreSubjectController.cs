@@ -832,29 +832,25 @@ namespace Helios.Core.Controllers
             {
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-                //await _context.Subjects.Where(x => x.IsActive && !x.IsDeleted && x.Id == 10 && x.StudyId == baseDTO.StudyId)
-                //    .Include(x => x.SubjectVisits.Where(a => a.IsActive && !a.IsDeleted))
-                //    .ThenInclude(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted))
-                //    .ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted))
-                //    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted))
-                //    .ThenInclude(x => x.StudyVisitPageModuleElement)
-                //    .ThenInclude(x => x.StudyVisitPageModule)
-                //    .ThenInclude(x => x.StudyVisitPage)
-                //    .ThenInclude(x => x.StudyVisit)
-                //    .ThenInclude(x => x.Study);
+                StudyVisitAnnotatedCrfModel model = new StudyVisitAnnotatedCrfModel();
 
                 var subjectData = await _context.Subjects.Where(x => x.IsActive && !x.IsDeleted && x.Id == subjectId && x.StudyId == 8)
                     .Include(x => x.SubjectVisits.Where(a => a.IsActive && !a.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted && (a.UserValue != null && a.UserValue != ""))).ToListAsync();
+
+                if (subjectData.Count < 1)
+                {
+                    return model;
+                }
+
                 var subjectPages = subjectData.SelectMany(x => x.SubjectVisits).SelectMany(x => x.SubjectVisitPages).ToList();
 
                 var emptyModuleIds = subjectPages
                 .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Any()))
                 .SelectMany(page => page.SubjectVisitPageModules.Select(module => module.StudyVisitPageModuleId))
                 .ToList();
-
 
                 var study = await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.Id == 8).Select(study => new Study
                 {
@@ -896,7 +892,6 @@ namespace Helios.Core.Controllers
                     }).ToList()
                 }).AsNoTracking().AsSplitQuery().FirstOrDefaultAsync();
 
-                StudyVisitAnnotatedCrfModel model = new StudyVisitAnnotatedCrfModel();
                 if (study != null)
                 {
                     StudyAnnotatedCrfModel studyModel = new StudyAnnotatedCrfModel
