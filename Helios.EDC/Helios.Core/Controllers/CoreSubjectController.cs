@@ -629,7 +629,7 @@ namespace Helios.Core.Controllers
                                 var sbjctElm = allSbjElmnts.FirstOrDefault(x => x.StudyVisitPageModuleElementId == dtl.TargetElementId && x.StudyVisitPageModuleElement.ElementType != Common.Enums.ElementType.Calculated);
 
                                 if (sbjctElm != null && sbjctElm.UserValue != null && sbjctElm.UserValue != "")
-                                    finalJs += "var " + dtl.VariableName + "=" + sbjctElm.UserValue + ";";
+                                    finalJs += "var " + dtl.VariableName + "='" + sbjctElm.UserValue + "';";
                             }
 
                             finalJs += javascriptCode + "}";
