@@ -239,6 +239,9 @@ namespace Helios.Core.Controllers
                 });
             }
 
+            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+            study.UpdatedAt = DateTimeOffset.Now;
+
             var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
             if (result)
@@ -282,6 +285,8 @@ namespace Helios.Core.Controllers
                 studyRole.Name = userPermission.RoleName;
                 studyRole.TenantId = baseDTO.TenantId;
                 await _context.StudyRoles.AddAsync(studyRole);
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
                 if (result)
@@ -309,6 +314,9 @@ namespace Helios.Core.Controllers
                     oldEntity.Name = userPermission.RoleName;
 
                     _context.StudyRoles.Update(oldEntity);
+
+                    var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == oldEntity.StudyId);
+                    study.UpdatedAt = DateTimeOffset.Now;
 
                     var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -349,6 +357,9 @@ namespace Helios.Core.Controllers
             _context.Permissions.RemoveRange(oldEntity.Permissions);
 
             _context.StudyRoles.Remove(oldEntity);
+
+            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+            study.UpdatedAt = DateTimeOffset.Now;
 
             var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -429,6 +440,9 @@ namespace Helios.Core.Controllers
                 };
                 await _context.StudyUsers.AddAsync(user);
 
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyUserModel.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
+
                 var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now) > 0;
 
                 if (!result)
@@ -506,6 +520,9 @@ namespace Helios.Core.Controllers
                         }
                     }
 
+                    var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyUserModel.StudyId);
+                    study.UpdatedAt = DateTimeOffset.Now;
+
                     var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
                     if (result > 0)
@@ -561,6 +578,9 @@ namespace Helios.Core.Controllers
                     user.IsActive = !studyUserModel.IsActive;
                 }
 
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyUserModel.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
+
                 var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
                 if (result > 0)
@@ -609,6 +629,9 @@ namespace Helios.Core.Controllers
                         x.IsActive = !studyUserModel.IsActive;
                     });
                 }
+
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyUserModel.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
 
                 var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 
@@ -659,6 +682,9 @@ namespace Helios.Core.Controllers
                     _context.StudyUserSites.RemoveRange(user.StudyUserSites);
                     _context.StudyUsers.Remove(user);
                 }
+
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == studyUserModel.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
 
                 var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
 

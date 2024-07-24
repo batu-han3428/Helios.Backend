@@ -6,7 +6,6 @@ using Helios.Core.Domains.Entities;
 using Helios.Core.helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using Helios.Common.Helpers.Api;
 using System.Text.Json;
 using Helios.Core.Services.Interfaces;
@@ -3772,6 +3771,9 @@ namespace Helios.Core.Controllers
 
                         await _context.StudyVisits.AddAsync(visit);
 
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
+                        study.UpdatedAt = DateTimeOffset.Now;
+
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                         if (result)
@@ -3835,6 +3837,9 @@ namespace Helios.Core.Controllers
 
                         await _context.StudyVisitPages.AddAsync(page);
 
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                        study.UpdatedAt = DateTimeOffset.Now;
+
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                         if (result)
@@ -3877,6 +3882,9 @@ namespace Helios.Core.Controllers
                             visit.Name = visitDTO.Name;
                             visit.VisitType = visitDTO.VisitType.Value;
 
+                            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visit.StudyId);
+                            study.UpdatedAt = DateTimeOffset.Now;
+
                             var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                             if (result)
@@ -3905,6 +3913,9 @@ namespace Helios.Core.Controllers
                         {
                             page.Name = visitDTO.Name;
 
+                            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                            study.UpdatedAt = DateTimeOffset.Now;
+
                             var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                             if (result)
@@ -3927,11 +3938,14 @@ namespace Helios.Core.Controllers
                     }
                     else if (visitDTO.Type == VisitStatu.module.ToString())
                     {
-                        var page = await _context.StudyVisitPageModules.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
+                        var module = await _context.StudyVisitPageModules.FirstOrDefaultAsync(x => x.Id == visitDTO.Id && x.IsActive && !x.IsDeleted);
 
-                        if (page != null)
+                        if (module != null)
                         {
-                            page.Name = visitDTO.Name;
+                            module.Name = visitDTO.Name;
+                            
+                            var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                            study.UpdatedAt = DateTimeOffset.Now;
 
                             var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -4101,14 +4115,17 @@ namespace Helios.Core.Controllers
                             }).ToList(),
                             Permissions = visit.Permissions
                         }).AsSplitQuery().FirstOrDefaultAsync();
+
                     if (visit != null)
                     {
                         _context.Permissions.RemoveRange(visit.Permissions);
 
                         _context.Permissions.RemoveRange(visit.StudyVisitPages.SelectMany(x => x.Permissions));
 
-
                         _context.StudyVisits.Remove(visit);
+
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visit.StudyId);
+                        study.UpdatedAt = DateTimeOffset.Now;
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -4203,6 +4220,9 @@ namespace Helios.Core.Controllers
 
                         _context.StudyVisitPages.Remove(page);
 
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
+                        study.UpdatedAt = DateTimeOffset.Now;
+
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                         if (result)
@@ -4275,6 +4295,9 @@ namespace Helios.Core.Controllers
                     if (module != null)
                     {
                         _context.StudyVisitPageModules.Remove(module);
+
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
+                        study.UpdatedAt = DateTimeOffset.Now;
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -4477,17 +4500,16 @@ namespace Helios.Core.Controllers
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-            List<Permission> permissions = null;
-            Expression<Func<Permission, bool>> query = null;
+            IQueryable<Permission> query = _context.Permissions.Where(x => x.StudyId == baseDTO.StudyId && !x.IsDeleted);
 
             //visit yetkileri için if, page yetkileri için else if
             if (dto.StudyVisitId != null && dto.StudyVisitId != 0)
             {
-                query = x => x.StudyId == baseDTO.StudyId && x.StudyVisitId == dto.StudyVisitId && !x.IsDeleted;
+                query = query.Where(x => x.StudyVisitId == dto.StudyVisitId).Include(x => x.StudyVisit).ThenInclude(x=>x.Study);
             }
             else if (dto.StudyVisitPageId != null && dto.StudyVisitPageId != 0)
             {
-                query = x => x.StudyId == baseDTO.StudyId && x.StudyVisitPageId == dto.StudyVisitPageId && !x.IsDeleted;
+                query = query.Where(x => x.StudyVisitPageId == dto.StudyVisitPageId).Include(x => x.StudyVisitPage).ThenInclude(x => x.StudyVisit).ThenInclude(x=>x.Study);
             }
             else
             {
@@ -4499,7 +4521,7 @@ namespace Helios.Core.Controllers
             }
 
             //yetkileri çekiyorum
-            permissions = await _context.Permissions.Where(query).ToListAsync();
+            List<Permission> permissions = await query.ToListAsync();
 
             //yeni seçtiğim yetkilerin daha önce veri tabanında kayıtlı olup olmadığını anlıyorum
             var expectData = dto.PermissionKeys.Except(permissions.Select(x => x.PermissionKey).ToList()).ToList();
@@ -4518,6 +4540,19 @@ namespace Helios.Core.Controllers
             var inactiveExpect = permissions.Where(x => !x.IsActive && dto.PermissionKeys.Contains(x.PermissionKey)).ToList();
             //onları true yapıyorum
             inactiveExpect.ForEach(x => x.IsActive = true);
+
+            if (dto.StudyVisitId != null && dto.StudyVisitId != 0)
+            {
+                var visit = permissions.FirstOrDefault().StudyVisit;
+                visit.UpdatedAt = DateTimeOffset.Now;
+                visit.Study.UpdatedAt = DateTimeOffset.Now;
+            }
+            else if (dto.StudyVisitPageId != null && dto.StudyVisitPageId != 0)
+            {
+                var page = permissions.FirstOrDefault().StudyVisitPage;
+                page.UpdatedAt = DateTimeOffset.Now;
+                page.StudyVisit.Study.UpdatedAt = DateTimeOffset.Now;
+            }
 
             var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -4548,6 +4583,9 @@ namespace Helios.Core.Controllers
                 await _context.StudyVisitPageModules.AddRangeAsync(moduleList);
 
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                study.UpdatedAt = DateTimeOffset.Now;
 
                 result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
