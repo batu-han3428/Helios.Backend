@@ -744,12 +744,12 @@ namespace Helios.Authentication.Controllers
             };
         }
 
-        [HttpPost]   
+        [HttpPost]
         public async Task<ApiResponse<dynamic>> UserProfileChangePassword(ResetUserProfileViewModel model)
         {
             var result = new ApiResponse<dynamic>();
             if (!String.IsNullOrEmpty(model.Password))
-            {              
+            {
                 var user = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
 
                 if (user == null)
@@ -760,7 +760,7 @@ namespace Helios.Authentication.Controllers
                         Message = "An unexpected error occurred."
                     };
                 }
-                if (model.Password==null || model.NewPassword==null || model.ConfirmPassword==null)
+                if (model.Password == null || model.NewPassword == null || model.ConfirmPassword == null)
                 {
                     return new ApiResponse<dynamic>
                     {
@@ -774,7 +774,7 @@ namespace Helios.Authentication.Controllers
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
-                        Message = "cod0",                        
+                        Message = "cod0",
                     };
                 }
 
@@ -791,7 +791,7 @@ namespace Helios.Authentication.Controllers
                     {
                         IsSuccess = false,
                         Message = message
-                    };                  
+                    };
                 }
 
                 if (model.NewPassword == model.Password)
@@ -830,7 +830,7 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = resetResult.Errors.ToString()
                     };
-                   
+
                 }
 
             }
@@ -1659,16 +1659,14 @@ namespace Helios.Authentication.Controllers
 
             var result = await (
                 from userManagerUser in _userManager.Users
-                join systemAdmin in _context.SystemAdmins on userManagerUser.Id equals systemAdmin.AuthUserId into systemAdmins
+                join systemAdmin in _context.SystemAdmins.Where(sa => !sa.IsDeleted) on userManagerUser.Id equals systemAdmin.AuthUserId into systemAdmins
                 from sysAdmin in systemAdmins.DefaultIfEmpty()
-                join tenantAdmin in _context.TenantAdmins on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
+                join tenantAdmin in _context.TenantAdmins.Where(ta => !ta.IsDeleted) on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
                 from tenAdmin in tenantAdmins.DefaultIfEmpty()
                 join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
                 where
                     userManagerUser.IsActive &&
-                    userManagerUser.Id != id &&
-                    (sysAdmin != null && !sysAdmin.IsDeleted) ||
-                    (tenAdmin != null && !tenAdmin.IsDeleted)
+                    userManagerUser.Id != id
                 select new SystemUserModel
                 {
                     Id = userManagerUser.Id,
@@ -1676,7 +1674,7 @@ namespace Helios.Authentication.Controllers
                     LastName = userManagerUser.LastName,
                     Email = userManagerUser.Email,
                     PhoneNumber = userManagerUser.PhoneNumber,
-                    IsActive = (sysAdmin != null && sysAdmin.IsActive) || (tenAdmin != null && tenAdmin.IsActive) || userManagerUser.IsActive,
+                    IsActive = sysAdmin != null ? sysAdmin.IsActive : tenAdmin != null ? tenAdmin.IsActive : userManagerUser.IsActive,
                     Roles = userManagerUser.UserRoles.Select(ur => new
                     {
                         RoleId = ur.RoleId,
