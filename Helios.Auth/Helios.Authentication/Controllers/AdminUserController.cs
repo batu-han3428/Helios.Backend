@@ -1664,8 +1664,7 @@ namespace Helios.Authentication.Controllers
                 join tenantAdmin in _context.TenantAdmins.Where(ta => !ta.IsDeleted) on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
                 from tenAdmin in tenantAdmins.DefaultIfEmpty()
                 join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
-                where
-                    userManagerUser.IsActive &&
+                where                   
                     userManagerUser.Id != id
                 select new SystemUserModel
                 {

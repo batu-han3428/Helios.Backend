@@ -163,19 +163,19 @@ namespace Helios.Authentication.Controllers
                         };
                     }
 
-                    //if (user.AccessFailedCount == 5)
-                    //{
-                    //    user.IsActive = false;
-                    //    var updateResult = await _userManager.UpdateAsync(user);
-                    //    if (updateResult.Succeeded)
-                    //    {
-                    //        return new ApiResponse<dynamic>
-                    //        {
-                    //            IsSuccess = false,
-                    //            Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account."
-                    //        };
-                    //    }
-                    //}
+                    if (user.AccessFailedCount == 5)
+                    {
+                        user.IsActive = false;
+                        var updateResult = await _userManager.UpdateAsync(user);
+                        if (updateResult.Succeeded)
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account."
+                            };
+                        }
+                    }
 
                     bool isActive = await UserActiveControl(user);
 
