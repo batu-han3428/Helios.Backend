@@ -505,7 +505,7 @@ namespace Helios.Core.Controllers
 
             var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
 
-            if (element != null && model.Value != "" && model.Value != element.UserValue)
+            if (element != null/* && model.Value != ""*/ && model.Value != element.UserValue)
             {
                 element.UserValue = model.Value;
 
