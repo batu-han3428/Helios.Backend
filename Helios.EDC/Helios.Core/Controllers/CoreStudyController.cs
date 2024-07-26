@@ -3483,11 +3483,11 @@ namespace Helios.Core.Controllers
 
             List<Int64> hideElements = new List<Int64>();
 
-            var events = await _context.StudyVisitPageModuleElementEvents.Where(x => x.IsActive && !x.IsDeleted && targetElementIds.Contains(x.TargetElementId)).ToListAsync();
+            var events = await _context.StudyVisitPageModuleElementEvents.Where(x => x.IsActive && !x.IsDeleted && x.EventType == EventType.Dependency && targetElementIds.Contains(x.TargetElementId)).ToListAsync();
 
             if (subjectId != 0)
             {
-                var elements = events.Select(x => x.SourceElementId).ToList();
+                var elements = events.SelectMany(e => new[] { e.SourceElementId, e.TargetElementId }).ToList();
 
                 var subjectElements = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
                     .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
@@ -3499,9 +3499,14 @@ namespace Helios.Core.Controllers
                 foreach (var evnt in events)
                 {
                     var elm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId);
+                    //var elm = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
                     if (elm != null)
                     {
                         var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
+
+                        var hiddenElm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.TargetElementId);
+
+                        if (hiddenElm == null) continue;
 
                         if (evnt.ValueCondition == ActionCondition.Less)
                         {
@@ -3509,14 +3514,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
@@ -3526,14 +3531,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
@@ -3543,14 +3548,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
@@ -3560,14 +3565,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
@@ -3577,14 +3582,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
@@ -3594,14 +3599,14 @@ namespace Helios.Core.Controllers
                             {
                                 if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                             else
                             {
                                 if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
                                 {
-                                    hideElements.Add(evnt.TargetElementId);
+                                    hideElements.Add(hiddenElm.Id);
                                 }
                             }
                         }
