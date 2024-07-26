@@ -178,6 +178,8 @@ namespace Helios.Core.Controllers
             }
 
             return new UserPermissionModel();
+         
+           
         }
 
         [HttpGet]
