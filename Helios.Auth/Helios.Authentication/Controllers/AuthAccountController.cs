@@ -194,7 +194,7 @@ namespace Helios.Authentication.Controllers
                     {
                         user.AccessFailedCount++;
                         var remainAttemp = 5 - user.AccessFailedCount;
-                        var failMsg = user.AccessFailedCount == 4 ? "If you enter your password incorrectly, your account will be blocked, please contact the system administrator." : "You have @Change attempts left for the validity of your password.";
+                        var failMsg = user.AccessFailedCount == 4 ? "If you enter your password incorrectly, your account will be blocked, please contact the system administrator." : user.AccessFailedCount == 5 ? "Your account has been blocked. Please contact the system administrator." : "You have @Change attempts left for the validity of your password.";
                         var updateResult = await _userManager.UpdateAsync(user);
 
                         return new ApiResponse<dynamic>
