@@ -505,7 +505,7 @@ namespace Helios.Core.Controllers
 
             var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
 
-            if (element != null/* && model.Value != ""*/ && model.Value != element.UserValue)
+            if (element != null && model.Value != element.UserValue && (model.Type == ElementType.CheckList || model.Value != ""))
             {
                 element.UserValue = model.Value;
 
@@ -696,7 +696,7 @@ namespace Helios.Core.Controllers
                 var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
                     .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
                     .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
-                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.StudyVisitPageModuleElementId))).ToListAsync();
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.Id))).ToListAsync();
 
                 var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
 
