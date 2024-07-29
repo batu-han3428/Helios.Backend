@@ -1,5 +1,6 @@
 ﻿using Helios.Common.DTO;
 using Helios.Common.Enums;
+using Helios.Common.Helpers;
 using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
 using Helios.Core.Contexts;
@@ -204,6 +205,8 @@ namespace Helios.Core.Controllers
             }
             else
             {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
                 var study = await _context.Studies
                     .Include(x => x.Sites.Where(y => y.IsActive && !y.IsDeleted))
                     .Include(x => x.StudyVisits.Where(y => y.IsActive && !y.IsDeleted))
@@ -259,19 +262,24 @@ namespace Helios.Core.Controllers
                     SiteId = model.SiteId,
                     SubjectNumber = subjectNo,
                     InitialName = model.InitialName,
+                    TenantId = baseDTO.TenantId,
                     SubjectVisits = study.StudyVisits.Select(studyVisit => new SubjectVisit
                     {
                         StudyVisitId = studyVisit.Id,
+                        TenantId = baseDTO.TenantId,
                         SubjectVisitPages = studyVisit.StudyVisitPages.Select(stdVstPg => new SubjectVisitPage
                         {
                             StudyVisitPageId = stdVstPg.Id,
+                            TenantId = baseDTO.TenantId,
                             SubjectVisitPageModules = stdVstPg.StudyVisitPageModules.Select(stdVstPgMdl => new SubjectVisitPageModule
                             {
                                 StudyVisitPageModuleId = stdVstPgMdl.Id,
+                                TenantId = baseDTO.TenantId,
                                 SubjectVisitPageModuleElements = stdVstPgMdl.StudyVisitPageModuleElements.Select(stdVstPgMdlElm => new SubjectVisitPageModuleElement
                                 {
                                     StudyVisitPageModuleElementId = stdVstPgMdlElm.Id,
-                                    DataGridRowId = stdVstPgMdlElm.StudyVisitPageModuleElementDetail.RowIndex
+                                    DataGridRowId = stdVstPgMdlElm.StudyVisitPageModuleElementDetail.RowIndex,
+                                    TenantId = baseDTO.TenantId,
                                 }).ToList(),
                             }).ToList(),
                         }).ToList(),
@@ -279,7 +287,7 @@ namespace Helios.Core.Controllers
                 };
 
                 _context.Subjects.Add(newSubject);
-                var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = true,
@@ -910,6 +918,173 @@ namespace Helios.Core.Controllers
             }
 
             return result;
+        }
+
+        [HttpGet]
+        public async Task<StudyVisitAnnotatedCrfModel> GetSubjectVisitAnnotatedCrf(Int64 subjectId)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                StudyVisitAnnotatedCrfModel model = new StudyVisitAnnotatedCrfModel();
+
+                var subjectData = await _context.Subjects.Where(x => x.IsActive && !x.IsDeleted && x.Id == subjectId && x.StudyId == 8)
+                    .Include(x => x.SubjectVisits.Where(a => a.IsActive && !a.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted && (a.UserValue != null && a.UserValue != ""))).ToListAsync();
+
+                if (subjectData.Count < 1)
+                {
+                    return model;
+                }
+
+                var subjectPages = subjectData.SelectMany(x => x.SubjectVisits).SelectMany(x => x.SubjectVisitPages).ToList();
+
+                var emptyModuleIds = subjectPages
+                .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Any()))
+                .SelectMany(page => page.SubjectVisitPageModules.Select(module => module.StudyVisitPageModuleId))
+                .ToList();
+
+                var study = await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.Id == 8).Select(study => new Study
+                {
+                    ProtocolCode = study.ProtocolCode,
+                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).OrderBy(visit => visit.Order).Select(visit => new StudyVisit
+                    {
+                        Id = visit.Id,
+                        Name = visit.Name,
+                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).OrderBy(page => page.Order).Select(page => new StudyVisitPage
+                        {
+                            Id = page.Id,
+                            Name = page.Name,
+                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted && !emptyModuleIds.Contains(module.Id)).OrderBy(module => module.Order).Select(module => new StudyVisitPageModule
+                            {
+                                Id = module.Id,
+                                Name = module.Name,
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && elm.ElementType != ElementType.Hidden).OrderBy(elm => elm.Order).Select(elm => new StudyVisitPageModuleElement
+                                {
+                                    Id = elm.Id,
+                                    Title = elm.Title,
+                                    ElementName = elm.ElementName,
+                                    Description = elm.Description,
+                                    IsRequired = elm.IsRequired,
+                                    ElementType = elm.ElementType,
+                                    StudyVisitPageModuleElementDetail = elm.StudyVisitPageModuleElementDetail != null && elm.StudyVisitPageModuleElementDetail.IsActive && !elm.StudyVisitPageModuleElementDetail.IsDeleted
+                                                ? new StudyVisitPageModuleElementDetail
+                                                {
+                                                    LowerLimit = elm.StudyVisitPageModuleElementDetail.LowerLimit,
+                                                    UpperLimit = elm.StudyVisitPageModuleElementDetail.UpperLimit,
+                                                    ParentId = elm.StudyVisitPageModuleElementDetail.ParentId,
+                                                    ElementOptions = elm.StudyVisitPageModuleElementDetail.ElementOptions,
+                                                    ColunmIndex = elm.StudyVisitPageModuleElementDetail.ColunmIndex,
+                                                    DatagridAndTableProperties = elm.StudyVisitPageModuleElementDetail.DatagridAndTableProperties
+                                                }
+                                                : null,
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList()
+                }).AsNoTracking().AsSplitQuery().FirstOrDefaultAsync();
+
+                if (study != null)
+                {
+                    StudyAnnotatedCrfModel studyModel = new StudyAnnotatedCrfModel
+                    {
+                        ProtocolCode = study.ProtocolCode,
+                        SubjectNumber = subjectData.FirstOrDefault().SubjectNumber
+                    };
+
+                    List<VisitAnnotatedCrfModel> visitModel = new List<VisitAnnotatedCrfModel>();
+
+                    var elements = study.StudyVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements);
+
+                    var chls = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId != 0).ToList();
+
+                    List<Int64> ids = new List<Int64>();
+
+                    chls.ForEach(chl =>
+                    {
+                        var parentElm = elements.FirstOrDefault(x => chl?.StudyVisitPageModuleElementDetail?.ParentId == x.Id);
+                        if (parentElm != null && parentElm.ElementType == ElementType.DataGrid)
+                        {
+                            ids.Add(chl.Id);
+                        }
+                    });
+
+                    visitModel.AddRange(study.StudyVisits.Select(visit => new VisitAnnotatedCrfModel
+                    {
+                        Title = visit.Name,
+                        Children = visit.StudyVisitPages.Select(page => new VisitAnnotatedCrfModel
+                        {
+                            Title = page.Name,
+                            Children = page.StudyVisitPageModules.Select(module => new VisitAnnotatedCrfModel
+                            {
+                                Title = module.Name,
+                                Children = module.StudyVisitPageModuleElements.Where(x => !ids.Contains(x.Id)).Select(elm =>
+                                {
+                                    VisitAnnotatedCrfModel newElm = new VisitAnnotatedCrfModel();
+                                    newElm.Title = elm.Title != "" ? elm.Title : elm.ElementName;
+                                    newElm.Input = elm.ElementType;
+                                    newElm.Description = elm.Description;
+                                    newElm.IsRequired = elm.IsRequired;
+                                    newElm.ElementOptions = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.ElementOptions : "";
+                                    newElm.LowerLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.LowerLimit : "";
+                                    newElm.UpperLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.UpperLimit : "";
+
+                                    var gh = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.StudyVisitPageModuleElementId == elm.Id);
+
+                                    newElm.UserValue = gh?.UserValue;
+
+                                    if (elm.ElementType == ElementType.DataGrid)
+                                    {
+                                        var children = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId == elm.Id).OrderBy(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex != null ? int.Parse(x?.StudyVisitPageModuleElementDetail?.ColunmIndex.ToString()) : int.MaxValue).ToList();
+
+                                        var datp = System.Text.Json.JsonSerializer.Deserialize<List<DatagridAndTableProperties>>(elm?.StudyVisitPageModuleElementDetail?.DatagridAndTableProperties);
+                                        int index = 1;
+                                        Dictionary<string, string> datagridAndTableValue = new Dictionary<string, string>();
+                                        datp?.ForEach(d =>
+                                        {
+                                            var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index);
+                                            string val = "";
+                                            if (chl != null)
+                                            {
+                                                if (chl.ElementType == ElementType.RadioList || chl.ElementType == ElementType.DropDown || chl.ElementType == ElementType.CheckList || chl.ElementType == ElementType.DropDownMulti)
+                                                {
+                                                    val = chl?.StudyVisitPageModuleElementDetail?.ElementOptions;
+                                                }
+                                                else
+                                                {
+                                                    val = chl.ElementType.ToString();
+                                                }
+                                                string key = $"{d.title}_{Guid.NewGuid()}";
+                                                datagridAndTableValue.Add(key, val);
+                                            }
+                                            else
+                                            {
+                                                string key = $"Empty_{Guid.NewGuid()}";
+                                                datagridAndTableValue.Add(key, val);
+                                            }
+                                            index++;
+                                        });
+                                        newElm.DatagridAndTableValue = datagridAndTableValue;
+                                    }
+                                    return newElm;
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList());
+                    model.StudyModel = studyModel;
+                    model.VisitModel = visitModel;
+                }
+
+                return model;
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
     }
 }

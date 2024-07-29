@@ -3755,7 +3755,7 @@ namespace Helios.Core.Controllers
                         List<Permission> permissions = new List<Permission>();
                         foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
                         {
-                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission });
+                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission, TenantId = baseDTO.TenantId });
                         }
 
                         var roles = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == visitDTO.StudyId).ToListAsync();
@@ -3821,7 +3821,7 @@ namespace Helios.Core.Controllers
                         List<Permission> permissions = new List<Permission>();
                         foreach (VisitPermission permission in Enum.GetValues(typeof(VisitPermission)))
                         {
-                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission });
+                            permissions.Add(new Permission { StudyId = visitDTO.StudyId, PermissionKey = (int)permission, TenantId = baseDTO.TenantId });
                         }
 
                         var roles = await _context.StudyRoles.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == visitDTO.StudyId).ToListAsync();
@@ -4000,7 +4000,8 @@ namespace Helios.Core.Controllers
                 var subjectVisit = new SubjectVisit()
                 {
                     SubjectId = item.Id,
-                    StudyVisitId = visitId
+                    StudyVisitId = visitId,
+                    TenantId = item.TenantId
                 };
 
                 _context.SubjectVisits.Add(subjectVisit);
@@ -4019,7 +4020,8 @@ namespace Helios.Core.Controllers
                 var subjectVisitPage = new SubjectVisitPage()
                 {
                     SubjectVisitId = item.Id,
-                    StudyVisitPageId = pageId
+                    StudyVisitPageId = pageId,
+                    TenantId = item.TenantId
                 };
 
                 _context.SubjectVisitPages.Add(subjectVisitPage);
@@ -4624,7 +4626,8 @@ namespace Helios.Core.Controllers
                                     StudyVisitPageModuleId = item.StudyVisitPageModuleId,
                                     CalculationElementId = item.Id,
                                     TargetElementId = stdVstPgMdlElements.FirstOrDefault(x => x.ElementId == calculationElementDetailDTO.TargetElementId).Id,
-                                    VariableName = calculationElementDetailDTO.VariableName
+                                    VariableName = calculationElementDetailDTO.VariableName,
+                                    TenantId = baseDTO.TenantId
                                 };
 
                                 studyVisitPageModuleCalculationElementDetailsList.Add(studyVisitPageModuleCalculationElementDetail);
@@ -4794,6 +4797,7 @@ namespace Helios.Core.Controllers
                     ReferenceKey = Guid.NewGuid(),
                     VersionKey = lastVer,
                     Order = lastOrder,
+                    TenantId = moduleDTO.TenantId
                 };
 
                 studyVisitPageModule.StudyVisitPageModuleElements = MapElementDTOListToStudyVisitPageModuleElementList(moduleDTO.StudyVisitPageModuleElements);
@@ -4890,7 +4894,8 @@ namespace Helios.Core.Controllers
                     var subjectVisitPageModule = new SubjectVisitPageModule()
                     {
                         StudyVisitPageModuleId = mdlId,
-                        SubjectVisitPageId = item.Id
+                        SubjectVisitPageId = item.Id,
+                        TenantId = item.TenantId
                     };
 
                     _context.SubjectVisitPageModules.Add(subjectVisitPageModule);
@@ -5059,17 +5064,16 @@ namespace Helios.Core.Controllers
                     ProtocolCode = study.ProtocolCode,
                     Description = study.Description,
                     SubDescription = study.SubDescription,
-                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).Select(visit => new StudyVisit
+                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).OrderBy(visit => visit.Order).Select(visit => new StudyVisit
                     {
                         Name = visit.Name,
-                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new StudyVisitPage
+                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).OrderBy(page => page.Order).Select(page => new StudyVisitPage
                         {
                             Name = dto.IsPage ? page.Name : null,
-                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new StudyVisitPageModule
+                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).OrderBy(module => module.Order).Select(module => new StudyVisitPageModule
                             {
                                 Name = module.Name,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label) && (dto.IsHiddenElement || elm.ElementType != ElementType.Hidden) && (dto.IsHiddenFields || !elm.IsHidden)
-                                ).Select(elm => new StudyVisitPageModuleElement
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && (dto.IsCalculated || elm.ElementType != ElementType.Calculated) && (dto.IsLabel || elm.ElementType != ElementType.Label) && (dto.IsHiddenElement || elm.ElementType != ElementType.Hidden) && (dto.IsHiddenFields || !elm.IsHidden)).OrderBy(elm => elm.Order).Select(elm => new StudyVisitPageModuleElement
                                 {
                                     Id = elm.Id,
                                     Title = elm.Title,
@@ -5310,6 +5314,7 @@ namespace Helios.Core.Controllers
                     ReferenceKey = Guid.NewGuid(),
                     VersionKey = 1,
                     Order = 1,
+                    TenantId = x.TenantId,
                     StudyVisitPageModuleElements = x.Elements.Where(q => q.IsActive && !q.IsDeleted).Select(e => new ElementDTO
                     {
                         Id = e.Id,
@@ -5672,7 +5677,8 @@ namespace Helios.Core.Controllers
                         {
                             SubjectVisitModuleId = mdl.Id,
                             StudyVisitPageModuleElementId = elmnt.Id,
-                            DataGridRowId = elmnt.StudyVisitPageModuleElementDetail.RowIndex
+                            DataGridRowId = elmnt.StudyVisitPageModuleElementDetail.RowIndex,
+                            TenantId = mdl.TenantId
                         };
 
                         _context.SubjectVisitPageModuleElements.Add(subjectVisitPageModuleElement);
@@ -6242,7 +6248,8 @@ namespace Helios.Core.Controllers
                                     ValueCondition = item.ValidationCondition,
                                     Value = item.ValidationValue,
                                     Message = item.ValidationMessage,
-                                    ReferenceKey = Guid.NewGuid()
+                                    ReferenceKey = Guid.NewGuid(),
+                                    TenantId = model.TenantId
                                 };
 
                                 _context.StudyVisitPageModuleElementValidationDetails.Add(validation);
@@ -6375,7 +6382,8 @@ namespace Helios.Core.Controllers
                             ActionType = (ActionType)model.DependentAction,
                             ActionValue = model.DependentFieldValue,
                             StudyVisitPageModuleId = stdVstPgMdlElement.StudyVisitPageModuleId,
-                            ReferenceKey = Guid.NewGuid()
+                            ReferenceKey = Guid.NewGuid(),
+                            TenantId = model.TenantId
                         };
 
                         _context.StudyVisitPageModuleElementEvents.Add(elementEvent);
@@ -6622,7 +6630,8 @@ namespace Helios.Core.Controllers
                                 ValueCondition = item.ValidationCondition,
                                 Value = item.ValidationValue,
                                 Message = item.ValidationMessage,
-                                ReferenceKey = Guid.NewGuid()
+                                ReferenceKey = Guid.NewGuid(),
+                                TenantId = model.TenantId
                             };
 
                             _context.StudyVisitPageModuleElementValidationDetails.Add(validation);

@@ -14,6 +14,7 @@ namespace Helios.Common.Model
         public string Description { get; set; }
         public string SubDescription { get; set; }
         public string ProtocolCode { get; set; }
+        public string? SubjectNumber { get; set; }
     }
 
     public class VisitAnnotatedCrfModel
@@ -27,5 +28,6 @@ namespace Helios.Common.Model
         public string LowerLimit { get; set; }
         public string UpperLimit { get; set; }
         public List<VisitAnnotatedCrfModel>? Children { get; set; }
+        public string? UserValue { get; set; }
     }
 }
