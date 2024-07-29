@@ -203,6 +203,8 @@ namespace Helios.Core.Controllers
             }
             else
             {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
                 var study = await _context.Studies
                     .Include(x => x.Sites.Where(y => y.IsActive && !y.IsDeleted))
                     .Include(x => x.StudyVisits.Where(y => y.IsActive && !y.IsDeleted))
@@ -239,19 +241,24 @@ namespace Helios.Core.Controllers
                     SiteId = model.SiteId,
                     SubjectNumber = subjectNo,
                     InitialName = model.InitialName,
+                    TenantId = baseDTO.TenantId,
                     SubjectVisits = study.StudyVisits.Select(studyVisit => new SubjectVisit
                     {
                         StudyVisitId = studyVisit.Id,
+                        TenantId = baseDTO.TenantId,
                         SubjectVisitPages = studyVisit.StudyVisitPages.Select(stdVstPg => new SubjectVisitPage
                         {
                             StudyVisitPageId = stdVstPg.Id,
+                            TenantId = baseDTO.TenantId,
                             SubjectVisitPageModules = stdVstPg.StudyVisitPageModules.Select(stdVstPgMdl => new SubjectVisitPageModule
                             {
                                 StudyVisitPageModuleId = stdVstPgMdl.Id,
+                                TenantId = baseDTO.TenantId,
                                 SubjectVisitPageModuleElements = stdVstPgMdl.StudyVisitPageModuleElements.Select(stdVstPgMdlElm => new SubjectVisitPageModuleElement
                                 {
                                     StudyVisitPageModuleElementId = stdVstPgMdlElm.Id,
-                                    DataGridRowId = stdVstPgMdlElm.StudyVisitPageModuleElementDetail.RowIndex
+                                    DataGridRowId = stdVstPgMdlElm.StudyVisitPageModuleElementDetail.RowIndex,
+                                    TenantId = baseDTO.TenantId,
                                 }).ToList(),
                             }).ToList(),
                         }).ToList(),
@@ -259,7 +266,7 @@ namespace Helios.Core.Controllers
                 };
 
                 _context.Subjects.Add(newSubject);
-                var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = true,
@@ -855,19 +862,19 @@ namespace Helios.Core.Controllers
                 var study = await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.Id == 8).Select(study => new Study
                 {
                     ProtocolCode = study.ProtocolCode,
-                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).Select(visit => new StudyVisit
+                    StudyVisits = study.StudyVisits.Where(visit => visit.IsActive && !visit.IsDeleted).OrderBy(visit => visit.Order).Select(visit => new StudyVisit
                     {
                         Id = visit.Id,
                         Name = visit.Name,
-                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new StudyVisitPage
+                        StudyVisitPages = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).OrderBy(page => page.Order).Select(page => new StudyVisitPage
                         {
                             Id = page.Id,
                             Name = page.Name,
-                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted && !emptyModuleIds.Contains(module.Id)).Select(module => new StudyVisitPageModule
+                            StudyVisitPageModules = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted && !emptyModuleIds.Contains(module.Id)).OrderBy(module => module.Order).Select(module => new StudyVisitPageModule
                             {
                                 Id = module.Id,
                                 Name = module.Name,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && elm.ElementType != ElementType.Hidden).Select(elm => new StudyVisitPageModuleElement
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && elm.ElementType != ElementType.Hidden).OrderBy(elm => elm.Order).Select(elm => new StudyVisitPageModuleElement
                                 {
                                     Id = elm.Id,
                                     Title = elm.Title,

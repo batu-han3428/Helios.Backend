@@ -605,6 +605,7 @@ namespace Helios.Core.Controllers
                                     ValueCondition = item.ValidationCondition,
                                     Value = item.ValidationValue,
                                     Message = item.ValidationMessage,
+                                    TenantId = model.TenantId
                                 };
 
                                 _context.ElementValidationDetails.Add(validation);
@@ -973,6 +974,7 @@ namespace Helios.Core.Controllers
                                 ValueCondition = (ActionCondition)item.ValidationCondition,
                                 Value = item.ValidationValue,
                                 Message = item.ValidationMessage,
+                                TenantId = model.TenantId
                             };
 
                             _context.ElementValidationDetails.Add(validation);
@@ -1499,8 +1501,8 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
         {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
             var result = new ApiResponse<dynamic>();
-            int userId = 0;
             var dbTags = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).ToListAsync();
 
             foreach (var item in tags)
@@ -1513,7 +1515,8 @@ namespace Helios.Core.Controllers
                     {
                         Key = item.TagKey,
                         Name = item.TagName.TrimStart().TrimEnd(),
-                        Value = item.TagValue
+                        Value = item.TagValue,
+                        TenantId = baseDTO.TenantId
                     };
 
                     _context.MultipleChoiceTag.Add(tag);
@@ -1525,7 +1528,7 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
+            result.IsSuccess = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
             result.Message = result.IsSuccess ? "Successful" : "There is a list of tags registered with this name. Please try again with a different name.";
             return result;
         }

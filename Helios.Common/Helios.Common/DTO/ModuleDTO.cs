@@ -1,5 +1,4 @@
 ﻿using Helios.Common.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Common.DTO
 {
@@ -11,6 +10,7 @@ namespace Helios.Common.DTO
         public Guid ReferenceKey { get; set; }
         public Int64 VersionKey { get; set; }
         public int Order { get; set; }
+        public Int64 TenantId { get; set; }
     }
 
     public class ElementDTO

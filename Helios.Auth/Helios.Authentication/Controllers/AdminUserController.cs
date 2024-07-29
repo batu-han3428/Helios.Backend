@@ -294,6 +294,7 @@ namespace Helios.Authentication.Controllers
                         User = usr,
                         RoleId = role.Id,
                         UserId = usr.Id,
+                        TenantId = model.TenantId
                     });
 
                     if (model.Role == Roles.StudyUser)

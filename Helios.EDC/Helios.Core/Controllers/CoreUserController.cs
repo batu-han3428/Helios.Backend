@@ -443,7 +443,8 @@ namespace Helios.Core.Controllers
                 var userSites = studyUserModel.SiteIds.Select(x => new StudyUserSite
                 {
                     StudyUserId = user.Id,
-                    SiteId = x
+                    SiteId = x,
+                    TenantId = studyUserModel.TenantId
                 });
 
                 if (userSites.Count() > 0)
@@ -500,7 +501,8 @@ namespace Helios.Core.Controllers
                             var newUserSite = new StudyUserSite
                             {
                                 StudyUserId = user.Id,
-                                SiteId = siteId
+                                SiteId = siteId,
+                                TenantId = user.TenantId
                             };
                             await _context.StudyUserSites.AddAsync(newUserSite);
                         }
