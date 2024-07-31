@@ -325,6 +325,7 @@ namespace Helios.Core.Controllers
 
             return new ApiResponse<dynamic>
             {
+                IsSuccess = result.IsSuccess,
                 Message = result.IsSuccess ? "Successful" : "Operation failed!"
             };
         }
@@ -348,6 +349,7 @@ namespace Helios.Core.Controllers
 
             return new ApiResponse<dynamic>
             {
+                IsSuccess = result.IsSuccess,
                 Message = result.IsSuccess ? "Successful" : "Operation failed!"
             };
         }
@@ -933,7 +935,9 @@ namespace Helios.Core.Controllers
                     .Include(x => x.SubjectVisits.Where(a => a.IsActive && !a.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted))
-                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted && (a.UserValue != null && a.UserValue != ""))).ToListAsync();
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(a => a.IsActive && !a.IsDeleted /*&& (a.UserValue != null && a.UserValue != "")*/))
+                    .ThenInclude(x => x.StudyVisitPageModuleElement)
+                    .ThenInclude(x => x.StudyVisitPageModuleElementDetail).ToListAsync();
 
                 if (subjectData.Count < 1)
                 {
@@ -943,7 +947,7 @@ namespace Helios.Core.Controllers
                 var subjectPages = subjectData.SelectMany(x => x.SubjectVisits).SelectMany(x => x.SubjectVisitPages).ToList();
 
                 var emptyModuleIds = subjectPages
-                .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Any()))
+                .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Where(x=> x.UserValue != null && x.UserValue != "").Any()))
                 .SelectMany(page => page.SubjectVisitPageModules.Select(module => module.StudyVisitPageModuleId))
                 .ToList();
 
@@ -978,7 +982,8 @@ namespace Helios.Core.Controllers
                                                     ParentId = elm.StudyVisitPageModuleElementDetail.ParentId,
                                                     ElementOptions = elm.StudyVisitPageModuleElementDetail.ElementOptions,
                                                     ColunmIndex = elm.StudyVisitPageModuleElementDetail.ColunmIndex,
-                                                    DatagridAndTableProperties = elm.StudyVisitPageModuleElementDetail.DatagridAndTableProperties
+                                                    DatagridAndTableProperties = elm.StudyVisitPageModuleElementDetail.DatagridAndTableProperties,
+                                                    RowCount = elm.StudyVisitPageModuleElementDetail.RowCount,
                                                 }
                                                 : null,
                                 }).ToList()
@@ -1032,7 +1037,7 @@ namespace Helios.Core.Controllers
                                     newElm.LowerLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.LowerLimit : "";
                                     newElm.UpperLimit = elm.StudyVisitPageModuleElementDetail != null ? elm.StudyVisitPageModuleElementDetail.UpperLimit : "";
 
-                                    var gh = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.StudyVisitPageModuleElementId == elm.Id);
+                                    var gh = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.UserValue != null && x.UserValue != "" && x.StudyVisitPageModuleElementId == elm.Id);
 
                                     newElm.UserValue = gh?.UserValue;
 
@@ -1041,32 +1046,37 @@ namespace Helios.Core.Controllers
                                         var children = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId == elm.Id).OrderBy(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex != null ? int.Parse(x?.StudyVisitPageModuleElementDetail?.ColunmIndex.ToString()) : int.MaxValue).ToList();
 
                                         var datp = System.Text.Json.JsonSerializer.Deserialize<List<DatagridAndTableProperties>>(elm?.StudyVisitPageModuleElementDetail?.DatagridAndTableProperties);
-                                        int index = 1;
-                                        Dictionary<string, string> datagridAndTableValue = new Dictionary<string, string>();
-                                        datp?.ForEach(d =>
+
+                                        var rowCount = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).Where(x => x.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId == elm.Id).Max(x => x.DataGridRowId);
+
+                                        Dictionary<string, DatagridAndTableDicVal> datagridAndTableValue = new Dictionary<string, DatagridAndTableDicVal>();
+                                        for (int i = 0; i < rowCount; i++)
                                         {
-                                            var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index);
-                                            string val = "";
-                                            if (chl != null)
+                                            int index = 1;
+                                            datp?.ForEach(d =>
                                             {
-                                                if (chl.ElementType == ElementType.RadioList || chl.ElementType == ElementType.DropDown || chl.ElementType == ElementType.CheckList || chl.ElementType == ElementType.DropDownMulti)
+                                                var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index);
+                                                string elmType = "";
+                                                if (chl != null)
                                                 {
-                                                    val = chl?.StudyVisitPageModuleElementDetail?.ElementOptions;
+                                                    var subElm = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.StudyVisitPageModuleElementId == chl.Id && x.DataGridRowId == (i+1));
+                                                    if (chl.ElementType == ElementType.RadioList || chl.ElementType == ElementType.DropDown || chl.ElementType == ElementType.CheckList || chl.ElementType == ElementType.DropDownMulti)
+                                                    {
+                                                        elmType = chl?.StudyVisitPageModuleElementDetail?.ElementOptions;
+                                                    }
+                                                    else
+                                                    {
+                                                        elmType = chl.ElementType.ToString();
+                                                    }
+                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i+1).ToString(), ElementType = elmType, Value = subElm != null ? subElm.UserValue : "" });
                                                 }
                                                 else
                                                 {
-                                                    val = chl.ElementType.ToString();
+                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i+1).ToString(), ElementType = elmType, Value = "" });
                                                 }
-                                                string key = $"{d.title}_{Guid.NewGuid()}";
-                                                datagridAndTableValue.Add(key, val);
-                                            }
-                                            else
-                                            {
-                                                string key = $"Empty_{Guid.NewGuid()}";
-                                                datagridAndTableValue.Add(key, val);
-                                            }
-                                            index++;
-                                        });
+                                                index++;
+                                            });
+                                        }
                                         newElm.DatagridAndTableValue = datagridAndTableValue;
                                     }
                                     return newElm;
