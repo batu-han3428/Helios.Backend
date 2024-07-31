@@ -164,14 +164,6 @@ namespace Helios.Core.Controllers
                         {
                             var demoCopyStudy= await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
                             var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitRelation = await _context.StudyVisitRelation.Where(x => x.StudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPages = await _context.StudyVisitPages.Where(x => copyStudyVisits.Select(y => y.Id).Contains(x.StudyVisitId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModules = await _context.StudyVisitPageModules.Where(x => copyStudyVisitPages.Select(y => y.Id).Contains(x.StudyVisitPageId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModuleElements = await _context.StudyVisitPageModuleElements.Where(x => copyStudyVisitPageModules.Select(y => y.Id).Contains(x.StudyVisitPageModuleId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModuleElementEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => copyStudyVisitPageModules.Select(y => y.Id).Contains(x.StudyVisitPageModuleId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModuleElementValidationDetails = await _context.StudyVisitPageModuleElementValidationDetails.Where(x => copyStudyVisitPageModuleElements.Select(y => y.Id).Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModuleElementDetails = await _context.StudyVisitPageModuleElementDetails.Where(x => copyStudyVisitPageModuleElements.Select(y => y.Id).Contains(x.StudyVisitPageModuleElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                            //var copyStudyVisitPageModuleCalculationElementDetails = await _context.studyVisitPageModuleCalculationElementDetails.Where(x => copyStudyVisitPageModules.Select(y => y.Id).Contains(x.StudyVisitPageModuleId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                             List<StudyVisit> visitDatas = null;
                             List<StudyVisitPage> pageDatas = null;
