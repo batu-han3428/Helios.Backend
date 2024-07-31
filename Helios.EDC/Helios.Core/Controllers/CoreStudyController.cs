@@ -11,6 +11,8 @@ using System.Text.Json;
 using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Helios.Common.Helpers;
+using MassTransit;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -156,11 +158,12 @@ namespace Helios.Core.Controllers
                         activeResearch.EquivalentStudyId = demoResearch.Id;
                         _context.Studies.Update(activeResearch);
                         _context.Studies.Update(demoResearch);
-                       
+
 
                         if (studyModel.CopyStudyId != null)
-                        {                          
-                            var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted).ToListAsync();
+                        {
+                            var demoCopyStudy= await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
+                            var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                             //var copyStudyVisitRelation = await _context.StudyVisitRelation.Where(x => x.StudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted).ToListAsync();
                             //var copyStudyVisitPages = await _context.StudyVisitPages.Where(x => copyStudyVisits.Select(y => y.Id).Contains(x.StudyVisitId) && x.IsActive && !x.IsDeleted).ToListAsync();
                             //var copyStudyVisitPageModules = await _context.StudyVisitPageModules.Where(x => copyStudyVisitPages.Select(y => y.Id).Contains(x.StudyVisitPageId) && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -177,7 +180,7 @@ namespace Helios.Core.Controllers
                             List<StudyVisit> addedVisits = null;
                             if (copyStudyVisits.Count > 0)
                             {
-                                visitDatas = await _context.StudyVisits.Where(x => x.StudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted).Select(visit => new StudyVisit
+                                visitDatas = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).Select(visit => new StudyVisit
                                 {
                                     Id = visit.Id,
                                     StudyId = visit.Study.EquivalentStudyId.Value,
@@ -318,7 +321,7 @@ namespace Helios.Core.Controllers
                                                     IsDependent = element.IsDependent,
                                                     IsRelated = element.IsRelated,
                                                     CanMissing = element.CanMissing,
-                                                    ReferenceKey = Guid.NewGuid(),
+                                                    ReferenceKey = element.ReferenceKey,
                                                     TenantId = element.TenantId
                                                 };
 
@@ -329,7 +332,7 @@ namespace Helios.Core.Controllers
                                                         CalculationElementId = element.Id,
                                                         TargetElementId = calculation.TargetElementId,
                                                         VariableName = calculation.VariableName,
-                                                        ReferenceKey = Guid.NewGuid(),
+                                                        ReferenceKey = calculation.ReferenceKey,
                                                         TenantId = calculation.TenantId
                                                     };
                                                     newModule.StudyVisitPageModuleCalculationElementDetail.Add(calcu);
@@ -390,7 +393,7 @@ namespace Helios.Core.Controllers
                                                         ValueCondition = events.ValueCondition,
                                                         ActionValue = events.ActionValue,
                                                         VariableName = events.VariableName,
-                                                        ReferenceKey = Guid.NewGuid(),
+                                                        ReferenceKey = events.ReferenceKey,
                                                         TenantId = events.TenantId
                                                     };
                                                     newModule.StudyVisitPageModuleElementEvent.Add(newEvents);
@@ -405,7 +408,7 @@ namespace Helios.Core.Controllers
                                                         ActionType = val.ActionType,
                                                         Value = val.Value,
                                                         ValueCondition = val.ValueCondition,
-                                                        ReferenceKey = Guid.NewGuid(),
+                                                        ReferenceKey = val.ReferenceKey,
                                                         TenantId = val.TenantId
                                                     };
                                                     return newVal;
@@ -428,20 +431,101 @@ namespace Helios.Core.Controllers
                                 await _context.StudyVisits.AddRangeAsync(addedVisits);
                             }
                             var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                            if (result)
+                            {
+                                if ((addedVisits != null && addedVisits.Count > 0))
+                                {
+                                    if (addedVisits != null && addedVisits.Count > 0)
+                                    {
+                                        var elementReferenceKeys = visitDatas
+                                           .SelectMany(visitData => visitData.StudyVisitPages)
+                                           .SelectMany(studyVisitPage => studyVisitPage.StudyVisitPageModules)
+                                           .SelectMany(studyVisitPageModule => studyVisitPageModule.StudyVisitPageModuleElements)
+                                           .Select(element => element.ReferenceKey)
+                                           .Distinct();
+
+                                        var elementsData = await _context.StudyVisitPageModuleElements.Where(x => elementReferenceKeys.Contains(x.ReferenceKey)).OrderByDescending(x => x.CreatedAt).ToListAsync();
+
+                                        var addedCalcuTargetElement = addedVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleCalculationElementDetails).ToList();
+
+                                        foreach (var item in addedCalcuTargetElement)
+                                        {
+                                            var ggg = elementsData.FirstOrDefault(x => item.TargetElementId == x.Id);
+                                            if (ggg != null)
+                                            {
+                                                var nItem = elementsData.FirstOrDefault(x => x.Id != ggg.Id && x.ReferenceKey == ggg.ReferenceKey);
+                                                if (nItem != null)
+                                                {
+                                                    item.TargetElementId = nItem.Id;
+                                                }
+                                            }
+                                            item.ReferenceKey = Guid.NewGuid();
+                                        }
+
+                                        var addedEventTargetElement = addedVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements).SelectMany(x => x.StudyVisitPageModuleElementEvents).ToList();
+
+                                        foreach (var item in addedEventTargetElement)
+                                        {
+                                            var ggg = elementsData.FirstOrDefault(x => item.SourceElementId == x.Id);
+                                            if (ggg != null)
+                                            {
+                                                var nItem = elementsData.FirstOrDefault(x => x.Id != ggg.Id && x.ReferenceKey == ggg.ReferenceKey);
+                                                if (nItem != null)
+                                                {
+                                                    item.SourceElementId = nItem.Id;
+                                                }
+                                            }
+                                            item.ReferenceKey = Guid.NewGuid();
+                                        }
+
+                                        var addedParentIds = addedVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements).Where(x => x.StudyVisitPageModuleElementDetail != null && x.StudyVisitPageModuleElementDetail.ParentId != null).Select(x => x.StudyVisitPageModuleElementDetail).ToList();
+
+                                        foreach (var item in addedParentIds)
+                                        {
+                                            var ggg = elementsData.FirstOrDefault(x => item?.ParentId == x.Id);
+                                            if (ggg != null)
+                                            {
+                                                var nItem = elementsData.FirstOrDefault(x => x.Id != ggg.Id && x.ReferenceKey == ggg.ReferenceKey);
+                                                if (nItem != null)
+                                                {
+                                                    item.ParentId = nItem.Id;
+                                                }
+                                            }                                           
+                                        }
+                                        var addedElement = addedVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements).ToList();
+                                        foreach (var item in addedElement)
+                                        {
+                                            item.ReferenceKey = Guid.NewGuid();
+                                        }
+                                        var result1 = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                                        if (result1)
+                                        {
+                                            return new ApiResponse<dynamic>
+                                            {
+                                                IsSuccess = true,
+                                                Message = "Successful",
+                                                Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
+                                            };
+                                        }
+                                    }
+                                }
+                            }
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = false,
+                                Message = "Unsuccessful"
+                            };
+                            #endregion
                         }
-                        #endregion
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = true,
-                            Message = "Successful",
-                            Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
-                        };
+
+                       
                     }
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
                         Message = "Unsuccessful"
                     };
+
                 }
                 else
                 {
