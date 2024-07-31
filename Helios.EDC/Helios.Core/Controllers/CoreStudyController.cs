@@ -5152,7 +5152,7 @@ namespace Helios.Core.Controllers
 
                                         var datp = JsonSerializer.Deserialize<List<DatagridAndTableProperties>>(elm?.StudyVisitPageModuleElementDetail?.DatagridAndTableProperties);
                                         int index = 1;
-                                        Dictionary<string, string> datagridAndTableValue = new Dictionary<string, string>();
+                                        Dictionary<string, DatagridAndTableDicVal> datagridAndTableValue = new Dictionary<string, DatagridAndTableDicVal>();
                                         datp?.ForEach(d =>
                                         {
                                             //var chl = children.FirstOrDefault(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex == index && x.StudyVisitPageModuleElementDetail.IsActive && !x.StudyVisitPageModuleElementDetail.IsDeleted);
@@ -5169,12 +5169,12 @@ namespace Helios.Core.Controllers
                                                     val = chl.ElementType.ToString();
                                                 }
                                                 string key = $"{d.title}_{Guid.NewGuid()}";
-                                                datagridAndTableValue.Add(key, val);
+                                                datagridAndTableValue.Add(key, new DatagridAndTableDicVal { ElementType = val, Value = "" });
                                             }
                                             else
                                             {
                                                 string key = $"Empty_{Guid.NewGuid()}";
-                                                datagridAndTableValue.Add(key, val);
+                                                datagridAndTableValue.Add(key, new DatagridAndTableDicVal { ElementType = val, Value = "" });
                                             }
                                             index++;
                                         });

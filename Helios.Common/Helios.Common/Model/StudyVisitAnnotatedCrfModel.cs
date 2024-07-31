@@ -24,10 +24,17 @@ namespace Helios.Common.Model
         public string Description { get; set; }
         public bool IsRequired { get; set; }
         public string ElementOptions { get; set; }
-        public Dictionary<string, string> DatagridAndTableValue { get; set; }
+        public Dictionary<string, DatagridAndTableDicVal> DatagridAndTableValue { get; set; }
         public string LowerLimit { get; set; }
         public string UpperLimit { get; set; }
         public List<VisitAnnotatedCrfModel>? Children { get; set; }
         public string? UserValue { get; set; }
+    }
+
+    public class DatagridAndTableDicVal
+    {
+        public string ColonName { get; set; }
+        public string ElementType { get; set; }
+        public string Value { get; set; }
     }
 }
