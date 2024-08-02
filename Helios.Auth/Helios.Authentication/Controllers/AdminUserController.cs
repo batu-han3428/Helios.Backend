@@ -49,7 +49,8 @@ namespace Helios.Authentication.Controllers
                 ActiveStudies = "0",
                 StudyLimit = x.StudyLimit,
                 CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt
+                UpdatedAt = x.UpdatedAt,
+                UserLimit=x.UserLimit,
             }).ToListAsync();
         }
 
