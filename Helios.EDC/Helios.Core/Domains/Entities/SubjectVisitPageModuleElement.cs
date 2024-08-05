@@ -12,5 +12,6 @@
         public bool Query { get; set; }
         public StudyVisitPageModuleElement StudyVisitPageModuleElement { get; set; }
         public SubjectVisitPageModule SubjectVisitModule { get; set; }
+        public List<SubjectVisitPageModuleElementComments> SubjectVisitPageModuleElementComments { get; set; }
     }
 }

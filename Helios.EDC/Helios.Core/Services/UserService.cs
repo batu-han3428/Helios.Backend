@@ -3,7 +3,6 @@ using Helios.Common.Model;
 using Helios.Core.Services.Base;
 using Helios.Core.Services.Interfaces;
 using RestSharp;
-using System.Text.Json;
 
 namespace Helios.Core.Services
 {
@@ -29,6 +28,18 @@ namespace Helios.Core.Services
                 return result.Data;
             }
 
+        }
+
+        public async Task<RestResponse<List<AspNetUserDTO>>> GetUserList(List<Int64> AuthUserIds)
+        {
+            using (var client = AuthServiceClient)
+            {
+                string authUserIdsString = string.Join(",", AuthUserIds);
+                var req = new RestRequest("AdminUser/GetUserList", Method.Get);
+                req.AddParameter("AuthUserIds", authUserIdsString);
+                var users = await client.ExecuteAsync<List<AspNetUserDTO>>(req);
+                return users;
+            }
         }
     }
 }

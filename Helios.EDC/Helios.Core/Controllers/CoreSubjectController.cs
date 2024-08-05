@@ -20,11 +20,13 @@ namespace Helios.Core.Controllers
     {
         private CoreContext _context;
         private IStudyService _studyService;
+        private IUserService _userService;
 
-        public CoreSubjectController(CoreContext context, IStudyService studyService)
+        public CoreSubjectController(CoreContext context, IStudyService studyService, IUserService userService)
         {
             _context = context;
             _studyService = studyService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -421,6 +423,7 @@ namespace Helios.Core.Controllers
             var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
                 .SelectMany(x => x.SubjectVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
                 .SelectMany(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
+                .Include(x => x.SubjectVisitPageModuleElementComments)
                 .Include(x => x.StudyVisitPageModuleElement)
                 .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
                 .Select(e => new SubjectElementModel
@@ -475,7 +478,8 @@ namespace Helios.Core.Controllers
                     ShowOnScreen = e.ShowOnScreen,
                     MissingData = e.MissingData,
                     Sdv = e.Sdv,
-                    Query = e.Query
+                    Query = e.Query,
+                    IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted)
                 }).OrderBy(x => x.Order).ToListAsync();
 
             foreach (var item in result)
@@ -1094,6 +1098,130 @@ namespace Helios.Core.Controllers
             {
 
                 throw;
+            }
+        }
+
+        [HttpGet]
+        public async Task<List<SubjectCommentModel>> GetSubjectComments(Int64 subjectElementId)
+        {
+            var comments =  await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId).Select(comment => new SubjectCommentModel
+            {
+                Id = comment.Id,
+                Comment = comment.Comment,
+                CommentTime = comment.UpdatedAt != new DateTimeOffset(new DateTime(1, 1, 1), TimeSpan.Zero) ? comment.UpdatedAt : comment.CreatedAt,
+                SenderId = comment.AddedById
+            }).ToListAsync();
+
+            if (comments.Count > 0)
+            {
+                var users = await _userService.GetUserList(comments.Select(c => c.SenderId).ToList());
+                if (users.IsSuccessful)
+                {
+                    comments.ForEach(c =>
+                    {
+                        var user = users.Data.FirstOrDefault(u => u.Id == c.SenderId);
+                        if (user != null)
+                        {
+                            c.SenderName = user.Name + " " + user.LastName;
+                        }
+                    });
+                } 
+            }
+
+            return comments;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetSubjectComment(SubjectCommentDTO dto)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                if (dto.Id == 0)
+                {
+                    await _context.SubjectVisitPageModuleElementComments.AddAsync(new SubjectVisitPageModuleElementComments
+                    {
+                        SubjectVisitPageModuleElementId = dto.ElementId,
+                        TenantId = baseDTO.TenantId,
+                        Comment = dto.Comment.Trim()
+                    });
+                }
+                else
+                {
+                    var comment = await _context.SubjectVisitPageModuleElementComments.FirstOrDefaultAsync(comment => comment.IsActive && !comment.IsDeleted && comment.Id == dto.Id);
+
+                    if (comment != null)
+                    {
+                        comment.Comment = dto.Comment.Trim();
+
+                        _context.SubjectVisitPageModuleElementComments.Update(comment);
+                    }
+
+                }
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> RemoveSubjectComment(Int64 id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+
+                var comment = await _context.SubjectVisitPageModuleElementComments.FirstOrDefaultAsync(comment => comment.IsActive && !comment.IsDeleted && comment.Id == id);
+
+                if(comment == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                _context.SubjectVisitPageModuleElementComments.Remove(comment);
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
             }
         }
     }
