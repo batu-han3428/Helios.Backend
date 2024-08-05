@@ -1,9 +1,4 @@
 ﻿using Helios.Common.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Helios.Common.Model
 {
@@ -93,5 +88,7 @@ namespace Helios.Common.Model
 
         //public bool? HasChildren { get; set; } = false;
         public List<SubjectElementModel>? ChildElements { get; set; } = new List<SubjectElementModel>();
+
+        public bool IsComment { get; set; }
     }
 }

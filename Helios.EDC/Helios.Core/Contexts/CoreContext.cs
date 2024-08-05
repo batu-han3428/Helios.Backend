@@ -118,5 +118,6 @@ namespace Helios.Core.Contexts
         public DbSet<SystemAuditTrail> SystemAuditTrails { get; set; }
         public DbSet<StudyVisitRelation> StudyVisitRelation {  get; set; }
         public DbSet<AnnotatedVersions> AnnotatedVersions { get; set; }
+        public DbSet<SubjectVisitPageModuleElementComments> SubjectVisitPageModuleElementComments { get; set; }
     }
 }
