@@ -608,6 +608,11 @@ namespace Helios.Authentication.Controllers
         {
             return await _context.TenantAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
         }
+        [HttpGet]
+        public async Task<int> GetUserSystemCount(Int64 userId)
+        {
+            return await _context.SystemAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
+        }
 
         [HttpGet]
         public async Task<List<SSOUserTenantModel>> GetUserTenantList(Int64 userId)
