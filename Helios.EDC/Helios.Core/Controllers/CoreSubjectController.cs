@@ -307,53 +307,97 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> AddDatagridSubjectElements(List<SubjectVisitPageModuleElementModel> model)
+        public async Task<ApiResponse<dynamic>> AddDatagridSubjectElements(Int64 datagridId)
         {
-            var result = new ApiResponse<dynamic>();
-
-            foreach (var item in model)
+            try
             {
-                var subjectElement = new SubjectVisitPageModuleElement
+                var datagrid = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == datagridId);
+
+                if (datagrid != null)
                 {
-                    SubjectVisitModuleId = item.SubjectVisitPageModuleId,
-                    StudyVisitPageModuleElementId = item.StudyVisitPageModuleElementId,
-                    DataGridRowId = item.DataGridRowId
+                    var childElements = await _context.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted && datagrid.SubjectVisitModuleId == x.SubjectVisitModuleId && x.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId == datagrid.StudyVisitPageModuleElementId && x.DataGridRowId == _context.SubjectVisitPageModuleElements
+                        .Where(y => y.IsActive && !y.IsDeleted &&
+                                    datagrid.SubjectVisitModuleId == y.SubjectVisitModuleId &&
+                                    y.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId == datagrid.StudyVisitPageModuleElementId)
+                        .Max(y => y.DataGridRowId)).Include(x => x.StudyVisitPageModuleElement).ToListAsync();
+
+                    await _context.SubjectVisitPageModuleElements.AddRangeAsync(childElements.Select(x => new SubjectVisitPageModuleElement
+                    {
+                        SubjectVisitModuleId = datagrid.SubjectVisitModuleId,
+                        StudyVisitPageModuleElementId = x.StudyVisitPageModuleElementId,
+                        DataGridRowId = x.DataGridRowId + 1
+                    }));
+
+                    BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                    var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = result,
+                        Message = result ? "Successful" : "Unsuccessful"
+                    };
+                }
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
                 };
-
-                _context.SubjectVisitPageModuleElements.Add(subjectElement);
             }
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
-
-            return new ApiResponse<dynamic>
+            catch (Exception)
             {
-                IsSuccess = result.IsSuccess,
-                Message = result.IsSuccess ? "Successful" : "Operation failed!"
-            };
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> RemoveDatagridSubjectElements(List<Int64> elementIds)
+        public async Task<ApiResponse<dynamic>> RemoveDatagridSubjectElements(DatagridRemoveDTO dto)
         {
-            var result = new ApiResponse<dynamic>();
-
-            var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
-
-            foreach (var item in subjectElements)
+            try
             {
-                item.IsActive = false;
-                item.IsDeleted = true;
+                var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => dto.elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                _context.SubjectVisitPageModuleElements.Update(item);
+                if(subjectElements.Count < 1) return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+
+                foreach (var item in subjectElements)
+                {
+                    if (dto.singleLine) item.UserValue = null;
+                    else
+                    {
+                        item.IsActive = false;
+                        item.IsDeleted = true;
+                    }
+                }
+
+                _context.SubjectVisitPageModuleElements.UpdateRange(subjectElements);
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
             }
-
-            result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
-
-            return new ApiResponse<dynamic>
+            catch (Exception)
             {
-                IsSuccess = result.IsSuccess,
-                Message = result.IsSuccess ? "Successful" : "Operation failed!"
-            };
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
         }
 
         [HttpPost]
