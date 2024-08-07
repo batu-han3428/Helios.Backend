@@ -6,8 +6,12 @@ ENV ASPNETCORE_URLS=http://+:3500
 EXPOSE 3500
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
+
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY nuget.config .
 COPY ["Helios.EDC/Helios.Core/Helios.Core.csproj", "Helios.EDC/Helios.Core/"]
 COPY ["Helios.EDC/Helios.Common/Helios.Common.csproj", "Helios.EDC/Helios.Common/"]
 RUN dotnet restore "./Helios.EDC/Helios.Core/./Helios.Core.csproj"

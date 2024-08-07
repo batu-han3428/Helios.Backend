@@ -13,6 +13,9 @@ Add as system envoiment variable:
 $env:NUGET_PLUGIN_PATHS="C:\Users\inan\.nuget\plugins\netcore\CredentialProvider.Microsoft\CredentialProvider.Microsoft.exe"
 
 
+ [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Interactive'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+
 Dotnet resporse solution:
 dotnet restore --interactive .\Helios.sln
 
@@ -48,8 +51,8 @@ docker tag helios-auth:v0.0.1 medcase.azurecr.io/helios/helios-auth:v0.0.1
 docker push medcase.azurecr.io/helios/helios-auth:v0.0.1
 
 
-docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.1 "C:\Projects\v3\Medcase"
-docker tag helios-core:v0.0.1 medcase.azurecr.io/helios/helios-core:v0.0.1
-docker push medcase.azurecr.io/helios/helios-core:v0.0.1
+docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.2 "C:\Projects\v3\Medcase"
+docker tag helios-core:v0.0.1 medcase.azurecr.io/helios/helios-core:v0.0.2
+docker push medcase.azurecr.io/helios/helios-core:v0.0.2
 
 ********************************
