@@ -650,6 +650,40 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<StudyUserDTO>> AddStudyUserRole(StudyUserModel model)
+        {
+            var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.StudyUser.ToString());
+            var usr = await _userManager.FindByEmailAsync(model.Email);
+            var userroles =await _context.UserRoles.Where(x=>x.UserId==usr.Id && x.StudyId==model.StudyId && x.TenantId==model.TenantId).ToListAsync();
+            var rol = userroles.Any(x=>x.RoleId==role.Id);
+            if (!rol)
+            {
+                usr.UserRoles.Add(new ApplicationUserRole
+                {
+                    RoleId = role.Id,
+                    UserId = usr.Id,
+                    StudyId = model.StudyId,
+                    TenantId = model.TenantId,
+                });
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                if (result)
+                {
+                    return new ApiResponse<StudyUserDTO>
+                    {
+                        IsSuccess = true,
+                        Message = "",                      
+                    };
+                }
+            }
+            return new ApiResponse<StudyUserDTO>
+            {
+                IsSuccess = false,
+                Message = "Unsuccessful"
+            };
+        }
+
+        [HttpPost]
         public async Task AddStudyUserMail(StudyUserModel model)
         {
             await _emailService.AddStudyUserMail(model);
@@ -1666,7 +1700,7 @@ namespace Helios.Authentication.Controllers
                 join tenantAdmin in _context.TenantAdmins.Where(ta => !ta.IsDeleted) on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
                 from tenAdmin in tenantAdmins.DefaultIfEmpty()
                 join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
-                where                   
+                where
                     userManagerUser.Id != id
                 select new SystemUserModel
                 {
