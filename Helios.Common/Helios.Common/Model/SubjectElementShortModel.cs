@@ -13,11 +13,4 @@ namespace Helios.Common.Model
         public string Value { get; set; } = "";
         public ElementType Type { get; set; }
     }
-
-    public class SubjectVisitPageModuleElementModel
-    {
-        public Int64 SubjectVisitPageModuleId { get; set; }
-        public Int64 StudyVisitPageModuleElementId { get; set; }
-        public int DataGridRowId { get; set; }
-    }
 }

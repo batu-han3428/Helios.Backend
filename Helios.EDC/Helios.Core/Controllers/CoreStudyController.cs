@@ -1474,6 +1474,7 @@ namespace Helios.Core.Controllers
                         {
                             item.Name = p.Name;
                             item.Order = p.Order;
+                            item.VisitType = p.VisitType;
                         }
                     }
 
@@ -3537,7 +3538,8 @@ namespace Helios.Core.Controllers
             foreach (var aElement in aElements)
             {
                 var dElement = dElements.FirstOrDefault(e => e.ReferenceKey == aElement.ReferenceKey);
-                if (AreModuleElementPropertiesEqual(aElement, dElement))
+
+                if (dElement == null || AreModuleElementPropertiesEqual(aElement, dElement))
                 {
                     return true;
                 }
