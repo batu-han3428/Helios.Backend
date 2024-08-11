@@ -32,6 +32,11 @@ steps:
 
 - script: dotnet --version
   displayName: 'Check .NET Version'
+  
+- script: |
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    az --version
+  displayName: 'Install Azure CLI'
 
 - script: |
     echo "Running the build process..."
