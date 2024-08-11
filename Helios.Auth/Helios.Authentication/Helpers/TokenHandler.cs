@@ -1,4 +1,4 @@
-﻿using Helios.Authentication.Entities;
+﻿using Helios.Authentication.Domains.Entities;
 using Helios.Authentication.Models;
 using Helios.Common.DTO;
 using Helios.Common.Enums;
@@ -47,8 +47,10 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = user.Name;
+            securityToken.Payload["lastName"] = user.LastName;
             securityToken.Payload["roles"] = roles;
             securityToken.Payload["mail"] = user.Email;
+            securityToken.Payload["phoneNumber"] = user.PhoneNumber;
             securityToken.Payload["userId"] = user.Id;
             securityToken.Payload["tenantId"] = tenantIds != null ? tenantIds : "";
             securityToken.Payload["studyId"] = studyIds != null ? studyIds : "";
@@ -108,8 +110,10 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            securityToken.Payload["lastName"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "lastName")?.Value;
             securityToken.Payload["roles"] = roles;
             securityToken.Payload["mail"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "mail")?.Value;
+            securityToken.Payload["phoneNumber"] = oldToken?.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
             securityToken.Payload["userId"] = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
             securityToken.Payload["tenantId"] = sSOLoginDTO.TenantId != 0 ? sSOLoginDTO.TenantId : "";
             securityToken.Payload["studyId"] = sSOLoginDTO.StudyId != 0 ? sSOLoginDTO.StudyId : "";
@@ -139,7 +143,9 @@ namespace Helios.Authentication.Helpers
                 .Select(c => c.Value)
                 .ToList();
             var oldName = oldToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            var oldLastName = oldToken?.Claims.FirstOrDefault(c => c.Type == "lastName")?.Value;
             var oldMail = oldToken?.Claims.FirstOrDefault(c => c.Type == "mail")?.Value;
+            var oldPhoneNumber = oldToken?.Claims.FirstOrDefault(c => c.Type == "phoneNumber")?.Value;
             var oldUserId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
             var oldTenantId = Convert.ToInt64(oldToken?.Claims.FirstOrDefault(c => c.Type == "tenantId")?.Value);
             var studyId = oldToken?.Claims.FirstOrDefault(c => c.Type == "studyId")?.Value;
@@ -163,8 +169,10 @@ namespace Helios.Authentication.Helpers
 
             securityToken.Payload["isAuthenticated"] = true;
             securityToken.Payload["name"] = jwtToken.Name != null && oldName != jwtToken.Name ? jwtToken.Name : oldName;
+            securityToken.Payload["lastName"] = jwtToken.LastName != null && oldLastName != jwtToken.LastName ? jwtToken.LastName : oldLastName;
             securityToken.Payload["roles"] = jwtToken?.Roles != null ? roles.OrderBy(x => x).SequenceEqual(jwtToken?.Roles?.OrderBy(x => x)) ? roles : jwtToken.Roles : roles;
             securityToken.Payload["mail"] = jwtToken.Mail != null && oldMail != jwtToken.Mail ? jwtToken.Mail : oldMail;
+            securityToken.Payload["phoneNumber"] = jwtToken.Mail != null && oldPhoneNumber != jwtToken.PhoneNumber ? jwtToken.PhoneNumber : oldPhoneNumber;
             securityToken.Payload["userId"] = jwtToken.UserId != null && oldUserId != jwtToken.UserId ? jwtToken.UserId : oldUserId;
             securityToken.Payload["tenantId"] = jwtToken.TenantId != null && oldTenantId != jwtToken.TenantId ? jwtToken.TenantId == 0 ? "" : jwtToken.TenantId : oldTenantId;
             securityToken.Payload["studyId"] = jwtToken.StudyId != null && oldStudyId != jwtToken.StudyId ? jwtToken.StudyId == 0 ? "" : jwtToken.StudyId : oldStudyId;

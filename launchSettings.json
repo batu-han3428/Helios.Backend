@@ -6,8 +6,7 @@
       "serviceActions": {
         "rabbitmq": "StartDebugging",
         "helios.authentication": "StartDebugging",
-        "helios.core": "StartDebugging",
-        "frontend": "StartDebugging"
+        "helios.core": "StartDebugging"
       }
     }
   }

@@ -1,5 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Core.Domains.Entities
 {
@@ -13,7 +12,7 @@ namespace Helios.Core.Domains.Entities
         public bool Sign { get; set; }
         public bool Sdv { get; set; }
         public bool Query { get; set; }
-        public string Verification { get; set; }
+        public string? Verification { get; set; }
         public SubjectVisit SubjectVisit { get; set; }
         public StudyVisitPage StudyVisitPage { get; set; }
         public ICollection<SubjectVisitPageModule> SubjectVisitPageModules { get; set; }

@@ -1,8 +1,6 @@
-﻿using Helios.Core.Domains.Base;
-
-namespace Helios.Core.Domains.Entities
+﻿namespace Helios.Core.Domains.Entities
 {
-    public class MailTemplatesRole: EntityBase
+    public class MailTemplatesRole : EntityBase
     {
         public Int64 MailTemplateId { get; set; }
         public MailTemplate MailTemplate { get; set; }

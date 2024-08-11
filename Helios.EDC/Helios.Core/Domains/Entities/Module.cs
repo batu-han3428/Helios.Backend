@@ -1,9 +1,8 @@
-﻿using Helios.Core.Domains.Base;
-
-namespace Helios.Core.Domains.Entities
+﻿namespace Helios.Core.Domains.Entities
 {
     public class Module : EntityBase
     {
         public string Name { get; set; }
+        public List<Element> Elements { get; set; }
     }
 }

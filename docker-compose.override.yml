@@ -1,12 +1,6 @@
 version: '3.4'
 
 services:
-  # helios.ecrf:
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #   ports:
-  #     - "3300:3300"
-  #     - "3301:3301"
 
   helios.authentication:
     environment:
@@ -19,5 +13,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "3500:3500"
+      - "3500:8080"
       - "3501:3501"
+
+  helios.shared:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "4500:8080"
+      - "4501:4501"
+
+networks:
+  v3network:
+     name: v3network

@@ -1,14 +1,13 @@
 ﻿using Helios.Common.DTO;
 using Helios.Core.Contexts;
-using Helios.Core.Domains.Entities;
 using Helios.Common.Enums;
-using Helios.Core.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using System.Text.Json;
 using Helios.Common.Model;
+using Helios.Core.helpers;
+using Helios.Core.Domains.Entities;
+using Helios.Common.Helpers.Api;
 
 namespace Helios.Core.Controllers
 {
@@ -17,7 +16,6 @@ namespace Helios.Core.Controllers
     public class CoreModuleController : Controller
     {
         private CoreContext _context;
-
         public CoreModuleController(CoreContext context)
         {
             _context = context;
@@ -27,7 +25,7 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<bool> AddModule(ModuleModel model)
         {
-            _context.Modules.Add(new Domains.Entities.Module
+            _context.Modules.Add(new Module
             {
                 TenantId = model.TenantId,
                 AddedById = model.UserId,
@@ -62,13 +60,22 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> DeleteModule(ModuleModel model)
+        public async Task<ApiResponse<dynamic>> DeleteModule(ModuleModel model)
         {
-            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var result = new ApiResponse<dynamic>();
+            var module = await _context.Modules.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.ElementDetail)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.ModuleElementEvents)
+                .Include(x => x.Elements)
+                .ThenInclude(x => x.CalculatationElementDetails)
+                .FirstOrDefaultAsync();
 
             if (module == null)
             {
-                return false;
+                result.IsSuccess = false;
+                result.Message = "Unsuccessful";
             }
 
             module.UpdatedAt = DateTimeOffset.Now;
@@ -76,8 +83,48 @@ namespace Helios.Core.Controllers
             module.IsActive = false;
             module.IsDeleted = true;
 
+            foreach (var item in module.Elements)
+            {
+                item.UpdatedAt = DateTimeOffset.Now;
+                item.UpdatedById = model.UserId;
+                item.IsActive = false;
+                item.IsDeleted = true;
+
+                item.ElementDetail.UpdatedAt = DateTimeOffset.Now;
+                item.ElementDetail.UpdatedById = model.UserId;
+                item.ElementDetail.IsActive = false;
+                item.ElementDetail.IsDeleted = true;
+
+                foreach (var evnt in item.ModuleElementEvents)
+                {
+                    evnt.UpdatedAt = DateTimeOffset.Now;
+                    evnt.UpdatedById = model.UserId;
+                    evnt.IsActive = false;
+                    evnt.IsDeleted = true;
+                }
+
+                foreach (var cal in item.CalculatationElementDetails)
+                {
+                    cal.UpdatedAt = DateTimeOffset.Now;
+                    cal.UpdatedById = model.UserId;
+                    cal.IsActive = false;
+                    cal.IsDeleted = true;
+                }
+            }
+
             _context.Modules.Update(module);
-            var result = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+            var res = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+            if (res)
+            {
+                result.IsSuccess = true;
+                result.Message = "Successful";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Unsuccessful";
+            }
 
             return result;
         }
@@ -99,16 +146,23 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ModuleModel>> GetModuleList(Int64 tenantId)
+        public async Task<List<ModuleModel>> GetModuleList()
         {
-            var result = await _context.Modules.Where(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var result = await _context.Modules.Where(x => x.TenantId == baseDTO.TenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
             {
                 Id = x.Id,
-                Name = x.Name
+                Name = x.Name,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                AddedById = x.AddedById,
+                UpdatedById = x.UpdatedById
             }).AsNoTracking().ToListAsync();
 
             return result;
         }
+
         #endregion
 
         [HttpGet]
@@ -136,7 +190,6 @@ namespace Helios.Core.Controllers
                     Layout = x.ElementDetail.Layout,
                     DefaultValue = x.ElementDetail.DefaultValue,
                     AddTodayDate = x.ElementDetail.AddTodayDate,
-                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                     MainJs = x.ElementDetail.MainJs,
                     StartDay = x.ElementDetail.StartDay,
                     EndDay = x.ElementDetail.EndDay,
@@ -179,7 +232,6 @@ namespace Helios.Core.Controllers
                     Layout = x.ElementDetail.Layout,
                     DefaultValue = x.ElementDetail.DefaultValue,
                     AddTodayDate = x.ElementDetail.AddTodayDate,
-                    CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                     MainJs = x.ElementDetail.MainJs,
                     StartDay = x.ElementDetail.StartDay,
                     EndDay = x.ElementDetail.EndDay,
@@ -194,11 +246,12 @@ namespace Helios.Core.Controllers
                     DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                     ColumnIndex = x.ElementDetail.ColunmIndex,
                     RowIndex = x.ElementDetail.RowIndex,
+                    AdverseEventType = x.ElementDetail.AdverseEventType
                 }).OrderBy(x => x.Order).AsNoTracking().ToListAsync();
 
             foreach (var item in result)
             {
-                if (item.ParentId == 0)
+                if (item.ParentId == 0 || item.ParentId == null)
                     finalList.Add(item);
                 else
                 {
@@ -237,12 +290,10 @@ namespace Helios.Core.Controllers
                 Layout = x.ElementDetail.Layout,
                 IsDependent = x.IsDependent,
                 IsRelated = x.IsRelated,
-                RelationSourceInputs = x.ElementDetail.RelationSourceInputs,
                 RelationMainJs = x.ElementDetail.RelationMainJs,
                 ElementOptions = x.ElementDetail.ElementOptions,
                 DefaultValue = x.ElementDetail.DefaultValue,
                 AddTodayDate = x.ElementDetail.AddTodayDate,
-                CalculationSourceInputs = x.ElementDetail.CalculationSourceInputs,
                 MainJs = x.ElementDetail.MainJs,
                 StartDay = x.ElementDetail.StartDay,
                 EndDay = x.ElementDetail.EndDay,
@@ -257,11 +308,19 @@ namespace Helios.Core.Controllers
                 DatagridAndTableProperties = x.ElementDetail.DatagridAndTableProperties,
                 ColumnIndex = x.ElementDetail.ColunmIndex,
                 RowIndex = x.ElementDetail.RowIndex,
+                AdverseEventType = x.ElementDetail.AdverseEventType
             }).AsNoTracking().FirstOrDefaultAsync();
+
+            var events = new List<ModuleElementEvent>();
+
+            if (result.IsRelated || result.IsDependent)
+            {
+                events = await _context.ModuleElementEvents.Where(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted).ToListAsync();
+            }
 
             if (result.IsDependent)
             {
-                var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == id && x.IsActive && !x.IsDeleted);
+                var dep = events.FirstOrDefault(x => x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
 
                 if (dep != null)
                 {
@@ -273,13 +332,65 @@ namespace Helios.Core.Controllers
                 }
             }
 
+            if (result.IsRelated)
+            {
+                var rels = events.Where(x => x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToList();
+                var relSrcIds = rels.Select(x => x.SourceElementId).ToList();
+                var srcs = await _context.Elements.Where(x => relSrcIds.Contains(x.Id)).ToArrayAsync();
+                var relStr = "[";
+
+                foreach (var item in rels)
+                {
+                    var src = srcs.FirstOrDefault(x => x.Id == item.SourceElementId);
+
+                    relStr += "{\"relationFieldsSelectedGroup\":{\"label\":\"" + src.ElementName + " - " + StringExtensionsHelper.GetEnumDescription(src.ElementType) + "\",\"value\":" + item.SourceElementId + "},\"variableName\":\"" + item.VariableName + "\"}";
+
+                    if (item == rels.LastOrDefault())
+                        relStr += "]";
+                    else
+                        relStr += ",";
+                }
+
+                result.RelationSourceInputs = relStr;
+            }
+
+            if (result.ElementType == ElementType.Calculated)
+            {
+                var cals = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == result.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var calSrcIds = cals.Select(x => x.TargetElementId).ToList();
+                var srcs = await _context.Elements.Where(x => calSrcIds.Contains(x.Id)).ToArrayAsync();
+
+                var calStr = "[";
+
+                foreach (var item in cals)
+                {
+                    var src = srcs.FirstOrDefault(x => x.Id == item.TargetElementId);
+
+                    calStr += "{\"elementFieldSelectedGroup\":{\"label\":\"" + src.ElementName + " - " + StringExtensionsHelper.GetEnumDescription(src.ElementType) + "\",\"value\":" + item.TargetElementId + "},\"variableName\":\"" + item.VariableName + "\"}";
+
+                    if (item == cals.LastOrDefault())
+                        calStr += "]";
+                    else
+                        calStr += ",";
+                }
+
+                result.CalculationSourceInputs = calStr;
+            }
+
+            var validations = await _context.ElementValidationDetails.Where(x => x.ElementId == result.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+            if (validations != null)
+            {
+                result.ValidationList = JsonSerializer.Serialize(validations);
+            }
+
             return result;
         }
 
         [HttpPost]
         public async Task<ApiResponse<dynamic>> SaveModuleContent(ElementModel model)
         {
-            var result = new ApiResponse<dynamic>();
+            var result = new ApiResponse<dynamic>() { Message = "Operation is successfully." };
             var calcList = new List<CalculationModel>();
 
             var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
@@ -342,8 +453,6 @@ namespace Helios.Core.Controllers
                         ModuleId = model.ModuleId,
                         TenantId = model.TenantId,
                         Order = model.ParentId == 0 ? moduleElementMaxOrder + 1 : 0,
-                        //CreatedAt = DateTimeOffset.Now,
-                        //AddedById = userId,
                     };
 
                     _context.Elements.Add(elm);
@@ -365,16 +474,14 @@ namespace Helios.Core.Controllers
                             MetaDataTags = model.ElementName,
                             DefaultValue = model.DefaultValue,
                             AddTodayDate = model.AddTodayDate,
-                            CalculationSourceInputs = model.CalculationSourceInputs,
-                            RelationSourceInputs = model.RelationSourceInputs,
                             MainJs = model.MainJs,
                             RelationMainJs = model.RelationMainJs,
-                            StartDay = model.StartDay,
-                            EndDay = model.EndDay,
-                            StartMonth = model.StartMonth,
-                            EndMonth = model.EndMonth,
-                            StartYear = model.StartYear,
-                            EndYear = model.EndYear,
+                            StartDay = model.ElementType != ElementType.DateOption ? 0 : model.StartDay,
+                            EndDay = model.ElementType != ElementType.DateOption ? 0 : model.EndDay,
+                            StartMonth = model.ElementType != ElementType.DateOption ? 0 : model.StartMonth,
+                            EndMonth = model.ElementType != ElementType.DateOption ? 0 : model.EndMonth,
+                            StartYear = model.ElementType != ElementType.DateOption ? 0 : model.StartYear,
+                            EndYear = model.ElementType != ElementType.DateOption ? 0 : model.EndYear,
                             IsInCalculation = model.ElementType == ElementType.Calculated,
                             LeftText = model.LeftText,
                             RightText = model.RightText,
@@ -382,7 +489,8 @@ namespace Helios.Core.Controllers
                             ColumnCount = model.ColumnCount,
                             DatagridAndTableProperties = model.DatagridAndTableProperties,
                             RowIndex = model.ParentId == 0 ? 0 : model.RowIndex,
-                            ColunmIndex = model.ColumnIndex
+                            ColunmIndex = model.ColumnIndex,
+                            AdverseEventType = model.AdverseEventType,
                             //CreatedAt = DateTimeOffset.Now,
                             //AddedById = userId,
                             //ButtonText = model.buttonText
@@ -391,15 +499,24 @@ namespace Helios.Core.Controllers
                         _context.ElementDetails.Add(elementDetail);
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
-                        elm.ElementDetailId = elementDetail.Id;
-                        _context.Elements.Update(elm);
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        if (!result.IsSuccess)
+                        {
+                            elm.IsActive = false;
+                            elm.IsDeleted = true;
+                            _context.Elements.Update(elm);
+                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            result.IsSuccess = false;
+                            result.Message = "Operation failed. Please try again.";
+
+                            return result;
+                        }
 
                         if (model.IsDependent)
                         {
                             var elementEvent = new ModuleElementEvent()
                             {
-                                SourceElementId = model.DependentTargetFieldId,
+                                SourceElementId = model.DependentSourceFieldId,
                                 TargetElementId = elm.Id,
                                 ModuleId = model.ModuleId,
                                 TenantId = model.TenantId,
@@ -425,7 +542,8 @@ namespace Helios.Core.Controllers
                                     TenantId = model.TenantId,
                                     ModuleId = model.ModuleId,
                                     CalculationElementId = elm.Id,
-                                    TargetElementId = item.elementFieldSelectedGroup.value,
+                                    TargetElementId = item.elementFieldSelectedGroup.value != 0 ? item.elementFieldSelectedGroup.value : elm.Id,//own element is in calculation list
+                                    VariableName = item.variableName
                                 };
 
                                 _context.CalculatationElementDetails.Add(calcDtil);
@@ -444,17 +562,17 @@ namespace Helios.Core.Controllers
                         if (model.IsRelated)
                         {
                             var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                            var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
 
-                            foreach (var item in relElmIds)
+                            foreach (var item in relList)
                             {
                                 var elementEvent = new ModuleElementEvent()
                                 {
                                     ModuleId = model.ModuleId,
-                                    SourceElementId = item,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value != 0 ? item.relationFieldsSelectedGroup.value : elm.Id,//element related to own
                                     TargetElementId = elm.Id,
                                     TenantId = model.TenantId,
                                     EventType = EventType.Relation,
+                                    VariableName = item.variableName
                                 };
 
                                 _context.ModuleElementEvents.Add(elementEvent);
@@ -465,7 +583,6 @@ namespace Helios.Core.Controllers
                             if (!isSuccess)
                             {
                                 element.IsRelated = false;
-                                elementDetail.RelationSourceInputs = "";
                                 elementDetail.RelationMainJs = "";
 
                                 _context.Elements.Update(element);
@@ -474,33 +591,43 @@ namespace Helios.Core.Controllers
                             }
                         }
 
-                        //control for both of element and elementDetail saved
-                        var elmDtl = await _context.ElementDetails.FirstOrDefaultAsync(x => x.ElementId == elm.Id && x.IsActive && !x.IsDeleted);
-
-                        if (elmDtl == null)
+                        if (model.HasValidation)
                         {
-                            elm.IsActive = false;
-                            elm.IsDeleted = true;
-                            _context.Elements.Update(elm);
-                            var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                            var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
 
-                            result.IsSuccess = false;
-                            result.Message = "Operation failed. Please try again.";
+                            foreach (var item in validations)
+                            {
+                                var validation = new ElementValidationDetail
+                                {
+                                    ModuleId = model.ModuleId,
+                                    ElementId = elm.Id,
+                                    ActionType = item.ValidationActionType,
+                                    ValueCondition = item.ValidationCondition,
+                                    Value = item.ValidationValue,
+                                    Message = item.ValidationMessage,
+                                    TenantId = model.TenantId
+                                };
+
+                                _context.ElementValidationDetails.Add(validation);
+                            }
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
-                        else if (!result.IsSuccess)//if dependent or calculation didn't save
+
+                        if (!result.IsSuccess)//if dependent or calculation didn't save
                         {
                             elm.IsActive = false;
                             elm.IsDeleted = true;
                             _context.Elements.Update(elm);
 
-                            elmDtl.IsActive = false;
-                            elmDtl.IsDeleted = true;
-                            _context.ElementDetails.Update(elmDtl);
+                            elementDetail.IsActive = false;
+                            elementDetail.IsDeleted = true;
+                            _context.ElementDetails.Update(elementDetail);
 
                             var aa = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
                             result.IsSuccess = false;
-                            result.Message = "Operation failed. Please try again.";
+                            result.Message = "Operation failed. Please try again to save dependents or calculation part.";
                         }
                     }
                     else
@@ -577,6 +704,7 @@ namespace Helios.Core.Controllers
                 elementDetail.RightText = model.RightText;
                 elementDetail.RowCount = model.RowCount;
                 elementDetail.ColumnCount = model.ColumnCount;
+                elementDetail.AdverseEventType = model.AdverseEventType;
                 elementDetail.DatagridAndTableProperties = model.DatagridAndTableProperties;
                 element.UpdatedAt = DateTimeOffset.Now;
                 element.UpdatedById = model.UserId;
@@ -617,26 +745,47 @@ namespace Helios.Core.Controllers
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
+                else
+                {
+                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
+
+                    if (dep != null)
+                    {
+                        dep.IsActive = false;
+                        dep.IsDeleted = true;
+
+                        _context.ModuleElementEvents.Update(dep);
+                    }
+                }
 
                 if (model.ElementType == ElementType.Calculated)
                 {
-                    var dbCalcList = JsonSerializer.Deserialize<List<CalculationModel>>(elementDetail.CalculationSourceInputs);
                     var existCalDtil = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
                     var existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();
                     var elementInExistCalList = await _context.ElementDetails.Where(x => existCalElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var calcElmIds = calcList.Select(x => x.elementFieldSelectedGroup.value).ToList();
+                    var calcElmSgs = calcList.Select(x => x.elementFieldSelectedGroup).ToList();
+                    var calcElmIds1 = calcElmSgs.Select(x => x.value).ToList();
+
+                    var elementInExistCalListIds = elementInExistCalList.Select(x => x.ElementId).ToList();
+                    var allCalDtil = await _context.CalculatationElementDetails.Where(x => elementInExistCalListIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     //update updated variable list
-                    foreach (var item in dbCalcList)
+                    foreach (var item in existCalDtil)
                     {
-                        var c = calcList.FirstOrDefault(x => x.variableName == item.variableName);
+                        var c = calcList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                        if (c != null && c.elementFieldSelectedGroup.value != item.elementFieldSelectedGroup.value)
+                        if (c != null && c.elementFieldSelectedGroup.value != item.TargetElementId)
                         {
-                            var exc = existCalDtil.FirstOrDefault(x => x.TargetElementId == item.elementFieldSelectedGroup.value && x.IsActive && !x.IsDeleted);
+                            item.TargetElementId = c.elementFieldSelectedGroup.value;
+                            _context.CalculatationElementDetails.Update(item);
+                        }
 
-                            exc.TargetElementId = c.elementFieldSelectedGroup.value;
-                            _context.CalculatationElementDetails.Update(exc);
+                        var cc = calcList.FirstOrDefault(x => x.elementFieldSelectedGroup.value == item.TargetElementId);
+
+                        if (cc != null && cc.variableName != item.VariableName)
+                        {
+                            item.VariableName = cc.variableName;
+                            _context.CalculatationElementDetails.Update(item);
                         }
                     }
 
@@ -645,11 +794,16 @@ namespace Helios.Core.Controllers
                     //change elementDetail first
                     foreach (var item in elementInExistCalList)
                     {
-                        item.IsInCalculation = false;
-                        _context.ElementDetails.Update(item);
+                        var a = allCalDtil.Count(x => x.TargetElementId == item.ElementId);
+
+                        if (a == 1)//if element used in another calculation element too, IsInCalculation must remain true.
+                        {
+                            item.IsInCalculation = false;
+                            _context.ElementDetails.Update(item);
+                        }
                     }
 
-                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var elementInCalList = await _context.ElementDetails.Where(x => calcElmIds1.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
 
                     //then change new elementDetail flags
                     foreach (var item in elementInCalList)
@@ -659,7 +813,8 @@ namespace Helios.Core.Controllers
                     }
 
                     existCalElmIds = existCalDtil.Select(x => x.TargetElementId).ToList();//ids updated
-                                                                                          //add new calcElementDetails
+
+                    //add new calcElementDetails
                     foreach (var item in calcList)
                     {
                         if (!existCalElmIds.Contains(item.elementFieldSelectedGroup.value))
@@ -670,6 +825,7 @@ namespace Helios.Core.Controllers
                                 ModuleId = model.ModuleId,
                                 CalculationElementId = element.Id,
                                 TargetElementId = item.elementFieldSelectedGroup.value,
+                                VariableName = item.variableName
                             };
 
                             _context.CalculatationElementDetails.Add(calcDtil);
@@ -679,7 +835,7 @@ namespace Helios.Core.Controllers
                     //remove deleted items from calc
                     foreach (var item in existCalDtil)
                     {
-                        if (!calcElmIds.Contains(item.TargetElementId))
+                        if (!calcElmIds1.Contains(item.TargetElementId))
                         {
                             item.IsActive = false;
                             item.IsDeleted = true;
@@ -688,7 +844,6 @@ namespace Helios.Core.Controllers
                         }
                     }
 
-                    elementDetail.CalculationSourceInputs = model.CalculationSourceInputs;
                     _context.ElementDetails.Update(elementDetail);
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
@@ -696,72 +851,167 @@ namespace Helios.Core.Controllers
 
                 if (model.IsRelated)
                 {
-                    var dbRelList = JsonSerializer.Deserialize<List<RelationModel>>(elementDetail.RelationSourceInputs);
-                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                    var relList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
-                    var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
-
-                    foreach (var item in dbRelList)
+                    try
                     {
-                        var r = relList.FirstOrDefault(x => x.variableName == item.variableName);
+                        var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                        if (r != null && r.relationFieldsSelectedGroup.value != item.relationFieldsSelectedGroup.value)
+                        var orgRelList = JsonSerializer.Deserialize<List<RelationModel>>(model.RelationSourceInputs);
+                        var relList = orgRelList;
+                        var relElmIds = relList.Select(x => x.relationFieldsSelectedGroup.value).ToList();
+
+                        foreach (var item in rels)
                         {
-                            var exr = rels.FirstOrDefault(x => x.TargetElementId == item.relationFieldsSelectedGroup.value && x.IsActive && !x.IsDeleted);
+                            var r = relList.FirstOrDefault(x => x.variableName == item.VariableName);
 
-                            exr.TargetElementId = r.relationFieldsSelectedGroup.value;
-                            _context.ModuleElementEvents.Update(exr);
-                        }
-                    }
-
-                    var relIds = rels.Select(x => x.SourceElementId).ToList();
-
-                    //first add unadded rows to evet
-                    foreach (var item in relList)
-                    {
-                        if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
-                        {
-                            var elementEvent = new ModuleElementEvent()
+                            if (r != null && r.relationFieldsSelectedGroup.value != item.SourceElementId)
                             {
-                                ModuleId = model.ModuleId,
-                                SourceElementId = item.relationFieldsSelectedGroup.value,
-                                TargetElementId = model.Id,
-                                TenantId = model.TenantId,
-                                EventType = EventType.Relation,
-                            };
-
-                            _context.ModuleElementEvents.Add(elementEvent);
+                                item.SourceElementId = r.relationFieldsSelectedGroup.value;
+                                _context.ModuleElementEvents.Update(item);
+                            }
                         }
-                    }
 
-                    //then remove deleted rows
-                    foreach (var item in rels)
-                    {
-                        var delRel = relList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+                        var relIds = rels.Select(x => x.SourceElementId).ToList();
 
-                        if (delRel == null)
+                        //add unadded rows to evet
+                        foreach (var item in relList)
                         {
-                            item.IsActive = false;
-                            item.IsDeleted = true;
+                            if (!relIds.Contains(item.relationFieldsSelectedGroup.value))
+                            {
+                                var elementEvent = new ModuleElementEvent()
+                                {
+                                    ModuleId = model.ModuleId,
+                                    SourceElementId = item.relationFieldsSelectedGroup.value,
+                                    TargetElementId = model.Id,
+                                    TenantId = model.TenantId,
+                                    EventType = EventType.Relation,
+                                    VariableName = item.variableName
+                                };
 
-                            _context.ModuleElementEvents.Add(item);
+                                _context.ModuleElementEvents.Add(elementEvent);
+                            }
+                        }
+
+                        //remove deleted rows
+                        foreach (var item in rels)
+                        {
+                            var delRel = orgRelList.FirstOrDefault(x => x.relationFieldsSelectedGroup.value == item.SourceElementId);
+
+                            if (delRel == null)
+                            {
+                                item.IsActive = false;
+                                item.IsDeleted = true;
+
+                                _context.ModuleElementEvents.Update(item);
+                            }
+                        }
+
+                        _context.ElementDetails.Update(elementDetail);
+
+                        var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                        if (!isSuccess)
+                        {
+                            element.IsRelated = false;
+                            elementDetail.RelationMainJs = "";
+
+                            _context.Elements.Update(element);
+                            _context.ElementDetails.Update(elementDetail);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                         }
                     }
-
-                    elementDetail.RelationSourceInputs = model.RelationSourceInputs;
-                    _context.ElementDetails.Update(elementDetail);
-
-                    var isSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                    if (!isSuccess)
+                    catch (Exception ex)
                     {
                         element.IsRelated = false;
-                        elementDetail.RelationSourceInputs = "";
                         elementDetail.RelationMainJs = "";
 
                         _context.Elements.Update(element);
                         _context.ElementDetails.Update(elementDetail);
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+                }
+                else
+                {
+                    var rels = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Relation && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    if (rels.Count > 0)
+                    {
+                        foreach (var item in rels)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ModuleElementEvents.Update(item);
+                        }
+                    }
+                }
+
+                if (model.HasValidation)
+                {
+                    var dbValidations = await _context.ElementValidationDetails.Where(x => x.ElementId == model.Id).ToListAsync();
+                    var validations = JsonSerializer.Deserialize<List<ElementValidationModel>>(model.ValidationList);
+
+                    //add or update
+                    foreach (var item in validations)
+                    {
+                        var existVal = dbValidations.FirstOrDefault(x => x.Id == item.Id && x.IsActive && !x.IsDeleted);
+
+                        if (existVal != null)
+                        {
+                            existVal.Value = item.ValidationValue;
+                            existVal.ValueCondition = item.ValidationCondition;
+                            existVal.Message = item.ValidationMessage;
+                            existVal.ActionType = item.ValidationActionType;
+
+                            _context.ElementValidationDetails.Update(existVal);
+                        }
+                        else
+                        {
+                            var validation = new ElementValidationDetail
+                            {
+                                ModuleId = model.ModuleId,
+                                ElementId = element.Id,
+                                ActionType = item.ValidationActionType,
+                                ValueCondition = (ActionCondition)item.ValidationCondition,
+                                Value = item.ValidationValue,
+                                Message = item.ValidationMessage,
+                                TenantId = model.TenantId
+                            };
+
+                            _context.ElementValidationDetails.Add(validation);
+                        }
+
+                    }
+
+                    //delete
+                    foreach (var item in dbValidations)
+                    {
+                        var existVal = validations.FirstOrDefault(x => x.Id == item.Id);
+
+                        if (existVal == null)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(item);
+                        }
+                    }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                }
+                else
+                {
+                    var dbValidations = await _context.ElementValidationDetails.Where(x => x.ElementId == model.Id).ToListAsync();
+
+                    if (dbValidations.Count > 0)
+                    {
+                        foreach (var item in dbValidations)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(item);
+                        }
+
                         result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                     }
                 }
@@ -775,104 +1025,119 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
 
-            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-
-            if (element != null)
+            try
             {
-                var name = element.ElementName + "_1";
+                var element = await _context.Elements
+                    .Include(x => x.ElementDetail)
+                    .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-                for (; ; )
+                if (element != null)
                 {
-                    if (checkElementName(element.ModuleId, name).Result)
-                        break;
-                    else
-                        name = name + "_1";
-                }
+                    var name = element.ElementName + "_1";
 
-                element.Id = 0;
-                element.ElementName = name;
-                element.Order = element.Order + 1;
-
-                var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-                elementDetail.Id = 0;
-
-                _context.Add(element);
-                _context.Add(elementDetail);
-
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                elementDetail.ElementId = element.Id;
-                element.ElementDetailId = elementDetail.Id;
-
-                _context.Update(element);
-                _context.Update(elementDetail);
-
-                if (element.ElementType == ElementType.Calculated)
-                {
-                    var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id).ToListAsync();
-
-                    foreach (var cal in calcdtls)
+                    for (; ; )
                     {
-                        cal.CalculationElementId = element.Id;
-                        _context.Add(cal);
+                        if (checkElementName(element.ModuleId, name).Result)
+                            break;
+                        else
+                            name = name + "_1";
+                    }
+
+                    element.Id = 0;
+                    element.ElementName = name;
+                    element.Order = element.Order + 1;
+
+                    var elementDetail = element.ElementDetail;
+                    elementDetail.Id = 0;
+                    elementDetail.IsInCalculation = false;
+                    
+                    _context.Add(elementDetail);
+
+                    element.ElementDetail = elementDetail;
+                    _context.Add(element);
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                    if (element.ElementType == ElementType.Calculated)
+                    {
+                        var calcdtls = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                        foreach (var cal in calcdtls)
+                        {
+                            var newdtl = new CalculatationElementDetail()
+                            {
+                                TenantId = cal.TenantId,
+                                ModuleId = cal.ModuleId,
+                                TargetElementId = cal.TargetElementId,
+                                CalculationElementId = element.Id,
+                                VariableName = cal.VariableName,
+                            };
+
+                            _context.Add(newdtl);
+                        }
+
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }
+
+                    if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                    {
+                        var childrenDtils = await _context.ElementDetails
+                            .Include(x => x.Element)
+                            .Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                        var children = childrenDtils.Select(x => x.Element);
+
+                        foreach (var child in children)
+                        {
+                            var nm = child.ElementName + "_1";
+
+                            for (; ; )
+                            {
+                                if (checkElementName(child.ModuleId, nm).Result)
+                                    break;
+                                else
+                                    nm = nm + "_1";
+                            }
+
+                            var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                            chDtl.Id = 0;
+                            chDtl.ParentId = element.Id;
+                            chDtl.IsInCalculation = false;
+
+                            child.Id = 0;
+                            child.ElementName = nm;
+                            child.Order = child.Order + 1;
+
+                            _context.Add(chDtl);
+
+                            child.ElementDetail = chDtl;
+                            _context.Add(child);
+
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        }
+                    }
+
+                    var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    foreach (var item in moduleElements)
+                    {
+                        if (item.Order >= element.Order && item.Id != element.Id)
+                        {
+                            item.Order = (item.Order + 1);
+                            _context.Update(item);
+                        }
                     }
 
                     result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
                 }
-
-                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                else
                 {
-                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id).ToListAsync();
-                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
-                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
-
-                    foreach (var child in children)
-                    {
-                        var nm = child.ElementName + "_1";
-
-                        for (; ; )
-                        {
-                            if (checkElementName(child.ModuleId, nm).Result)
-                                break;
-                            else
-                                nm = nm + "_1";
-                        }
-
-                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
-                        chDtl.Id = 0;
-
-                        child.Id = 0;
-                        child.ElementName = nm;
-                        child.Order = child.Order + 1;
-
-                        _context.Add(child);
-                        _context.Add(chDtl);
-
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-
-                        child.ElementDetailId = chDtl.Id;
-                        chDtl.Id = child.Id;
-                        chDtl.ParentId = element.Id;
-
-                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                    }
+                    result.IsSuccess = false;
+                    result.Message = "Error";
                 }
-
-                var moduleElements = await _context.Elements.Where(x => x.ModuleId == element.ModuleId && x.IsActive && !x.IsDeleted).ToListAsync();
-
-                foreach (var item in moduleElements)
-                {
-                    if (item.Order >= element.Order && item.Id != element.Id)
-                    {
-                        item.Order = (item.Order + 1);
-                        _context.Update(item);
-                    }
-                }
-
-                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
-                result.Message = result.IsSuccess ? "Successful" : "Error";
             }
-            else
+            catch (Exception ex)
             {
                 result.IsSuccess = false;
                 result.Message = "Error";
@@ -898,7 +1163,7 @@ namespace Helios.Core.Controllers
                     return result;
                 }
 
-                var moduleEvent = _context.ModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+                var moduleEvent = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
 
                 if (moduleEvent != null)
                 {
@@ -932,12 +1197,23 @@ namespace Helios.Core.Controllers
                     }
                 }
 
+                //remove events
+                var moduleEvents = await _context.ModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                foreach (var item in moduleEvents)
+                {
+                    item.IsActive = false;
+                    item.IsDeleted = true;
+
+                    _context.ModuleElementEvents.Update(item);
+                }
+
                 if (element.ElementType == ElementType.Calculated)
                 {
                     var childrenDtils = await _context.CalculatationElementDetails.Where(x => x.CalculationElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
-                    var targetElmIds = childrenDtils.Select(x=>x.TargetElementId).ToList();
+                    var targetElmIds = childrenDtils.Select(x => x.TargetElementId).ToList();
 
-                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x=>x.TargetElementId).ToListAsync();
+                    var anotherCalcDtils = await _context.CalculatationElementDetails.Where(x => targetElmIds.Contains(x.TargetElementId) && x.IsActive && !x.IsDeleted).GroupBy(x => x.TargetElementId).ToListAsync();
 
                     var chngIds = new List<Int64>();
 
@@ -951,7 +1227,9 @@ namespace Helios.Core.Controllers
 
                     foreach (var item in elmDtils)
                     {
-                        if (chngIds.Contains(item.ElementId))
+                        var elmCnt = elmDtils.Where(x => x.Id == item.Id).Count();
+
+                        if (chngIds.Contains(item.ElementId) && elmCnt == 1)
                         {
                             item.IsInCalculation = false;
 
@@ -965,6 +1243,20 @@ namespace Helios.Core.Controllers
                         item.IsDeleted = true;
 
                         _context.CalculatationElementDetails.Update(item);
+                    }
+                }
+
+                //remove validations
+                var validations = await _context.ElementValidationDetails.Where(x => x.ElementId == element.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                if (validations != null && validations.Count > 0)
+                {
+                    foreach (var validation in validations)
+                    {
+                        validation.IsActive = false;
+                        validation.IsDeleted = true;
+
+                        _context.ElementValidationDetails.Update(validation);
                     }
                 }
 
@@ -987,6 +1279,210 @@ namespace Helios.Core.Controllers
 
             return result;
         }
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> CopyTableRowElement(ElementShortModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (element != null)
+            {
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+                    elementDetail.RowCount = elementDetail.RowCount + 1;
+                    _context.Update(elementDetail);
+
+                    var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                    var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+                    var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                    foreach (var child in children)
+                    {
+                        var nm = child.ElementName + "_1";
+
+                        for (; ; )
+                        {
+                            if (checkElementName(child.ModuleId, nm).Result)
+                                break;
+                            else
+                                nm = nm + "_1";
+                        }
+
+                        var chDtl = childrenDtils.FirstOrDefault(x => x.ElementId == child.Id);
+                        if (chDtl != null && chDtl.RowIndex == model.RowIndex)
+                        {
+                            child.Id = 0;
+                            child.ElementName = nm;
+
+                            chDtl.Id = 0;
+                            chDtl.RowIndex = chDtl.RowIndex + 1;
+
+                            _context.Add(child);
+                            _context.Add(chDtl);
+                            result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+
+                            chDtl.ElementId = child.Id;
+                            _context.Update(chDtl);
+                        }
+                        else if (chDtl != null && chDtl.RowIndex > model.RowIndex)
+                        {
+                            chDtl.RowIndex = chDtl.RowIndex + 1;
+                            _context.Update(chDtl);
+                        }
+                    }
+                }
+                result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                result.Message = result.IsSuccess ? "Successful" : "Error";
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Error";
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteTableRowElement(ElementShortModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+
+            if (element != null)
+            {
+                var childrenDtils = await _context.ElementDetails.Where(x => x.ParentId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var chldrnIds = childrenDtils.Select(x => x.ElementId).ToList();
+                var children = await _context.Elements.Where(x => chldrnIds.Contains(x.Id)).ToListAsync();
+
+                if (element.ElementType == ElementType.DataGrid || element.ElementType == ElementType.Table)
+                {
+                    var moduleEvent = _context.ModuleElementEvents.FirstOrDefault(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted);
+
+                    if (moduleEvent != null)
+                    {
+                        result.IsSuccess = false;
+                        result.Message = "This element used as relation or dependent in another element. Please remove it first and try again.";
+
+                        return result;
+                    }
+                    else
+                    {
+                        elementDetail.RowCount = elementDetail.RowCount != 1 ? elementDetail.RowCount - 1 : elementDetail.RowCount;
+                        _context.Update(elementDetail);
+                    }
+
+                    foreach (var item in childrenDtils)
+                    {
+
+                        if (item.RowIndex == model.RowIndex)
+                        {
+                            item.IsActive = false;
+                            item.IsDeleted = true;
+
+                            var chld = children.FirstOrDefault(x => x.Id == item.ElementId);
+                            chld.IsActive = false;
+                            chld.IsDeleted = true;
+                            _context.Elements.Update(chld);
+                        }
+                        else if (item.RowIndex > model.RowIndex)
+                        {
+                            item.RowIndex = item.RowIndex - 1;
+                        }
+                        _context.ElementDetails.Update(item);
+
+                    }
+
+                }
+                if (childrenDtils.Count() > 0)
+                {
+                    var chldrnIds2 = childrenDtils.Where(y => y.RowIndex == model.RowIndex).Select(x => x.ElementId).ToList();
+                    var validations = await _context.ElementValidationDetails.Where(x => chldrnIds2.Contains(x.ElementId) && x.IsActive && !x.IsDeleted).ToListAsync();
+
+                    if (validations != null && validations.Count > 0)
+                    {
+                        foreach (var validation in validations)
+                        {
+                            validation.IsActive = false;
+                            validation.IsDeleted = true;
+
+                            _context.ElementValidationDetails.Update(validation);
+                        }
+                    }
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    result.Message = result.IsSuccess ? "Successful" : "Error";
+                }
+                else
+                {
+                    result.IsSuccess = false;
+                    result.Message = "Error";
+                }
+
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Error";
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> RemoveMultipleTagList([FromBody] JsonElement data)
+        {
+            try
+            {
+                if (!data.TryGetProperty("id", out var idElement) || idElement.ValueKind != JsonValueKind.Number)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+
+                long id = idElement.GetInt64();
+
+                var tag = await _context.MultipleChoiceTag.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (tag != null)
+                {
+                    BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+                    _context.MultipleChoiceTag.Remove(tag);
+
+                    var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > -1;
+
+                    if (result)
+                    {
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = true,
+                            Message = "Successful"
+                        };
+                    }
+                }
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
 
         [HttpGet]
         public async Task<List<TagModel>> GetMultipleTagList(Int64 id)
@@ -1005,8 +1501,8 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AddNewTag(List<TagModel> tags)
         {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
             var result = new ApiResponse<dynamic>();
-            int userId = 0;
             var dbTags = await _context.MultipleChoiceTag.Where(x => x.IsActive && !x.IsDeleted).ToListAsync();
 
             foreach (var item in tags)
@@ -1019,7 +1515,8 @@ namespace Helios.Core.Controllers
                     {
                         Key = item.TagKey,
                         Name = item.TagName.TrimStart().TrimEnd(),
-                        Value = item.TagValue
+                        Value = item.TagValue,
+                        TenantId = baseDTO.TenantId
                     };
 
                     _context.MultipleChoiceTag.Add(tag);
@@ -1031,8 +1528,18 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            result.IsSuccess = await _context.SaveCoreContextAsync(userId, DateTimeOffset.Now) > 0;
-            result.Message = result.IsSuccess ? "Successful" : "Error";
+            result.IsSuccess = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+            result.Message = result.IsSuccess ? "Successful" : "There is a list of tags registered with this name. Please try again with a different name.";
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AutoSaveElement(ElementShortModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+
+
             return result;
         }
 
@@ -1047,5 +1554,257 @@ namespace Helios.Core.Controllers
                 return true;
         }
 
+        [HttpGet]
+        public async Task<List<ElementRankingModel>> GetElementRankingList(Int64 moduleId, bool isStudy)
+        {
+            var detailTableName = isStudy ? "StudyVisitPageModuleElementDetail" : "ElementDetail";
+
+            IQueryable<object> baseQuery = isStudy
+                ? _context.Set<StudyVisitPageModuleElement>().Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageModuleId == moduleId)
+                : _context.Set<Element>().Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId);
+
+            var query = baseQuery.Include(detailTableName);
+
+            var data = await query
+                .Select(element => new
+                {
+                    Id = isStudy ? ((StudyVisitPageModuleElement)element).Id : ((Element)element).Id,
+                    ElementName = isStudy ? ((StudyVisitPageModuleElement)element).ElementName : ((Element)element).ElementName,
+                    Order = isStudy ? ((StudyVisitPageModuleElement)element).Order : ((Element)element).Order,
+                    ElementType = isStudy ? ((StudyVisitPageModuleElement)element).ElementType : ((Element)element).ElementType,
+                    ElementDetail = isStudy ? (((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail != null ?
+                    new ElementDetail
+                    {
+                        Id = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.Id,
+                        ParentId = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ParentId,
+                        RowIndex = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.RowIndex,
+                        ColunmIndex = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ColunmIndex,
+                        RowCount = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.RowCount,
+                        ColumnCount = ((StudyVisitPageModuleElement)element).StudyVisitPageModuleElementDetail.ColumnCount,
+                    } : null) :
+                    (((Element)element).ElementDetail != null ?
+                    new ElementDetail
+                    {
+                        Id = ((Element)element).ElementDetail.Id,
+                        ParentId = ((Element)element).ElementDetail.ParentId,
+                        RowIndex = ((Element)element).ElementDetail.RowIndex,
+                        ColunmIndex = ((Element)element).ElementDetail.ColunmIndex,
+                        RowCount = ((Element)element).ElementDetail.RowCount,
+                        ColumnCount = ((Element)element).ElementDetail.ColumnCount,
+                    } : null)
+                }).ToListAsync();
+
+            var result = data.Where(x => x.ElementDetail != null && x.ElementDetail.ParentId == 0).Select(element =>
+            {
+                var newElement = new ElementRankingModel
+                {
+                    Id = element.Id,
+                    Key = Guid.NewGuid().ToString(),
+                    Title = element.ElementName,
+                    Order = element.Order.ToString(),
+                    ElementType = element.ElementType.GetDescription(),
+                };
+
+                if (element.ElementType == ElementType.Table || element.ElementType == ElementType.DataGrid)
+                {
+                    var children = data.Where(x => x.ElementDetail != null && x.ElementDetail.ParentId == element.Id);
+
+                    var newChildren = children.Select(child =>
+                    {
+                        var newChild = new ElementRankingModel
+                        {
+                            Id = child.Id,
+                            Key = Guid.NewGuid().ToString(),
+                            Title = child.ElementName,
+                            Order = $"{child.ElementDetail.RowIndex}-{child.ElementDetail.ColunmIndex}",
+                            ElementType = child.ElementType.GetDescription(),
+                        };
+                        return newChild;
+                    }).ToList();
+
+                    for (int i = 1; i < element.ElementDetail.RowCount; i++)
+                    {
+                        var rowChildren = children.Where(x => x.ElementDetail.RowIndex == i).ToList();
+
+                        var existingColumnIndexes = rowChildren.Select(x => x.ElementDetail.ColunmIndex.GetValueOrDefault()).ToList();
+                        var missingColumnIndexes = Enumerable.Range(1, element.ElementDetail.ColumnCount.GetValueOrDefault()).Except(existingColumnIndexes).ToList();
+
+                        foreach (var missingColumnIndex in missingColumnIndexes)
+                        {
+                            var newChild = new ElementRankingModel
+                            {
+                                Id = -1,
+                                Key = Guid.NewGuid().ToString(),
+                                Title = "Empty",
+                                Order = $"{i}-{missingColumnIndex}",
+                            };
+                            newChildren.Add(newChild);
+                        }
+                    }
+                    newElement.Children = newChildren;
+                }
+                return newElement;
+            }).OrderBy(e => StringExtensionsHelper.ParseOrder(e.Order)).ToList();
+
+            foreach (var item in result.Where(e => e.Children != null))
+            {
+                item.Children = item.Children.OrderBy(child => StringExtensionsHelper.ParseOrder(child.Order)).ToList();
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetElementRankingList(List<ElementRankingModel> elements, Int64 moduleId, bool isStudy)
+        {
+            try
+            {
+                if (isStudy)
+                {
+                    var data = await _context.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageModuleId == moduleId).Include(x => x.StudyVisitPageModuleElementDetail).ToListAsync();
+
+                    var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
+
+                    data.ForEach(element =>
+                    {
+                        var elm = elements.FirstOrDefault(x => x.Id == element.Id);
+                        if (elm != null)
+                        {
+                            var elmOrder = Convert.ToInt32(elm.Order);
+                            if (elmOrder != element.Order)
+                            {
+                                element.Order = elmOrder;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.RowIndex != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.RowIndex = 0;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.ColunmIndex != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.ColunmIndex = 0;
+                            }
+                            if (element.StudyVisitPageModuleElementDetail != null && element.StudyVisitPageModuleElementDetail.ParentId != 0)
+                            {
+                                element.StudyVisitPageModuleElementDetail.ParentId = 0;
+                            }
+                        }
+                        else if (newChildren != null)
+                        {
+                            var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
+                            if (child != null)
+                            {
+                                if (element.Order != 0)
+                                {
+                                    element.Order = 0;
+                                }
+                                string[] parts = child.Order.Split('-');
+                                int rowIndex = Convert.ToInt32(parts[0]);
+                                int columnIndex = Convert.ToInt32(parts[1]);
+                                if (element.StudyVisitPageModuleElementDetail != null && rowIndex != element.StudyVisitPageModuleElementDetail.RowIndex)
+                                {
+                                    element.StudyVisitPageModuleElementDetail.RowIndex = rowIndex;
+                                }
+                                if (element.StudyVisitPageModuleElementDetail != null && columnIndex != element.StudyVisitPageModuleElementDetail.ColunmIndex)
+                                {
+                                    element.StudyVisitPageModuleElementDetail.ColunmIndex = columnIndex;
+                                }
+                            }
+                        }
+                    });
+
+                    _context.StudyVisitPageModuleElements.UpdateRange(data);
+                }
+                else
+                {
+                    var data = await _context.Elements.Where(x => x.IsActive && !x.IsDeleted && x.ModuleId == moduleId).Include(x => x.ElementDetail).ToListAsync();
+
+                    var newChildren = elements.Where(x => x.Children != null).SelectMany(x => x.Children).ToList();
+
+                    data.ForEach(element =>
+                    {
+                        var elm = elements.FirstOrDefault(x => x.Id == element.Id);
+                        if (elm != null)
+                        {
+                            var elmOrder = Convert.ToInt32(elm.Order);
+                            if (elmOrder != element.Order)
+                            {
+                                element.Order = elmOrder;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.RowIndex != 0)
+                            {
+                                element.ElementDetail.RowIndex = 0;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.ColunmIndex != 0)
+                            {
+                                element.ElementDetail.ColunmIndex = 0;
+                            }
+                            if (element.ElementDetail != null && element.ElementDetail.ParentId != 0)
+                            {
+                                element.ElementDetail.ParentId = 0;
+                            }
+                        }
+                        else if (newChildren != null)
+                        {
+                            var child = newChildren.FirstOrDefault(x => x.Id == element.Id);
+                            if (child != null)
+                            {
+                                if (element.Order != 0)
+                                {
+                                    element.Order = 0;
+                                }
+                                string[] parts = child.Order.Split('-');
+                                int rowIndex = Convert.ToInt32(parts[0]);
+                                int columnIndex = Convert.ToInt32(parts[1]);
+                                if (element.ElementDetail != null && rowIndex != element.ElementDetail.RowIndex)
+                                {
+                                    element.ElementDetail.RowIndex = rowIndex;
+                                }
+                                if (element.ElementDetail != null && columnIndex != element.ElementDetail.ColunmIndex)
+                                {
+                                    element.ElementDetail.ColunmIndex = columnIndex;
+                                }
+                            }
+                        }
+                    });
+
+                    _context.Elements.UpdateRange(data);
+                }
+
+                var result = await _context.SaveCoreContextAsync(0, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else if (result == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "No changes were made. Please make changes to save."
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "Unsuccessful"
+                };
+            }
+        }
     }
 }

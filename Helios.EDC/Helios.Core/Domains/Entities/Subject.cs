@@ -1,6 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Helios.Common.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
@@ -9,7 +7,7 @@ namespace Helios.Core.Domains.Entities
     {
         public Int64 SiteId { get; set; }
         public Int64 StudyId { get; set; }
-        public string InitialName { get; set; }
+        public string? InitialName { get; set; }
         public string SubjectNumber { get; set; }
         public DataStatus DataStatus { get; set; }
         public SubjectValidationStatus ValidationStatus { get; set; }
@@ -17,11 +15,12 @@ namespace Helios.Core.Domains.Entities
         public bool Signature { get; set; }
         public bool Lock { get; set; }
         public bool Freeze { get; set; }
-        public string RandomData { get; set; }
+        public string? RandomData { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTimeOffset RandomDataDate { get; set; }
+        public DateTimeOffset? RandomDataDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTimeOffset? UserValueUpdateDate { get; set; }
+        public string? Comment { get; set; }
         public Site Site { get; set; }
         public Study Study { get; set; }
         public ICollection<SubjectVisit> SubjectVisits { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Helios.Core.Domains.Base
+namespace Helios.Core.Domains.Entities
 {
     public class EntityBase : IBase
     {
@@ -18,6 +18,5 @@ namespace Helios.Core.Domains.Base
 
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
-
     }
 }

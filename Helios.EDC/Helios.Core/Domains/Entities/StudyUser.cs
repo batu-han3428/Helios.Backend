@@ -1,6 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-
-namespace Helios.Core.Domains.Entities
+﻿namespace Helios.Core.Domains.Entities
 {
     public class StudyUser : EntityBase
     {
@@ -11,6 +9,6 @@ namespace Helios.Core.Domains.Entities
         public Int64? StudyRoleId { get; set; }
         public StudyRole StudyRole { get; set; }
         public List<StudyUserSite> StudyUserSites { get; set; }
-        
+
     }
 }

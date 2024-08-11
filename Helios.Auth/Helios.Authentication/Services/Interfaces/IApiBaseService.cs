@@ -2,11 +2,8 @@
 {
     public interface IApiBaseService
     {
-        string ClientIp { get; set; }
-        string HttpContextRequestPath { get; set; }
-        Int64 UserId { get; set; }
-        Int64 ResearchId { get; set; }
-        Int64 TenantId { get; set; }
-        Int64 ResearcherId { get; set; }
+        public Int64 UserId { get; set; }
+        public Int64 StudyId { get; set; }
+        public Int64 TenantId { get; set; }
     }
 }

@@ -8,7 +8,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["Helios.Auth/Helios.Authentication/Helios.Authentication.csproj", "Helios.Auth/Helios.Authentication/"]
-COPY ["Helios.EDC/Helios.Common/Helios.Common.csproj", "Helios.EDC/Helios.Common/"]
+COPY ["Helios.Common/Helios.Common/Helios.Common.csproj", "Helios.Common/Helios.Common/"]
 COPY ["Helios.Auth/Helios.EventBus.Base/Helios.EventBus.Base.csproj", "Helios.Auth/Helios.EventBus.Base/"]
 COPY ./nuget.config .
 

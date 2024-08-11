@@ -1,5 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
@@ -7,10 +6,8 @@ namespace Helios.Core.Domains.Entities
     public class Element : EntityBase
     {
         public Int64 ModuleId { get; set; }
-        [ForeignKey("ElementDetail")]
-        public Int64? ElementDetailId { get; set; }
         public ElementType ElementType { get; set; }
-        public string ElementName{ get; set; }
+        public string ElementName { get; set; }
         public string Title { get; set; }
         public bool IsTitleHidden { get; set; }
         public int Order { get; set; }
@@ -24,6 +21,8 @@ namespace Helios.Core.Domains.Entities
         public bool CanMissing { get; set; }
         public Module Module { get; set; }
         public ElementDetail? ElementDetail { get; set; }
-
+        public ICollection<CalculatationElementDetail>? CalculatationElementDetails { get; set; }
+        public ICollection<ModuleElementEvent>? ModuleElementEvents { get; set; }
+        public ICollection<ElementValidationDetail>? ElementValidationDetails { get; set; }
     }
 }

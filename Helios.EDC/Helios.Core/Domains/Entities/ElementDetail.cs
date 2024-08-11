@@ -1,12 +1,13 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Helios.Core.Domains.Entities
 {
     public class ElementDetail : EntityBase
     {
+        [ForeignKey("Element")]
         public Int64 ElementId { get; set; }
-        public Int64 ParentId { get; set; }
+        public Int64? ParentId { get; set; }
         public int? RowIndex { get; set; }
         public int? ColunmIndex { get; set; }
         public string? MetaDataTags { get; set; }
@@ -36,21 +37,17 @@ namespace Helios.Core.Domains.Entities
         //chkbox, radio, ddown vs
         public string? ElementOptions { get; set; } //json text value
 
-        //hidden
-        public Int64? TargetElementId { get; set; }
-
         //rangeslider
         public string? LeftText { get; set; }
         public string? RightText { get; set; }
 
         //calculation
-        public string? CalculationSourceInputs { get; set; }
         public bool IsInCalculation { get; set; }
         public string? MainJs { get; set; }
 
-        public string? RelationSourceInputs { get; set; }
         public string? RelationMainJs { get; set; }
 
+        public int? AdverseEventType { get; set; }
 
         public Element Element { get; set; }
 

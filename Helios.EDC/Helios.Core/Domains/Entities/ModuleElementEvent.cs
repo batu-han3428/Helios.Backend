@@ -1,5 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Core.Domains.Entities
 {
@@ -12,6 +11,8 @@ namespace Helios.Core.Domains.Entities
         public Int64 TargetElementId { get; set; }
         public ActionCondition ValueCondition { get; set; }
         public string? ActionValue { get; set; }
+        public string? VariableName { get; set; }
         public Module Module { get; set; }
+        public Element TargetElement { get; set; }
     }
 }

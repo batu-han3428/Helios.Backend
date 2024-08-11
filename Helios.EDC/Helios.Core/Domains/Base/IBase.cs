@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Helios.Core.Domains.Base
+namespace Helios.Core.Domains.Entities
 {
     public interface IBase
     {

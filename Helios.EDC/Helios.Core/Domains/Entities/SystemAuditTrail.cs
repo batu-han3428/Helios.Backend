@@ -1,5 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Core.Domains.Entities
 {

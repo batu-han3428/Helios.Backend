@@ -1,5 +1,4 @@
-﻿using Helios.Core.Domains.Base;
-using Helios.Common.Enums;
+﻿using Helios.Common.Enums;
 
 namespace Helios.Core.Domains.Entities
 {
@@ -16,9 +15,9 @@ namespace Helios.Core.Domains.Entities
         public bool Sdv { get; set; }
         public bool Query { get; set; }
         public bool SAELockStatus { get; set; }
-        public string Verification { get; set; }
-        public string FormNo { get; set; }
-        public string FormName { get; set; }
+        public string? Verification { get; set; }
+        public string? FormNo { get; set; }
+        public string? FormName { get; set; }
         public int RowIndex { get; set; }
         public StudyVisit StudyVisit { get; set; }
         public Subject Subject { get; set; }

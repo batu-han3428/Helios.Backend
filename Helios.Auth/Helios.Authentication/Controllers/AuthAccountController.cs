@@ -1,5 +1,4 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Helios.Authentication.Services.Interfaces;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Helios.Common.Model;
 using System.Web;
 using Helios.Common.Enums;
+using Helios.Authentication.Domains.Entities;
 
 namespace Helios.Authentication.Controllers
 {
@@ -151,7 +151,7 @@ namespace Helios.Authentication.Controllers
         {
             try
             {
-                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);
+                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);             
                 if (user != null)
                 {
                     if (!user.IsActive)
@@ -159,7 +159,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Please contact the system administrator to open your account."
+                            Message = "Your account has been deactivated, please contact the system administrator."
                         };
                     }
 
@@ -184,7 +184,7 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Please contact the system administrator to open your account."
+                            Message = "Your account has been deactivated, please contact the system administrator."
                         };
                     }
 
@@ -194,7 +194,7 @@ namespace Helios.Authentication.Controllers
                     {
                         user.AccessFailedCount++;
                         var remainAttemp = 5 - user.AccessFailedCount;
-                        var failMsg = user.AccessFailedCount == 4 ? "If you enter your password incorrectly, your account will be blocked, please contact the system administrator." : "You have @Change attempts left for the validity of your password.";
+                        var failMsg = user.AccessFailedCount == 4 ? "If you enter your password incorrectly, your account will be blocked, please contact the system administrator." : user.AccessFailedCount == 5 ? "Your account has been blocked. Please contact the system administrator." : "You have @Change attempts left for the validity of your password.";
                         var updateResult = await _userManager.UpdateAsync(user);
 
                         return new ApiResponse<dynamic>
@@ -289,12 +289,12 @@ namespace Helios.Authentication.Controllers
                             };
                         }
                     }
-                }
+                }               
 
                 return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
-                    Message = "Invalid user"
+                    Message = "Invalid user!"
                 };
             }
             catch (Exception e)
@@ -607,6 +607,11 @@ namespace Helios.Authentication.Controllers
         public async Task<int> GetUserTenantCount(Int64 userId)
         {
             return await _context.TenantAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
+        }
+        [HttpGet]
+        public async Task<int> GetUserSystemCount(Int64 userId)
+        {
+            return await _context.SystemAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
         }
 
         [HttpGet]

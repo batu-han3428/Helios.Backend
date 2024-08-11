@@ -1,8 +1,6 @@
-﻿using Helios.Core.Domains.Base;
-
-namespace Helios.Core.Domains.Entities
+﻿namespace Helios.Core.Domains.Entities
 {
-    public class Permission: EntityBase
+    public class Permission : EntityBase
     {
         public Int64? StudyRoleId { get; set; }
         public StudyRole StudyRole { get; set; }
@@ -10,7 +8,7 @@ namespace Helios.Core.Domains.Entities
         public StudyVisit StudyVisit { get; set; }
         public Int64? StudyVisitPageId { get; set; }
         public StudyVisitPage StudyVisitPage { get; set; }
-        public int PermissionName { get; set; }
+        public int PermissionKey { get; set; }
         public Int64 StudyId { get; set; }
     }
 }

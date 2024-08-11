@@ -1,5 +1,4 @@
 ﻿using Helios.Authentication.Contexts;
-using Helios.Authentication.Entities;
 using Helios.Authentication.Helpers;
 using Helios.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +11,8 @@ using MassTransit.Initializers;
 using Azure.Storage.Blobs;
 using Helios.Common.Enums;
 using System.Data;
+using Helios.Authentication.Domains.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Helios.Authentication.Controllers
 {
@@ -48,7 +49,8 @@ namespace Helios.Authentication.Controllers
                 ActiveStudies = "0",
                 StudyLimit = x.StudyLimit,
                 CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt
+                UpdatedAt = x.UpdatedAt,
+                UserLimit=x.UserLimit,
             }).ToListAsync();
         }
 
@@ -69,19 +71,27 @@ namespace Helios.Authentication.Controllers
             {
                 if (!string.IsNullOrEmpty(tenant.Path))
                 {
-                    BlobClient blobClient = await _blobStorage.GetBlob(tenant.Path);
-                    var contentType = blobClient.GetProperties();
-                    var ddd = contentType.Value.ContentType;
-                    if (blobClient != null)
+                    try
                     {
-                        using (MemoryStream ms = new MemoryStream())
+                        BlobClient blobClient = await _blobStorage.GetBlob(tenant.Path);
+                        var contentType = blobClient.GetProperties();
+                        var ddd = contentType.Value.ContentType;
+                        if (blobClient != null)
                         {
-                            await blobClient.DownloadToAsync(ms);
-                            tenant.Logo = Convert.ToBase64String(ms.ToArray());
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                await blobClient.DownloadToAsync(ms);
+                                tenant.Logo = Convert.ToBase64String(ms.ToArray());
+                            }
                         }
                     }
+                    catch (Exception)
+                    {
+                        return tenant;
+                    }
+
                 }
-                
+
                 return tenant;
             }
 
@@ -159,10 +169,10 @@ namespace Helios.Authentication.Controllers
                     }
 
                     if (oldEntity.Name != tenantDTO.TenantName) oldEntity.Name = tenantDTO.TenantName;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.StudyLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.StudyLimit)) oldEntity.StudyLimit = tenantDTO.StudyLimit;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.UserLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.UserLimit)) oldEntity.UserLimit = tenantDTO.UserLimit;
-                    if(StringExtensionsHelper.NormalizeString(oldEntity.TimeZone) != StringExtensionsHelper.NormalizeString(tenantDTO.TimeZone)) oldEntity.TimeZone = tenantDTO.TimeZone;
-                    if(oldEntity.Logo != (tenantDTO.TenantLogo?.FileName == null ? null : "TenantName/" + tenantDTO.TenantLogo?.FileName))
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.StudyLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.StudyLimit)) oldEntity.StudyLimit = tenantDTO.StudyLimit;
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.UserLimit) != StringExtensionsHelper.NormalizeString(tenantDTO.UserLimit)) oldEntity.UserLimit = tenantDTO.UserLimit;
+                    if (StringExtensionsHelper.NormalizeString(oldEntity.TimeZone) != StringExtensionsHelper.NormalizeString(tenantDTO.TimeZone)) oldEntity.TimeZone = tenantDTO.TimeZone;
+                    if (oldEntity.Logo != (tenantDTO.TenantLogo?.FileName == null ? null : "TenantName/" + tenantDTO.TenantLogo?.FileName))
                     {
                         string? removeFile = oldEntity.Logo;
 
@@ -286,6 +296,7 @@ namespace Helios.Authentication.Controllers
                         User = usr,
                         RoleId = role.Id,
                         UserId = usr.Id,
+                        TenantId = model.TenantId
                     });
 
                     if (model.Role == Roles.StudyUser)
@@ -309,7 +320,7 @@ namespace Helios.Authentication.Controllers
                         //}
                         string mailContent = "";
 
-                        var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.png");
+                        var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.jpg");
                         byte[] imageArray = System.IO.File.ReadAllBytes(imgPath);
                         string base64ImageRepresentation = Convert.ToBase64String(imageArray);
 
@@ -424,17 +435,39 @@ namespace Helios.Authentication.Controllers
                     user.Name = model.Name;
                     user.LastName = model.LastName;
                     user.Email = model.Email;
-                   
+                    user.PhoneNumber = model.PhoneNumber;
+
                     await _userManager.UpdateAsync(user);
 
                     if (oldEmail != model.Email)
                     {
-                        await _emailService.UserResetPasswordMail(new StudyUserModel
+                        user.ChangePassword = false;
+                        var changePassword = await _userManager.UpdateAsync(user);
+                        if (changePassword.Succeeded)
                         {
-                            Name = user.Name,
-                            LastName = user.LastName,
-                            Email = user.Email
-                        });
+                            string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                            var removeResult = await _userManager.RemovePasswordAsync(user);
+                            if (removeResult.Succeeded)
+                            {
+                                var passResult = await _userManager.AddPasswordAsync(user, newPassword);
+                                if (passResult.Succeeded)
+                                {
+                                    await _emailService.SystemAdminUserMail(new SystemAdminDTO
+                                    {
+                                        Email = user.Email,
+                                        Name = user.Name,
+                                        LastName = user.LastName,
+                                        Password = newPassword
+
+                                    });
+                                    return new ApiResponse<dynamic>
+                                    {
+                                        IsSuccess = true,
+                                        Message = "Successful"
+                                    };
+                                }
+                            }
+                        }
                     }
 
                     return new ApiResponse<dynamic>
@@ -459,7 +492,7 @@ namespace Helios.Authentication.Controllers
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
                 };
-            }  
+            }
         }
 
         [HttpPost]
@@ -617,6 +650,40 @@ namespace Helios.Authentication.Controllers
         }
 
         [HttpPost]
+        public async Task<ApiResponse<StudyUserDTO>> AddStudyUserRole(StudyUserModel model)
+        {
+            var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.StudyUser.ToString());
+            var usr = await _userManager.FindByEmailAsync(model.Email);
+            var userroles =await _context.UserRoles.Where(x=>x.UserId==usr.Id && x.StudyId==model.StudyId && x.TenantId==model.TenantId).ToListAsync();
+            var rol = userroles.Any(x=>x.RoleId==role.Id);
+            if (!rol)
+            {
+                usr.UserRoles.Add(new ApplicationUserRole
+                {
+                    RoleId = role.Id,
+                    UserId = usr.Id,
+                    StudyId = model.StudyId,
+                    TenantId = model.TenantId,
+                });
+
+                var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                if (result)
+                {
+                    return new ApiResponse<StudyUserDTO>
+                    {
+                        IsSuccess = true,
+                        Message = "",                      
+                    };
+                }
+            }
+            return new ApiResponse<StudyUserDTO>
+            {
+                IsSuccess = false,
+                Message = "Unsuccessful"
+            };
+        }
+
+        [HttpPost]
         public async Task AddStudyUserMail(StudyUserModel model)
         {
             await _emailService.AddStudyUserMail(model);
@@ -632,7 +699,7 @@ namespace Helios.Authentication.Controllers
                 var aspNetResult = await _userManager.RemoveFromRoleAsync(aspNetUser, Roles.StudyUser.ToString());
 
                 if (aspNetResult.Succeeded)
-                {                        
+                {
                     return new ApiResponse<DeleteStudyUserDTO>
                     {
                         IsSuccess = true,
@@ -655,7 +722,7 @@ namespace Helios.Authentication.Controllers
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
                 };
-            } 
+            }
         }
 
         [HttpPost]
@@ -672,14 +739,16 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "An unexpected error occurred."
                     };
-                }else if (!user.IsActive)
+                }
+                else if (!user.IsActive)
                 {
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
                         Message = "Please activate the account first and then try this process again."
                     };
-                }else
+                }
+                else
                 {
                     user.ChangePassword = false;
                     var changePassword = await _userManager.UpdateAsync(user);
@@ -709,6 +778,101 @@ namespace Helios.Authentication.Controllers
                 IsSuccess = false,
                 Message = "An unexpected error occurred."
             };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> UserProfileChangePassword(ResetUserProfileViewModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+            if (!String.IsNullOrEmpty(model.Password))
+            {
+                var user = await _userManager.FindByIdAsync(model.AuthUserId.ToString());
+
+                if (user == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+                if (model.Password == null || model.NewPassword == null || model.ConfirmPassword == null)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod1",
+                    };
+                }
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
+                if (!passwordCheck)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod0",
+                    };
+                }
+
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var validPassword = await passwordValidator.ValidateAsync(_userManager, user, model.NewPassword);
+                if (!validPassword.Succeeded)
+                {
+                    var message = "";
+                    foreach (var item in validPassword.Errors)
+                    {
+                        message += "<br>" + item.Description;
+                    }
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = message
+                    };
+                }
+
+                if (model.NewPassword == model.Password)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod2",
+                    };
+                }
+
+
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod3",
+                    };
+                }
+
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, code, model.NewPassword);
+                if (resetResult.Succeeded)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = resetResult.Errors.ToString()
+                    };
+
+                }
+
+            }
+            result.IsSuccess = false;
+            result.Message = "An unexpected error occurred.";
+            return result;
         }
 
         [HttpPost]
@@ -833,7 +997,7 @@ namespace Helios.Authentication.Controllers
                             IsSuccess = false,
                             Message = "Unsuccessful"
                         };
-                    }     
+                    }
                 }
                 else
                 {
@@ -884,7 +1048,7 @@ namespace Helios.Authentication.Controllers
                         {
                             IsSuccess = true,
                             Message = "Successful",
-                            Values = new SystemAdminDTO  { Password = model.Password}
+                            Values = new SystemAdminDTO { Password = model.Password }
                         };
                     }
                     else
@@ -897,13 +1061,13 @@ namespace Helios.Authentication.Controllers
                     }
                 }
 
-          
+
                 return new ApiResponse<SystemAdminDTO>
                 {
                     IsSuccess = false,
                     Message = "This user is already registered in the system.",
                 };
-                
+
             }
             else
             {
@@ -933,7 +1097,8 @@ namespace Helios.Authentication.Controllers
                         Message = result ? "Successful" : "Unsuccessful"
                     };
                 }
-                else {
+                else
+                {
                     return new ApiResponse<SystemAdminDTO>
                     {
                         IsSuccess = true,
@@ -1024,7 +1189,7 @@ namespace Helios.Authentication.Controllers
                         }
                     }
 
-                   return false;
+                    return false;
                 }
                 catch (Exception)
                 {
@@ -1078,7 +1243,7 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "Unsuccessful"
                     };
-                }              
+                }
             }
             else
             {
@@ -1280,7 +1445,7 @@ namespace Helios.Authentication.Controllers
                         };
                     }
                 }
-                else if(string.IsNullOrEmpty(model.Password))
+                else if (string.IsNullOrEmpty(model.Password))
                 {
                     var firstChar = StringExtensionsHelper.ConvertTRCharToENChar(model.Name).Substring(0, 1).ToLower();
                     var lastNameEng = StringExtensionsHelper.ConvertTRCharToENChar(model.LastName).Replace(" ", "").ToLower();
@@ -1426,7 +1591,8 @@ namespace Helios.Authentication.Controllers
                         {
                             var r = await _userManager.AddToRoleAsync(usr, Roles.TenantAdmin.ToString());
 
-                            if (!r.Succeeded) {
+                            if (!r.Succeeded)
+                            {
                                 return new ApiResponse<dynamic>
                                 {
                                     IsSuccess = false,
@@ -1503,7 +1669,7 @@ namespace Helios.Authentication.Controllers
                 catch (Exception)
                 {
                     return false;
-                }              
+                }
             }
 
             bool AreArraysEqual<T>(IEnumerable<T> array1, IEnumerable<T> array2)
@@ -1529,16 +1695,13 @@ namespace Helios.Authentication.Controllers
 
             var result = await (
                 from userManagerUser in _userManager.Users
-                join systemAdmin in _context.SystemAdmins on userManagerUser.Id equals systemAdmin.AuthUserId into systemAdmins
+                join systemAdmin in _context.SystemAdmins.Where(sa => !sa.IsDeleted) on userManagerUser.Id equals systemAdmin.AuthUserId into systemAdmins
                 from sysAdmin in systemAdmins.DefaultIfEmpty()
-                join tenantAdmin in _context.TenantAdmins on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
+                join tenantAdmin in _context.TenantAdmins.Where(ta => !ta.IsDeleted) on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
                 from tenAdmin in tenantAdmins.DefaultIfEmpty()
                 join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
                 where
-                    userManagerUser.IsActive &&
-                    userManagerUser.Id != id &&
-                    (sysAdmin != null && !sysAdmin.IsDeleted) ||
-                    (tenAdmin != null && !tenAdmin.IsDeleted)
+                    userManagerUser.Id != id
                 select new SystemUserModel
                 {
                     Id = userManagerUser.Id,
@@ -1546,13 +1709,13 @@ namespace Helios.Authentication.Controllers
                     LastName = userManagerUser.LastName,
                     Email = userManagerUser.Email,
                     PhoneNumber = userManagerUser.PhoneNumber,
-                    IsActive = (sysAdmin != null && sysAdmin.IsActive) || (tenAdmin != null && tenAdmin.IsActive) || userManagerUser.IsActive,
+                    IsActive = sysAdmin != null ? sysAdmin.IsActive : tenAdmin != null ? tenAdmin.IsActive : userManagerUser.IsActive,
                     Roles = userManagerUser.UserRoles.Select(ur => new
                     {
                         RoleId = ur.RoleId,
                         RoleName = ur.Role.Name
                     }).ToList(),
-                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ? 
+                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ?
                         tenants.Where(t => !t.IsDeleted)
                                 .Select(t => new
                                 {
@@ -1595,7 +1758,7 @@ namespace Helios.Authentication.Controllers
 
             if (user.Count > 0)
             {
-                _context.TenantAdmins.RemoveRange(user.Where(x=>model.TenantIds.Contains(x.TenantId)));
+                _context.TenantAdmins.RemoveRange(user.Where(x => model.TenantIds.Contains(x.TenantId)));
 
                 var result = await _context.SaveAuthenticationContextAsync(model.UserId, DateTimeOffset.Now) > 0;
 
@@ -1696,7 +1859,7 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "Unsuccessful"
                     };
-                }              
+                }
             }
             else
             {
