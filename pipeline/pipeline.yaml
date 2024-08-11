@@ -53,8 +53,8 @@ steps:
   displayName: 'Deploy to AKS'
   inputs:
     connectionType: 'Azure Resource Manager'
-    azureSubscriptionEndpoint: 'AKSConnection'
-    azureResourceGroup: 'your-resource-group'
+    azureSubscriptionEndpoint: 'AksServiceConnection-medcase-dev'
+    azureResourceGroup: 'medcase-cluster'
     kubernetesCluster: '$(aksClusterName)'
     namespace: '$(kubernetesNamespace)'
     command: 'apply'
