@@ -20,7 +20,11 @@ variables:
   kubernetesNamespace: 'helios-testing'  # e.g., production
 
 steps:
-- task: Checkout@2
+- checkout: self  # This is the correct way to reference the checkout step
+
+- script: |
+    echo "Running the build process..."
+  displayName: 'Build the application'
 
 - task: Docker@2
   displayName: 'Build Docker image'
