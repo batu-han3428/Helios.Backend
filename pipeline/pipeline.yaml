@@ -6,16 +6,7 @@ trigger:
 pool:
   name: 'build'
 
-steps:
-- checkout: self
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.x'
-    installationPath: $(Agent.ToolsDirectory)/dotnet
-    
-- script: dotnet --version
-  displayName: 'Check .NET Version'
+
 
 variables:
   # Docker image details
@@ -32,6 +23,15 @@ variables:
 
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
+
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- script: dotnet --version
+  displayName: 'Check .NET Version'
 
 - script: |
     echo "Running the build process..."
