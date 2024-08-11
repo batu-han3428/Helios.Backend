@@ -43,16 +43,16 @@ steps:
       echo "Listing images in ACR..."
       az acr repository list --name $(acrName) --output table
 
-# - task: Kubernetes@1
-#   displayName: 'Deploy to AKS'
-#   inputs:
-#     connectionType: 'Azure Resource Manager'
-#     azureSubscriptionEndpoint: 'AKSConnection'
-#     azureResourceGroup: 'your-resource-group'
-#     kubernetesCluster: '$(aksClusterName)'
-#     namespace: '$(kubernetesNamespace)'
-#     command: 'apply'
-#     useConfigurationFile: false
-#     arguments: |
-#       -f deploy/deployment-core.yaml
-#     secretType: 'None'
+- task: Kubernetes@1
+  displayName: 'Deploy to AKS'
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscriptionEndpoint: 'AKSConnection'
+    azureResourceGroup: 'your-resource-group'
+    kubernetesCluster: '$(aksClusterName)'
+    namespace: '$(kubernetesNamespace)'
+    command: 'apply'
+    useConfigurationFile: false
+    arguments: |
+      -f deploy/deployment-core.yaml
+    secretType: 'None'
