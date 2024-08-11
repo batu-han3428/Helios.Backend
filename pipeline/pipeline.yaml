@@ -28,7 +28,7 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'AksServiceConnection-medcase-dev'
+    azureSubscription: 'Medcase-Azure-Cli'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
