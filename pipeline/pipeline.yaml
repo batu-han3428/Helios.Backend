@@ -4,7 +4,18 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'build'
+
+steps:
+- checkout: self
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+    
+- script: dotnet --version
+  displayName: 'Check .NET Version'
 
 variables:
   # Docker image details
