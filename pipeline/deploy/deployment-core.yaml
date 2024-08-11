@@ -1,0 +1,42 @@
+# deploy/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helios-v3-core-api
+  namespace: helios-testing
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: helios-v3-core-api
+  template:
+    metadata:
+      labels:
+        app: helios-v3-core-api
+    spec:
+      containers:
+      - name: your-container-name
+        image:  medcase.azurecr.io/helios/helios-core:$(Build.BuildId)
+        ports:
+        - containerPort: 80
+        env:
+        - name: Services__Auth
+          value: "http://10.7.0.5:80"
+        - name: Services__Shared
+          value: "http://10.7.0.6:80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helios-v3-core-api
+  namespace: helios-testing
+spec:
+  selector:
+    app: helios-v3-core-api
+  ports:
+  - port: 443
+    name: tcp-443
+    targetPort: 443
+  - port: 80
+    name: tcp-80
+    targetPort: 80

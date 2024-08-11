@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Docker image details
+  imageName: 'helios-core'
+
+  # Azure Container Registry details
+  acrName: 'medcase'
+  acrLoginServer: 'medcase.azurecr.io'
+  tag: '$(Build.BuildId)'
+
+  # Kubernetes details
+  aksClusterName: 'medcase-cluster-dev'
+  kubernetesNamespace: 'helios-testing'  # e.g., production
+
+steps:
+- task: Checkout@2
+
+- task: Docker@2
+  displayName: 'Build Docker image'
+  inputs:
+    containerRegistry: '$(acrName)'
+    repository: '$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    buildContext: '.'
+    tags: |
+      $(tag)
+      latest
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AksServiceConnection-medcase-dev'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Listing images in ACR..."
+      az acr repository list --name $(acrName) --output table
+
+# - task: Kubernetes@1
+#   displayName: 'Deploy to AKS'
+#   inputs:
+#     connectionType: 'Azure Resource Manager'
+#     azureSubscriptionEndpoint: 'AKSConnection'
+#     azureResourceGroup: 'your-resource-group'
+#     kubernetesCluster: '$(aksClusterName)'
+#     namespace: '$(kubernetesNamespace)'
+#     command: 'apply'
+#     useConfigurationFile: false
+#     arguments: |
+#       -f deploy/deployment-core.yaml
+#     secretType: 'None'

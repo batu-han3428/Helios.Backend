@@ -1,0 +1,8 @@
+az account set --subscription "Microsoft Azure Sponsorship"
+az aks get-credentials --resource-group medcase-cluster --name medcase-cluster-dev
+
+
+az acr login --name medcase 
+
+kubectl apply -f test-service.yaml --namespace helios-testing
+kubectl apply -f test-ingress.yaml --namespace helios-testing
