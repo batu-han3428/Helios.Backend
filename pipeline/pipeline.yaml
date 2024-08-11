@@ -26,6 +26,15 @@ steps:
     echo "Running the build process..."
   displayName: 'Build the application'
 
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AksServiceConnection-medcase-dev'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Listing images in ACR..."
+      az acr repository list --name $(acrName) --output table
+
 - task: Docker@2
   displayName: 'Build Docker image'
   inputs:
@@ -38,14 +47,7 @@ steps:
       $(tag)
       latest
 
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: 'AksServiceConnection-medcase-dev'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      echo "Listing images in ACR..."
-      az acr repository list --name $(acrName) --output table
+
 
 - task: Kubernetes@1
   displayName: 'Deploy to AKS'
