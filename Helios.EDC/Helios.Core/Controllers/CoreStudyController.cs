@@ -11,8 +11,6 @@ using System.Text.Json;
 using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Helios.Common.Helpers;
-using MassTransit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Helios.Core.Controllers
 {
@@ -3847,30 +3845,36 @@ namespace Helios.Core.Controllers
 
                 foreach (var evnt in events)
                 {
-                    var elm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId);
-                    //var elm = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
-                    if (elm != null)
+                    var elmList = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
+                    
+                    if(elmList.Count > 0)
                     {
                         var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
 
-                        var hiddenElm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.TargetElementId);
+                        var hiddenElmList = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.TargetElementId).ToList();
 
-                        if (hiddenElm == null) continue;
+                        if (hiddenElmList.Count == 0) continue;
 
                         if (evnt.ValueCondition == ActionCondition.Less)
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3878,16 +3882,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3895,16 +3905,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x=>x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3912,16 +3928,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3929,16 +3951,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3946,16 +3974,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -5999,7 +6033,7 @@ namespace Helios.Core.Controllers
 
             foreach (var mdl in subjectVisitPageModules)
             {
-                var sb = siblings.Where(x => x.SubjectVisitModuleId == mdl.Id).Select(x => x.DataGridRowId).ToList();
+                var sb = siblings.Where(x => x.SubjectVisitModuleId == mdl.Id).Select(x => x.DataGridRowId).Distinct().ToList();
 
                 if (sb.Count > 0)
                 {
