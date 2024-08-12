@@ -23,7 +23,7 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    if [ ! -f "src/MyProject.csproj" ]; then
+    if [ ! -f "./Helios.sln" ]; then
       echo "Project file not found!"
       exit 1
     fi
