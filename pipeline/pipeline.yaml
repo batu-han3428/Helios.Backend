@@ -9,20 +9,25 @@ pool:
 
 
 variables:
-  # Docker image details
-  imageName: 'helios-core'
-
+ 
   # Azure Container Registry details
   acrName: 'medcase'
-  acrLoginServer: 'medcase.azurecr.io'
+  registry: 'medcase.azurecr.io'
   tag: '$(Build.BuildId)'
 
   # Kubernetes details
   aksClusterName: 'medcase-cluster-dev'
   kubernetesNamespace: 'helios-testing'  # e.g., production
-
+  azureServiceConnection: 'Medcase-Azure-Cli' 
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
+
+- script: |
+    if [ ! -f "src/MyProject.csproj" ]; then
+      echo "Project file not found!"
+      exit 1
+    fi
+  displayName: 'Verify project file exists'
 
 - task: UseDotNet@2
   inputs:
@@ -44,24 +49,25 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'Medcase-Azure-Cli'
+    azureSubscription: $(azureServiceConnection)
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
       echo "Listing images in ACR..."
-      az acr repository list --name $(acrName) --output table
+      az acr repository list --name $(registry) --output table
 
-- task: Docker@2
-  displayName: 'Build Docker image'
+- task: AzureCLI@2
   inputs:
-    containerRegistry: '$(acrName)'
-    repository: '$(imageName)'
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
-    buildContext: '.'
-    tags: |
-      $(tag)
-      latest
+    azureSubscription: $(azureServiceConnection)
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az acr login --name $(registry)
+
+- script: |
+    chmod +x ./build-docker.sh  # Make the script executable
+    ./build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
+  displayName: '[Core Api] Build and Push Docker Image'
 
 
 
