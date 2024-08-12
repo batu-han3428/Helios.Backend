@@ -360,9 +360,11 @@ namespace Helios.Core.Controllers
         {
             try
             {
-                var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => dto.elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+                var datagrid = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == dto.datagridId);
 
-                if(subjectElements.Count < 1) return new ApiResponse<dynamic>
+                var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted && datagrid.SubjectVisitModuleId == x.SubjectVisitModuleId && x.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId == datagrid.StudyVisitPageModuleElementId && x.DataGridRowId == dto.datagridRowId).ToListAsync();
+
+                if (subjectElements.Count < 1) return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
