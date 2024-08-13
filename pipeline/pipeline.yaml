@@ -23,6 +23,8 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
+    echo "Listing files..."
+    ls
     if [ ! -f "./Helios.sln" ]; then
       echo "Project file not found!"
       exit 1
