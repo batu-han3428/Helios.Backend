@@ -65,6 +65,10 @@ steps:
       az acr login --name $(registry)
 
 - script: |
+    ls
+  displayName: 'Listing files in folder'
+
+- script: |
     chmod +x ./build-docker.sh  # Make the script executable
     ./build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'

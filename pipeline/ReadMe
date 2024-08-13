@@ -17,3 +17,5 @@ az vmss extension set --resource-group MEDCASE-CLUSTER --vmss-name azure-devops 
 az vmss extension list   --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops
 
 az vmss extension delete  --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops  --name Microsoft.Azure.DevOps.Pipelines.Agent
+
+az vmss create --name vmssagentspool --resource-group  build-server-group --image Ubuntu2204 --vm-sku Standard_D2_v4 --storage-sku StandardSSD_LRS --authentication-type SSH --generate-ssh-keys --instance-count 2 --disable-overprovision --upgrade-policy-mode manual    --custom-data cloud-init.txt --single-placement-group false --platform-fault-domain-count 1  --orchestration-mode Uniform
