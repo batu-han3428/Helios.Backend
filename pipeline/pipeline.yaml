@@ -23,6 +23,8 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
+    echo Current user:
+    whoami
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
