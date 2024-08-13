@@ -5,4 +5,15 @@ az aks get-credentials --resource-group medcase-cluster --name medcase-cluster-d
 az acr login --name medcase 
 
 kubectl apply -f test-service.yaml --namespace helios-testing
-kubectl apply -f test-ingress.yaml --namespace helios-testing
+kubectl apply -f .\deploy\ingress.yaml --namespace helios-testing
+
+
+
+az vm get-instance-view     --resource-group MEDCASE-CLUSTER     --name azure-devops     --query "instanceView.extensions"   
+
+az vmss extension set --resource-group MEDCASE-CLUSTER --vmss-name azure-devops --name TeamServicesAgentLinux --publisher Microsoft.VisualStudio.Services
+
+
+az vmss extension list   --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops
+
+az vmss extension delete  --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops  --name Microsoft.Azure.DevOps.Pipelines.Agent
