@@ -49,10 +49,6 @@ steps:
     az --version
   displayName: 'Install Azure CLI'
 
-- script: |
-    echo "Running the build process..."
-  displayName: 'Build the application'
-
 - task: AzureCLI@2
   inputs:
     azureSubscription: $(azureServiceConnection)
@@ -68,7 +64,7 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az acr login --name $(registry)
+      az acr login --name $(registry) --expose-token
 
 - script: |
     ls
