@@ -27,6 +27,10 @@ steps:
       echo "Project file not found!"
       exit 1
     fi
+     if [ ! -f "../pipeline/build-docker.sh" ]; then
+      echo "build-docker.sh file not found!"
+      exit 1
+    fi
   displayName: 'Verify project file exists'
 
 - task: UseDotNet@2
@@ -69,7 +73,7 @@ steps:
   displayName: 'Listing files in folder'
 
 - script: |
-    chmod +x ./build-docker.sh  # Make the script executable
+    chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
