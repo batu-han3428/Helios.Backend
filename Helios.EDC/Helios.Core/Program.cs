@@ -1,6 +1,7 @@
 using Helios.Core.Contexts;
 using Helios.Core.Extension;
 using Helios.Core.Helpers;
+using Helios.Caching.Helpers;
 using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.DependencyInjection();
 #endregion
 
 builder.Services.AddControllers();
+
+// Add Redis Cache Service
+builder.Services.AddRedisCache(builder.Configuration);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
 builder.Services.DefaultConfigurationService(configuration);
