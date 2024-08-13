@@ -23,8 +23,13 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    echo Current user:
+    echo "Current user:""
     whoami
+    echo adding docker permission to current user:
+    sudo usermod -aG docker AzDevOps
+    echo "Listing files..."
+    echo "Listing docker images..."
+    docker ps
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
