@@ -24,12 +24,12 @@ steps:
 
 - script: |
     echo "Listing files..."
-    tree .
+    ls -R .
     if [ ! -f "./Helios.sln" ]; then
       echo "Project file not found!"
       exit 1
     fi
-     if [ ! -f "../pipeline/build-docker.sh" ]; then
+     if [ ! -f "./pipeline/build-docker.sh" ]; then
       echo "build-docker.sh file not found!"
       exit 1
     fi
