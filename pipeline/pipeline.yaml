@@ -25,8 +25,11 @@ steps:
 - script: |
     echo "Current user:"
     whoami
+
     echo "Checking docker permission:"
     ls -l /var/run/docker.sock
+    echo "Docker Status"
+    systemctl status docker
     echo "Listing docker images..."
     docker ps
     echo "Listing files..."
