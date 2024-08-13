@@ -509,12 +509,17 @@ namespace Helios.Core.Controllers
                         }
                         else
                         {
-                            return new ApiResponse<dynamic>
+                            var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                            if (result)
                             {
-                                IsSuccess = true,
-                                Message = "Successful",
-                                Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
-                            };
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful",
+                                    Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
+                                };
+                            }
+                           
                         }
 
                        
