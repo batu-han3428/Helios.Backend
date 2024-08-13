@@ -158,7 +158,7 @@ namespace Helios.Core.Controllers
                         _context.Studies.Update(demoResearch);
 
 
-                        if (studyModel.CopyStudyId != null)
+                        if (studyModel.CopyStudyId != 0)
                         {
                             var demoCopyStudy= await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
                             var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -506,6 +506,15 @@ namespace Helios.Core.Controllers
                                 Message = "Unsuccessful"
                             };
                             #endregion
+                        }
+                        else
+                        {
+                            return new ApiResponse<dynamic>
+                            {
+                                IsSuccess = true,
+                                Message = "Successful",
+                                Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
+                            };
                         }
 
                        
