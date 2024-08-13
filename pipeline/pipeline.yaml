@@ -25,7 +25,6 @@ steps:
 - script: |
     echo "Current user:"
     whoami
-
     echo "Checking docker permission:"
     ls -l /var/run/docker.sock
     echo "Docker Status"
@@ -73,22 +72,15 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo "Listing images in ACR..."
-      az acr repository list --name $(registry) --output table
-
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(azureServiceConnection)
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
       az acr login --name $(registry) --expose-token
+      az acr repository list --name $(registry) --output table
 
 - script: |
     ls
   displayName: 'Listing files in folder'
 
 - script: |
+    docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
