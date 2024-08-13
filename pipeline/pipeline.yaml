@@ -24,7 +24,7 @@ steps:
 
 - script: |
     echo "Listing files..."
-    ls
+    tree .
     if [ ! -f "./Helios.sln" ]; then
       echo "Project file not found!"
       exit 1
