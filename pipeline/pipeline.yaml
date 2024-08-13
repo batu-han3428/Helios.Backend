@@ -54,9 +54,18 @@ steps:
   displayName: 'Check .NET Version'
   
 - script: |
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+- script: |
+    echo "Installing Azure CLI..."
+    sudo apt-get install -y azure-cli
     az --version
-  displayName: 'Install Azure CLI'
+
+    echo "Installing Docker..."
+    sudo apt-get install -y docker.io
+
+  # displayName: 'Run Docker build and push'
+  #   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+  #   az --version
+  displayName: 'Install Azure CLI and docker'
 
 - task: AzureCLI@2
   inputs:
