@@ -88,7 +88,7 @@ steps:
 
 
 - script: |
-    az acr login --name $(acrName) --expose-token
+    sudo -u AzDevOps az acr login --name $(acrName) --expose-token
     docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry)/helios 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
