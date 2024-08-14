@@ -81,8 +81,7 @@ steps:
 - script: |
     docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
-    docker build -t helios-core: $(tag) -f './Helios.EDC/Helios.Core/Dockerfile'
-
+    sudo docker build -t helios-core: $(tag) -f './Helios.EDC/Helios.Core/Dockerfile'
     # ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
