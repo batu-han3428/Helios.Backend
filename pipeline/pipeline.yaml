@@ -70,16 +70,17 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az acr login --name $(registry) --expose-token
-      az acr repository list --name $(registry) --output table
+      sudo az acr login --name $(registry) --expose-token
+      sudo az acr repository list --name $(registry) --output table
 
-- task: Docker@2
-  inputs:
-    command: login
-    containerRegistry: $(dockerRegistryServiceConnection)
-  displayName: 'Login to ACR'
+# - task: Docker@2
+#   inputs:
+#     command: login
+#     containerRegistry: $(dockerRegistryServiceConnection)
+#   displayName: 'Login to ACR'
 
 - script: |
+    sudo az acr login --name medcase 
     sudo docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
