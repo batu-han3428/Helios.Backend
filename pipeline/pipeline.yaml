@@ -25,13 +25,6 @@ steps:
 
 - script: |
     whoami
-    echo 'az version'
-    az --version
-    echo 'sudo az version'
-    sudo -u AzDevOps az acr login --name $(acrName) --expose-token
-    sudo -u AzDevOps az account show
-    echo "Listing Docker images..."
-    docker ps
     sudo -u AzDevOps docker ps
     echo "Listing files..."
     ls -R .
@@ -74,8 +67,6 @@ steps:
 
 
 - script: |
-    az acr login --name $(acrName) --expose-token
-    az account show
     sudo -u AzDevOps docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
