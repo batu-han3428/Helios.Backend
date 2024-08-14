@@ -72,29 +72,13 @@ steps:
       echo "Listing images in ACR..."
       az acr repository list --name $(acrName) --output table
 
-# - task: Docker@2
-#   inputs:
-#     command: login
-#     containerRegistry: $(dockerRegistryServiceConnection)
-#   displayName: 'Login to ACR'
-# - task: AzureCLI@2
-#   inputs:
-#     azureSubscription: $(azureServiceConnection)
-#     scriptType: 'bash'
-#     scriptLocation: 'inlineScript'
-#     inlineScript: |
-#       sudo -u AzDevOps az acr login --name $(acrName) --expose-token
-#       echo "Running az command as the user..."
-#       sudo -u AzDevOps az account show
-#   displayName: 'Authenticate Azure CLI'
-
 
 - script: |
-    sudo -u AzDevOps az acr login --name $(acrName) --expose-token
-    sudo -u AzDevOps az account show
+    az acr login --name $(acrName) --expose-token
+    az account show
     sudo -u AzDevOps docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
-    ./pipeline/build-docker.sh $(registry)/helios 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
+    ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
 - task: Kubernetes@1
