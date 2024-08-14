@@ -46,39 +46,25 @@ steps:
 - script: dotnet --version
   displayName: 'Check .NET Version'
 
-- script: |
-    sudo apt-get update
-    sudo apt-get install -y docker.io
-  displayName: 'Install Docker'
+# - script: |
+#     sudo apt-get update
+#     sudo apt-get install -y docker.io
+#     sudo usermod -aG docker AzDevOps
+#   displayName: 'Install Docker'
+
+# - script: |
+#     echo "Installing Azure CLI..."
+#     sudo apt-get install -y azure-cli
+#     az --version
+#   displayName: 'Install Azure CLI'
 
 - script: |
-    echo "Installing Azure CLI..."
-    sudo apt-get install -y azure-cli
-    az --version
-  displayName: 'Install Azure CLI'
-
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(azureServiceConnection)
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      echo "Listing images in ACR..."
-      az acr repository list --name $(registry) --output table
-      az acr login --name $(acrName) --expose-token
-      az acr repository list --name $(acrName) --output table
-
-# - task: Docker@2
-#   inputs:
-#     command: login
-#     containerRegistry: $(dockerRegistryServiceConnection)
-#   displayName: 'Login to ACR'
-
-- script: |
-    az acr login --name medcase 
+    echo "Listing images in ACR..."
+    az acr login --name $(acrName) --expose-token
+    az acr repository list --name $(acrName) --output table
     docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
-    ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
+    ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
 - task: Kubernetes@1
