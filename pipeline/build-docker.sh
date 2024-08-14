@@ -2,6 +2,8 @@ REGISTRY=$1
 IMAGE_NAME=$2
 TAG=$3
 DOCKERFILE_PATH=$4
+REGISTRY=$1
+
 
 # Build the Docker image
 docker build -t $IMAGE_NAME:$TAG -f $DOCKERFILE_PATH .
