@@ -24,14 +24,6 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    echo "Current build id:"
-    echo $(tag)
-    echo "Checking docker permission:"
-    ls -l /var/run/docker.sock
-    echo "Docker Status"
-    systemctl status docker
-    echo "Listing docker images..."
-    docker ps
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
@@ -70,8 +62,8 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      sudo az acr login --name $(registry) --expose-token
-      sudo az acr repository list --name $(registry) --output table
+      sudo az acr login --name $(acrName) --expose-token
+      sudo az acr repository list --name $(acrName) --output table
 
 # - task: Docker@2
 #   inputs:
