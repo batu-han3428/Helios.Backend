@@ -75,7 +75,7 @@ steps:
 #   displayName: 'Login to ACR'
 - task: AzureCLI@2
   inputs:
-    azureSubscription: $(azureSubscription)
+    azureSubscription: $(azureServiceConnection)
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
