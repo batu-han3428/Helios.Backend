@@ -73,16 +73,16 @@ steps:
 #     command: login
 #     containerRegistry: $(dockerRegistryServiceConnection)
 #   displayName: 'Login to ACR'
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(azureServiceConnection)
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      sudo -u AzDevOps az acr login --name $(acrName) --expose-token
-      echo "Running az command as the user..."
-      sudo -u AzDevOps az account show
-  displayName: 'Authenticate Azure CLI'
+# - task: AzureCLI@2
+#   inputs:
+#     azureSubscription: $(azureServiceConnection)
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       sudo -u AzDevOps az acr login --name $(acrName) --expose-token
+#       echo "Running az command as the user..."
+#       sudo -u AzDevOps az account show
+#   displayName: 'Authenticate Azure CLI'
 
 
 - script: |
