@@ -7,7 +7,7 @@ ConfigurationManager configuration = builder.Configuration; // allows both to ac
 
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
-builder.Services.DefaultConfigurationService(configuration);
+//builder.Services.DefaultConfigurationService(configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

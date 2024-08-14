@@ -21,6 +21,8 @@ namespace Helios.Caching.Helpers
                 options.InstanceName = "HeliosCacheInstance";
             });
 
+            services.AddHttpContextAccessor();
+            services.AddMemoryCache();
             services.AddScoped<IRedisCacheService, RedisCacheService>();
 
             return services;

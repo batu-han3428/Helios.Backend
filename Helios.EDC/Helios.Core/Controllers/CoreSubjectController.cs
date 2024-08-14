@@ -91,12 +91,12 @@ namespace Helios.Core.Controllers
 
             for (; ; )
             {
-                var value = await _cacheService.GetAsync<string>(localCacheKey);
-                var userPermissions = JsonSerializer.Deserialize<UserPermissionCacheModel>(value);
+                var value = await _cacheService.GetAsync<UserPermissionCacheModel>(localCacheKey);
 
-                if (userPermissions != null)
+                if (value != null)
                 {
-                    return userPermissions;
+                    //var userPermissions = JsonSerializer.Deserialize<UserPermissionCacheModel>(value);
+                    return value;
                 }
                 else
                 {
@@ -113,7 +113,13 @@ namespace Helios.Core.Controllers
             string prefix = "Study:Permissions";
             var localCacheKey = prefix + ":" + studyId;
 
-            await _cacheService.SetAsync(localCacheKey, userPermissions, new TimeSpan(100, 0, 0));
+            var model = new UserPermissionCacheModel()
+            {
+                StudyId = studyId,
+                UserPermissionModel = userPermissions
+            };
+
+            await _cacheService.SetAsync(localCacheKey, model, new TimeSpan(100, 0, 0));
             return true;
         }
 
