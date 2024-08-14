@@ -75,8 +75,8 @@ steps:
 #   displayName: 'Login to ACR'
 
 - script: |
-    sudo az acr login --name medcase 
-    sudo docker ps
+    az acr login --name medcase 
+    docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'

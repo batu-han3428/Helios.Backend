@@ -4,10 +4,10 @@ TAG=$3
 DOCKERFILE_PATH=$4
 
 # Build the Docker image
-sudo docker build -t $IMAGE_NAME:$TAG -f $DOCKERFILE_PATH .
+docker build -t $IMAGE_NAME:$TAG -f $DOCKERFILE_PATH .
 
 # Tag the image with the registry
-sudo docker tag $IMAGE_NAME:$TAG $REGISTRY/$IMAGE_NAME:$TAG
+docker tag $IMAGE_NAME:$TAG $REGISTRY/$IMAGE_NAME:$TAG
 
 # Push the image to the Azure Container Registry
-sudo docker push $REGISTRY/$IMAGE_NAME:$TAG
+docker push $REGISTRY/$IMAGE_NAME:$TAG
