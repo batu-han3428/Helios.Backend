@@ -51,7 +51,8 @@ steps:
 
 - script: dotnet --version
   displayName: 'Check .NET Version'
-  - script: |
+
+- script: |
     sudo apt-get update
     sudo apt-get install -y docker.io
   displayName: 'Install Docker'
@@ -78,7 +79,6 @@ steps:
 - script: |
     sudo docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
-    # sudo docker build -t helios-core: $(tag) -f './Helios.EDC/Helios.Core/Dockerfile'
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
