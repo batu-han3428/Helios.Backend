@@ -29,6 +29,7 @@ steps:
     sudo az --version
     echo "Listing Docker images..."
     docker ps
+    sudo -u AzDevOps docker ps
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
@@ -86,8 +87,8 @@ steps:
 
 
 - script: |
-    sudo -u AzDevOps az account show
-    docker ps
+    az account show
+    sudo -u AzDevOps docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry)/helios 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
