@@ -51,11 +51,11 @@ steps:
   displayName: 'Check .NET Version'
 
 
-# - script: |
-#     echo "Installing Azure CLI..."
-#     apt-get install -y azure-cli
-#     az --version
-#   displayName: 'Install Azure CLI'
+- script: |
+    echo "Installing Azure CLI..."
+    apt-get install -y azure-cli
+    az --version
+  displayName: 'Install Azure CLI'
 
 - task: AzureCLI@2
   inputs:
