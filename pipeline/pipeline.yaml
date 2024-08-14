@@ -19,6 +19,7 @@ variables:
   aksClusterName: 'medcase-cluster-dev'
   kubernetesNamespace: 'helios-testing'  # e.g., production
   azureServiceConnection: 'Medcase-Azure-Cli' 
+  dockerRegistryServiceConnection: 'medcase'
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
@@ -72,9 +73,13 @@ steps:
       az acr login --name $(registry) --expose-token
       az acr repository list --name $(registry) --output table
 
-- script: |
-    ls
-  displayName: 'Listing files in folder'
+- task: Docker@2
+  inputs:
+    command: login
+    containerRegistry: $(dockerRegistryServiceConnection)
+  displayName: 'Login to ACR'
+
+
 
 - script: |
     sudo docker ps
