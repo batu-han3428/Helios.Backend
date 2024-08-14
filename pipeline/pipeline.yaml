@@ -79,16 +79,14 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo "Adding user to group..."
-      sudo usermod -aG $(group) AzDevOps
-
+      sudo -u AzDevOps az acr login --name $(acrName) --expose-token
       echo "Running az command as the user..."
       sudo -u AzDevOps az account show
-  displayName: 'Modify user and run Azure CLI command'
+  displayName: 'Authenticate Azure CLI'
 
 
 - script: |
-    sudo -u AzDevOps az acr login --name $(acrName) --expose-token
+  
     docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry)/helios 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
