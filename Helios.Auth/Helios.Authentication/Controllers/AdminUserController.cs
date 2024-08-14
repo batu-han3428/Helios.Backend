@@ -795,13 +795,21 @@ namespace Helios.Authentication.Controllers
                         IsSuccess = false,
                         Message = "An unexpected error occurred."
                     };
-                }
+                }              
                 if (model.Password == null || model.NewPassword == null || model.ConfirmPassword == null)
                 {
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = false,
                         Message = "cod1",
+                    };
+                }
+                if (model.NewPassword.Length < 6 || model.NewPassword.Length > 16)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "cod4",
                     };
                 }
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
