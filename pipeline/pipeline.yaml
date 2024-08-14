@@ -23,8 +23,8 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    echo "Current user:"
-    whoami
+    echo "Current build id:"
+    echo $(tag)
     echo "Checking docker permission:"
     ls -l /var/run/docker.sock
     echo "Docker Status"
