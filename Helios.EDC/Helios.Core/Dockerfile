@@ -7,8 +7,6 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
-
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY nuget.config .
