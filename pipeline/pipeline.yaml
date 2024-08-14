@@ -79,15 +79,11 @@ steps:
     containerRegistry: $(dockerRegistryServiceConnection)
   displayName: 'Login to ACR'
 
-
-
 - script: |
     sudo docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry) 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
-
-
 
 - task: Kubernetes@1
   displayName: 'Deploy to AKS'

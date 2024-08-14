@@ -15,7 +15,7 @@ spec:
         app: helios-v3-core-api
     spec:
       containers:
-      - name: your-container-name
+      - name: helios-v3-core-api
         image:  medcase.azurecr.io/helios/helios-core:$(Build.BuildId)
         ports:
         - containerPort: 80
