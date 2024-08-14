@@ -25,6 +25,8 @@ steps:
 
 - script: |
     whoami
+    az --version
+    sudo az --version
     echo "Listing Docker images..."
     docker ps
     echo "Listing files..."
@@ -49,11 +51,11 @@ steps:
   displayName: 'Check .NET Version'
 
 
-- script: |
-    echo "Installing Azure CLI..."
-    sudo apt-get install -y azure-cli
-    az --version
-  displayName: 'Install Azure CLI'
+# - script: |
+#     echo "Installing Azure CLI..."
+#     apt-get install -y azure-cli
+#     az --version
+#   displayName: 'Install Azure CLI'
 
 - task: AzureCLI@2
   inputs:
@@ -61,6 +63,7 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
+      whoami
       az acr login --name $(acrName) --expose-token
       echo "Listing images in ACR..."
       az acr repository list --name $(acrName) --output table
@@ -70,6 +73,19 @@ steps:
 #     command: login
 #     containerRegistry: $(dockerRegistryServiceConnection)
 #   displayName: 'Login to ACR'
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Adding user to group..."
+      sudo usermod -aG $(group) AzDevOps
+
+      echo "Running az command as the user..."
+      sudo -u AzDevOps az account show
+  displayName: 'Modify user and run Azure CLI command'
+
 
 - script: |
     az acr login --name $(acrName) --expose-token
