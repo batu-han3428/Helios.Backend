@@ -24,7 +24,9 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    whoami    
+    whoami
+    echo "Listing Docker images..."
+    docker ps
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
@@ -70,7 +72,7 @@ steps:
 #   displayName: 'Login to ACR'
 
 - script: |
-    az acr login --name medcase 
+    az acr login --name $(acrName) --expose-token
     docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh $(registry)/helios 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
