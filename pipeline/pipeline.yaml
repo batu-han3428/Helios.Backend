@@ -62,6 +62,8 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
+      echo "Listing images in ACR..."
+      az acr repository list --name $(registry) --output table
       sudo az acr login --name $(acrName) --expose-token
       sudo az acr repository list --name $(acrName) --output table
 
