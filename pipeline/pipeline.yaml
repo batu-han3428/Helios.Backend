@@ -23,14 +23,6 @@ variables:
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
-
-- script: |
-    sudo usermod -aG docker $(whoami)
-    newgrp docker
-  displayName: 'Add current user to Docker group'
-
-steps:
-
 - script: |
     echo $PATH
     which az
@@ -43,6 +35,11 @@ steps:
 - script: |
     az login --service-principal -u ${env:CLIENTID} -p ${env:CLIENTSECRET} --tenant ${env:TENANTID}
   displayName: 'Login Azure CLI'
+
+- script: |
+    sudo usermod -aG docker $(whoami)
+    newgrp docker
+  displayName: 'Add current user to Docker group'
 
 - script: |
     docker --version
