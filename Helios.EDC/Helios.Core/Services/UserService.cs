@@ -12,24 +12,6 @@ namespace Helios.Core.Services
         {
         }
 
-        public async Task<ApiResponse<dynamic>> RemoveUserPermissions(Int64 studyId)
-        {
-            var model = new SubjectMenuModel()
-            {
-                StudyId = studyId,
-            };
-
-            using (var client = SharedServiceClient)
-            {
-                var req = new RestRequest("Cache/RemoveUserPermissions", Method.Post);
-                req.AddJsonBody(model);
-
-                var result = await client.ExecuteAsync<ApiResponse<dynamic>>(req);
-                return result.Data;
-            }
-
-        }
-
         public async Task<RestResponse<List<AspNetUserDTO>>> GetUserList(List<Int64> AuthUserIds)
         {
             using (var client = AuthServiceClient)

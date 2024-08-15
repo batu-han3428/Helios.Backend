@@ -1,4 +1,5 @@
-﻿using Helios.Common.DTO;
+﻿using Helios.Caching.Services.Interfaces;
+using Helios.Common.DTO;
 using Helios.Common.Enums;
 using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
@@ -17,11 +18,13 @@ namespace Helios.Core.Controllers
     {
         private CoreContext _context;
         private IUserService _userService;
+        private IRedisCacheService _cacheService;
 
-        public CoreUserController(CoreContext context, IUserService userService)
+        public CoreUserController(CoreContext context, IUserService userService, IRedisCacheService cacheService)
         {
             _context = context;
             _userService = userService;
+            _cacheService = cacheService;
         }
 
         #region Tenants     
@@ -282,7 +285,7 @@ namespace Helios.Core.Controllers
 
             if (result)
             {
-                await _userService.RemoveUserPermissions(baseDTO.StudyId);
+                await RemoveUserPermissions(baseDTO.StudyId);
 
                 return new ApiResponse<dynamic>
                 {
@@ -298,6 +301,14 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        private async Task RemoveUserPermissions(Int64 studyId)
+        {
+            string prefix = "Study:Permissions";
+            var localCacheKey = prefix + ":" + studyId;
+
+            await _cacheService.RemoveAsync(localCacheKey);
         }
 
         [HttpPost]

@@ -86,23 +86,28 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<UserPermissionCacheModel> GetUserPermissions(Int64 studyId, Int64 userId)
         {
-            string prefix = "Study:Permissions";
-            var localCacheKey = prefix + ":" + studyId;
-
-            for (; ; )
+            if (studyId != 0)
             {
-                var value = await _cacheService.GetAsync<UserPermissionCacheModel>(localCacheKey);
+                string prefix = "Study:Permissions";
+                var localCacheKey = prefix + ":" + studyId;
 
-                if (value != null)
+                for (; ; )
                 {
-                    //var userPermissions = JsonSerializer.Deserialize<UserPermissionCacheModel>(value);
-                    return value;
-                }
-                else
-                {
-                    await SetUserPermissions(studyId, userId);
+                    var value = await _cacheService.GetAsync<UserPermissionCacheModel>(localCacheKey);
+
+                    if (value != null)
+                    {
+                        //var userPermissions = JsonSerializer.Deserialize<UserPermissionCacheModel>(value);
+                        return value;
+                    }
+                    else
+                    {
+                        await SetUserPermissions(studyId, userId);
+                    }
                 }
             }
+            else
+                return new UserPermissionCacheModel() { UserPermissionModel = new UserPermissionModel() };
         }
 
         private async Task<bool> SetUserPermissions(Int64 studyId, Int64 userId)
@@ -210,37 +215,6 @@ namespace Helios.Core.Controllers
 
             return retVal;
         }
-
-        //[HttpGet]
-        //public async Task<UserPermissionModel> SetUserPermissions(Int64 studyId, Int64 userId)
-        //{
-        //    var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
-        //    {
-        //        RoleId = x.StudyRole.Id,
-        //        RoleName = x.StudyRole.Name
-        //    }).ToListAsync();
-
-        //    if (role != null && role.Count > 0)
-        //    {
-        //        var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
-        //        var cRes = await _studyService.SetUserPermissions(studyId, userPermissions);
-
-        //        return userPermissions;
-        //    }
-
-        //    return new UserPermissionModel();
-
-
-        //}
-
-        //[HttpGet]
-        //public async Task<List<SubjectDetailMenuModel>> SetSubjectDetailMenu(Int64 studyId)
-        //{
-        //    var menu = await GetSubjectDetailMenuLocal(studyId);
-        //    var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
-
-        //    return menu;
-        //}
 
         private async Task<bool> SetSubjectDetailMenu(Int64 studyId)
         {
