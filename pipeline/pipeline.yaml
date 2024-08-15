@@ -35,11 +35,8 @@ steps:
 
 - script: |
     whoami
+    sudo usermod -aG docker AzDevOps
     groups
-    # whoami
-    # sudo usermod -aG docker AzDevOps
-    az acr login --name $(acrName) --expose-token
-    docker ps
   displayName: 'Verify User and Group Membership'
 
 - script: |
