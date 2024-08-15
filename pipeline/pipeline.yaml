@@ -28,17 +28,23 @@ steps:
     # newgrp docker # Refresh group membership so that the changes take effect
     whoami
     groups
+    sudo chown root:docker /var/run/docker.sock
+    sudo chmod 660 /var/run/docker.sock
+    sudo systemctl restart docker
+    docker --version
+    sudo docker info
   env:
     cid: $(CLIENTID) 
     cs: $(CLIENTSECRET)
     tt: $(TENANTID)
-  displayName: 'Add current user to Docker group'
-
-
-- script: |
-    sudo docker --version
   displayName: 'Verify Docker Installation'
 
+- script: |
+    echo "Installing Azure CLI..."
+    apt-get install -y azure-cli
+    az --version
+  displayName: 'Install Azure CLI'
+  
 - script: |
     az --version
   displayName: 'Verify Azure CLI Installation'
