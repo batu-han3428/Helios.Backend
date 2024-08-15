@@ -20,13 +20,11 @@ namespace Helios.Core.Controllers
     public class CoreStudyController : Controller
     {
         private CoreContext _context;
-        private IStudyService _studyService;
         private IRedisCacheService _cacheService;
 
-        public CoreStudyController(CoreContext context, IStudyService studyService, IRedisCacheService cacheService)
+        public CoreStudyController(CoreContext context, IRedisCacheService cacheService)
         {
             _context = context;
-            _studyService = studyService;
             _cacheService = cacheService;
         }
 
@@ -7139,6 +7137,8 @@ namespace Helios.Core.Controllers
 
                 if (result)
                 {
+                    await RemoveSubjectDetailMenu(visitsToUpdate.FirstOrDefault().StudyId);
+                    
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,

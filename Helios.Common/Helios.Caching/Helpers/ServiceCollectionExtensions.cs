@@ -8,20 +8,17 @@ namespace Helios.Caching.Helpers
 {
     public static class ServiceCollectionExtensions
     {
-        //public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
-        //{
-        //    var redisConnectionString = configuration.GetConnectionString("Redis");
-        //    services.AddStackExchangeRedisCache(options =>
-        //    {
-        //        options.Configuration = redisConnectionString;
-        //        options.InstanceName = "HeliosCacheInstance";
-        //    });
+        public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetConnectionString("Redis");
+                options.InstanceName = "Helios:";
+            });
 
-        //    services.AddHttpContextAccessor();
-        //    services.AddMemoryCache();
-        //    services.AddScoped<IRedisCacheService, RedisCacheService>();
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
 
-        //    return services;
-        //}
+            return services;
+        }
     }
 }

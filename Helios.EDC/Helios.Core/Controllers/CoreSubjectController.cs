@@ -24,14 +24,12 @@ namespace Helios.Core.Controllers
     public class CoreSubjectController : Controller
     {
         private CoreContext _context;
-        private IStudyService _studyService;
         private IUserService _userService;
         private IRedisCacheService _cacheService;
 
-        public CoreSubjectController(CoreContext context, IStudyService studyService, IUserService userService, IRedisCacheService cacheService)
+        public CoreSubjectController(CoreContext context, IUserService userService, IRedisCacheService cacheService)
         {
             _context = context;
-            _studyService = studyService;
             _userService = userService;
             _cacheService = cacheService;
         }
@@ -39,9 +37,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<SubjectDTO>> GetSubjectList(SubjectListFilterDTO dto)
         {
-            //var menu = await GetSubjectDetailMenuLocal(dto.StudyId);
-            //var csRes = await _studyService.SetSubjectDetailMenu(dto.StudyId, menu);
-            var csRes = await SetSubjectDetailMenu(dto.StudyId);
+            await SetSubjectDetailMenu(dto.StudyId);
 
             var roleSite = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == dto.StudyId && x.AuthUserId == dto.UserId && x.StudyRole != null).Include(x => x.StudyRole).Include(x => x.StudyUserSites).Select(x => new
             {
@@ -77,14 +73,13 @@ namespace Helios.Core.Controllers
                 RoleName = x.RoleName
             }).ToList();
 
-            //var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, dto.StudyId);
-            var permRes = await SetUserPermissions(dto.StudyId, dto.UserId);
+            await SetUserPermissions(dto.StudyId, dto.UserId);
 
             return result;
         }
 
         [HttpGet]
-        public async Task<UserPermissionCacheModel> GetUserPermissions(Int64 studyId, Int64 userId)
+        public async Task<UserPermissionModel> GetUserPermissions(Int64 studyId, Int64 userId)
         {
             if (studyId != 0)
             {
@@ -93,11 +88,10 @@ namespace Helios.Core.Controllers
 
                 for (; ; )
                 {
-                    var value = await _cacheService.GetAsync<UserPermissionCacheModel>(localCacheKey);
+                    var value = await _cacheService.GetAsync<UserPermissionModel>(localCacheKey);
 
                     if (value != null)
                     {
-                        //var userPermissions = JsonSerializer.Deserialize<UserPermissionCacheModel>(value);
                         return value;
                     }
                     else
@@ -107,10 +101,10 @@ namespace Helios.Core.Controllers
                 }
             }
             else
-                return new UserPermissionCacheModel() { UserPermissionModel = new UserPermissionModel() };
+                return null;
         }
 
-        private async Task<bool> SetUserPermissions(Int64 studyId, Int64 userId)
+        private async Task SetUserPermissions(Int64 studyId, Int64 userId)
         {
             var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).FirstOrDefaultAsync().Select(y => y.StudyRole);
 
@@ -118,14 +112,7 @@ namespace Helios.Core.Controllers
             string prefix = "Study:Permissions";
             var localCacheKey = prefix + ":" + studyId;
 
-            var model = new UserPermissionCacheModel()
-            {
-                StudyId = studyId,
-                UserPermissionModel = userPermissions
-            };
-
-            await _cacheService.SetAsync(localCacheKey, model, new TimeSpan(100, 0, 0));
-            return true;
+            await _cacheService.SetAsync(localCacheKey, userPermissions, new TimeSpan(100, 0, 0));
         }
 
         private async Task<UserPermissionModel> getUserPermission(Int64 roleId, Int64 studyId)
@@ -216,14 +203,13 @@ namespace Helios.Core.Controllers
             return retVal;
         }
 
-        private async Task<bool> SetSubjectDetailMenu(Int64 studyId)
+        private async Task SetSubjectDetailMenu(Int64 studyId)
         {
             var menu = await GetSubjectDetailMenuLocal(studyId);
             string prefix = "Study:Menu";
             var localCacheKey = prefix + ":" + studyId;
 
             await _cacheService.SetAsync(localCacheKey, menu, new TimeSpan(100, 0, 0));
-            return true;
         }
 
         [HttpGet]
@@ -234,12 +220,11 @@ namespace Helios.Core.Controllers
 
             for (; ; )
             {
-                var value = await _cacheService.GetAsync<string>(localCacheKey);
-                var SubjectDetailMenu = JsonSerializer.Deserialize<List<SubjectDetailMenuModel>>(value);
+                var value = await _cacheService.GetAsync<List<SubjectDetailMenuModel>>(localCacheKey);
 
-                if (SubjectDetailMenu != null)
+                if (value != null)
                 {
-                    return SubjectDetailMenu;
+                    return value;
                 }
                 else
                 {
