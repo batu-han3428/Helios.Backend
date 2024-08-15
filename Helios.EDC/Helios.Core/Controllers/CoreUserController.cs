@@ -40,7 +40,7 @@ namespace Helios.Core.Controllers
                     tenantIdsInt.Add(guid);
                 }
             }
-            return await _context.Studies.Where(x => tenantIdsInt.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
+            return await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && tenantIdsInt.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
             {
                 Id = g.Key,
                 ActiveStudies = g.Count().ToString()
@@ -50,7 +50,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<int> GetStudyCount(Int64? tenantId)
         {
-            return await _context.Studies.Where(x => x.TenantId == tenantId && !x.IsDemo).CountAsync();
+            return await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == tenantId && !x.IsDemo).CountAsync();
         }
         #endregion
 
