@@ -25,7 +25,8 @@ steps:
 
 - script: |
     whoami
-    sudo -u AzDevOps docker ps
+    az acr login --name $(acrName) --expose-token
+    docker ps
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
@@ -67,7 +68,8 @@ steps:
 
 
 - script: |
-    sudo -u AzDevOps docker ps
+    az acr login --name $(acrName) --expose-token
+    docker ps
     chmod +x ./pipeline/build-docker.sh  # Make the script executable
     ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
