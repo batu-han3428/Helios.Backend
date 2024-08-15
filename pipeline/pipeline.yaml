@@ -26,6 +26,7 @@ steps:
 - script: |
     sudo usermod -aG docker $(whoami)
     # newgrp docker # Refresh group membership so that the changes take effect
+    whoami
     groups
   env:
     cid: $(CLIENTID) 
