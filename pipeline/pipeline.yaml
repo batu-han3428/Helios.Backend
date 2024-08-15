@@ -14,7 +14,6 @@ variables:
   acrName: 'medcase'
   registry: 'medcase.azurecr.io'
   tag: '$(Build.BuildId)'
-  clientid:  ${env:CLIENTID} 
 
   # Kubernetes details
   aksClusterName: 'medcase-cluster-dev'
@@ -26,8 +25,13 @@ steps:
 
 - script: |
     sudo usermod -aG docker $(whoami)
-    echo  $(CLIENTID) $(CLIENTSECRET)  $(TENANTID)
+    echo  $(cid) $(cs) $(tt)
+  env:
+    cid: $(CLIENTID) 
+    cs: $(CLIENTSECRET)
+    tt: $(TENANTID)
   displayName: 'Add current user to Docker group'
+
 
 - script: |
     docker --version
