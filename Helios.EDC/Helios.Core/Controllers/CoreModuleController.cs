@@ -150,7 +150,7 @@ namespace Helios.Core.Controllers
         {
             BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-            var result = await _context.Modules.Where(x => x.TenantId == baseDTO.TenantId && x.IsActive && !x.IsDeleted).Select(x => new ModuleModel()
+            var result = await _context.Modules.Where(x => x.TenantId == baseDTO.TenantId && x.IsActive && !x.IsDeleted).OrderByDescending(x => x.CreatedAt).Select(x => new ModuleModel()
             {
                 Id = x.Id,
                 Name = x.Name,
