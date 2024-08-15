@@ -859,6 +859,48 @@ namespace Helios.Core.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<bool> SetDependentPageElementValue(string pageIdString, Int64 subjectId)
+        {
+            try
+            {
+                string[] pageIdsArray = pageIdString.Split(',');
+                if (pageIdsArray.Length < 1 || subjectId == 0) return false;
+                List<Int64> pageIds = new List<Int64>();
+                foreach (string id in pageIdsArray)
+                {
+                    if (Int64.TryParse(id, out Int64 l))
+                    {
+                        pageIds.Add(l);
+                    }
+                }
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                    .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && pageIds.Contains(x.StudyVisitPageId)))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted)).ToListAsync();
+
+                var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+                if (subjectElements.Count() < 1) return false;
+
+                subjectElements.ForEach(element =>
+                {
+                    if (element.UserValue != null && element.UserValue != "") element.UserValue = null;
+                });
+
+                _context.SubjectVisitPageModuleElements.UpdateRange(subjectElements);
+
+                return await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
         {
             return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted)
