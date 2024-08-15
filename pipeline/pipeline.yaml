@@ -25,6 +25,15 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
+    sudo usermod -aG docker $(whoami)
+    newgrp docker
+  displayName: 'Add current user to Docker group'
+
+- script: |
+    docker --version
+  displayName: 'Verify Docker Installation'
+
+- script: |
     echo $PATH
     which az
   displayName: 'Check Azure CLI Path'
@@ -36,15 +45,6 @@ steps:
 - script: |
     az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
-
-- script: |
-    sudo usermod -aG docker $(whoami)
-    newgrp docker
-  displayName: 'Add current user to Docker group'
-
-- script: |
-    docker --version
-  displayName: 'Verify Docker Installation'
 
 - script: |
     echo "Listing files..."
