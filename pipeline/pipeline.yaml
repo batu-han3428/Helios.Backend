@@ -20,6 +20,8 @@ variables:
   kubernetesNamespace: 'helios-testing'  # e.g., production
   azureServiceConnection: 'Medcase-Azure-Cli' 
   dockerRegistryServiceConnection: 'medcase'
+steps:
+- checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
     echo "Installing Azure CLI..."
@@ -27,8 +29,7 @@ variables:
     az --version
   displayName: 'Install Azure CLI'
 
-steps:
-- checkout: self  # This is the correct way to reference the checkout step
+
 
 - script: |
     whoami
