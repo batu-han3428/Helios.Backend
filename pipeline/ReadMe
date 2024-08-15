@@ -18,14 +18,14 @@ az vmss extension list   --resource-group MEDCASE-CLUSTER   --vmss-name azure-de
 
 az vmss extension delete  --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops  --name Microsoft.Azure.DevOps.Pipelines.Agent
 
-az vmss create --name vmssagentspool --resource-group  build-server-group --image Ubuntu2204 --vm-sku Standard_D2_v4 --storage-sku StandardSSD_LRS --authentication-type SSH --generate-ssh-keys --instance-count 2 --disable-overprovision --upgrade-policy-mode manual    --custom-data cloud-init.txt --single-placement-group false --platform-fault-domain-count 1  --orchestration-mode Uniform
+az vmss create --name vmssagents-pool --resource-group  build-server-group --image Ubuntu2204 --vm-sku Standard_D2_v4 --storage-sku StandardSSD_LRS --authentication-type SSH --generate-ssh-keys --instance-count 2 --disable-overprovision --upgrade-policy-mode manual    --custom-data cloud-init.txt --single-placement-group false --platform-fault-domain-count 1  --orchestration-mode Uniform
 
 az vm run-command invoke -g myResourceGroup -n myVm --command-id RunShellScript --scripts "sudo usermod -aG docker AzDevOps"
 
 
-az vmss list-instances   --resource-group  build-server-group   --name vmssagentspool   --query "[].{ID:instanceId, Name:name, IP:privateIpAddress}"   --output table
+az vmss list-instances   --resource-group  build-server-group   --name vmssagents-pool   --query "[].{ID:instanceId, Name:name, IP:privateIpAddress}"   --output table
 
-az vmss run-command invoke  --resource-group build-server-group   --name vmssagentspool   --command-id RunShellScript   --instance-id "3"   --scripts "sudo usermod -aG docker AzDevOps"
+az vmss run-command invoke  --resource-group build-server-group   --name vmssagents-pool   --command-id RunShellScript   --instance-id "5"   --scripts "sudo usermod -aG docker AzDevOps && sudo reboot"
 
 az vmss run-command invoke  --resource-group build-server-group   --name vmssagentspool   --command-id RunShellScript   --instance-id "3"   --scripts "sudo apt-get remove docker docker-engine docker.io containerd runc && sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io && sudo usermod -aG docker AzDevOps" 
 
@@ -33,3 +33,8 @@ az vmss run-command invoke  --resource-group build-server-group   --name vmssage
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+az vmss extension set --resource-group build-server-group   --name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"}'
+az vmss extension set --resource-group build-server-group   --name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "curl -fsSL https://get.docker.com | sh"}'
+

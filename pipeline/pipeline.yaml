@@ -23,20 +23,30 @@ variables:
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
-- task: DockerInstaller@0
-  inputs:
-    dockerVersion: '17.09.0-ce'
 
 - script: |
-    echo "Installing Azure CLI..."
-    docker image ls
-  displayName: 'List Docker images'
+    sudo usermod -aG docker $(whoami)
+    newgrp docker
+  displayName: 'Add current user to Docker group'
+
+steps:
 
 - script: |
-    whoami
-    sudo usermod -aG docker AzDevOps
-    groups
-  displayName: 'Verify User and Group Membership'
+    echo $PATH
+    which az
+  displayName: 'Check Azure CLI Path'
+
+- script: |
+    az --version
+  displayName: 'Verify Azure CLI Installation'
+
+- script: |
+    az login --service-principal -u ${env:CLIENTID} -p ${env:CLIENTSECRET} --tenant ${env:TENANTID}
+  displayName: 'Login Azure CLI'
+
+- script: |
+    docker --version
+  displayName: 'Verify Docker Installation'
 
 - script: |
     echo "Listing files..."
