@@ -32,7 +32,7 @@ steps:
     sudo chmod 660 /var/run/docker.sock
     sudo systemctl restart docker
     docker --version
-    docker info
+    sudo docker info
   env:
     cid: $(CLIENTID) 
     cs: $(CLIENTSECRET)
