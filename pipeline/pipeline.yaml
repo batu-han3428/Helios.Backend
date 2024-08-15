@@ -20,14 +20,26 @@ variables:
   kubernetesNamespace: 'helios-testing'  # e.g., production
   azureServiceConnection: 'Medcase-Azure-Cli' 
   dockerRegistryServiceConnection: 'medcase'
+
+- script: |
+    echo "Installing Azure CLI..."
+    apt-get install -y azure-cli
+    az --version
+  displayName: 'Install Azure CLI'
+
 steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
     whoami
-    sudo usermod -aG docker AzDevOps
+    groups
+    # whoami
+    # sudo usermod -aG docker AzDevOps
     az acr login --name $(acrName) --expose-token
     docker ps
+  displayName: 'Verify User and Group Membership'
+
+- script: |
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
@@ -48,13 +60,6 @@ steps:
 
 - script: dotnet --version
   displayName: 'Check .NET Version'
-
-
-- script: |
-    echo "Installing Azure CLI..."
-    apt-get install -y azure-cli
-    az --version
-  displayName: 'Install Azure CLI'
 
 - task: AzureCLI@2
   inputs:
