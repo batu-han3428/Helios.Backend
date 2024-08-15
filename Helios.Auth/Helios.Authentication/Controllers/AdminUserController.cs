@@ -248,7 +248,8 @@ namespace Helios.Authentication.Controllers
                 UserId = user.Id,
                 Email = user.Email,
                 FirstName = user.Name,
-                LastName = user.Name
+                LastName = user.Name,
+                PhoneNumber=user.PhoneNumber
             };
 
             return result;
@@ -568,6 +569,7 @@ namespace Helios.Authentication.Controllers
                 Name = x.Name,
                 LastName = x.LastName,
                 IsActive = x.IsActive,
+                PhoneNumber=x.PhoneNumber
             }).FirstOrDefaultAsync();
         }
 
