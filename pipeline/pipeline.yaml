@@ -40,16 +40,11 @@ steps:
   displayName: 'Verify Docker Installation'
 
 - script: |
-    echo $PATH
-    sudo which az
-  displayName: 'Check Azure CLI Path'
-
-- script: |
-   sudo az --version
+    az --version
   displayName: 'Verify Azure CLI Installation'
 
 - script: |
-   sudo  az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
+    az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
 
 - script: |
@@ -66,7 +61,7 @@ steps:
   displayName: 'Verify project file exists'
 
 - script: |
-    az acr login --name $(acrName) --expose-token
+    sudo az acr login --name $(acrName) --expose-token
     sudo docker --version
 
     sudo docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
