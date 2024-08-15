@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Common", "Helios.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Shared", "Helios.Common\Helios.Shared\Helios.Shared.csproj", "{C66DADFB-2B2D-441F-82F9-09927A93FA2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helios.Caching", "Helios.Common\Helios.Caching\Helios.Caching.csproj", "{D91B5684-6348-4015-9752-673294360EBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helios.Caching", "Helios.Common\Helios.Caching\Helios.Caching.csproj", "{D91B5684-6348-4015-9752-673294360EBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
