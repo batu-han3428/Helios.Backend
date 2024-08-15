@@ -19,3 +19,4 @@ sudo usermod -aG docker 'AzDevOps'
 
 sudo chown root:docker /var/run/docker.sock
 sudo chmod 660 /var/run/docker.sock
+sudo systemctl restart docker
