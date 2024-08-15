@@ -26,7 +26,7 @@ steps:
 
 - script: |
     sudo usermod -aG docker $(whoami)
-    
+    echo  $(CLIENTID) $(CLIENTSECRET)  $(TENANTID)
   displayName: 'Add current user to Docker group'
 
 - script: |
