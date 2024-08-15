@@ -11,6 +11,7 @@ using System.Text.Json;
 using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Helios.Common.Helpers;
+using Helios.Caching.Services.Interfaces;
 
 namespace Helios.Core.Controllers
 {
@@ -19,12 +20,12 @@ namespace Helios.Core.Controllers
     public class CoreStudyController : Controller
     {
         private CoreContext _context;
-        private IStudyService _studyService;
+        private IRedisCacheService _cacheService;
 
-        public CoreStudyController(CoreContext context, IStudyService studyService)
+        public CoreStudyController(CoreContext context, IRedisCacheService cacheService)
         {
             _context = context;
-            _studyService = studyService;
+            _cacheService = cacheService;
         }
 
         #region Study
@@ -4183,7 +4184,7 @@ namespace Helios.Core.Controllers
                             addNewVisitToSubjects(visitDTO.StudyId, visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4249,7 +4250,7 @@ namespace Helios.Core.Controllers
                             addNewPageToSubjects(page.StudyVisitId, page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4291,7 +4292,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4322,7 +4323,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4353,7 +4354,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4385,6 +4386,14 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        private async Task RemoveSubjectDetailMenu(Int64 studyId)
+        {
+            string prefix = "Study:Menu";
+            var localCacheKey = prefix + ":" + studyId;
+
+            await _cacheService.RemoveAsync(localCacheKey);
         }
 
         private bool addNewVisitToSubjects(Int64 studyId, Int64 visitId)
@@ -4538,7 +4547,7 @@ namespace Helios.Core.Controllers
                             removeVisitFromSubjects(visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4634,7 +4643,7 @@ namespace Helios.Core.Controllers
                             removePageFromSubjects(page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4710,7 +4719,7 @@ namespace Helios.Core.Controllers
                             removeModuleFromSubjects(module.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -5106,7 +5115,7 @@ namespace Helios.Core.Controllers
                         .FirstOrDefault(x => x.Id == studyVisitPageId);
 
                     var studyId = studyVisitPage.StudyVisit.StudyId;
-                    await _studyService.RemoveSubjectDetailMenu(studyId);
+                    await RemoveSubjectDetailMenu(studyId);
 
                     return new ApiResponse<dynamic>
                     {
@@ -7133,6 +7142,8 @@ namespace Helios.Core.Controllers
 
                 if (result)
                 {
+                    await RemoveSubjectDetailMenu(visitsToUpdate.FirstOrDefault().StudyId);
+                    
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,

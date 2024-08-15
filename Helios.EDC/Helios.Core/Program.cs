@@ -1,10 +1,14 @@
 using Helios.Core.Contexts;
 using Helios.Core.Extension;
 using Helios.Core.Helpers;
-using Microsoft.Extensions.Configuration;
+using Helios.Caching.Services.Interfaces;
+using Helios.Caching.Services;
+using Helios.Caching.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration; // allows both to access and to set up the config
+
+
 
 // Add services to the container.
 
@@ -20,8 +24,11 @@ builder.Services.DependencyInjection();
 #endregion
 
 builder.Services.AddControllers();
+
+// Add Redis Cache Service
+builder.Services.AddRedisCache(builder.Configuration);
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddMemoryCache();
 builder.Services.DefaultConfigurationService(configuration);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -49,28 +49,14 @@ services:
       v3network:
         aliases:
           - core
-  
-  helios.shared:
-    image: ${DOCKER_REGISTRY-}heliosshared
-    container_name: helios.shared
-    build:
-      context: .
-      dockerfile: Helios.Common/Helios.shared/Dockerfile
-    ports:
-      - "4500:8080"
-      - "4501:4501"
-    networks:
-      v3network:
-        aliases:
-          - shared
 
-  redis_image:
-    image: redis
+  redis:
+    image: redis:latest
     container_name: redis.cache
     command: redis-server --requirepass heliosredis
     ports:
-      - 6379:6379
+      - "6379:6379"
     networks:
       - v3network
-
-
+    
+  
