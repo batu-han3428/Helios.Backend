@@ -54,7 +54,7 @@ steps:
   displayName: 'Login Azure CLI'
 
 - script: |
-    ls -l /var/lib/docker
+    ls -R /var/lib/docker
     echo "Listing files..."
     ls -R .
     if [ ! -f "./Helios.sln" ]; then
