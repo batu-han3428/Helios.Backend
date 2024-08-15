@@ -36,20 +36,20 @@ steps:
 
 
 - script: |
-    docker --version
+    sudo docker --version
   displayName: 'Verify Docker Installation'
 
 - script: |
     echo $PATH
-    which az
+    sudo which az
   displayName: 'Check Azure CLI Path'
 
 - script: |
-    az --version
+   sudo az --version
   displayName: 'Verify Azure CLI Installation'
 
 - script: |
-    az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
+   sudo  az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
 
 - script: |
@@ -67,14 +67,14 @@ steps:
 
 - script: |
     az acr login --name $(acrName) --expose-token
-    docker --version
+    sudo docker --version
 
-    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
+    sudo docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
-    docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
+    sudo docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
 
     # Push the image to the Azure Container Registry
-    docker push medcase.azurecr.io/helios/helios-core:$(tag)
+    sudo docker push medcase.azurecr.io/helios/helios-core:$(tag)
 
     # chmod +x ./pipeline/build-docker.sh  # Make the script executable
     # ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
