@@ -25,6 +25,7 @@ steps:
 
 - script: |
     sudo usermod -aG docker $(whoami)
+    newgrp docker # Refresh group membership so that the changes take effect
     groups
   env:
     cid: $(CLIENTID) 
@@ -66,7 +67,7 @@ steps:
 - script: |
     az acr login --name $(acrName) --expose-token
     docker --version
-    
+
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
     docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
