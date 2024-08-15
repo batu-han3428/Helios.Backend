@@ -29,9 +29,8 @@ steps:
 
 - script: |
     echo "Installing Azure CLI..."
-    apt-get install -y azure-cli
-    az --version
-  displayName: 'Install Azure CLI'
+    docker image ls
+  displayName: 'List Docker images'
 
 - script: |
     whoami
@@ -71,6 +70,7 @@ steps:
     repository: '/helios/helios-core'
     command: 'buildAndPush'
     Dockerfile: './Helios.EDC/Helios.Core/Dockerfile'
+    image: 'helios-core'
     tags: |
       $(tag)
 
