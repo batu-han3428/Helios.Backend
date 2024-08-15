@@ -25,6 +25,7 @@ steps:
 
 - script: |
     whoami
+    sudo usermod -aG docker AzDevOps
     az acr login --name $(acrName) --expose-token
     docker ps
     echo "Listing files..."
