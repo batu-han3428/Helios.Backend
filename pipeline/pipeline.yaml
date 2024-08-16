@@ -75,9 +75,10 @@ steps:
     az acr login --name $(acrName) --expose-token
 
     sudo usermod -aG docker $(whoami)
+
     newgrp docker << EOF
 
-    az acr login --name $(acrName) --expose-token
+    az acr login $(acrName)
     
     # Your Docker commands here
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
@@ -88,8 +89,6 @@ steps:
     docker push medcase.azurecr.io/helios/helios-core:$(tag)
 
     EOF
-    # chmod +x ./pipeline/build-docker.sh  # Make the script executable
-    # ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
 
 - task: Kubernetes@1
