@@ -10,7 +10,7 @@ parameters:
 - name: deployToAKS
   type: boolean
   default: false
-  displayName: 'Deploy to AKS?'
+  displayName: 'Deploy to Test?'
 
 variables:
  
@@ -87,7 +87,7 @@ steps:
     # Your Docker commands here
     docker build -t helios-core:v$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
-    docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:v$(tag)
+    docker tag helios-core:v$(tag) medcase.azurecr.io/helios/helios-core:v$(tag)
 
     # Push the image to the Azure Container Registry
     docker push medcase.azurecr.io/helios/helios-core:v$(tag)
