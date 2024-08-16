@@ -48,16 +48,18 @@ steps:
     az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
 
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(azureServiceConnection)
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      echo "Listing images in ACR..."
-      az acr repository list --name $(acrName) --output table
-      echo  [! command -v kubectl &> /dev/null]
-      if [! command -v kubectl &> /dev/null]; then
+- script: |
+    #!/bin/bash
+    echo "Listing images in ACR..."
+    az acr repository list --name $(acrName) --output table
+
+    # Check if kubectl is installed
+    if command -v kubectl &> /dev/null; then
+        echo "kubectl is already installed."
+        kubectl version --client
+    else
+        echo "kubectl not found. Installing..."
+
         sudo apt-get update
         # apt-transport-https may be a dummy package; if so, you can skip that package
         sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
@@ -72,10 +74,7 @@ steps:
 
         sudo apt-get update
         sudo apt-get install -y kubectl
-      fi
-        echo "kubectl is already installed."
-        kubectl version --client
-      fi      
+    fi
   displayName: 'Check and Install kubectl'
 
 - script: |
