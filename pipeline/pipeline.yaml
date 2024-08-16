@@ -33,26 +33,13 @@ steps:
     id
   displayName: 'Check user details'
 
-# - script: |
-#     sudo usermod -a -G docker $(whoami)
-
-#     whoami
-#     groups
-#     sudo chown root:docker /var/run/docker.sock
-#     sudo chmod 660 /var/run/docker.sock
-#     ls -R .
-    
-#   env:
-#     cid: $(CLIENTID) 
-#     cs: $(CLIENTSECRET)
-#     tt: $(TENANTID)
-#   displayName: 'Verify Docker Installation'
-
 - script: |
     echo "Installing Azure CLI..."
     apt-get install -y azure-cli
     az --version
-  displayName: 'Install Azure CLI'
+    echo "Installing 'kubectl'"
+    sudo apt-get update && sudo apt-get install -y apt-transport-https && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && echo \"deb https://apt.kubernetes.io/ kubernetes-xenial main\" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list && sudo apt-get update && sudo apt-get install -y kubectl
+  displayName: 'Install Azure CLI and kubectl'
   
 - script: |
     az --version
@@ -135,7 +122,7 @@ steps:
       # Run your kubectl commands
       kubectl get nodes
       kubectl get pods -n $(kubernetesNamespace)
-    displayName: 'Checking AKS nodes and pods'
+  displayName: 'Checking AKS nodes and pods'
 
 # - task: Kubernetes@1
 #   condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
