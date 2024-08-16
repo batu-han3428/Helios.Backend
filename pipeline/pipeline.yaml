@@ -24,7 +24,10 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
-    sudo usermod -aG docker $(whoami)
+    sudo usermod -a -G docker $(whoami)
+    sudo usermod -a -G dockerr $(whoami)
+
+    # sudo usermod -aG docker $(whoami)
     # newgrp docker # Refresh group membership so that the changes take effect
     whoami
     groups $(whoami)
