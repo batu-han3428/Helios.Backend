@@ -13,6 +13,9 @@ sudo systemctl start docker
 # Install the Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
+sudo apt-get update && sudo apt-get install -y kubectl
+
+
 # (Optional) Add current user to the docker group to avoid using 'sudo' with Docker
 sudo usermod -aG docker $USER
 sudo usermod -aG docker 'AzDevOps'
