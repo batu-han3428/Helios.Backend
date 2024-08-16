@@ -52,7 +52,7 @@ steps:
     #!/bin/bash
     echo "Listing images in ACR..."
     az acr repository list --name $(acrName) --output table
-    echo => Check if kubectl is installed
+    echo "=> Check if kubectl is installed"
     echo command -v kubectl &> /dev/null
     # Check if kubectl is installed
     if command -v kubectl &> /dev/null; then
@@ -135,7 +135,7 @@ steps:
       kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
     fi
   displayName: 'Deploying [helios-v3-core-api] to Test'
-  condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
+  condition: and(succeededOrFailed(), eq('${{ parameters.deployToAKS }}', true))
 
 
 
