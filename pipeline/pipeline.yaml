@@ -33,6 +33,7 @@ steps:
     sudo systemctl restart docker
     docker --version
     sudo docker info
+    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
   env:
     cid: $(CLIENTID) 
     cs: $(CLIENTSECRET)
@@ -71,11 +72,14 @@ steps:
     az acr login --name $(acrName) --expose-token
     sudo docker --version
 
-    # Fetch the access token
-    ACCESS_TOKEN=$(az account get-access-token --resource $(registry) --query accessToken --output tsv)
+    # # Fetch the access token
+    # ACCESS_TOKEN=$(az account get-access-token --resource $(registry) --query accessToken --output tsv)
 
-    # Log in to Docker using the access token
-    echo $ACCESS_TOKEN | sudo docker login $(registry) --username $ACCESS_TOKEN --password-stdin
+    # # Fetch the access token
+    # ACCESS_TOKEN=$(az acr login --name $(acrName) --expose-token --query accessToken --output tsv)
+
+    # # Log in to Docker using the access token
+    # echo $ACCESS_TOKEN | sudo docker login $(registry) --username $ACCESS_TOKEN --password-stdin
 
 
     sudo docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
