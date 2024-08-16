@@ -76,6 +76,19 @@ steps:
     fi
   displayName: 'Verify project file exists'
 
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Get AKS credentials
+      az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName) --overwrite-existing
+
+      # Run your kubectl commands
+      kubectl get nodes
+      kubectl get pods -n $(kubernetesNamespace)
+
 - script: |
     sudo usermod -aG docker $(whoami)
 
@@ -110,6 +123,19 @@ steps:
   displayName: 'Deploying [helios-v3-core-api] to Test'
   condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
 
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Get AKS credentials
+      az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName) --overwrite-existing
+
+      # Run your kubectl commands
+      kubectl get nodes
+      kubectl get pods -n $(kubernetesNamespace)
+    displayName: 'Checking AKS nodes and pods'
 
 # - task: Kubernetes@1
 #   condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
