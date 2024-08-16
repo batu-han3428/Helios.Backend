@@ -129,49 +129,10 @@ steps:
     kubectl get deployment helios-v3-core-api --namespace $(kubernetesNamespace)
     if [ $? -ne 0 ]; then
       echo "Deployment does not exist. Creating a new deployment from YAML..."
-      kubectl apply -f ./deploy/deployment-core.yaml --namespace $(kubernetesNamespace)
+      kubectl apply -f ./pipeline/deploy/deployment-core.yaml --namespace $(kubernetesNamespace)
     else
       echo "Deployment exists. Updating the deployment with the new image..."
       kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
     fi
   displayName: 'Deploying [helios-v3-core-api] to Test'
   condition: and(succeededOrFailed(), eq('${{ parameters.deployToAKS }}', true))
-
-
-
-# - task: Kubernetes@1
-#   condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
-#   inputs:
-#     connectionType: 'Azure Resource Manager'
-#     azureSubscriptionEndpoint: '$(azureServiceConnection)' 
-#     azureResourceGroup: '$(aksResourceGroup)'
-#     kubernetesCluster: '$(aksClusterName)'
-#     namespace: '$(kubernetesNamespace)'
-#     command: 'set'
-#     arguments: 'image deployment/your-deployment-name $(imageName)=$(containerRegistry)/$(imageName):$(imageTag)'
-#   displayName: 'Deploging to Test'
-
-# - task: Kubernetes@1
-#   inputs:
-#     connectionType: 'Azure Resource Manager'
-#     azureSubscriptionEndpoint: '$(azureServiceConnection)' 
-#     azureResourceGroup: '$(aksResourceGroup)'
-#     kubernetesCluster: '$(aksClusterName)'
-#     namespace: '$(kubernetesNamespace)'
-#     command: 'set'
-#     arguments: 'image deployment/your-deployment-name $(imageName)=$(containerRegistry)/$(imageName):$(imageTag)'
-#   displayName: 'Set image in Kubernetes deployment'
-
-# - task: Kubernetes@1
-#   displayName: 'Deploy to AKS'
-#   inputs:
-#     connectionType: 'Azure Resource Manager'
-#     azureSubscriptionEndpoint: 'Medcase-Azure-Cli'
-#     azureResourceGroup: 'medcase-cluster'
-#     kubernetesCluster: '$(aksClusterName)'
-#     namespace: '$(kubernetesNamespace)'
-#     command: 'apply'
-#     useConfigurationFile: false
-#     arguments: |
-#       -f deploy/deployment-core.yaml
-#     secretType: 'None'
