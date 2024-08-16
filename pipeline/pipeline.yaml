@@ -6,7 +6,12 @@ trigger:
 pool:
   name: 'vmssagents-pool'
 
-
+parameters:
+- name: deployToAKS
+  type: boolean
+  default: false
+  displayName: 'Deploy to Test?'
+  helpMarkDown: 'Set to true to deploy the built image to AKS.'
 
 variables:
  
@@ -18,6 +23,7 @@ variables:
   # Kubernetes details
   aksClusterName: 'medcase-cluster-dev'
   kubernetesNamespace: 'helios-testing'  # e.g., production
+  aksResourceGroup: 'medcase-clusterg'  # e.g., production
   azureServiceConnection: 'Medcase-Azure-Cli' 
   dockerRegistryServiceConnection: 'medcase'
 steps:
@@ -80,26 +86,65 @@ steps:
     az acr login --name $(acrName)
     
     # Your Docker commands here
-    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
+    docker build -t helios-core:v$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
-    docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
+    docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:v$(tag)
 
     # Push the image to the Azure Container Registry
-    docker push medcase.azurecr.io/helios/helios-core:$(tag)
+    docker push medcase.azurecr.io/helios/helios-core:v$(tag)
 
     EOF
   displayName: '[Core Api] Build and Push Docker Image'
 
-- task: Kubernetes@1
-  displayName: 'Deploy to AKS'
-  inputs:
-    connectionType: 'Azure Resource Manager'
-    azureSubscriptionEndpoint: 'Medcase-Azure-Cli'
-    azureResourceGroup: 'medcase-cluster'
-    kubernetesCluster: '$(aksClusterName)'
-    namespace: '$(kubernetesNamespace)'
-    command: 'apply'
-    useConfigurationFile: false
-    arguments: |
-      -f deploy/deployment-core.yaml
-    secretType: 'None'
+- script: |
+    echo "Getting Aks credentials..."
+    az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName)
+    echo "Checking if deployment exists..."
+    kubectl get deployment helios-v3-core-api --namespace $(kubernetesNamespace)
+    if [ $? -ne 0 ]; then
+      echo "Deployment does not exist. Creating a new deployment from YAML..."
+      kubectl apply -f ./deploy/deployment-core.yaml --namespace $(kubernetesNamespace)
+    else
+      echo "Deployment exists. Updating the deployment with the new image..."
+      kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
+    fi
+  displayName: 'Deploying [helios-v3-core-api] to Test'
+  condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
+
+
+# - task: Kubernetes@1
+#   condition: and(succeeded(), eq('${{ parameters.deployToAKS }}', true))
+#   inputs:
+#     connectionType: 'Azure Resource Manager'
+#     azureSubscriptionEndpoint: '$(azureServiceConnection)' 
+#     azureResourceGroup: '$(aksResourceGroup)'
+#     kubernetesCluster: '$(aksClusterName)'
+#     namespace: '$(kubernetesNamespace)'
+#     command: 'set'
+#     arguments: 'image deployment/your-deployment-name $(imageName)=$(containerRegistry)/$(imageName):$(imageTag)'
+#   displayName: 'Deploging to Test'
+
+# - task: Kubernetes@1
+#   inputs:
+#     connectionType: 'Azure Resource Manager'
+#     azureSubscriptionEndpoint: '$(azureServiceConnection)' 
+#     azureResourceGroup: '$(aksResourceGroup)'
+#     kubernetesCluster: '$(aksClusterName)'
+#     namespace: '$(kubernetesNamespace)'
+#     command: 'set'
+#     arguments: 'image deployment/your-deployment-name $(imageName)=$(containerRegistry)/$(imageName):$(imageTag)'
+#   displayName: 'Set image in Kubernetes deployment'
+
+# - task: Kubernetes@1
+#   displayName: 'Deploy to AKS'
+#   inputs:
+#     connectionType: 'Azure Resource Manager'
+#     azureSubscriptionEndpoint: 'Medcase-Azure-Cli'
+#     azureResourceGroup: 'medcase-cluster'
+#     kubernetesCluster: '$(aksClusterName)'
+#     namespace: '$(kubernetesNamespace)'
+#     command: 'apply'
+#     useConfigurationFile: false
+#     arguments: |
+#       -f deploy/deployment-core.yaml
+#     secretType: 'None'
