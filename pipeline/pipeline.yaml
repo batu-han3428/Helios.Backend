@@ -52,7 +52,8 @@ steps:
     #!/bin/bash
     echo "Listing images in ACR..."
     az acr repository list --name $(acrName) --output table
-
+    echo => Check if kubectl is installed
+    echo command -v kubectl &> /dev/null
     # Check if kubectl is installed
     if command -v kubectl &> /dev/null; then
         echo "kubectl is already installed."
