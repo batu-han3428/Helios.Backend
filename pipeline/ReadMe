@@ -36,7 +36,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 
 
 az vmss extension set --resource-group build-server-group    --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"}'
-az vmss extension set --resource-group build-server-group    --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "echo "asd""}'
+az vmss extension set --resource-group build-server-group    --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": ""}'
 
 az vmss extension set --resource-group build-server-group   --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "sudo apt-get update && sudo apt-get install -y docker.io"}'
 
@@ -44,3 +44,10 @@ az vmss extension delete  --resource-group build-server-group   --vmss-name vmss
 
 
 az vmss extension set --resource-group build-server-group   --name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions    --settings '{"commandToExecute": "curl -fsSL https://get.docker.com | sh"}'
+
+az vmss run-command invoke --resource-group build-server-group    --vmss-name vmssagents-pool  --command-id RunShellScript   --scripts '
+  apt-get update && apt-get install -y apt-transport-https curl && \
+  curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+  chmod +x ./kubectl && \
+  mv ./kubectl /usr/local/bin/kubectl && \
+  kubectl version --client'

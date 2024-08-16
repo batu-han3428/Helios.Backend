@@ -47,6 +47,21 @@ steps:
 - script: |
     az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
+  
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptType: 'bash'
+    scriptPath: './configure/install-kubectl.sh'
+  displayName: 'Installing kubectl...'
+
+- script: |
+    az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName) --overwrite-existing
+
+    # Run your kubectl commands
+    kubectl get nodes
+    kubectl get pods -n $(kubernetesNamespace)
+  displayName: 'AKS nodes and pods'
 
 - script: |
     ls -R /var/lib/docker
@@ -61,14 +76,8 @@ steps:
       exit 1
     fi
   displayName: 'Verify project file exists'
-  
-- script: |
-    az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName) --overwrite-existing
 
-    # Run your kubectl commands
-    kubectl get nodes
-    kubectl get pods -n $(kubernetesNamespace)
-  displayName: 'AKS nodes and pods'
+
 
 
 - script: |
