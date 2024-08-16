@@ -54,8 +54,8 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo "Listing images in ACR..."
-      az acr repository list --name $(acrName) --output table
+    echo "Listing images in ACR..."
+    az acr repository list --name $(acrName) --output table
 
     sudo apt-get update
     # apt-transport-https may be a dummy package; if so, you can skip that package
