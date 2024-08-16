@@ -22,7 +22,7 @@ variables:
   # Kubernetes details
   aksClusterName: 'medcase-cluster-dev'
   kubernetesNamespace: 'helios-testing'  # e.g., production
-  aksResourceGroup: 'medcase-clusterg'  # e.g., production
+  aksResourceGroup: 'medcase-cluster'  
   azureServiceConnection: 'Medcase-Azure-Cli' 
   dockerRegistryServiceConnection: 'medcase'
 steps:
