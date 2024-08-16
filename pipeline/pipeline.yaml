@@ -7,11 +7,11 @@ pool:
   name: 'vmssagents-pool'
 
 parameters:
-  - name: deployToAKS
-      type: boolean
-      default: false
-      displayName: 'Deploy to Test?'
-      helpMarkDown: 'Set to true to deploy the built image to AKS.'
+- name: deployToAKS
+  type: boolean
+  default: false
+  displayName: 'Deploy to AKS?'
+  helpMarkDown: 'Set to true to deploy the built image to AKS.'
 
 variables:
  
