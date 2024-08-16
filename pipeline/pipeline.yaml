@@ -47,12 +47,25 @@ steps:
 - script: |
     az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
   displayName: 'Login Azure CLI'
-  
+
 - task: AzureCLI@2
   inputs:
     azureSubscription: $(azureServiceConnection)
     scriptType: 'bash'
-    scriptPath: './configure/install-kubectl.sh'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Listing images in ACR..."
+      az acr repository list --name $(acrName) --output table
+
+      apt-get update && apt-get install -y apt-transport-https curl
+
+      # Download and install kubectl
+      curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      chmod +x ./kubectl
+      mv ./kubectl /usr/local/bin/kubectl
+
+      # Verify installation
+      kubectl version --client
   displayName: 'Installing kubectl...'
 
 - script: |
