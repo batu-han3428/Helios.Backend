@@ -37,8 +37,7 @@ steps:
     echo "Installing Azure CLI..."
     apt-get install -y azure-cli
     az --version
-    echo "Installing 'kubectl'"
-    sudo apt-get update && sudo apt-get install -y kubectl
+ 
   displayName: 'Install Azure CLI and kubectl'
   
 - script: |
