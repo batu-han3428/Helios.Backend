@@ -1752,7 +1752,66 @@ namespace Helios.Authentication.Controllers
 
             return distinctResult;
         }
+        [HttpGet]
+        public async Task<List<SystemUserModel>> GetTenantAdminUserList(Int64 id)
+        {
+            List<Tenant> emptyTenantList = new List<Tenant>();
 
+            var result = await (
+                from userManagerUser in _userManager.Users
+                join tenantAdmin in _context.TenantAdmins.Where(ta => !ta.IsDeleted) on userManagerUser.Id equals tenantAdmin.AuthUserId into tenantAdmins
+                from tenAdmin in tenantAdmins.DefaultIfEmpty()
+                join tenant in _context.Tenants on tenAdmin.TenantId equals tenant.Id into tenants
+                where
+                    userManagerUser.Id != id && userManagerUser.UserRoles.Any(role => role.RoleId ==3)
+                select new SystemUserModel
+                {
+                    Id = userManagerUser.Id,
+                    Name = userManagerUser.Name,
+                    LastName = userManagerUser.LastName,
+                    Email = userManagerUser.Email,
+                    PhoneNumber = userManagerUser.PhoneNumber,
+                    IsActive = tenAdmin != null ? tenAdmin.IsActive : userManagerUser.IsActive,
+                    Roles = userManagerUser.UserRoles.Select(ur => new
+                    {
+                        RoleId = ur.RoleId,
+                        RoleName = ur.Role.Name
+                    }).ToList(),
+                    Tenants = tenAdmin != null && !tenAdmin.IsDeleted ?
+                        tenants.Where(t => !t.IsDeleted)
+                                .Select(t => new
+                                {
+                                    TenantId = t.Id,
+                                    TenantName = t.Name
+                                }).ToList()
+                    : emptyTenantList
+                }
+            ).ToListAsync();
+
+            var distinctResult = result
+                .GroupBy(x => x.Id)
+                .Select(group => new SystemUserModel
+                {
+                    Id = group.Key,
+                    Name = group.First().Name,
+                    LastName = group.First().LastName,
+                    Email = group.First().Email,
+                    PhoneNumber = group.First().PhoneNumber,
+                    IsActive = group.First().IsActive,
+                    Roles = group.First().Roles,
+                    Tenants = group.SelectMany(x => x.Tenants)
+                      .GroupBy(t => t.TenantId)
+                      .Select(tGroup => new Tenant
+                      {
+                          Id = tGroup.First().TenantId,
+                          Name = tGroup.First().TenantName
+                      })
+                      .ToList()
+                })
+                .ToList();
+
+            return distinctResult;
+        }      
         [HttpPost]
         public async Task<ApiResponse<dynamic>> TenantAdminDelete(TenantAndSystemAdminDTO model)
         {
