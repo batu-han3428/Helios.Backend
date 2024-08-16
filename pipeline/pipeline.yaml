@@ -32,8 +32,7 @@ steps:
     groups $(whoami)
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
-    sudo systemctl restart docker
-
+    ls -R .
     docker ps
  
     docker --version
