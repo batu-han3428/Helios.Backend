@@ -27,7 +27,9 @@ steps:
     sudo usermod -aG docker $(whoami)
     # newgrp docker # Refresh group membership so that the changes take effect
     whoami
-    groups
+    groups $(whoami)
+    exec su -l $USER
+    groups $(whoami)
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
     sudo systemctl restart docker
