@@ -24,12 +24,15 @@ steps:
 - checkout: self  # This is the correct way to reference the checkout step
 
 - script: |
+    echo "Current user: $(whoami)"
+    id
+  displayName: 'Check user details'
+
+- script: |
     sudo usermod -a -G docker $(whoami)
-    sudo usermod -a -G dockerr $(whoami)
-    sudo ./svc.sh install $(whoami)
 
     whoami
-    groups $(whoami)
+    groups
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
     ls -R .
