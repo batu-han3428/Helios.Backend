@@ -36,8 +36,11 @@ steps:
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
     ls -R .
-
+    sudo usermod -aG docker $(whoami)
+    newgrp docker << EOF
+    # Your Docker commands here
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
+    EOF
   env:
     cid: $(CLIENTID) 
     cs: $(CLIENTSECRET)
