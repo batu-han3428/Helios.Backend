@@ -56,7 +56,6 @@ steps:
     # Check if kubectl is installed
     if command -v kubectl &> /dev/null; then
         echo "kubectl is already installed."
-        kubectl version --client
     else
         echo "kubectl not found. Installing..."
 
@@ -75,6 +74,7 @@ steps:
         sudo apt-get update
         sudo apt-get install -y kubectl
     fi
+    kubectl version --client
   displayName: 'Check and Install kubectl'
 
 - script: |
