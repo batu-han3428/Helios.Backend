@@ -31,10 +31,12 @@ steps:
     # newgrp docker # Refresh group membership so that the changes take effect
     whoami
     groups $(whoami)
-    docker ps
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
     sudo systemctl restart docker
+
+    docker ps
+ 
     docker --version
     sudo docker info
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
