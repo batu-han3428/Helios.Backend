@@ -26,9 +26,8 @@ steps:
 - script: |
     sudo usermod -a -G docker $(whoami)
     sudo usermod -a -G dockerr $(whoami)
+    udo ./svc.sh install $(whoami)
 
-    # sudo usermod -aG docker $(whoami)
-    # newgrp docker # Refresh group membership so that the changes take effect
     whoami
     groups $(whoami)
     sudo chown root:docker /var/run/docker.sock
