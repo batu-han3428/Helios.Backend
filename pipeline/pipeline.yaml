@@ -8,10 +8,10 @@ pool:
 
 parameters:
   - name: deployToAKS
-    type: boolean
-    default: false
-    displayName: 'Deploy to Test?'
-    helpMarkDown: 'Set to true to deploy the built image to AKS.'
+      type: boolean
+      default: false
+      displayName: 'Deploy to Test?'
+      helpMarkDown: 'Set to true to deploy the built image to AKS.'
 
 variables:
  
