@@ -28,24 +28,20 @@ steps:
     id
   displayName: 'Check user details'
 
-- script: |
-    sudo usermod -a -G docker $(whoami)
+# - script: |
+#     sudo usermod -a -G docker $(whoami)
 
-    whoami
-    groups
-    sudo chown root:docker /var/run/docker.sock
-    sudo chmod 660 /var/run/docker.sock
-    ls -R .
-    sudo usermod -aG docker $(whoami)
-    newgrp docker << EOF
-    # Your Docker commands here
-    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
-    EOF
-  env:
-    cid: $(CLIENTID) 
-    cs: $(CLIENTSECRET)
-    tt: $(TENANTID)
-  displayName: 'Verify Docker Installation'
+#     whoami
+#     groups
+#     sudo chown root:docker /var/run/docker.sock
+#     sudo chmod 660 /var/run/docker.sock
+#     ls -R .
+    
+#   env:
+#     cid: $(CLIENTID) 
+#     cs: $(CLIENTSECRET)
+#     tt: $(TENANTID)
+#   displayName: 'Verify Docker Installation'
 
 - script: |
     echo "Installing Azure CLI..."
@@ -77,18 +73,13 @@ steps:
 
 - script: |
     az acr login --name $(acrName) --expose-token
-    sudo docker --version
 
-    # # Fetch the access token
-    # ACCESS_TOKEN=$(az account get-access-token --resource $(registry) --query accessToken --output tsv)
+    sudo usermod -aG docker $(whoami)
+    newgrp docker << EOF
 
-    # # Fetch the access token
-    # ACCESS_TOKEN=$(az acr login --name $(acrName) --expose-token --query accessToken --output tsv)
-
-    # # Log in to Docker using the access token
-    # echo $ACCESS_TOKEN | sudo docker login $(registry) --username $ACCESS_TOKEN --password-stdin
-
-
+    az acr login --name $(acrName) --expose-token
+    
+    # Your Docker commands here
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
     docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
@@ -96,6 +87,7 @@ steps:
     # Push the image to the Azure Container Registry
     docker push medcase.azurecr.io/helios/helios-core:$(tag)
 
+    EOF
     # chmod +x ./pipeline/build-docker.sh  # Make the script executable
     # ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
   displayName: '[Core Api] Build and Push Docker Image'
