@@ -25,13 +25,16 @@ steps:
 
 - script: |
     sudo usermod -a -G docker $(whoami)
+    sudo usermod -a -G dockerr $(whoami)
+    sudo ./svc.sh install $(whoami)
+
     whoami
     groups $(whoami)
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
-    docker ps
-    docker --version
-    sudo docker info
+    ls -R .
+    
+    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
   env:
     cid: $(CLIENTID) 
     cs: $(CLIENTSECRET)
