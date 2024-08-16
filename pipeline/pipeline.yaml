@@ -33,7 +33,7 @@ steps:
     sudo chown root:docker /var/run/docker.sock
     sudo chmod 660 /var/run/docker.sock
     ls -R .
-    
+
     docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
   env:
     cid: $(CLIENTID) 
@@ -83,12 +83,12 @@ steps:
     # echo $ACCESS_TOKEN | sudo docker login $(registry) --username $ACCESS_TOKEN --password-stdin
 
 
-    sudo docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
+    docker build -t helios-core:$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
     # Tag the image with the registry
-    sudo docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
+    docker tag helios-core:$(tag) medcase.azurecr.io/helios/helios-core:$(tag)
 
     # Push the image to the Azure Container Registry
-    sudo docker push medcase.azurecr.io/helios/helios-core:$(tag)
+    docker push medcase.azurecr.io/helios/helios-core:$(tag)
 
     # chmod +x ./pipeline/build-docker.sh  # Make the script executable
     # ./pipeline/build-docker.sh 'medcase.azurecr.io/helios' 'helios-core' $(tag) './Helios.EDC/Helios.Core/Dockerfile'
