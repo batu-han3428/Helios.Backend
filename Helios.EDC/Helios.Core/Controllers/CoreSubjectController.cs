@@ -47,11 +47,11 @@ namespace Helios.Core.Controllers
             var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted && sIds.Contains(p.SiteId))
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
-                .ThenInclude(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPages.Where(p=>p.IsActive && !p.IsDeleted))
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
-                    FirstPageId = x.SubjectVisits.FirstOrDefault().SubjectVisitPages.FirstOrDefault().StudyVisitPageId,
+                    FirstPageId = x.SubjectVisits.Where(sv => sv.IsActive && !sv.IsDeleted).OrderBy(sv => sv.StudyVisit.Order).FirstOrDefault().StudyVisit.StudyVisitPages.OrderBy(a => a.Order).Select(a => a.Id).FirstOrDefault(),
                     SubjectNumber = x.SubjectNumber,
                     CreatedAt = x.CreatedAt,
                     UpdatedAt = x.UpdatedAt,
@@ -472,8 +472,10 @@ namespace Helios.Core.Controllers
                 .Include(x => x.SubjectVisitPageModuleElementComments)
                 .Include(x => x.StudyVisitPageModuleElement)
                 .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
+                .OrderBy(a => a.StudyVisitPageModuleElement.Order)
                 .Select(e => new SubjectElementModel
                 {
+                    ModuleOrder = e.StudyVisitPageModuleElement.StudyVisitPageModule.Order,
                     SubjectId = subjectId,
                     SubjectVisitPageId = pageId,
                     SubjectVisitPageModuleElementId = e.Id,
@@ -526,7 +528,7 @@ namespace Helios.Core.Controllers
                     Sdv = e.Sdv,
                     Query = e.Query,
                     IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted)
-                }).OrderBy(x => x.Order).ToListAsync();
+                }).ToListAsync();
 
             foreach (var item in result)
             {
@@ -557,7 +559,7 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            return finalList;
+            return finalList.OrderBy(x=>x.ModuleOrder).ToList();
         }
 
         [HttpPost]
@@ -823,7 +825,7 @@ namespace Helios.Core.Controllers
 
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
         {
-            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted)
+            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).OrderBy(x=>x.Order)
                 .Include(x => x.StudyVisitPages)
                 .Select(visit => new SubjectDetailMenuModel
                 {
@@ -831,6 +833,7 @@ namespace Helios.Core.Controllers
                     Title = visit.Name,
                     Children = visit.StudyVisitPages
                         .Where(page => page.IsActive && !page.IsDeleted)
+                        .OrderBy(page=>page.Order)
                         .Select(page => new SubjectDetailMenuModel
                         {
                             Id = page.Id,

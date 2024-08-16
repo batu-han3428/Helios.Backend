@@ -4,6 +4,7 @@ namespace Helios.Common.Model
 {
     public class SubjectElementModel
     {
+        public int ModuleOrder { get; set; }
         public Int64 SubjectVisitPageModuleElementId { get; set; }
         public Int64 SubjectVisitPageModuleId { get; set; }
         public Int64 SubjectId { get; set; }
