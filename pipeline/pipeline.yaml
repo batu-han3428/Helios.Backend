@@ -38,7 +38,7 @@ steps:
     apt-get install -y azure-cli
     az --version
  
-  displayName: 'Install Azure CLI and kubectl'
+  displayName: 'Install Azure CLI'
   
 - script: |
     az --version
@@ -56,8 +56,8 @@ steps:
     inlineScript: |
       echo "Listing images in ACR..."
       az acr repository list --name $(acrName) --output table
-
-      if ! command -v kubectl &> /dev/null; then
+      echo  [! command -v kubectl &> /dev/null]
+      if [! command -v kubectl &> /dev/null]; then
         sudo apt-get update
         # apt-transport-https may be a dummy package; if so, you can skip that package
         sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
@@ -72,7 +72,7 @@ steps:
 
         sudo apt-get update
         sudo apt-get install -y kubectl
-      else
+      fi
         echo "kubectl is already installed."
         kubectl version --client
       fi      
