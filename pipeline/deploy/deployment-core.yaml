@@ -5,7 +5,7 @@ metadata:
   name: helios-v3-core-api
   namespace: helios-testing
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: helios-v3-core-api
@@ -16,8 +16,9 @@ spec:
     spec:
       containers:
       - name: helios-v3-core-api
-        image:  medcase.azurecr.io/helios/helios-core:$(Build.BuildId)
+        image:  medcase.azurecr.io/helios/helios-core:v306
         ports:
+        - containerPort: 443
         - containerPort: 80
         env:
         - name: Services__Auth

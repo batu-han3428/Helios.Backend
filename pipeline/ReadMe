@@ -51,3 +51,7 @@ az vmss run-command invoke --resource-group build-server-group    --vmss-name vm
   chmod +x ./kubectl && \
   mv ./kubectl /usr/local/bin/kubectl && \
   kubectl version --client'
+
+kubectl get deployment helios-v3-core-api --namespace helios-testing
+
+kubectl apply -f ./pipeline/deploy/deployment-core.yaml --namespace helios-testing

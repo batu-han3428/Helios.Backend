@@ -130,6 +130,7 @@ steps:
     if [ $? -ne 0 ]; then
       echo "Deployment does not exist. Creating a new deployment from YAML..."
       kubectl apply -f ./pipeline/deploy/deployment-core.yaml --namespace $(kubernetesNamespace)
+      kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
     else
       echo "Deployment exists. Updating the deployment with the new image..."
       kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
