@@ -16,11 +16,14 @@ spec:
     spec:
       containers:
       - name: helios-v3-core-api
-        image:  medcase.azurecr.io/helios/helios-core:v306
+        image:  medcase.azurecr.io/helios/helios-core:v305
         ports:
-        - containerPort: 443
-        - containerPort: 80
+          - containerPort: 8080
+          # - containerPort: 8443
         env:
+        - name: ASPNETCORE_URLS
+          # value: "http://+:8080"
+          value: "http://+:8080;https://+:8081"
         - name: Services__Auth
           value: "http://10.7.0.5:80"
         - name: Services__Shared
@@ -31,13 +34,19 @@ kind: Service
 metadata:
   name: helios-v3-core-api
   namespace: helios-testing
+  # annotations:
+  #   appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+  #   appgw.ingress.kubernetes.io/override-frontend-port: "true"
 spec:
   selector:
     app: helios-v3-core-api
   ports:
-  - port: 443
-    name: tcp-443
-    targetPort: 443
-  - port: 80
-    name: tcp-80
-    targetPort: 80
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8081
+  type: ClusterIP

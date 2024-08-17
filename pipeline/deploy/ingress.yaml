@@ -5,9 +5,11 @@ metadata:
   namespace: helios-testing
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
-
+  tls:
+  - hosts:
+    -  api-v3-test.helios-crf.com
+    secretName: tls-cloudflare-2024
   rules:
     - host: api-v3-test.helios-crf.com
       http:
@@ -18,4 +20,13 @@ spec:
               service:
                 name: helios-v3-core-api
                 port:
-                  number: 80
+                  number: 8080
+      https:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: helios-v3-core-api
+                port:
+                  number: 8081
