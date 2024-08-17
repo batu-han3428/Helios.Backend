@@ -44,7 +44,7 @@ services:
       dockerfile: Helios.EDC/Helios.Core/Dockerfile
     ports:
       - "3500:8080"
-      - "3501:3501"
+      - "3501:8081"
     networks:
       v3network:
         aliases:
