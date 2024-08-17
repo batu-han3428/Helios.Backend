@@ -13,8 +13,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "3500:8080"
-      - "3501:8081"
+      - "3500:80"
+      - "3501:443"
 
   helios.shared:
     environment:

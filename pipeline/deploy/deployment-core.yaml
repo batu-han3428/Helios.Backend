@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: helios-v3-core-api
-        image:  medcase.azurecr.io/helios/helios-core:v307
+        image:  medcase.azurecr.io/helios/helios-core:v308
         ports:
           - containerPort: 8080
           - containerPort: 8081
