@@ -43,13 +43,12 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    // Swagger UI'ýn kök dizinine yönlendirme
     c.RoutePrefix = string.Empty;
 });
 
 app.UseCors("MyPolicy");
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
