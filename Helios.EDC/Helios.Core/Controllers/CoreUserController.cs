@@ -1,4 +1,5 @@
-﻿using Helios.Common.DTO;
+﻿using Helios.Caching.Services.Interfaces;
+using Helios.Common.DTO;
 using Helios.Common.Enums;
 using Helios.Common.Helpers.Api;
 using Helios.Common.Model;
@@ -17,11 +18,13 @@ namespace Helios.Core.Controllers
     {
         private CoreContext _context;
         private IUserService _userService;
+        private IRedisCacheService _cacheService;
 
-        public CoreUserController(CoreContext context, IUserService userService)
+        public CoreUserController(CoreContext context, IUserService userService, IRedisCacheService cacheService)
         {
             _context = context;
             _userService = userService;
+            _cacheService = cacheService;
         }
 
         #region Tenants     
@@ -37,7 +40,7 @@ namespace Helios.Core.Controllers
                     tenantIdsInt.Add(guid);
                 }
             }
-            return await _context.Studies.Where(x => tenantIdsInt.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
+            return await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && tenantIdsInt.Contains(x.TenantId) && !x.IsDemo).GroupBy(s => s.TenantId).Select(g => new TenantModel
             {
                 Id = g.Key,
                 ActiveStudies = g.Count().ToString()
@@ -47,7 +50,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<int> GetStudyCount(Int64? tenantId)
         {
-            return await _context.Studies.Where(x => x.TenantId == tenantId && !x.IsDemo).CountAsync();
+            return await _context.Studies.Where(x => x.IsActive && !x.IsDeleted && x.TenantId == tenantId && !x.IsDemo).CountAsync();
         }
         #endregion
 
@@ -282,7 +285,7 @@ namespace Helios.Core.Controllers
 
             if (result)
             {
-                await _userService.RemoveUserPermissions(baseDTO.StudyId);
+                await RemoveUserPermissions(baseDTO.StudyId);
 
                 return new ApiResponse<dynamic>
                 {
@@ -298,6 +301,14 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        private async Task RemoveUserPermissions(Int64 studyId)
+        {
+            string prefix = "Study:Permissions";
+            var localCacheKey = prefix + ":" + studyId;
+
+            await _cacheService.RemoveAsync(localCacheKey);
         }
 
         [HttpPost]

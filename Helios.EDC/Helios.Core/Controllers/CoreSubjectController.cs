@@ -1,4 +1,5 @@
-﻿using Helios.Common.DTO;
+﻿using Helios.Caching.Services.Interfaces;
+using Helios.Common.DTO;
 using Helios.Common.Enums;
 using Helios.Common.Helpers;
 using Helios.Common.Helpers.Api;
@@ -10,7 +11,11 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using StackExchange.Redis;
 using System.Data;
+using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Helios.Core.Controllers
 {
@@ -19,21 +24,20 @@ namespace Helios.Core.Controllers
     public class CoreSubjectController : Controller
     {
         private CoreContext _context;
-        private IStudyService _studyService;
         private IUserService _userService;
+        private IRedisCacheService _cacheService;
 
-        public CoreSubjectController(CoreContext context, IStudyService studyService, IUserService userService)
+        public CoreSubjectController(CoreContext context, IUserService userService, IRedisCacheService cacheService)
         {
             _context = context;
-            _studyService = studyService;
             _userService = userService;
+            _cacheService = cacheService;
         }
 
         [HttpGet]
         public async Task<List<SubjectDTO>> GetSubjectList(SubjectListFilterDTO dto)
         {
-            var menu = await GetSubjectDetailMenuLocal(dto.StudyId);
-            var csRes = await _studyService.SetSubjectDetailMenu(dto.StudyId, menu);
+            await SetSubjectDetailMenu(dto.StudyId);
 
             var roleSite = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == dto.StudyId && x.AuthUserId == dto.UserId && x.StudyRole != null).Include(x => x.StudyRole).Include(x => x.StudyUserSites).Select(x => new
             {
@@ -69,10 +73,46 @@ namespace Helios.Core.Controllers
                 RoleName = x.RoleName
             }).ToList();
 
-            var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, dto.StudyId);
-            var permRes = _studyService.SetUserPermissions(dto.StudyId, userPermissions);
+            await SetUserPermissions(dto.StudyId, dto.UserId);
 
             return result;
+        }
+
+        [HttpGet]
+        public async Task<UserPermissionModel> GetUserPermissions(Int64 studyId, Int64 userId)
+        {
+            if (studyId != 0)
+            {
+                string prefix = "Study:Permissions";
+                var localCacheKey = prefix + ":" + studyId;
+
+                for (; ; )
+                {
+                    var value = await _cacheService.GetAsync<UserPermissionModel>(localCacheKey);
+
+                    if (value != null)
+                    {
+                        return value;
+                    }
+                    else
+                    {
+                        await SetUserPermissions(studyId, userId);
+                    }
+                }
+            }
+            else
+                return null;
+        }
+
+        private async Task SetUserPermissions(Int64 studyId, Int64 userId)
+        {
+            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).FirstOrDefaultAsync().Select(y => y.StudyRole);
+
+            var userPermissions = await getUserPermission(role.Id, studyId);
+            string prefix = "Study:Permissions";
+            var localCacheKey = prefix + ":" + studyId;
+
+            await _cacheService.SetAsync(localCacheKey, userPermissions, new TimeSpan(100, 0, 0));
         }
 
         private async Task<UserPermissionModel> getUserPermission(Int64 roleId, Int64 studyId)
@@ -163,35 +203,34 @@ namespace Helios.Core.Controllers
             return retVal;
         }
 
-        [HttpGet]
-        public async Task<UserPermissionModel> SetUserPermissions(Int64 studyId, Int64 userId)
+        private async Task SetSubjectDetailMenu(Int64 studyId)
         {
-            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
-            {
-                RoleId = x.StudyRole.Id,
-                RoleName = x.StudyRole.Name
-            }).ToListAsync();
+            var menu = await GetSubjectDetailMenuLocal(studyId);
+            string prefix = "Study:Menu";
+            var localCacheKey = prefix + ":" + studyId;
 
-            if (role != null && role.Count > 0)
-            {
-                var userPermissions = await getUserPermission(role.FirstOrDefault().RoleId, studyId);
-                var cRes = await _studyService.SetUserPermissions(studyId, userPermissions);
-
-                return userPermissions;
-            }
-
-            return new UserPermissionModel();
-         
-           
+            await _cacheService.SetAsync(localCacheKey, menu, new TimeSpan(100, 0, 0));
         }
 
         [HttpGet]
-        public async Task<List<SubjectDetailMenuModel>> SetSubjectDetailMenu(Int64 studyId)
+        public async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenu(Int64 studyId)
         {
-            var menu = await GetSubjectDetailMenuLocal(studyId);
-            var csRes = await _studyService.SetSubjectDetailMenu(studyId, menu);
+            string prefix = "Study:Menu";
+            var localCacheKey = prefix + ":" + studyId;
 
-            return menu;
+            for (; ; )
+            {
+                var value = await _cacheService.GetAsync<List<SubjectDetailMenuModel>>(localCacheKey);
+
+                if (value != null)
+                {
+                    return value;
+                }
+                else
+                {
+                    await SetSubjectDetailMenu(studyId);
+                }
+            }
         }
 
         [HttpPost]
@@ -360,9 +399,11 @@ namespace Helios.Core.Controllers
         {
             try
             {
-                var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => dto.elementIds.Contains(x.Id) && x.IsActive && !x.IsDeleted).ToListAsync();
+                var datagrid = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == dto.datagridId);
 
-                if(subjectElements.Count < 1) return new ApiResponse<dynamic>
+                var subjectElements = await _context.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted && datagrid.SubjectVisitModuleId == x.SubjectVisitModuleId && x.StudyVisitPageModuleElement.StudyVisitPageModuleElementDetail.ParentId == datagrid.StudyVisitPageModuleElementId && x.DataGridRowId == dto.datagridRowId).ToListAsync();
+
+                if (subjectElements.Count < 1) return new ApiResponse<dynamic>
                 {
                     IsSuccess = false,
                     Message = "An unexpected error occurred."
@@ -540,7 +581,7 @@ namespace Helios.Core.Controllers
 
             foreach (var item in finalList)
             {
-                if (item.ElementType == ElementType.DataGrid)
+                if (item.ElementType == Common.Enums.ElementType.DataGrid)
                 {
                     if (item.ChildElements.Count > 0)
                     {
@@ -565,7 +606,7 @@ namespace Helios.Core.Controllers
 
             var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
 
-            if (element != null && model.Value != element.UserValue && (model.Type == ElementType.CheckList || model.Value != ""))
+            if (element != null && model.Value != element.UserValue && (model.Type == Common.Enums.ElementType.CheckList || model.Value != ""))
             {
                 element.UserValue = model.Value;
 
@@ -757,6 +798,48 @@ namespace Helios.Core.Controllers
                     .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && x.StudyVisitPageId == pageId))
                     .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
                     .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => elementIds.Contains(x.Id))).ToListAsync();
+
+                var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+                if (subjectElements.Count() < 1) return false;
+
+                subjectElements.ForEach(element =>
+                {
+                    if (element.UserValue != null && element.UserValue != "") element.UserValue = null;
+                });
+
+                _context.SubjectVisitPageModuleElements.UpdateRange(subjectElements);
+
+                return await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        [HttpPost]
+        public async Task<bool> SetDependentPageElementValue(string pageIdString, Int64 subjectId)
+        {
+            try
+            {
+                string[] pageIdsArray = pageIdString.Split(',');
+                if (pageIdsArray.Length < 1 || subjectId == 0) return false;
+                List<Int64> pageIds = new List<Int64>();
+                foreach (string id in pageIdsArray)
+                {
+                    if (Int64.TryParse(id, out Int64 l))
+                    {
+                        pageIds.Add(l);
+                    }
+                }
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                    .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && pageIds.Contains(x.StudyVisitPageId)))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted)).ToListAsync();
 
                 var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
 
@@ -995,7 +1078,7 @@ namespace Helios.Core.Controllers
                 var subjectPages = subjectData.SelectMany(x => x.SubjectVisits).SelectMany(x => x.SubjectVisitPages).ToList();
 
                 var emptyModuleIds = subjectPages
-                .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Where(x=> x.UserValue != null && x.UserValue != "").Any()))
+                .Where(page => page.SubjectVisitPageModules.All(module => !module.SubjectVisitPageModuleElements.Where(x => x.UserValue != null && x.UserValue != "").Any()))
                 .SelectMany(page => page.SubjectVisitPageModules.Select(module => module.StudyVisitPageModuleId))
                 .ToList();
 
@@ -1014,7 +1097,7 @@ namespace Helios.Core.Controllers
                             {
                                 Id = module.Id,
                                 Name = module.Name,
-                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && elm.ElementType != ElementType.Hidden).OrderBy(elm => elm.Order).Select(elm => new StudyVisitPageModuleElement
+                                StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && elm.ElementType != Common.Enums.ElementType.Hidden).OrderBy(elm => elm.Order).Select(elm => new StudyVisitPageModuleElement
                                 {
                                     Id = elm.Id,
                                     Title = elm.Title,
@@ -1059,7 +1142,7 @@ namespace Helios.Core.Controllers
                     chls.ForEach(chl =>
                     {
                         var parentElm = elements.FirstOrDefault(x => chl?.StudyVisitPageModuleElementDetail?.ParentId == x.Id);
-                        if (parentElm != null && parentElm.ElementType == ElementType.DataGrid)
+                        if (parentElm != null && parentElm.ElementType == Common.Enums.ElementType.DataGrid)
                         {
                             ids.Add(chl.Id);
                         }
@@ -1089,7 +1172,7 @@ namespace Helios.Core.Controllers
 
                                     newElm.UserValue = gh?.UserValue;
 
-                                    if (elm.ElementType == ElementType.DataGrid)
+                                    if (elm.ElementType == Common.Enums.ElementType.DataGrid)
                                     {
                                         var children = elements.Where(x => x?.StudyVisitPageModuleElementDetail?.ParentId == elm.Id).OrderBy(x => x?.StudyVisitPageModuleElementDetail?.ColunmIndex != null ? int.Parse(x?.StudyVisitPageModuleElementDetail?.ColunmIndex.ToString()) : int.MaxValue).ToList();
 
@@ -1107,8 +1190,8 @@ namespace Helios.Core.Controllers
                                                 string elmType = "";
                                                 if (chl != null)
                                                 {
-                                                    var subElm = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.StudyVisitPageModuleElementId == chl.Id && x.DataGridRowId == (i+1));
-                                                    if (chl.ElementType == ElementType.RadioList || chl.ElementType == ElementType.DropDown || chl.ElementType == ElementType.CheckList || chl.ElementType == ElementType.DropDownMulti)
+                                                    var subElm = subjectData.SelectMany(x => x.SubjectVisits).Where(x => x.StudyVisitId == visit.Id).SelectMany(x => x.SubjectVisitPages).Where(x => x.StudyVisitPageId == page.Id).SelectMany(x => x.SubjectVisitPageModules).Where(x => x.StudyVisitPageModuleId == module.Id).SelectMany(x => x.SubjectVisitPageModuleElements).FirstOrDefault(x => x.StudyVisitPageModuleElementId == chl.Id && x.DataGridRowId == (i + 1));
+                                                    if (chl.ElementType == Common.Enums.ElementType.RadioList || chl.ElementType == Common.Enums.ElementType.DropDown || chl.ElementType == Common.Enums.ElementType.CheckList || chl.ElementType == Common.Enums.ElementType.DropDownMulti)
                                                     {
                                                         elmType = chl?.StudyVisitPageModuleElementDetail?.ElementOptions;
                                                     }
@@ -1116,11 +1199,11 @@ namespace Helios.Core.Controllers
                                                     {
                                                         elmType = chl.ElementType.ToString();
                                                     }
-                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i+1).ToString(), ElementType = elmType, Value = subElm != null ? subElm.UserValue : "" });
+                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i + 1).ToString(), ElementType = elmType, Value = subElm != null ? subElm.UserValue : "" });
                                                 }
                                                 else
                                                 {
-                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i+1).ToString(), ElementType = elmType, Value = "" });
+                                                    datagridAndTableValue.Add(Guid.NewGuid().ToString(), new DatagridAndTableDicVal { ColonName = d.title + "/" + (i + 1).ToString(), ElementType = elmType, Value = "" });
                                                 }
                                                 index++;
                                             });
@@ -1148,7 +1231,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<SubjectCommentModel>> GetSubjectComments(Int64 subjectElementId)
         {
-            var comments =  await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId).Select(comment => new SubjectCommentModel
+            var comments = await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId).Select(comment => new SubjectCommentModel
             {
                 Id = comment.Id,
                 Comment = comment.Comment,
@@ -1169,7 +1252,7 @@ namespace Helios.Core.Controllers
                             c.SenderName = user.Name + " " + user.LastName;
                         }
                     });
-                } 
+                }
             }
 
             return comments;
@@ -1238,7 +1321,7 @@ namespace Helios.Core.Controllers
 
                 var comment = await _context.SubjectVisitPageModuleElementComments.FirstOrDefaultAsync(comment => comment.IsActive && !comment.IsDeleted && comment.Id == id);
 
-                if(comment == null)
+                if (comment == null)
                 {
                     return new ApiResponse<dynamic>
                     {

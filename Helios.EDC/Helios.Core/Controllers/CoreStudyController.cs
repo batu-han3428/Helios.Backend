@@ -11,8 +11,7 @@ using System.Text.Json;
 using Helios.Core.Services.Interfaces;
 using MassTransit.Initializers;
 using Helios.Common.Helpers;
-using MassTransit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Helios.Caching.Services.Interfaces;
 
 namespace Helios.Core.Controllers
 {
@@ -21,12 +20,12 @@ namespace Helios.Core.Controllers
     public class CoreStudyController : Controller
     {
         private CoreContext _context;
-        private IStudyService _studyService;
+        private IRedisCacheService _cacheService;
 
-        public CoreStudyController(CoreContext context, IStudyService studyService)
+        public CoreStudyController(CoreContext context, IRedisCacheService cacheService)
         {
             _context = context;
-            _studyService = studyService;
+            _cacheService = cacheService;
         }
 
         #region Study
@@ -160,7 +159,7 @@ namespace Helios.Core.Controllers
                         _context.Studies.Update(demoResearch);
 
 
-                        if (studyModel.CopyStudyId != null)
+                        if (studyModel.CopyStudyId != 0)
                         {
                             var demoCopyStudy= await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
                             var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).ToListAsync();
@@ -508,6 +507,20 @@ namespace Helios.Core.Controllers
                                 Message = "Unsuccessful"
                             };
                             #endregion
+                        }
+                        else
+                        {
+                            var result = await _context.SaveCoreContextAsync(studyModel.UserId, DateTimeOffset.Now) > 0;
+                            if (result)
+                            {
+                                return new ApiResponse<dynamic>
+                                {
+                                    IsSuccess = true,
+                                    Message = "Successful",
+                                    Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
+                                };
+                            }
+                           
                         }
 
                        
@@ -3847,30 +3860,36 @@ namespace Helios.Core.Controllers
 
                 foreach (var evnt in events)
                 {
-                    var elm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId);
-                    //var elm = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
-                    if (elm != null)
+                    var elmList = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
+                    
+                    if(elmList.Count > 0)
                     {
                         var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
 
-                        var hiddenElm = sourceElements.FirstOrDefault(x => x.StudyVisitPageModuleElementId == evnt.TargetElementId);
+                        var hiddenElmList = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.TargetElementId).ToList();
 
-                        if (hiddenElm == null) continue;
+                        if (hiddenElmList.Count == 0) continue;
 
                         if (evnt.ValueCondition == ActionCondition.Less)
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue > userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3878,16 +3897,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue < userValueInt))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3895,16 +3920,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x=>x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3912,16 +3943,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) <= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3929,16 +3966,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, elm.UserValue, StringComparison.Ordinal) >= 0))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -3946,16 +3989,22 @@ namespace Helios.Core.Controllers
                         {
                             if (evnt.ActionType == ActionType.HideTarget)
                             {
-                                if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                             else
                             {
-                                if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                foreach (var elm in elmList)
                                 {
-                                    hideElements.Add(hiddenElm.Id);
+                                    if (!values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue)))
+                                    {
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                    }
                                 }
                             }
                         }
@@ -4135,7 +4184,7 @@ namespace Helios.Core.Controllers
                             addNewVisitToSubjects(visitDTO.StudyId, visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4201,7 +4250,7 @@ namespace Helios.Core.Controllers
                             addNewPageToSubjects(page.StudyVisitId, page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4243,7 +4292,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4274,7 +4323,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4305,7 +4354,7 @@ namespace Helios.Core.Controllers
 
                             if (result)
                             {
-                                await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                                await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                                 return new ApiResponse<dynamic>
                                 {
@@ -4337,6 +4386,14 @@ namespace Helios.Core.Controllers
                     Message = "Unsuccessful"
                 };
             }
+        }
+
+        private async Task RemoveSubjectDetailMenu(Int64 studyId)
+        {
+            string prefix = "Study:Menu";
+            var localCacheKey = prefix + ":" + studyId;
+
+            await _cacheService.RemoveAsync(localCacheKey);
         }
 
         private bool addNewVisitToSubjects(Int64 studyId, Int64 visitId)
@@ -4490,7 +4547,7 @@ namespace Helios.Core.Controllers
                             removeVisitFromSubjects(visit.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4586,7 +4643,7 @@ namespace Helios.Core.Controllers
                             removePageFromSubjects(page.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -4662,7 +4719,7 @@ namespace Helios.Core.Controllers
                             removeModuleFromSubjects(module.Id);
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
-                            await _studyService.RemoveSubjectDetailMenu(visitDTO.StudyId);
+                            await RemoveSubjectDetailMenu(visitDTO.StudyId);
 
                             return new ApiResponse<dynamic>
                             {
@@ -5058,7 +5115,7 @@ namespace Helios.Core.Controllers
                         .FirstOrDefault(x => x.Id == studyVisitPageId);
 
                     var studyId = studyVisitPage.StudyVisit.StudyId;
-                    await _studyService.RemoveSubjectDetailMenu(studyId);
+                    await RemoveSubjectDetailMenu(studyId);
 
                     return new ApiResponse<dynamic>
                     {
@@ -5999,7 +6056,7 @@ namespace Helios.Core.Controllers
 
             foreach (var mdl in subjectVisitPageModules)
             {
-                var sb = siblings.Where(x => x.SubjectVisitModuleId == mdl.Id).Select(x => x.DataGridRowId).ToList();
+                var sb = siblings.Where(x => x.SubjectVisitModuleId == mdl.Id).Select(x => x.DataGridRowId).Distinct().ToList();
 
                 if (sb.Count > 0)
                 {
@@ -7085,6 +7142,8 @@ namespace Helios.Core.Controllers
 
                 if (result)
                 {
+                    await RemoveSubjectDetailMenu(visitsToUpdate.FirstOrDefault().StudyId);
+                    
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,

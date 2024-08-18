@@ -2,7 +2,8 @@
 {
     public class DatagridRemoveDTO
     {
-        public List<Int64> elementIds { get; set; }
+        public Int64 datagridId { get; set; }
+        public int datagridRowId { get; set; }
         public bool singleLine { get; set; }
     }
 }
