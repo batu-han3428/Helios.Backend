@@ -20,14 +20,14 @@ spec:
             secretName: tls-cloudflare-2024
       containers:
       - name: helios-v3-core-api
-        image:  medcase.azurecr.io/helios/helios-core:v309
+        image:  medcase.azurecr.io/helios/helios-core:v310
         volumeMounts:
             - name: secret-volume
               mountPath: "/etc/ssl/certs"
               readOnly: true
         ports:
-          - containerPort: 80
-          - containerPort: 443
+          - containerPort: 8080
+          - containerPort: 8001
         env:
         - name: ASPNETCORE_Kestrel__Certificates__Default__Path
           value: "/etc/ssl/certs/tls.crt" # Path to the mounted certificate
