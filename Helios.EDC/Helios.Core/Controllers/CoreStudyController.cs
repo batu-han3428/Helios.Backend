@@ -1158,20 +1158,21 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<VisitModel>> GetVisits(Int64 studyId)
         {
-            return await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId).Include(x => x.StudyVisitPages).ThenInclude(x => x.StudyVisitPageModules).Select(x => new VisitModel
+            return await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId)
+                .Select(visit => new VisitModel
             {
-                Id = x.Id,
-                Name = x.Name,
-                VisitType = x.VisitType,
-                Order = x.Order,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt,
-                Children = x.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
+                Id = visit.Id,
+                Name = visit.Name,
+                VisitType = visit.VisitType,
+                Order = visit.Order,
+                CreatedAt = visit.CreatedAt,
+                UpdatedAt = visit.UpdatedAt,
+                Children = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
                 {
                     Id = page.Id,
                     Name = page.Name,
                     Order = page.Order,
-                    CreatedAt = x.CreatedAt,
+                    CreatedAt = page.CreatedAt,
                     UpdatedAt = page.UpdatedAt,
                     EPro = page.EPro,
                     Children = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new VisitModel
@@ -1179,11 +1180,11 @@ namespace Helios.Core.Controllers
                         Id = module.Id,
                         Name = module.Name,
                         Order = module.Order,
-                        CreatedAt = x.CreatedAt,
+                        CreatedAt = module.CreatedAt,
                         UpdatedAt = module.UpdatedAt
                     }).ToList()
                 }).ToList()
-            }).ToListAsync();
+            }).AsNoTracking().ToListAsync();
         }
 
         [HttpPost]
@@ -4443,8 +4444,8 @@ namespace Helios.Core.Controllers
             {
                 if (visitDTO.Type == VisitStatu.visit.ToString())
                 {
-                    var visit = await _context.StudyVisits
-                        .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted).Select(visit => new StudyVisit
+                    var visits = await _context.StudyVisits
+                        .Where(v => v.StudyId == visitDTO.StudyId && v.IsActive && !v.IsDeleted).Select(visit => new StudyVisit
                         {
                             Id = visit.Id,
                             CreatedAt = visit.CreatedAt,
@@ -4527,7 +4528,9 @@ namespace Helios.Core.Controllers
                                 Permissions = page.Permissions
                             }).ToList(),
                             Permissions = visit.Permissions
-                        }).AsSplitQuery().FirstOrDefaultAsync();
+                        }).AsSplitQuery().ToListAsync();
+
+                    var visit = visits.FirstOrDefault(x => x.Id == visitDTO.Id);
 
                     if (visit != null)
                     {
@@ -4540,11 +4543,21 @@ namespace Helios.Core.Controllers
                         var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visit.StudyId);
                         study.UpdatedAt = DateTimeOffset.Now;
 
+                        var otherVisits = visits.Where(x => x.Id != visit.Id && x.Order > visit.Order).OrderBy(x=>x.Order).ToList();
+
+                        otherVisits.ForEach((x) =>
+                        {
+                            x.Order = (x.Order - 1);
+                        });
+
+                        _context.StudyVisits.UpdateRange(otherVisits);
+
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                         if (result)
                         {
                             removeVisitFromSubjects(visit.Id);
+
                             result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
                             await RemoveSubjectDetailMenu(visitDTO.StudyId);
@@ -4559,8 +4572,8 @@ namespace Helios.Core.Controllers
                 }
                 else if (visitDTO.Type == VisitStatu.page.ToString())
                 {
-                    var page = await _context.StudyVisitPages
-                       .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted).Select(page => new StudyVisitPage
+                    var pages = await _context.StudyVisitPages
+                       .Where(v => v.StudyVisitId == visitDTO.ParentId && v.IsActive && !v.IsDeleted).Select(page => new StudyVisitPage
                        {
                            Id = page.Id,
                            AddedById = page.AddedById,
@@ -4625,7 +4638,9 @@ namespace Helios.Core.Controllers
                                StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
                            }).ToList(),
                            Permissions = page.Permissions
-                       }).AsSplitQuery().FirstOrDefaultAsync();
+                       }).AsSplitQuery().ToListAsync();
+
+                    var page = pages.FirstOrDefault(x => x.Id == visitDTO.Id);
 
                     if (page != null)
                     {
@@ -4635,6 +4650,15 @@ namespace Helios.Core.Controllers
 
                         var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
                         study.UpdatedAt = DateTimeOffset.Now;
+
+                        var otherPages = pages.Where(x => x.Id != page.Id && x.Order > page.Order).OrderBy(x => x.Order).ToList();
+
+                        otherPages.ForEach((x) =>
+                        {
+                            x.Order = (x.Order - 1);
+                        });
+
+                        _context.StudyVisitPages.UpdateRange(otherPages);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -4655,55 +4679,57 @@ namespace Helios.Core.Controllers
                 }
                 else if (visitDTO.Type == VisitStatu.module.ToString())
                 {
-                    var module = await _context.StudyVisitPageModules
-                       .Where(v => v.Id == visitDTO.Id && v.IsActive && !v.IsDeleted).Select(module => new StudyVisitPageModule
-                       {
-                           Id = module.Id,
-                           AddedById = module.AddedById,
-                           CreatedAt = module.CreatedAt,
-                           UpdatedAt = module.UpdatedAt,
-                           UpdatedById = module.UpdatedById,
-                           IsActive = module.IsActive,
-                           IsDeleted = module.IsDeleted,
-                           TenantId = module.TenantId,
-                           StudyVisitPageId = module.StudyVisitPageId,
-                           Name = module.Name,
-                           ReferenceKey = module.ReferenceKey,
-                           VersionKey = module.VersionKey,
-                           Order = module.Order,
-                           StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
-                           {
-                               Id = element.Id,
-                               CreatedAt = element.CreatedAt,
-                               AddedById = element.AddedById,
-                               UpdatedAt = element.UpdatedAt,
-                               UpdatedById = element.UpdatedById,
-                               IsActive = element.IsActive,
-                               IsDeleted = element.IsDeleted,
-                               TenantId = element.TenantId,
-                               StudyVisitPageModuleId = element.StudyVisitPageModuleId,
-                               ElementType = element.ElementType,
-                               ElementName = element.ElementName,
-                               Title = element.Title,
-                               IsTitleHidden = element.IsTitleHidden,
-                               Order = element.Order,
-                               Description = element.Description,
-                               Width = element.Width,
-                               IsHidden = element.IsHidden,
-                               IsRequired = element.IsRequired,
-                               IsDependent = element.IsDependent,
-                               IsRelated = element.IsRelated,
-                               IsReadonly = element.IsReadonly,
-                               CanMissing = element.CanMissing,
-                               ReferenceKey = element.ReferenceKey,
-                               StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
-                               StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
-                               StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
-                               StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
-                           }).ToList(),
-                           StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
-                           StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
-                       }).AsSplitQuery().FirstOrDefaultAsync();
+                    var modules = await _context.StudyVisitPageModules
+                    .Where(v => v.StudyVisitPageId == visitDTO.ParentId && v.IsActive && !v.IsDeleted).Select(module => new StudyVisitPageModule
+                    {
+                        Id = module.Id,
+                        AddedById = module.AddedById,
+                        CreatedAt = module.CreatedAt,
+                        UpdatedAt = module.UpdatedAt,
+                        UpdatedById = module.UpdatedById,
+                        IsActive = module.IsActive,
+                        IsDeleted = module.IsDeleted,
+                        TenantId = module.TenantId,
+                        StudyVisitPageId = module.StudyVisitPageId,
+                        Name = module.Name,
+                        ReferenceKey = module.ReferenceKey,
+                        VersionKey = module.VersionKey,
+                        Order = module.Order,
+                        StudyVisitPageModuleElements = module.StudyVisitPageModuleElements.Select(element => new StudyVisitPageModuleElement()
+                        {
+                            Id = element.Id,
+                            CreatedAt = element.CreatedAt,
+                            AddedById = element.AddedById,
+                            UpdatedAt = element.UpdatedAt,
+                            UpdatedById = element.UpdatedById,
+                            IsActive = element.IsActive,
+                            IsDeleted = element.IsDeleted,
+                            TenantId = element.TenantId,
+                            StudyVisitPageModuleId = element.StudyVisitPageModuleId,
+                            ElementType = element.ElementType,
+                            ElementName = element.ElementName,
+                            Title = element.Title,
+                            IsTitleHidden = element.IsTitleHidden,
+                            Order = element.Order,
+                            Description = element.Description,
+                            Width = element.Width,
+                            IsHidden = element.IsHidden,
+                            IsRequired = element.IsRequired,
+                            IsDependent = element.IsDependent,
+                            IsRelated = element.IsRelated,
+                            IsReadonly = element.IsReadonly,
+                            CanMissing = element.CanMissing,
+                            ReferenceKey = element.ReferenceKey,
+                            StudyVisitPageModuleElementDetail = element.StudyVisitPageModuleElementDetail,
+                            StudyVisitPageModuleElementEvents = element.StudyVisitPageModuleElementEvents,
+                            StudyVisitPageModuleCalculationElementDetails = element.StudyVisitPageModuleCalculationElementDetails,
+                            StudyVisitPageModuleElementValidationDetails = element.StudyVisitPageModuleElementValidationDetails
+                        }).ToList(),
+                        StudyVisitPageModuleElementEvent = module.StudyVisitPageModuleElementEvent,
+                        StudyVisitPageModuleCalculationElementDetail = module.StudyVisitPageModuleCalculationElementDetail
+                    }).AsSplitQuery().ToListAsync();
+
+                    var module = modules.FirstOrDefault(x => x.Id == visitDTO.Id);
 
                     if (module != null)
                     {
@@ -4711,6 +4737,15 @@ namespace Helios.Core.Controllers
 
                         var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
                         study.UpdatedAt = DateTimeOffset.Now;
+
+                        var otherModules = modules.Where(x => x.Id != module.Id && x.Order > module.Order).OrderBy(x => x.Order).ToList();
+
+                        otherModules.ForEach((x) =>
+                        {
+                            x.Order = (x.Order - 1);
+                        });
+
+                        _context.StudyVisitPageModules.UpdateRange(otherModules);
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
 
@@ -7114,7 +7149,7 @@ namespace Helios.Core.Controllers
                     var newData = visitList.FirstOrDefault(d => d.Id == visit.Id);
                     if (newData != null)
                     {
-                        visit.Order = newData.Order;
+                        if (visit.Order != newData.Order) visit.Order = newData.Order;
                     }
                 });
 
@@ -7128,15 +7163,43 @@ namespace Helios.Core.Controllers
                     }
                 });
 
+                var updatedModules = new List<(long ModuleId, long? NewParentId)>();
+
                 modulesToUpdate.ForEach(module =>
                 {
                     var newData = moduleList.FirstOrDefault(d => d.Id == module.Id);
                     if (newData != null)
                     {
-                        if (module.StudyVisitPageId != newData.ParentId && newData.ParentId != null) module.StudyVisitPageId = newData.ParentId.Value;
-                        if (module.Order != module.Order) module.Order = newData.Order;
+                        if (module.StudyVisitPageId != newData.ParentId && newData.ParentId != null) { 
+                            module.StudyVisitPageId = newData.ParentId.Value;
+                            updatedModules.Add((module.Id, newData.ParentId));
+                        }
+                        if (module.Order != newData.Order) module.Order = newData.Order;
                     }
                 });
+
+                var updatedModuleIds = updatedModules.Select(u => u.ModuleId).ToList();
+
+                if (updatedModuleIds.Count > 0)
+                {
+                    var subjectModules = await _context.Subjects
+                    .Where(x => x.StudyId == baseDTO.StudyId && x.IsActive && !x.IsDeleted)
+                    .Include(x => x.SubjectVisits.Where(a => a.IsActive && !a.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPages.Where(a => a.IsActive && !a.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(a => a.IsActive && !a.IsDeleted))
+                    .ToListAsync();
+
+                    subjectModules.SelectMany(a => a.SubjectVisits).SelectMany(a => a.SubjectVisitPages).SelectMany(a => a.SubjectVisitPageModules).ToList().ForEach((x) =>
+                    {
+                        var newModule = updatedModules.FirstOrDefault(d => d.ModuleId == x.StudyVisitPageModuleId);
+                        if (!newModule.Equals(default((long ModuleId, long? NewParentId))))
+                        {
+                            var sPages = subjectModules.SelectMany(a => a.SubjectVisits).SelectMany(a => a.SubjectVisitPages).ToList();
+                            var sPage = sPages.FirstOrDefault(a => a.StudyVisitPageId == newModule.NewParentId.Value);
+                            if (sPage != null) x.SubjectVisitPageId = sPage.Id;
+                        }
+                    });
+                }
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
