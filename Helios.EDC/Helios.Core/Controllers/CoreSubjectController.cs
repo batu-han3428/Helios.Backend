@@ -11,11 +11,7 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using StackExchange.Redis;
 using System.Data;
-using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Helios.Core.Controllers
 {
@@ -611,7 +607,7 @@ namespace Helios.Core.Controllers
             if (element != null && model.Value != element.UserValue && (model.Type == Common.Enums.ElementType.CheckList || model.Value != ""))
             {
                 element.UserValue = model.Value;
-
+                element.MissingData = false;
                 _context.SubjectVisitPageModuleElements.Update(element);
                 result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
 
@@ -1336,6 +1332,40 @@ namespace Helios.Core.Controllers
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
                 _context.SubjectVisitPageModuleElementComments.Remove(comment);
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetSubjectMissingData(SubjectMissingDataDTO dto)
+        {
+            try
+            {
+                var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.ElementId);
+
+                if (elm == null) return new ApiResponse<dynamic>{ IsSuccess = false, Message = "An unexpected error occurred." };
+
+                elm.UserValue = dto.Value;
+                elm.MissingData = true;
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                _context.SubjectVisitPageModuleElements.Update(elm);
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
