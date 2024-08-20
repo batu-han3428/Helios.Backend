@@ -254,7 +254,7 @@ namespace Helios.Core.Controllers
                     .FirstOrDefaultAsync(x => x.Id == model.StudyId && x.IsActive && !x.IsDeleted);
 
                 var site = study.Sites.FirstOrDefault(x => x.Id == model.SiteId);
-                var subjectsInSite = await _context.Subjects.Where(x => x.SiteId == model.SiteId && x.IsActive && !x.IsDeleted).ToListAsync();
+                var subjectsInSite = await _context.Subjects.Where(x => x.SiteId == model.SiteId && !x.IsDeleted).ToListAsync();
 
                 if (site.MaxEnrolmentCount > 0 && site.MaxEnrolmentCount <= subjectsInSite.Count)
                 {
