@@ -24,4 +24,9 @@ namespace Helios.Common.DTO
         public DateTimeOffset LastUpdatedOn { get; set; }
         public string UserRoleName { get; set; }
     }
+    public class TenantUserListDTO
+    {
+        public List<TenantUserDTO> TenantUserList { get; set; }
+        public int TenantUserLimit { get; set; }
+    }
 }

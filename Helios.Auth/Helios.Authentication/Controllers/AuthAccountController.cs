@@ -20,7 +20,7 @@ namespace Helios.Authentication.Controllers
         private AuthenticationContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;     
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IBaseService _baseService;
         private readonly IEmailService _emailService;
@@ -67,14 +67,14 @@ namespace Helios.Authentication.Controllers
                 if (user != null)
                 {
                     var selectRole = (Roles)role;
-                    
+
                     var existsUserRole = await _userManager.IsInRoleAsync(user, selectRole.ToString());
                     if (!existsUserRole)
                     {
                         var roleDb = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == selectRole.ToString());
                         await _context.UserRoles.AddAsync(new ApplicationUserRole
                         {
-                            User= user,
+                            User = user,
                             UserId = user.Id,
                             Role = roleDb,
                             RoleId = roleDb.Id,
@@ -104,7 +104,7 @@ namespace Helios.Authentication.Controllers
 
                 throw;
             }
-          
+
         }
 
         private async Task<bool> UserActiveControl(ApplicationUser user)
@@ -113,17 +113,17 @@ namespace Helios.Authentication.Controllers
             {
                 return true;
             }
-            
+
             if (user.UserRoles.Any(x => x.Role.Name == Roles.SystemAdmin.ToString()))
             {
-                bool result =  await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
+                bool result = await _context.SystemAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
 
                 if (result)
                 {
                     return result;
                 }
             }
-            
+
             if (user.UserRoles.Any(x => x.Role.Name == Roles.TenantAdmin.ToString()))
             {
                 bool result = await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == user.Id);
@@ -133,7 +133,7 @@ namespace Helios.Authentication.Controllers
                     return result;
                 }
             }
-            
+
             if (user.UserRoles.Any(x => x.Role.Name == Roles.StudyUser.ToString()))
             {
                 bool result = await _coreService.StudyUserActiveControl(user.Id);
@@ -151,7 +151,7 @@ namespace Helios.Authentication.Controllers
         {
             try
             {
-                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);             
+                var user = _userManager.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefault(p => p.Email == model.Email);
                 if (user != null)
                 {
                     if (!user.IsActive)
@@ -260,7 +260,7 @@ namespace Helios.Authentication.Controllers
                         List<Int64> tenantIds = null;
                         List<Int64> studyIds = null;
 
-                        if (user.UserRoles.Any(x=>x.Role.Name == Roles.TenantAdmin.ToString() || x.Role.Name == Roles.StudyUser.ToString()))
+                        if (user.UserRoles.Any(x => x.Role.Name == Roles.TenantAdmin.ToString() || x.Role.Name == Roles.StudyUser.ToString()))
                         {
                             tenantIds = await GetUserTenantIds(user.Id);
                             studyIds = await _coreService.GetUserStudyIds(user.Id);
@@ -289,7 +289,7 @@ namespace Helios.Authentication.Controllers
                             };
                         }
                     }
-                }               
+                }
 
                 return new ApiResponse<dynamic>
                 {
@@ -414,7 +414,7 @@ namespace Helios.Authentication.Controllers
                     IsSuccess = false,
                     Message = "Beklenmeyen bir hata oluştu."
                 };
-            } 
+            }
         }
 
         [HttpGet]
@@ -600,13 +600,20 @@ namespace Helios.Authentication.Controllers
         [HttpGet]
         public async Task<List<Int64>> GetUserTenantIds(Int64 userId)
         {
-            return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x=>x.TenantId).ToListAsync();
+            return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x => x.TenantId).ToListAsync();
         }
 
         [HttpGet]
         public async Task<int> GetUserTenantCount(Int64 userId)
         {
             return await _context.TenantAdmins.CountAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId);
+        }
+        [HttpGet]
+        public async Task<int> GetTenantUserLimit(Int64 tenantId)
+        {
+            var tenant = await _context.Tenants.Where(x => x.IsActive && !x.IsDeleted && x.Id == tenantId).FirstOrDefaultAsync();
+            var userlimit = tenant?.UserLimit != null ? int.Parse(tenant.UserLimit) : 0;
+            return userlimit;
         }
         [HttpGet]
         public async Task<int> GetUserSystemCount(Int64 userId)
