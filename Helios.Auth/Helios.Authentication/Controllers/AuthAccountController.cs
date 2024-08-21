@@ -101,7 +101,6 @@ namespace Helios.Authentication.Controllers
             }
             catch (Exception e)
             {
-
                 throw;
             }
 
@@ -162,21 +161,22 @@ namespace Helios.Authentication.Controllers
                             Message = "Your account has been deactivated, please contact the system administrator."
                         };
                     }
-
                     if (user.AccessFailedCount == 5)
                     {
-                        user.IsActive = false;
-                        var updateResult = await _userManager.UpdateAsync(user);
-                        if (updateResult.Succeeded)
+                        string newPassword = StringExtensionsHelper.GenerateRandomPassword();
+                        var removeResult = await _userManager.RemovePasswordAsync(user);
+                        var passResult = await _userManager.AddPasswordAsync(user, newPassword);
+
+                        if (passResult.Succeeded)
                         {
                             return new ApiResponse<dynamic>
                             {
                                 IsSuccess = false,
-                                Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account."
+                                Message = "Your account has been locked because you exceeded the login attempt limit. Please contact the system administrator to open your account.",
+                                Values = new { Change = user.AccessFailedCount.ToString() }
                             };
                         }
                     }
-
                     bool isActive = await UserActiveControl(user);
 
                     if (!isActive)
@@ -345,10 +345,10 @@ namespace Helios.Authentication.Controllers
                     return new ApiResponse<dynamic> { IsSuccess = false, Message = "User is inactive!" };
                 }
 
-                if (user.AccessFailedCount > 4)
-                {
-                    return new ApiResponse<dynamic> { IsSuccess = false, Message = "Your account has been deactivated because you have logged in incorrectly 5 times. Please contact the system administrator." };
-                }
+                //if (user.AccessFailedCount > 4)
+                //{
+                //    return new ApiResponse<dynamic> { IsSuccess = false, Message = "Your account has been deactivated because you have logged in incorrectly 5 times. Please contact the system administrator." };
+                //}
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
