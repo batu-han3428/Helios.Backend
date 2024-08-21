@@ -472,6 +472,7 @@ namespace Helios.Authentication.Controllers
                 user.LastChangePasswordDate = DateTime.UtcNow;
                 user.EmailConfirmed = true;
                 user.IsResetPasswordMailSent = false;
+                user.AccessFailedCount = 0;
                 var passwordResult = await _userManager.UpdateAsync(user);
                 if (passwordResult.Succeeded)
                 {
