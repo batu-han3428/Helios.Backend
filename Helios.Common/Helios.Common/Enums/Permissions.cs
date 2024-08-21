@@ -41,10 +41,6 @@ namespace Helios.Common.Enums
 
         [Description("On-site SDV")]
         Monitoring_Sdv = 111,
-        [Description("Verification")]
-        Monitoring_Verification = 112,
-        [Description("Remote SDV")]
-        Monitoring_RemoteSdv = 113,
         [Description("Query")]
         Monitoring_QueryView = 114,
         [Description("Close auto query")]

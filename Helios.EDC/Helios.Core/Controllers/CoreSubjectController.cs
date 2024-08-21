@@ -136,10 +136,8 @@ namespace Helios.Core.Controllers
                 CanMonitoringPageUnFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnFreeze),
                 CanMonitoringPageUnLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnLock),
                 CanMonitoringQueryView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView),
-                CanMonitoringRemoteSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv),
                 CanMonitoringSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv),
                 CanMonitoringSeePageActionAudit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_SeePageActionAudit),
-                CanMonitoringVerification = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Verification),
                 CanFormAddAdverseEvent = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AddAdverseEvent),
                 CanFormAddMultiVisit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AddMultiVisit),
                 CanFormAEArchive = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AEArchive),
@@ -600,39 +598,60 @@ namespace Helios.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<dynamic>> AutoSaveSubjectData(SubjectElementShortModel model)
         {
-            var result = new ApiResponse<dynamic>();
-
-            var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
-
-            if (element != null && model.Value != element.UserValue && (model.Type == Common.Enums.ElementType.CheckList || model.Value != ""))
+            try
             {
-                element.UserValue = model.Value;
-                element.MissingData = false;
-                _context.SubjectVisitPageModuleElements.Update(element);
-                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted);
 
-                if (result.IsSuccess)
+                if (element != null && model.Value != element.UserValue)
                 {
-                    var hdnResult = await SetHidden(model.Id);
-                    var calcResult = await SetCalculation(model.Id);
+                    element.UserValue = model.Value;
+                    element.MissingData = false;
+                    element.Sdv = false;
+                    _context.SubjectVisitPageModuleElements.Update(element);
+                    var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
 
-                    var subject = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Select(x => x.SubjectVisitModule).Select(x => x.SubjectVisitPage).Select(x => x.SubjectVisit).Select(x => x.Subject);
+                    if (result)
+                    {
+                        var hdnResult = await SetHidden(model.Id);
+                        var calcResult = await SetCalculation(model.Id);
 
-                    subject.UpdatedAt = DateTimeOffset.UtcNow;
-                    _context.Subjects.Update(subject);
-                    result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                        var subject = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Select(x => x.SubjectVisitModule).Select(x => x.SubjectVisitPage).Select(x => x.SubjectVisit).Select(x => x.Subject);
+
+                        subject.UpdatedAt = DateTimeOffset.UtcNow;
+                        _context.Subjects.Update(subject);
+                        var result1 = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+                        return new ApiResponse<dynamic>
+                        {
+                            IsSuccess = result1,
+                            Message = result1 ? "Successful" : "Unsuccessful"
+                        };
+                    }
+                }
+                else if (element != null && model.Value == element.UserValue)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "No changes were made. Please make changes to save."
+                    };
                 }
 
-                if (result.IsSuccess)
-                    result.Message = "Successfully.";
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
             }
-            //else
-            //{
-            //    result.IsSuccess = false;
-            //    result.Message = "Operation failed!";
-            //}
-
-            return result;
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+            
         }
 
         private async Task<bool> SetHidden(Int64 elementId)
@@ -734,6 +753,7 @@ namespace Helios.Core.Controllers
                     if (thisCalSbjElm != null && thisCalTarElms.Any(x => x.UserValue == "" || x.UserValue == null))
                     {
                         thisCalSbjElm.UserValue = "";
+                        thisCalSbjElm.Sdv = false;
                     }
                     else
                     {
@@ -757,6 +777,7 @@ namespace Helios.Core.Controllers
                                 var mathfnCall = " executeScript();";
                                 var mathResult = engine.Evaluate(finalJs + mathfnCall);
                                 thisCalSbjElm.UserValue = mathResult.ToString();
+                                if("[undefined]" != mathResult.ToString()) thisCalSbjElm.Sdv = true;
                             }
                         }
                         catch (Exception ex)
@@ -1362,10 +1383,53 @@ namespace Helios.Core.Controllers
 
                 elm.UserValue = dto.Value;
                 elm.MissingData = true;
+                elm.Sdv = false;
 
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
                 _context.SubjectVisitPageModuleElements.Update(elm);
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetSubjectSdv(Int64 id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "An unexpected error occurred."
+                    };
+                }
+
+                var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == id);
+
+                if (elm == null) return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
+
+                elm.Sdv = !elm.Sdv;
+
+                _context.SubjectVisitPageModuleElements.Update(elm);
+
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
