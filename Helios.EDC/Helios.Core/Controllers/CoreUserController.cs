@@ -193,7 +193,7 @@ namespace Helios.Core.Controllers
                 RoleId = x.StudyRole.Id,
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
-            if (role.Count()>0)
+            if (role.Count() > 0)
             {
                 var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
                 permissionListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv || x.PermissionKey == (int)StudyRolePermission.Monitoring_Verification || x.PermissionKey == (int)StudyRolePermission.Monitoring_RemoteSdv);
@@ -207,7 +207,7 @@ namespace Helios.Core.Controllers
             return permissionListModel;
         }
         [HttpGet]
-        public async Task<bool> GetHasRole(Int64 studyId,Int64 userId)
+        public async Task<bool> GetHasRole(Int64 studyId, Int64 userId)
         {
             var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
             {
@@ -216,7 +216,7 @@ namespace Helios.Core.Controllers
             }).ToListAsync();
             if (role.Count() > 0)
             {
-              return true;
+                return true;
             }
             return false;
         }
@@ -620,6 +620,61 @@ namespace Helios.Core.Controllers
                 study.UpdatedAt = DateTimeOffset.Now;
 
                 var result = await _context.SaveCoreContextAsync(studyUserModel.UserId, DateTimeOffset.Now);
+
+                if (result > 0)
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = true,
+                        Message = "Successful"
+                    };
+                }
+                else
+                {
+                    return new ApiResponse<dynamic>
+                    {
+                        IsSuccess = false,
+                        Message = "Unsuccessful"
+                    };
+                }
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> ActivePassiveByAuthUserId(Int64 authUserId, Int64 tenantId)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+            if (authUserId != 0 && tenantId != 0)
+            {
+                var users = await _context.StudyUsers.Where(x => x.AuthUserId == authUserId && x.TenantId == tenantId && !x.IsDeleted).Include(x => x.StudyUserSites).ToListAsync();
+
+                if (users.Count() != 0)
+                {
+                    foreach (var user in users)
+                    {
+                        foreach (var site in user.StudyUserSites.Where(x => !user.IsActive ? !x.IsActive && !x.IsDeleted : x.IsActive && !x.IsDeleted))
+                        {
+                            site.IsActive = !user.IsActive;
+                        }
+
+                        user.IsActive = !user.IsActive;
+                    }
+                }
+
+                var studys = await _context.Studies.Where(x => users.Select(t=>t.StudyId).Contains(x.Id)).ToListAsync();
+                foreach (var study in studys)
+                {
+                    study.UpdatedAt = DateTimeOffset.Now;
+                }
+               
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now);
 
                 if (result > 0)
                 {
