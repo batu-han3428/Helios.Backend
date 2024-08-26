@@ -9,7 +9,7 @@ pool:
 parameters:
 - name: deployToAKS
   type: boolean
-  default: false
+  default: true
   displayName: 'Deploy to Test?'
 
 variables:
