@@ -7205,7 +7205,7 @@ namespace Helios.Core.Controllers
 
                 if (result)
                 {
-                    await RemoveSubjectDetailMenu(visitsToUpdate.FirstOrDefault().StudyId);
+                    await RemoveSubjectDetailMenu(baseDTO.StudyId);
                     
                     return new ApiResponse<dynamic>
                     {
