@@ -1,0 +1,139 @@
+trigger:
+  branches:
+    include:
+      - test
+
+pool:
+  name: 'vmssagents-pool'
+
+parameters:
+- name: deployToAKS
+  type: boolean
+  default: true
+  displayName: 'Deploy to Test?'
+
+variables:
+ 
+  # Azure Container Registry details
+  acrName: 'medcase'
+  registry: 'medcase.azurecr.io'
+  tag: '$(Build.BuildId)'
+
+  # Kubernetes details
+  aksClusterName: 'medcase-cluster-dev'
+  kubernetesNamespace: 'helios-testing'  # e.g., production
+  aksResourceGroup: 'medcase-cluster'  
+  azureServiceConnection: 'Medcase-Azure-Cli' 
+  dockerRegistryServiceConnection: 'medcase'
+steps:
+- checkout: self  # This is the correct way to reference the checkout step
+
+- script: |
+    echo "Current user: $(whoami)"
+    id
+  displayName: 'Check user details'
+
+- script: |
+    echo "Installing Azure CLI..."
+    apt-get install -y azure-cli
+    az --version
+ 
+  displayName: 'Install Azure CLI'
+  
+- script: |
+    az --version
+  displayName: 'Verify Azure CLI Installation'
+
+- script: |
+    az login --service-principal -u $(CLIENTID) -p $(CLIENTSECRET) --tenant $(TENANTID)
+  displayName: 'Login Azure CLI'
+
+- script: |
+    #!/bin/bash
+    echo "Listing images in ACR..."
+    az acr repository list --name $(acrName) --output table
+    echo "=> Check if kubectl is installed"
+    echo command -v kubectl &> /dev/null
+    # Check if kubectl is installed
+    if command -v kubectl &> /dev/null; then
+        echo "kubectl is already installed."
+    else
+        echo "kubectl not found. Installing..."
+
+        sudo apt-get update
+        # apt-transport-https may be a dummy package; if so, you can skip that package
+        sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+
+        # If the folder `/etc/apt/keyrings` does not exist, it should be created before the curl command, read the note below.
+        # sudo mkdir -p -m 755 /etc/apt/keyrings
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
+
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
+
+        sudo apt-get update
+        sudo apt-get install -y kubectl
+    fi
+    kubectl version --client
+  displayName: 'Check and Install kubectl'
+
+- script: |
+    az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName) --overwrite-existing
+
+    # Run your kubectl commands
+    kubectl get nodes
+    kubectl get pods -n $(kubernetesNamespace)
+  displayName: 'AKS nodes and pods'
+
+- script: |
+    ls -R /var/lib/docker
+    echo "Listing files..."
+    ls -R .
+    if [ ! -f "./Helios.sln" ]; then
+      echo "Project file not found!"
+      exit 1
+    fi
+     if [ ! -f "./pipeline/build-docker.sh" ]; then
+      echo "build-docker.sh file not found!"
+      exit 1
+    fi
+  displayName: 'Verify project file exists'
+
+
+
+
+- script: |
+    sudo usermod -aG docker $(whoami)
+
+    newgrp docker << EOF
+
+    echo 'Running acr login ....'
+    az acr login --name $(acrName)
+    
+    # Your Docker commands here
+    docker build -t helios-core:v$(tag) -f './Helios.EDC/Helios.Core/Dockerfile' .
+    # Tag the image with the registry
+    docker tag helios-core:v$(tag) medcase.azurecr.io/helios/helios-core:v$(tag)
+
+    # Push the image to the Azure Container Registry
+    docker push medcase.azurecr.io/helios/helios-core:v$(tag)
+
+    EOF
+  displayName: '[Core Api] Build and Push Docker Image'
+
+- script: |
+    echo "Getting Aks credentials..."
+    az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksClusterName)
+    echo "Checking if deployment exists..."
+    kubectl get deployment helios-v3-core-api --namespace $(kubernetesNamespace)
+    if [ $? -ne 0 ]; then
+      echo "Deployment does not exist. Creating a new deployment from YAML..."
+      kubectl apply -f ./pipeline/deploy/deployment-core.yaml --namespace $(kubernetesNamespace)
+      kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
+    else
+      echo "Deployment exists. Updating the deployment with the new image..."
+      kubectl set image deployment/helios-v3-core-api helios-v3-core-api=medcase.azurecr.io/helios/helios-core:v$(tag) --namespace $(kubernetesNamespace)
+    fi
+  displayName: 'Deploying [helios-v3-core-api] to Test'
+  condition: and(succeededOrFailed(), eq('${{ parameters.deployToAKS }}', true))
