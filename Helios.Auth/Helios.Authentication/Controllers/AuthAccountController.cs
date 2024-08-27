@@ -184,7 +184,8 @@ namespace Helios.Authentication.Controllers
                         return new ApiResponse<dynamic>
                         {
                             IsSuccess = false,
-                            Message = "Your account has been deactivated, please contact the system administrator."
+                            Message = "Your account has been deactivated, please contact the system administrator.",
+                            Values = new { HasUser = true }
                         };
                     }
 
