@@ -1377,17 +1377,35 @@ namespace Helios.Core.Controllers
         {
             try
             {
-                var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.ElementId);
+                if (dto.IsPage)
+                {
+                    var elements = await _context.SubjectVisitPageModuleElements.Where(elm => elm.IsActive && elm.IsDeleted && (elm.UserValue != null || elm.UserValue != "") && !elm.MissingData && elm.StudyVisitPageModuleElement.CanMissing).ToListAsync();
 
-                if (elm == null) return new ApiResponse<dynamic>{ IsSuccess = false, Message = "An unexpected error occurred." };
+                    if (elements.Count < 1) return new ApiResponse<dynamic> { IsSuccess = false, Message = "There is no blank space to mark as missing data." };
 
-                elm.UserValue = dto.Value;
-                elm.MissingData = true;
-                elm.Sdv = false;
+                    elements.ForEach(elm =>
+                    {
+                        elm.UserValue = dto.Value;
+                        elm.MissingData = true;
+                        elm.Sdv = false;
+                    });
+
+                    _context.SubjectVisitPageModuleElements.UpdateRange(elements);
+                }
+                else
+                {
+                    var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.ElementId);
+
+                    if (elm == null) return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
+
+                    elm.UserValue = dto.Value;
+                    elm.MissingData = true;
+                    elm.Sdv = false;
+
+                    _context.SubjectVisitPageModuleElements.Update(elm);
+                }
 
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
-
-                _context.SubjectVisitPageModuleElements.Update(elm);
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
 
