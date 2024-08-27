@@ -196,7 +196,7 @@ namespace Helios.Core.Controllers
                 RoleId = x.StudyRole.Id,
                 RoleName = x.StudyRole.Name
             }).ToListAsync();
-            if (role.Count()>0)
+            if (role.Count() > 0)
             {
                 var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
                 permissionListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv);
@@ -210,7 +210,7 @@ namespace Helios.Core.Controllers
             return permissionListModel;
         }
         [HttpGet]
-        public async Task<bool> GetHasRole(Int64 studyId,Int64 userId)
+        public async Task<bool> GetHasRole(Int64 studyId, Int64 userId)
         {
             var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
             {
@@ -219,7 +219,7 @@ namespace Helios.Core.Controllers
             }).ToListAsync();
             if (role.Count() > 0)
             {
-              return true;
+                return true;
             }
             return false;
         }

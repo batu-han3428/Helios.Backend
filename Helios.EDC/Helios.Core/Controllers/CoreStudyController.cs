@@ -161,7 +161,7 @@ namespace Helios.Core.Controllers
 
                         if (studyModel.CopyStudyId != 0)
                         {
-                            var demoCopyStudy= await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
+                            var demoCopyStudy = await _context.Studies.FirstOrDefaultAsync(x => x.EquivalentStudyId == studyModel.CopyStudyId && x.IsActive && !x.IsDeleted);
                             var copyStudyVisits = await _context.StudyVisits.Where(x => x.StudyId == demoCopyStudy.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
                             List<StudyVisit> visitDatas = null;
@@ -481,7 +481,7 @@ namespace Helios.Core.Controllers
                                                 {
                                                     item.ParentId = nItem.Id;
                                                 }
-                                            }                                           
+                                            }
                                         }
                                         var addedElement = addedVisits.SelectMany(x => x.StudyVisitPages).SelectMany(x => x.StudyVisitPageModules).SelectMany(x => x.StudyVisitPageModuleElements).ToList();
                                         foreach (var item in addedElement)
@@ -520,10 +520,10 @@ namespace Helios.Core.Controllers
                                     Values = new { studyId = activeResearch.Id, demoStudyId = demoResearch.Id }
                                 };
                             }
-                           
+
                         }
 
-                       
+
                     }
                     return new ApiResponse<dynamic>
                     {
@@ -1160,31 +1160,31 @@ namespace Helios.Core.Controllers
         {
             return await _context.StudyVisits.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId)
                 .Select(visit => new VisitModel
-            {
-                Id = visit.Id,
-                Name = visit.Name,
-                VisitType = visit.VisitType,
-                Order = visit.Order,
-                CreatedAt = visit.CreatedAt,
-                UpdatedAt = visit.UpdatedAt,
-                Children = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
                 {
-                    Id = page.Id,
-                    Name = page.Name,
-                    Order = page.Order,
-                    CreatedAt = page.CreatedAt,
-                    UpdatedAt = page.UpdatedAt,
-                    EPro = page.EPro,
-                    Children = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new VisitModel
+                    Id = visit.Id,
+                    Name = visit.Name,
+                    VisitType = visit.VisitType,
+                    Order = visit.Order,
+                    CreatedAt = visit.CreatedAt,
+                    UpdatedAt = visit.UpdatedAt,
+                    Children = visit.StudyVisitPages.Where(page => page.IsActive && !page.IsDeleted).Select(page => new VisitModel
                     {
-                        Id = module.Id,
-                        Name = module.Name,
-                        Order = module.Order,
-                        CreatedAt = module.CreatedAt,
-                        UpdatedAt = module.UpdatedAt
+                        Id = page.Id,
+                        Name = page.Name,
+                        Order = page.Order,
+                        CreatedAt = page.CreatedAt,
+                        UpdatedAt = page.UpdatedAt,
+                        EPro = page.EPro,
+                        Children = page.StudyVisitPageModules.Where(module => module.IsActive && !module.IsDeleted).Select(module => new VisitModel
+                        {
+                            Id = module.Id,
+                            Name = module.Name,
+                            Order = module.Order,
+                            CreatedAt = module.CreatedAt,
+                            UpdatedAt = module.UpdatedAt
+                        }).ToList()
                     }).ToList()
-                }).ToList()
-            }).AsNoTracking().ToListAsync();
+                }).AsNoTracking().ToListAsync();
         }
 
         [HttpPost]
@@ -3862,8 +3862,8 @@ namespace Helios.Core.Controllers
                 foreach (var evnt in events)
                 {
                     var elmList = sourceElements.Where(x => x.StudyVisitPageModuleElementId == evnt.SourceElementId).ToList();
-                    
-                    if(elmList.Count > 0)
+
+                    if (elmList.Count > 0)
                     {
                         var values = JsonSerializer.Deserialize<List<string>>(evnt.ActionValue);
 
@@ -3925,7 +3925,7 @@ namespace Helios.Core.Controllers
                                 {
                                     if (values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(elm.UserValue, out var userValueInt) && intValue == userValueInt) || v == elm.UserValue))
                                     {
-                                        hideElements.AddRange(hiddenElmList.Where(x=>x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
+                                        hideElements.AddRange(hiddenElmList.Where(x => x.DataGridRowId == elm.DataGridRowId).Select(x => x.Id));
                                     }
                                 }
                             }
@@ -4543,7 +4543,7 @@ namespace Helios.Core.Controllers
                         var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visit.StudyId);
                         study.UpdatedAt = DateTimeOffset.Now;
 
-                        var otherVisits = visits.Where(x => x.Id != visit.Id && x.Order > visit.Order).OrderBy(x=>x.Order).ToList();
+                        var otherVisits = visits.Where(x => x.Id != visit.Id && x.Order > visit.Order).OrderBy(x => x.Order).ToList();
 
                         otherVisits.ForEach((x) =>
                         {
@@ -6134,8 +6134,11 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> DeleteElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var studyVisitPageModuleElement = await _context.StudyVisitPageModuleElements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).Include(x => x.StudyVisitPageModuleElementDetail).FirstOrDefaultAsync();
-            var studyVisitPageModuleElementDetail = await _context.StudyVisitPageModuleElementDetails.Where(x => x.StudyVisitPageModuleElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var studyVisitPageModuleElement = await _context.StudyVisitPageModuleElements
+                .Include(x=>x.StudyVisitPageModuleElementDetail)
+                .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            var studyVisitPageModuleElementDetail = studyVisitPageModuleElement.StudyVisitPageModuleElementDetail;
             var studyVisitPageModuleElementIds = new List<Int64>();
 
             if (studyVisitPageModuleElement != null)
@@ -6185,15 +6188,15 @@ namespace Helios.Core.Controllers
                 }
 
                 //remove events
-                //var moduleEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var moduleEvents = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                //foreach (var item in moduleEvents)
-                //{
-                //    item.IsActive = false;
-                //    item.IsDeleted = true;
+                foreach (var item in moduleEvents)
+                {
+                    item.IsActive = false;
+                    item.IsDeleted = true;
 
-                //    _context.StudyVisitPageModuleElementEvents.Update(item);
-                //}
+                    _context.StudyVisitPageModuleElementEvents.Update(item);
+                }
 
                 if (studyVisitPageModuleElement.ElementType == ElementType.Calculated)
                 {
@@ -6845,15 +6848,18 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var dep = await _context.StudyVisitPageModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
+                    var deps = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    if (dep != null)
+                    foreach (var dep in deps)
                     {
+
                         dep.IsActive = false;
                         dep.IsDeleted = true;
 
                         _context.StudyVisitPageModuleElementEvents.Update(dep);
                     }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.ElementType == ElementType.Calculated)
@@ -7170,7 +7176,8 @@ namespace Helios.Core.Controllers
                     var newData = moduleList.FirstOrDefault(d => d.Id == module.Id);
                     if (newData != null)
                     {
-                        if (module.StudyVisitPageId != newData.ParentId && newData.ParentId != null) { 
+                        if (module.StudyVisitPageId != newData.ParentId && newData.ParentId != null)
+                        {
                             module.StudyVisitPageId = newData.ParentId.Value;
                             updatedModules.Add((module.Id, newData.ParentId));
                         }
@@ -7206,7 +7213,7 @@ namespace Helios.Core.Controllers
                 if (result)
                 {
                     await RemoveSubjectDetailMenu(baseDTO.StudyId);
-                    
+
                     return new ApiResponse<dynamic>
                     {
                         IsSuccess = true,
