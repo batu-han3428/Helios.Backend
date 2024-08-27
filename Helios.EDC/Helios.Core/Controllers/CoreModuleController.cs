@@ -747,15 +747,17 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var dep = await _context.ModuleElementEvents.FirstOrDefaultAsync(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted);
+                    var deps = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    if (dep != null)
+                    foreach (var dep in deps)
                     {
                         dep.IsActive = false;
                         dep.IsDeleted = true;
 
                         _context.ModuleElementEvents.Update(dep);
                     }
+
+                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
                 }
 
                 if (model.ElementType == ElementType.Calculated)
@@ -1050,7 +1052,7 @@ namespace Helios.Core.Controllers
                     var elementDetail = element.ElementDetail;
                     elementDetail.Id = 0;
                     elementDetail.IsInCalculation = false;
-                    
+
                     _context.Add(elementDetail);
 
                     element.ElementDetail = elementDetail;
@@ -1150,8 +1152,11 @@ namespace Helios.Core.Controllers
         public async Task<ApiResponse<dynamic>> DeleteElement(ElementShortModel model)
         {
             var result = new ApiResponse<dynamic>();
-            var element = await _context.Elements.Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
-            var elementDetail = await _context.ElementDetails.Where(x => x.ElementId == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            var element = await _context.Elements
+                .Include(x => x.ElementDetail)
+                .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+
+            var elementDetail = element.ElementDetail;
 
             if (element != null)
             {
@@ -1198,7 +1203,7 @@ namespace Helios.Core.Controllers
                 }
 
                 //remove events
-                var moduleEvents = await _context.ModuleElementEvents.Where(x => x.SourceElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
+                var moduleEvents = await _context.ModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.IsActive && !x.IsDeleted).ToListAsync();
 
                 foreach (var item in moduleEvents)
                 {
