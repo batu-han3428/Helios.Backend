@@ -1379,7 +1379,27 @@ namespace Helios.Core.Controllers
             {
                 if (dto.IsPage)
                 {
-                    var elements = await _context.SubjectVisitPageModuleElements.Where(elm => elm.IsActive && elm.IsDeleted && (elm.UserValue != null || elm.UserValue != "") && !elm.MissingData && elm.StudyVisitPageModuleElement.CanMissing).ToListAsync();
+                    var elements = await (from elm in _context.SubjectVisitPageModuleElements
+                                          join detail in _context.StudyVisitPageModuleElementDetails on elm.StudyVisitPageModuleElementId equals detail.StudyVisitPageModuleElementId into details
+                                          from detail in details.DefaultIfEmpty()
+                                          join parentElm in _context.StudyVisitPageModuleElements on detail.ParentId equals parentElm.Id into parentElms
+                                          from parentElm in parentElms.DefaultIfEmpty()
+                                          where elm.IsActive
+                                            && !elm.IsDeleted
+                                            && (elm.UserValue == null || elm.UserValue == "")
+                                            && !elm.MissingData
+                                            && elm.StudyVisitPageModuleElement.CanMissing
+                                            && elm.StudyVisitPageModuleElement.StudyVisitPageModule.StudyVisitPageId == dto.Id
+                                            && elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId == dto.SubjectId
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.Hidden
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.Calculated
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.File
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.ConcomitantMedication
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.AdversEventElement
+                                            && elm.StudyVisitPageModuleElement.ElementType != ElementType.Randomization
+                                            && !elm.StudyVisitPageModuleElement.IsDependent
+                                            && (parentElm == null || !parentElm.IsDependent)
+                                          select elm).ToListAsync();
 
                     if (elements.Count < 1) return new ApiResponse<dynamic> { IsSuccess = false, Message = "There is no blank space to mark as missing data." };
 
@@ -1394,7 +1414,7 @@ namespace Helios.Core.Controllers
                 }
                 else
                 {
-                    var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.ElementId);
+                    var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.Id);
 
                     if (elm == null) return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
 
