@@ -1446,11 +1446,11 @@ namespace Helios.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<dynamic>> SetSubjectSdv(Int64 id)
+        public async Task<ApiResponse<dynamic>> SetSubjectSdv(List<Int64> ids)
         {
             try
             {
-                if (id == 0)
+                if (ids.Count < 1)
                 {
                     return new ApiResponse<dynamic>
                     {
@@ -1459,13 +1459,18 @@ namespace Helios.Core.Controllers
                     };
                 }
 
-                var elm = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == id);
+                var elms = await _context.SubjectVisitPageModuleElements.Where(elm => elm.IsActive && !elm.IsDeleted && ids.Contains(elm.Id)).ToListAsync();
 
-                if (elm == null) return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
+                if (elms.Count < 1) return new ApiResponse<dynamic> { IsSuccess = false, Message = "An unexpected error occurred." };
 
-                elm.Sdv = !elm.Sdv;
+                bool isSingleElement = elms.Count == 1;
 
-                _context.SubjectVisitPageModuleElements.Update(elm);
+                elms.ForEach(elm =>
+                {
+                    elm.Sdv = isSingleElement ? !elm.Sdv : true;
+                });
+
+                _context.SubjectVisitPageModuleElements.UpdateRange(elms);
 
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
