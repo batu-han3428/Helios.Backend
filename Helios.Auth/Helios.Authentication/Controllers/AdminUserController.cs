@@ -1389,8 +1389,7 @@ namespace Helios.Authentication.Controllers
         {
             if (model.Id == 0)
             {
-                var usr = await _userManager.FindByEmailAsync(model.Email);
-                bool isRole = false;
+                var usr = await _userManager.FindByEmailAsync(model.Email);              
 
                 if (usr == null)
                 {
@@ -1432,8 +1431,7 @@ namespace Helios.Authentication.Controllers
                         var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
 
                         if (addRoleResult.Succeeded)
-                        {
-                            isRole = true;
+                        {                            
                             await _emailService.SystemAdminUserMail(model);
                         }
                     }
@@ -1466,7 +1464,7 @@ namespace Helios.Authentication.Controllers
                     usr.UserName = newUserName;
                     usr.Name = model.Name.Trim();
                     usr.LastName = model.LastName.Trim();
-                    usr.PhoneNumber = model.PhoneNumber.Trim();
+                    usr.PhoneNumber = model.PhoneNumber!=null ? model.PhoneNumber.Trim() :model.PhoneNumber;
                     usr.ChangePassword = false;
                     usr.EmailConfirmed = true;
                     usr.IsActive = true;
@@ -1474,6 +1472,23 @@ namespace Helios.Authentication.Controllers
                     usr.LastChangePasswordDate = DateTime.Now;
 
                     var userResult = await _userManager.UpdateAsync(usr);
+                    if (userResult.Succeeded)
+                    {                       
+                        var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.TenantAdmin.ToString());
+
+                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
+
+                        if (addRoleResult.Succeeded)
+                        {
+                            CreateRoleUserDTO createRoleUserDTO = new CreateRoleUserDTO{
+                                Name = model.Name,
+                                LastName = model.LastName,
+                                Email = model.Email,
+                                Language = model.Language
+                            };
+                            await _emailService.CreateRoleUserMail(createRoleUserDTO);
+                        }                      
+                    }
 
                     if (!userResult.Succeeded)
                     {
@@ -1487,7 +1502,7 @@ namespace Helios.Authentication.Controllers
 
                 if (!await _context.TenantAdmins.AnyAsync(x => x.IsActive && !x.IsDeleted && x.AuthUserId == usr.Id))
                 {
-                    var result = await AddTenantAdmins(usr, model.Password, isRole);
+                    var result = await AddTenantAdmins(usr, model.Password);
 
                     if (result)
                     {
@@ -1619,42 +1634,10 @@ namespace Helios.Authentication.Controllers
             };
 
 
-            async Task<bool> AddTenantAdmins(ApplicationUser? usr, string password, bool isRole)
+            async Task<bool> AddTenantAdmins(ApplicationUser? usr, string password)
             {
                 try
-                {
-                    if (string.IsNullOrEmpty(password))
-                    {
-                        usr.ChangePassword = false;
-                        var changePassword = await _userManager.UpdateAsync(usr);
-                        if (changePassword.Succeeded)
-                        {
-                            string newPassword = StringExtensionsHelper.GenerateRandomPassword();
-                            var removeResult = await _userManager.RemovePasswordAsync(usr);
-                            if (removeResult.Succeeded)
-                            {
-                                var passResult = await _userManager.AddPasswordAsync(usr, newPassword);
-                                if (passResult.Succeeded)
-                                {
-                                    model.Password = newPassword;
-                                    await _emailService.SystemAdminUserMail(model);
-                                }
-                            }
-                        }
-                    }
-
-                    if (!isRole)
-                    {
-                        var role = await _roleManager.Roles.FirstOrDefaultAsync(x => x.Name == Roles.TenantAdmin.ToString());
-
-                        var addRoleResult = await _userManager.AddToRoleAsync(usr, role?.Name);
-
-                        if (!addRoleResult.Succeeded)
-                        {
-                            return false;
-                        }
-                    }
-
+                {                  
                     List<TenantAdmin> tenantAdmins = model.TenantIds.Select(x => new TenantAdmin
                     {
                         AuthUserId = usr.Id,
