@@ -2,7 +2,9 @@
 {
     public class SubjectMissingDataDTO
     {
-        public Int64 ElementId { get; set; }
+        public bool IsPage { get; set; }
+        public Int64 SubjectId { get; set; }
+        public Int64 Id { get; set; }
         public string Value { get; set; }
     }
 }
