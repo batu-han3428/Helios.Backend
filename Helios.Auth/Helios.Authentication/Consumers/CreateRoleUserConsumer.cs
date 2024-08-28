@@ -31,7 +31,6 @@ namespace Helios.Authentication.Consumers
                 mailSubject = "your eCRF account is created";
             }
 
-
             string mailContent = "";
 
             var imgPath = Path.Combine(Directory.GetCurrentDirectory(), @"MailPhotos/helios_222_70.jpg");
@@ -49,13 +48,13 @@ namespace Helios.Authentication.Consumers
                     .Replace("@dynamicdomain", "https://localhost:44458/");
             }
 
-            var mailMessage = new System.Net.Mail.MailMessage(userName, model.Email, mailSubject, mailContent)
+            var mailMessage = new MailMessage(userName, model.Email, mailSubject, mailContent)
             { IsBodyHtml = true, Sender = new MailAddress(userName) };
 
             var isSend = smtpClient.SendMailAsync(mailMessage);
             isSend.Wait();
 
-            return System.Threading.Tasks.Task.FromResult(0);
+            return Task.FromResult(0);
         }
     }
 }
