@@ -47,12 +47,8 @@ namespace Helios.Common.Enums
         Monitoring_AutoQueryClosed = 115,
         [Description("Lock")]
         Monitoring_HasPageLock = 116,
-        [Description("Unlock")]
-        Monitoring_HasPageUnLock = 117,
         [Description("Freeze")]
         Monitoring_HasPageFreeze = 118,
-        [Description("Unfreeze")]
-        Monitoring_HasPageUnFreeze = 119,
         [Description("Lock-Freeze audit trails")]
         Monitoring_SeePageActionAudit = 120,
         [Description("Input audit trail")]
