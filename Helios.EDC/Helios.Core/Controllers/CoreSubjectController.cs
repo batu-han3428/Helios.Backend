@@ -133,8 +133,6 @@ namespace Helios.Core.Controllers
                 CanMonitoringMarkAsNull = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_MarkAsNull),
                 CanMonitoringPageFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageFreeze),
                 CanMonitoringPageLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageLock),
-                CanMonitoringPageUnFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnFreeze),
-                CanMonitoringPageUnLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageUnLock),
                 CanMonitoringQueryView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView),
                 CanMonitoringSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv),
                 CanMonitoringSeePageActionAudit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_SeePageActionAudit),
