@@ -55,7 +55,7 @@ namespace Helios.Common.Enums
         [Description("Adverse event")]
         AdversEventElement = 17,
 
-        [Description("Adverse event")]
+        [Description("Randomization")]
         Randomization = 18,
     }
 }
