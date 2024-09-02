@@ -1489,5 +1489,44 @@ namespace Helios.Core.Controllers
                 };
             }
         }
+
+        [HttpGet]
+        public async Task<List<SdvModel>> GetSubjectSdvList()
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var sites = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId /*8*/ && x.AuthUserId == baseDTO.UserId /*34*/).SelectMany(x => x.StudyUserSites.Where(a => a.IsActive && !a.IsDeleted)).AsNoTracking().Select(x => x.SiteId).ToListAsync();
+
+                var excludedElementTypes = new List<int> { 1, 17, 14, 15, 16, 3, 18 };
+
+                return await _context.SubjectVisitPageModuleElements
+                    .Where(elm => elm.IsActive && !elm.IsDeleted && sites.Contains(elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.SiteId) && !excludedElementTypes.Contains((int)elm.StudyVisitPageModuleElement.ElementType) && elm.SubjectVisitModule.IsActive && !elm.SubjectVisitModule.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsDeleted)
+                    .GroupBy(elm => new
+                    {
+                        SubjectNo = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.SubjectNumber,
+                        SiteName = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.Site.Name,
+                        Visit = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.StudyVisit.Name,
+                        Page = elm.SubjectVisitModule.SubjectVisitPage.StudyVisitPage.Name,
+                        PageId = elm.SubjectVisitModule.SubjectVisitPage.StudyVisitPageId,
+                        SubjectId = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId
+                    })
+                    .Select(g => new SdvModel
+                    {
+                        SubjectNo = g.Key.SubjectNo,
+                        SiteName = g.Key.SiteName,
+                        VisitName = g.Key.Visit,
+                        PageName = g.Key.Page,
+                        SubjectId = g.Key.SubjectId,
+                        PageId = g.Key.PageId,
+                        SdvStatus = g.All(e => e.Sdv == true) ? SdvStatus.SdvDone : g.Any(e => e.Sdv == true) ? SdvStatus.SdvReady : SdvStatus.SdvPartial
+                    }).AsNoTracking().ToListAsync();
+            }
+            catch (Exception)
+            {
+                return new List<SdvModel>();
+            }
+        }
     }
 }
