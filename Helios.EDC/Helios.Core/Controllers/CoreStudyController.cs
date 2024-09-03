@@ -6850,16 +6850,19 @@ namespace Helios.Core.Controllers
                 {
                     var deps = await _context.StudyVisitPageModuleElementEvents.Where(x => x.TargetElementId == model.Id && x.EventType == EventType.Dependency && x.IsActive && !x.IsDeleted).ToListAsync();
 
-                    foreach (var dep in deps)
+                    if (deps.Count > 0)
                     {
+                        foreach (var dep in deps)
+                        {
 
-                        dep.IsActive = false;
-                        dep.IsDeleted = true;
+                            dep.IsActive = false;
+                            dep.IsDeleted = true;
 
-                        _context.StudyVisitPageModuleElementEvents.Update(dep);
-                    }
+                            _context.StudyVisitPageModuleElementEvents.Update(dep);
+                        }
 
-                    result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                        result.IsSuccess = await _context.SaveCoreContextAsync(model.UserId, DateTimeOffset.Now) > 0;
+                    }                  
                 }
 
                 if (model.ElementType == ElementType.Calculated)
