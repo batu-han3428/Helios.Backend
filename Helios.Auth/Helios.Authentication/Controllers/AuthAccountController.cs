@@ -604,7 +604,11 @@ namespace Helios.Authentication.Controllers
         {
             return await _context.TenantAdmins.Where(x => x.IsActive && !x.IsDeleted && x.AuthUserId == userId).Select(x => x.TenantId).ToListAsync();
         }
-
+        [HttpGet]
+        public async Task<int> GetSuperAdminCount(Int64 userId)
+        {
+            return await _context.UserRoles.CountAsync(x =>x.UserId == userId && x.RoleId==(int)Roles.SuperAdmin);
+        }
         [HttpGet]
         public async Task<int> GetUserTenantCount(Int64 userId)
         {
