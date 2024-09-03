@@ -11,7 +11,9 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using System.Data;
+using System.Collections.Generic;
 
 namespace Helios.Core.Controllers
 {
@@ -47,7 +49,7 @@ namespace Helios.Core.Controllers
             var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted && sIds.Contains(p.SiteId))
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
-                .ThenInclude(x => x.SubjectVisitPages.Where(p=>p.IsActive && !p.IsDeleted))
+                .ThenInclude(x => x.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
@@ -558,7 +560,7 @@ namespace Helios.Core.Controllers
                     MissingData = e.MissingData,
                     Sdv = e.Sdv,
                     Query = e.Query,
-                    IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted)
+                    IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted && comment.CommentType == (int)CommentType.SubjectElementComment)
                 }).ToListAsync();
 
             foreach (var item in result)
@@ -590,7 +592,7 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            return finalList.OrderBy(x=>x.ModuleOrder).ToList();
+            return finalList.OrderBy(x => x.ModuleOrder).ToList();
         }
 
         [HttpPost]
@@ -607,6 +609,14 @@ namespace Helios.Core.Controllers
                     element.Sdv = false;
                     _context.SubjectVisitPageModuleElements.Update(element);
                     var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+                    if (result && model.Comment != null && model.CommentType != null)
+                    {
+                        SubjectCommentDTO subjectCommentDTO = new SubjectCommentDTO();
+                        subjectCommentDTO.ElementId = model.Id;
+                        subjectCommentDTO.Comment = model.Comment;
+                        subjectCommentDTO.CommentType = (int)model.CommentType;
+                        await SetSubjectComment(subjectCommentDTO);
+                    }
 
                     if (result)
                     {
@@ -641,7 +651,7 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return new ApiResponse<dynamic>
                 {
@@ -649,7 +659,7 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
-            
+
         }
 
         private async Task<bool> SetHidden(Int64 elementId)
@@ -775,7 +785,7 @@ namespace Helios.Core.Controllers
                                 var mathfnCall = " executeScript();";
                                 var mathResult = engine.Evaluate(finalJs + mathfnCall);
                                 thisCalSbjElm.UserValue = mathResult.ToString();
-                                if("[undefined]" != mathResult.ToString()) thisCalSbjElm.Sdv = true;
+                                if ("[undefined]" != mathResult.ToString()) thisCalSbjElm.Sdv = true;
                             }
                         }
                         catch (Exception ex)
@@ -835,6 +845,81 @@ namespace Helios.Core.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<List<SubjectElementShortModel>> GetRelationPageElementValues(Int64 subjectVisitPageModuleElementId, Int64 studyId, string? value,Int64 subjectId)
+        {
+            List<Int64> hidePages = new List<Int64>();
+            List<SubjectElementShortModel> subjectElementShortModels = new List<SubjectElementShortModel>();
+
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(x => x.Id == subjectVisitPageModuleElementId && x.IsActive && !x.IsDeleted);
+           
+                var relation = await _context.StudyVisitRelation.FirstOrDefaultAsync(x => x.StudyId == studyId && x.ElementId == element.StudyVisitPageModuleElementId && x.IsActive && !x.IsDeleted);
+
+            if (relation != null)
+            {
+                var values = JsonSerializer.Deserialize<List<string>>(relation.ActionValue);
+
+                if (relation.ActionCondition == ActionCondition.Less && values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue > userValueInt))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+                else if (relation.ActionCondition == ActionCondition.More &&
+      values.Any(v => int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue < userValueInt))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+                else if (relation.ActionCondition == ActionCondition.Equal &&
+       values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue == userValueInt) || v == value))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+                else if (relation.ActionCondition == ActionCondition.MoreAndEqual &&
+       values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue <= userValueInt) || string.Compare(v, value, StringComparison.Ordinal) <= 0))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+                else if (relation.ActionCondition == ActionCondition.LessAndEqual &&
+       values.Any(v => (int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue >= userValueInt) || string.Compare(v, value, StringComparison.Ordinal) >= 0))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+                else if (relation.ActionCondition == ActionCondition.NotEqual &&
+        values.All(v => !((int.TryParse(v, out var intValue) && int.TryParse(value, out var userValueInt) && intValue == userValueInt) || v == value)))
+                {
+                    hidePages.AddRange(JsonSerializer.Deserialize<List<Int64>>(relation.TargetPage));
+                }
+
+
+                if (hidePages.Count() < 1 || subjectId == 0) return null;
+            
+
+                var visits = await _context.SubjectVisits.Where(x => x.IsActive && !x.IsDeleted && x.SubjectId == subjectId)
+                    .Include(x => x.SubjectVisitPages.Where(x => x.IsActive && !x.IsDeleted && hidePages.Contains(x.StudyVisitPageId)))
+                    .ThenInclude(x => x.SubjectVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                    .ThenInclude(x => x.SubjectVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted)).ThenInclude(x => x.StudyVisitPageModuleElement).ToListAsync();
+
+                var subjectElements = visits.SelectMany(x => x.SubjectVisitPages).SelectMany(x => x.SubjectVisitPageModules).SelectMany(x => x.SubjectVisitPageModuleElements).ToList();
+
+                if (subjectElements.Count() < 1) return null;
+
+                foreach (var item in subjectElements.Where(x => x.UserValue != null && x.UserValue!=""))
+                {
+                    SubjectElementShortModel subjectElementShortModel = new SubjectElementShortModel();
+                    subjectElementShortModel.Id = item.Id;
+                    subjectElementShortModel.ElementName = item.StudyVisitPageModuleElement.ElementName;
+                    subjectElementShortModel.Type = item.StudyVisitPageModuleElement.ElementType;
+                    subjectElementShortModel.Value = item.UserValue;                   
+                    subjectElementShortModels.Add(subjectElementShortModel);
+                }
+
+                
+            }
+            return subjectElementShortModels;
+        }
+
+
         [HttpPost]
         public async Task<bool> SetDependentPageElementValue(string pageIdString, Int64 subjectId)
         {
@@ -879,7 +964,7 @@ namespace Helios.Core.Controllers
 
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
         {
-            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).OrderBy(x=>x.Order)
+            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).OrderBy(x => x.Order)
                 .Include(x => x.StudyVisitPages)
                 .Select(visit => new SubjectDetailMenuModel
                 {
@@ -887,7 +972,7 @@ namespace Helios.Core.Controllers
                     Title = visit.Name,
                     Children = visit.StudyVisitPages
                         .Where(page => page.IsActive && !page.IsDeleted)
-                        .OrderBy(page=>page.Order)
+                        .OrderBy(page => page.Order)
                         .Select(page => new SubjectDetailMenuModel
                         {
                             Id = page.Id,
@@ -1249,7 +1334,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<SubjectCommentModel>> GetSubjectComments(Int64 subjectElementId)
         {
-            var comments = await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId).Select(comment => new SubjectCommentModel
+            var comments = await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId && comment.CommentType == (int)CommentType.SubjectElementComment).Select(comment => new SubjectCommentModel
             {
                 Id = comment.Id,
                 Comment = comment.Comment,
@@ -1289,7 +1374,8 @@ namespace Helios.Core.Controllers
                     {
                         SubjectVisitPageModuleElementId = dto.ElementId,
                         TenantId = baseDTO.TenantId,
-                        Comment = dto.Comment.Trim()
+                        Comment = dto.Comment.Trim(),
+                        CommentType = dto.CommentType,
                     });
                 }
                 else
@@ -1403,6 +1489,7 @@ namespace Helios.Core.Controllers
 
                     elements.ForEach(elm =>
                     {
+
                         elm.UserValue = dto.Value;
                         elm.MissingData = true;
                         elm.Sdv = false;
@@ -1426,6 +1513,15 @@ namespace Helios.Core.Controllers
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                if (result && dto.Comment != null && dto.CommentType != null)
+                {
+                    SubjectCommentDTO subjectCommentDTO = new SubjectCommentDTO();
+                    subjectCommentDTO.ElementId = dto.ElementId;
+                    subjectCommentDTO.Comment = dto.Comment;
+                    subjectCommentDTO.CommentType = (int)dto.CommentType;
+                    await SetSubjectComment(subjectCommentDTO);
+                }
 
                 return new ApiResponse<dynamic>
                 {

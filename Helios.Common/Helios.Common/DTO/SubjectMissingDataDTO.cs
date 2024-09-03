@@ -6,5 +6,7 @@
         public Int64 SubjectId { get; set; }
         public Int64 Id { get; set; }
         public string Value { get; set; }
+        public string? Comment { get; set; }
+        public Int64? CommentType { get; set; }
     }
 }
