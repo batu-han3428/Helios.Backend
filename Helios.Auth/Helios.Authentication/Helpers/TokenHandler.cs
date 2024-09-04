@@ -91,7 +91,7 @@ namespace Helios.Authentication.Helpers
                 .Where(c => c.Type == "roles")
                 .Select(c => c.Value)
                 .ToList();
-            roles.RemoveAll(x => (sSOLoginDTO.StudyId != null && x != Roles.StudyUser.ToString()) || (sSOLoginDTO.StudyId == null && x != Roles.TenantAdmin.ToString()));
+            roles.RemoveAll(x => (sSOLoginDTO.StudyId != null && x != Roles.StudyUser.ToString()) || (sSOLoginDTO.StudyId == null && x != Roles.TenantAdmin.ToString() && x!=Roles.SystemAdmin.ToString()));
 
             Token tokenInstance = new Token();
 
