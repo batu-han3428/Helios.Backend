@@ -198,8 +198,7 @@ namespace Helios.Core.Migrations
                     ReasonForChange = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ProtocolCode = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StudyLink = table.Column<string>(type: "longtext", nullable: false, collation: "utf8mb4_turkish_ci")
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    
                     Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     SubDescription = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_turkish_ci")

@@ -1517,7 +1517,7 @@ namespace Helios.Core.Controllers
                 if (result && dto.Comment != null && dto.CommentType != null)
                 {
                     SubjectCommentDTO subjectCommentDTO = new SubjectCommentDTO();
-                    subjectCommentDTO.ElementId = dto.ElementId;
+                    subjectCommentDTO.ElementId = dto.Id;
                     subjectCommentDTO.Comment = dto.Comment;
                     subjectCommentDTO.CommentType = (int)dto.CommentType;
                     await SetSubjectComment(subjectCommentDTO);

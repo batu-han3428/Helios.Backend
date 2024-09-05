@@ -10,8 +10,7 @@ namespace Helios.Common.Model
         public string Description { get; set; }
         public bool DoubleDataEntry { get; set; }
         public string ProtocolCode { get; set; }
-        public bool ReasonForChange { get; set; }
-        public string StudyLink { get; set; }
+        public bool ReasonForChange { get; set; }       
         public string StudyName { get; set; }
         public string SubDescription { get; set; }
         public int SubjectNumberDigist { get; set; }

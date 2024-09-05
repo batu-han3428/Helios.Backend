@@ -11,7 +11,6 @@
         public bool IsDemo { get; set; }
         public bool ReasonForChange { get; set; }
         public string? ProtocolCode { get; set; }
-        public string StudyLink { get; set; }
         public string? Description { get; set; }
         public string? SubDescription { get; set; }
         public string? StudyLogoPath { get; set; }
