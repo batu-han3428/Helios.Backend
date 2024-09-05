@@ -14,5 +14,6 @@ namespace Helios.Authentication.Models
         public Int64 UserId { get; set; }
         public string ConfirmPassword { get; set; }
         public string NewPassword { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

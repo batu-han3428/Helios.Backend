@@ -50,7 +50,16 @@ namespace Helios.Authentication.Services
         {
             await _backgorundWorker.Publish(systemAdminDTO);
         }
-
+        public async Task CreateRoleUserMail(CreateRoleUserDTO createRoleUserDTO)
+        {
+            await _backgorundWorker.Publish(new CreateRoleUserDTO
+            {
+                Name = createRoleUserDTO.Name,
+                LastName = createRoleUserDTO.LastName,
+                Email = createRoleUserDTO.Email,
+                Language = createRoleUserDTO.Language
+            });
+        }
         public async Task UserResetPasswordMail(StudyUserModel studyUserModel)
         {
             await _backgorundWorker.Publish(new UserResetPasswordModel
