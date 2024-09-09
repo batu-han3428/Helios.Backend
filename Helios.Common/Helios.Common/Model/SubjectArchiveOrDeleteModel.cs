@@ -14,4 +14,13 @@ namespace Helios.Common.Model
         public bool IsArchived { get; set; }
         public string Comment { get; set; } = "";
     }
+    
+    public class SubjectMultiFormArchiveOrDeleteModel
+    {
+        public Int64 SubjectId { get; set; }
+        public Int64 SubjectVisitId { get; set; }
+        public int RowIndex { get; set; }
+        public bool IsArchived { get; set; }
+        public string Comment { get; set; } = "";
+    }
 }

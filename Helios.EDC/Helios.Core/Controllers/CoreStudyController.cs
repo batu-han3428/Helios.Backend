@@ -4241,7 +4241,7 @@ namespace Helios.Core.Controllers
 
                         await _context.StudyVisitPages.AddAsync(page);
 
-                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == baseDTO.StudyId);
+                        var study = await _context.Studies.FirstOrDefaultAsync(x => x.Id == visitDTO.StudyId);
                         study.UpdatedAt = DateTimeOffset.Now;
 
                         var result = await _context.SaveCoreContextAsync(visitDTO.UserId, DateTimeOffset.Now) > 0;
@@ -4400,18 +4400,23 @@ namespace Helios.Core.Controllers
         private bool addNewVisitToSubjects(Int64 studyId, Int64 visitId)
         {
             var result = false;
-            var subjects = _context.Subjects.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).ToList();
+            var studyVisit = _context.StudyVisits.FirstOrDefault(x => x.Id == visitId);
 
-            foreach (var item in subjects)
+            if (studyVisit.VisitType == VisitType.Normal)
             {
-                var subjectVisit = new SubjectVisit()
-                {
-                    SubjectId = item.Id,
-                    StudyVisitId = visitId,
-                    TenantId = item.TenantId
-                };
+                var subjects = _context.Subjects.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).ToList();
 
-                _context.SubjectVisits.Add(subjectVisit);
+                foreach (var item in subjects)
+                {
+                    var subjectVisit = new SubjectVisit()
+                    {
+                        SubjectId = item.Id,
+                        StudyVisitId = visitId,
+                        TenantId = item.TenantId
+                    };
+
+                    _context.SubjectVisits.Add(subjectVisit);
+                }
             }
 
             return result;
@@ -6076,7 +6081,6 @@ namespace Helios.Core.Controllers
         private bool addNewElementsToSubjects(List<Int64> stdVstPgMdlElmntIds, Int64 stdVstPgMdlId)
         {
             var result = false;
-
             var stdVstPgMdlElmnts = _context.StudyVisitPageModuleElements
                 .Include(x => x.StudyVisitPageModuleElementDetail)
                 .Where(x => stdVstPgMdlElmntIds.Contains(x.Id) && x.IsActive && !x.IsDeleted)
@@ -6135,7 +6139,7 @@ namespace Helios.Core.Controllers
         {
             var result = new ApiResponse<dynamic>();
             var studyVisitPageModuleElement = await _context.StudyVisitPageModuleElements
-                .Include(x=>x.StudyVisitPageModuleElementDetail)
+                .Include(x => x.StudyVisitPageModuleElementDetail)
                 .Where(x => x.Id == model.Id && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
             var studyVisitPageModuleElementDetail = studyVisitPageModuleElement.StudyVisitPageModuleElementDetail;

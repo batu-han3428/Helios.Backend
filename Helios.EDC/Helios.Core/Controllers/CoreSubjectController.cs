@@ -47,7 +47,7 @@ namespace Helios.Core.Controllers
             var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted && sIds.Contains(p.SiteId))
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
-                .ThenInclude(x => x.SubjectVisitPages.Where(p=>p.IsActive && !p.IsDeleted))
+                .ThenInclude(x => x.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
                 .AsNoTracking().Select(x => new SubjectDTO()
                 {
                     Id = x.Id,
@@ -80,7 +80,7 @@ namespace Helios.Core.Controllers
             if (studyId != 0)
             {
                 string prefix = "Study:Permissions";
-                var localCacheKey = prefix + ":" + studyId;
+                var localCacheKey = prefix + ":" + studyId + ":" + userId;
 
                 for (; ; )
                 {
@@ -106,7 +106,7 @@ namespace Helios.Core.Controllers
 
             var userPermissions = await getUserPermission(role.Id, studyId);
             string prefix = "Study:Permissions";
-            var localCacheKey = prefix + ":" + studyId;
+            var localCacheKey = prefix + ":" + studyId + ":" + userId;
 
             await _cacheService.SetAsync(localCacheKey, userPermissions, new TimeSpan(100, 0, 0));
         }
@@ -244,7 +244,7 @@ namespace Helios.Core.Controllers
 
                 var study = await _context.Studies
                     .Include(x => x.Sites.Where(y => y.IsActive && !y.IsDeleted))
-                    .Include(x => x.StudyVisits.Where(y => y.IsActive && !y.IsDeleted))
+                    .Include(x => x.StudyVisits.Where(y => y.VisitType == VisitType.Normal && y.IsActive && !y.IsDeleted))
                     .ThenInclude(x => x.StudyVisitPages.Where(y => y.IsActive && !y.IsDeleted))
                     .ThenInclude(x => x.StudyVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
                     .ThenInclude(x => x.StudyVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
@@ -493,13 +493,13 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectElementModel>> GetSubjectElementList(Int64 subjectId, Int64 pageId)
+        public async Task<List<SubjectElementModel>> GetSubjectElementList(Int64 subjectId, Int64 pageId, int rowIndex)
         {
             var finalList = new List<SubjectElementModel>();
 
             var studyVisit = await _context.StudyVisitPages.Where(x => x.Id == pageId && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
 
-            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
+            var result = await _context.SubjectVisitPages.Where(x => x.StudyVisitPageId == studyVisit.Id && x.SubjectVisit.RowIndex == rowIndex && x.SubjectVisit.SubjectId == subjectId && x.IsActive && !x.IsDeleted)
                 .SelectMany(x => x.SubjectVisitPageModules.Where(y => y.IsActive && !y.IsDeleted))
                 .SelectMany(x => x.SubjectVisitPageModuleElements.Where(y => y.IsActive && !y.IsDeleted))
                 .Include(x => x.SubjectVisitPageModuleElementComments)
@@ -592,7 +592,7 @@ namespace Helios.Core.Controllers
                 }
             }
 
-            return finalList.OrderBy(x=>x.ModuleOrder).ToList();
+            return finalList.OrderBy(x => x.ModuleOrder).ToList();
         }
 
         [HttpPost]
@@ -651,7 +651,7 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
-            
+
         }
 
         private async Task<bool> SetHidden(Int64 elementId)
@@ -777,7 +777,7 @@ namespace Helios.Core.Controllers
                                 var mathfnCall = " executeScript();";
                                 var mathResult = engine.Evaluate(finalJs + mathfnCall);
                                 thisCalSbjElm.UserValue = mathResult.ToString();
-                                if("[undefined]" != mathResult.ToString()) thisCalSbjElm.Sdv = true;
+                                if ("[undefined]" != mathResult.ToString()) thisCalSbjElm.Sdv = true;
                             }
                         }
                         catch (Exception ex)
@@ -881,19 +881,21 @@ namespace Helios.Core.Controllers
 
         private async Task<List<SubjectDetailMenuModel>> GetSubjectDetailMenuLocal(Int64 studyId)
         {
-            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).OrderBy(x=>x.Order)
+            return await _context.StudyVisits.Where(x => x.StudyId == studyId && x.IsActive && !x.IsDeleted).OrderBy(x => x.Order)
                 .Include(x => x.StudyVisitPages)
                 .Select(visit => new SubjectDetailMenuModel
                 {
                     Id = visit.Id,
                     Title = visit.Name,
+                    Type = visit.VisitType,
                     Children = visit.StudyVisitPages
                         .Where(page => page.IsActive && !page.IsDeleted)
-                        .OrderBy(page=>page.Order)
+                        .OrderBy(page => page.Order)
                         .Select(page => new SubjectDetailMenuModel
                         {
                             Id = page.Id,
-                            Title = page.Name
+                            Title = page.Name,
+                            Type = visit.VisitType
                         })
                         .ToList()
                 }).ToListAsync();
@@ -1485,6 +1487,199 @@ namespace Helios.Core.Controllers
                     Message = "An unexpected error occurred."
                 };
             }
+        }
+
+        [HttpGet]
+        public async Task<List<SubjectMultiDTO>> GetSubjectMultiList(Int64 subjectId, Int64 studyVisitId, bool showArchivedMulties)
+        {
+            var result = new List<SubjectMultiDTO>();
+
+            result = await _context.SubjectVisits
+                .Include(x => x.StudyVisit)
+                .ThenInclude(x => x.StudyVisitPages)
+                .Where(x => x.SubjectId == subjectId && x.StudyVisitId == studyVisitId && x.IsActive == showArchivedMulties && !x.IsDeleted).Select(sv => new SubjectMultiDTO
+                {
+                    Id = sv.Id,
+                    FirstPageId = sv.StudyVisit.StudyVisitPages.OrderBy(a => a.Order).Select(a => a.Id).FirstOrDefault(),
+                    RowIndex = sv.RowIndex,
+                    FormName = sv.FormName,
+                    FormNo = sv.FormNo,
+                    CreatedAt = sv.CreatedAt,
+                    UpdatedAt = sv.UpdatedAt,
+                    Status = (int)sv.Status,
+                    IsArchived = !sv.IsActive
+                }).ToListAsync();
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> AddSubjectMultiForm(Int64 subjectId, Int64 studyVisitId)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+            var studyVisit = await _context.StudyVisits
+                .Include(x => x.StudyVisitPages.Where(x => x.IsActive && !x.IsDeleted))
+                .ThenInclude(x => x.StudyVisitPageModules.Where(x => x.IsActive && !x.IsDeleted))
+                .ThenInclude(x => x.StudyVisitPageModuleElements.Where(x => x.IsActive && !x.IsDeleted))
+                .ThenInclude(x => x.StudyVisitPageModuleElementDetail)
+                .FirstOrDefaultAsync(x => x.Id == studyVisitId && x.IsActive && !x.IsDeleted);
+
+            var subjectVisits = await _context.SubjectVisits.Where(x => x.StudyVisitId == studyVisit.Id && x.SubjectId == subjectId && x.IsActive && !x.IsDeleted).ToListAsync();
+            var formNo = subjectVisits.Count == 0 ? "1.0" : subjectVisits.LastOrDefault().RowIndex + 1 + ".0";
+            var rowIndex = subjectVisits.Count == 0 ? 1 : subjectVisits.LastOrDefault().RowIndex + 1;
+
+            var subjectVisit = new SubjectVisit()
+            {
+                StudyVisitId = studyVisit.Id,
+                SubjectId = subjectId,
+                FormName = studyVisit.Name,
+                FormNo = formNo,
+                RowIndex = rowIndex,
+                SubjectVisitPages = studyVisit.StudyVisitPages.Select(svp => new SubjectVisitPage
+                {
+                    StudyVisitPageId = svp.Id,
+                    SubjectVisitPageModules = svp.StudyVisitPageModules.Select(svpm => new SubjectVisitPageModule
+                    {
+                        StudyVisitPageModuleId = svpm.Id,
+                        SubjectVisitPageModuleElements = svpm.StudyVisitPageModuleElements.Select(svpme => new SubjectVisitPageModuleElement
+                        {
+                            StudyVisitPageModuleElementId = svpme.Id,
+                            DataGridRowId = svpme.StudyVisitPageModuleElementDetail.RowIndex
+                        }).ToList()
+                    }).ToList()
+                }).ToList(),
+            };
+
+            _context.SubjectVisits.Add(subjectVisit);
+            var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+            return new ApiResponse<dynamic>
+            {
+                IsSuccess = result,
+                Message = result ? "Successful" : "Unsuccessful"
+            };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> DeleteOrArchiveSubjectMultiForm(SubjectMultiFormArchiveOrDeleteModel model)
+        {
+            BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+            
+            var subjectVisit = _context.SubjectVisits
+                .Include(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.Id == model.SubjectVisitId && x.RowIndex == model.RowIndex && x.SubjectId == model.SubjectId && x.IsActive && !x.IsDeleted).FirstOrDefault();
+
+            if (subjectVisit != null)
+            {
+                subjectVisit.IsActive = false;
+                subjectVisit.IsDeleted = model.IsArchived ? false : true;
+
+                foreach (var svp in subjectVisit.SubjectVisitPages)
+                {
+                    svp.IsActive = false;
+                    svp.IsDeleted = model.IsArchived ? false : true;
+
+                    foreach (var svpm in svp.SubjectVisitPageModules)
+                    {
+                        svpm.IsActive = false;
+                        svpm.IsDeleted = model.IsArchived ? false : true;
+
+                        foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                        {
+                            svpme.IsActive = false;
+                            svpme.IsDeleted = model.IsArchived ? false : true;
+
+                            _context.SubjectVisitPageModuleElements.Update(svpme);
+                        }
+
+                        _context.SubjectVisitPageModules.Update(svpm);
+                    }
+
+                    _context.SubjectVisitPages.Update(svp);
+                }
+
+                _context.SubjectVisits.Update(subjectVisit);
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            else
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> UnArchiveSubjectMultiForm(SubjectMultiFormArchiveOrDeleteModel model)
+        {
+            var result = new ApiResponse<dynamic>();
+
+            var subjectVisit = await _context.SubjectVisits
+                .Include(x => x.SubjectVisitPages)
+                .ThenInclude(x => x.SubjectVisitPageModules)
+                .ThenInclude(x => x.SubjectVisitPageModuleElements)
+                .Where(x => x.Id == model.SubjectVisitId && x.SubjectId == model.SubjectId && x.RowIndex == model.RowIndex && !x.IsDeleted).FirstOrDefaultAsync();
+
+            if (subjectVisit != null)
+            {
+                subjectVisit.IsActive = true;
+
+                _context.SubjectVisits.Update(subjectVisit);
+
+                foreach (var svp in subjectVisit.SubjectVisitPages)
+                {
+                    svp.IsActive = true;
+
+                    _context.SubjectVisitPages.Update(svp);
+
+                    foreach (var svpm in svp.SubjectVisitPageModules)
+                    {
+                        svpm.IsActive = true;
+
+                        _context.SubjectVisitPageModules.Update(svpm);
+
+                        foreach (var svpme in svpm.SubjectVisitPageModuleElements)
+                        {
+                            svpme.IsActive = true;
+
+                            _context.SubjectVisitPageModuleElements.Update(svpme);
+                        }
+                    }
+                }
+
+                //subjectVisit.Comment = model.Comment;
+
+                _context.SubjectVisits.Update(subjectVisit);
+                result.IsSuccess = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
+
+                if (result.IsSuccess)
+                {
+                    result.Message = "Successfully";
+                }
+                else
+                {
+                    result.Message = "Error";
+                }
+            }
+            else
+            {
+                result.IsSuccess = false;
+                result.Message = "Try again please!";
+            }
+
+            return result;
         }
     }
 }
