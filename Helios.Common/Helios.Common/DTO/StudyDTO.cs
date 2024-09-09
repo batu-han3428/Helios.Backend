@@ -14,8 +14,7 @@ namespace Helios.Common.DTO
         public Int64 UserId { get; set; }
         public string StudyName { get; set; }
         public string? ProtocolCode { get; set; }
-        public bool AskSubjectInitial { get; set; }
-        public string StudyLink { get; set; }
+        public bool AskSubjectInitial { get; set; }     
         [Column(TypeName = "datetime")]
         public DateTimeOffset UpdatedAt { get; set; }
         public DateTimeOffset CreatedAt { get; set; }

@@ -594,10 +594,6 @@ namespace Helios.Core.Migrations
                     b.Property<int>("StudyLanguage")
                         .HasColumnType("int");
 
-                    b.Property<string>("StudyLink")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("StudyLogoPath")
                         .HasColumnType("longtext");
 

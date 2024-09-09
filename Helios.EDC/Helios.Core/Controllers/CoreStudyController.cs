@@ -38,8 +38,7 @@ namespace Helios.Core.Controllers
                 EquivalentStudyId = x.EquivalentStudyId,
                 StudyName = x.StudyName,
                 ProtocolCode = x.ProtocolCode,
-                AskSubjectInitial = x.AskSubjectInitial,
-                StudyLink = x.StudyLink,
+                AskSubjectInitial = x.AskSubjectInitial,             
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
                 IsLock = x.IsLock
@@ -59,8 +58,7 @@ namespace Helios.Core.Controllers
                 {
                     Id = study.Id,
                     EquivalentStudyId = study.EquivalentStudyId,
-                    StudyName = study.StudyName,
-                    StudyLink = study.StudyLink,
+                    StudyName = study.StudyName,                 
                     IsDemo = study.IsDemo,
                     ProtocolCode = study.ProtocolCode,
                     StudyLanguage = study.StudyLanguage,
@@ -97,16 +95,6 @@ namespace Helios.Core.Controllers
                     Int64 _versionKey = 0;
                     Guid _refKey = Guid.NewGuid();
 
-                    studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
-                    var checkShortName = _context.Studies.Any(c => c.StudyLink == studyModel.StudyLink && c.IsActive);
-                    if (checkShortName)
-                    {
-                        return new ApiResponse<dynamic>
-                        {
-                            IsSuccess = false,
-                            Message = "The research short name cannot be the same as another research."
-                        };
-                    }
 
                     var activeResearch = new Study()
                     {
@@ -114,8 +102,7 @@ namespace Helios.Core.Controllers
                         IsDemo = false,
                         StudyName = studyModel.StudyName,
                         ProtocolCode = studyModel.ProtocolCode,
-                        AskSubjectInitial = studyModel.AskSubjectInitial,
-                        StudyLink = studyModel.StudyLink,
+                        AskSubjectInitial = studyModel.AskSubjectInitial,                     
                         StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
                         SubDescription = studyModel.SubDescription,
                         Description = studyModel.Description,
@@ -132,8 +119,7 @@ namespace Helios.Core.Controllers
                         TenantId = studyModel.TenantId,
                         IsDemo = true,
                         StudyName = "DEMO-" + studyModel.StudyName,
-                        ProtocolCode = "DEMO-" + studyModel.ProtocolCode,
-                        StudyLink = "DEMO-" + studyModel.StudyLink,
+                        ProtocolCode = "DEMO-" + studyModel.ProtocolCode,                      
                         AskSubjectInitial = studyModel.AskSubjectInitial,
                         StudyType = studyModel.DoubleDataEntry ? (int)StudyType.DoubleEntry : (int)StudyType.Normal,
                         SubDescription = studyModel.SubDescription,
@@ -536,8 +522,7 @@ namespace Helios.Core.Controllers
                 {
                     var oldEntity = _context.Studies.Include(x => x.EquivalentStudy).FirstOrDefault(p => p.Id == studyModel.StudyId && p.IsActive && !p.IsDeleted);
                     if (oldEntity != null)
-                    {
-                        studyModel.StudyLink = StringExtensionsHelper.TurkishCharacterReplace(studyModel.StudyLink);
+                    {                      
                         if (oldEntity.ProtocolCode != studyModel.ProtocolCode)
                         {
                             oldEntity.ProtocolCode = studyModel.ProtocolCode;
@@ -552,12 +537,7 @@ namespace Helios.Core.Controllers
                         {
                             oldEntity.AskSubjectInitial = studyModel.AskSubjectInitial;
                             oldEntity.EquivalentStudy.AskSubjectInitial = studyModel.AskSubjectInitial;
-                        }
-                        if (oldEntity.StudyLink != studyModel.StudyLink)
-                        {
-                            oldEntity.StudyLink = studyModel.StudyLink;
-                            oldEntity.EquivalentStudy.StudyLink = "DEMO-" + studyModel.StudyLink;
-                        }
+                        }                       
                         if (oldEntity.ReasonForChange != studyModel.ReasonForChange)
                         {
                             oldEntity.ReasonForChange = studyModel.ReasonForChange;
