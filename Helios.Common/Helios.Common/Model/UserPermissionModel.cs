@@ -16,7 +16,8 @@ namespace Helios.Common.Model
         public bool CanSubjectExportForm { get; set; }
         public bool CanSubjectSign { get; set; }
         public bool CanMonitoringSdv { get; set; }
-        public bool CanMonitoringQueryView { get; set; }
+        public bool CanMonitoringOpenQuery { get; set; }
+        public bool CanMonitoringAnswerQuery { get; set; }
         public bool CanMonitoringAutoQueryClosed { get; set; }
         public bool CanMonitoringPageLock { get; set; }
         public bool CanMonitoringPageUnLock { get; set; }

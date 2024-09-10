@@ -41,8 +41,8 @@ namespace Helios.Common.Enums
 
         [Description("On-site SDV")]
         Monitoring_Sdv = 111,
-        [Description("Query")]
-        Monitoring_QueryView = 114,
+        [Description("Open query")]
+        Monitoring_OpenQuery = 114,
         [Description("Close auto query")]
         Monitoring_AutoQueryClosed = 115,
         [Description("Lock")]
@@ -170,6 +170,8 @@ namespace Helios.Common.Enums
         [Description("Unblinded")]
         TMF_Unblinded = 180,
         [Description("Share")]
-        TMF_Share = 181
+        TMF_Share = 181,
+        [Description("Answer query")]
+        Monitoring_AnswerQuery = 182,
     }
 }

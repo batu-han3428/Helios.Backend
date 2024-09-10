@@ -13,7 +13,7 @@ using Microsoft.ClearScript.V8;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Data;
-using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Helios.Core.Controllers
 {
@@ -33,7 +33,7 @@ namespace Helios.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<List<SubjectDTO>> GetSubjectList(SubjectListFilterDTO dto)
+        public async Task<List<SubjectListModel>> GetSubjectList(SubjectListFilterDTO dto)
         {
             await SetSubjectDetailMenu(dto.StudyId);
 
@@ -46,11 +46,14 @@ namespace Helios.Core.Controllers
 
             var sIds = roleSite.SelectMany(a => a.Sites).ToList();
 
+            var excludedElementTypes = new List<int> { (int)ElementType.Label, (int)ElementType.AdversEventElement, (int)ElementType.ConcomitantMedication, (int)ElementType.Table, (int)ElementType.DataGrid, (int)ElementType.Hidden, (int)ElementType.Randomization };
+
             var result = await _context.Subjects.Where(p => p.StudyId == dto.StudyId && p.IsActive == !dto.ShowArchivedSubjects && !p.IsDeleted && sIds.Contains(p.SiteId))
                 .Include(x => x.Site)
                 .Include(x => x.SubjectVisits.Where(p => p.IsActive && !p.IsDeleted))
                 .ThenInclude(x => x.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
-                .AsNoTracking().Select(x => new SubjectDTO()
+                .AsNoTracking()
+                .Select(x => new SubjectListModel()
                 {
                     Id = x.Id,
                     FirstPageId = x.SubjectVisits.Where(sv => sv.IsActive && !sv.IsDeleted).OrderBy(sv => sv.StudyVisit.Order).FirstOrDefault().StudyVisit.StudyVisitPages.OrderBy(a => a.Order).Select(a => a.Id).FirstOrDefault(),
@@ -63,13 +66,81 @@ namespace Helios.Core.Controllers
                     AddedById = x.AddedById,
                     InitialName = x.InitialName,
                     IsActive = x.IsActive,
+                    SdvStatus = x.SubjectVisits.Where(v => v.IsActive && !v.IsDeleted).Any(v => 
+                                v.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted).Any(p =>
+                                p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted).Any(m =>
+                                m.SubjectVisitPageModuleElements.Where(e=> e.IsActive && !e.IsDeleted && !excludedElementTypes.Contains((int)e.StudyVisitPageModuleElement.ElementType)).Any(e => e.Sdv == true)))) 
+                                ? 
+                                (x.SubjectVisits.Where(v => v.IsActive && !v.IsDeleted).All(v => 
+                                v.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted).All(p => 
+                                p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted).All(m => 
+                                m.SubjectVisitPageModuleElements.Where(e=> !excludedElementTypes.Contains((int)e.StudyVisitPageModuleElement.ElementType) && e.IsActive && !e.IsDeleted).All(e => e.Sdv == true)))) 
+                                ? 
+                                SdvStatus.SdvDone 
+                                : 
+                                SdvStatus.SdvReady) 
+                                : 
+                                SdvStatus.SdvPartial,
+                    QueryStatus = x.SubjectVisits.Where(v=>v.IsActive && !v.IsDeleted)
+                                  .SelectMany(v => v.SubjectVisitPages.Where(p=>p.IsActive && !p.IsDeleted))
+                                  .SelectMany(p => p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted))
+                                  .SelectMany(m => m.SubjectVisitPageModuleElements.Where(e => e.IsActive && !e.IsDeleted && e.Query))
+                                  .SelectMany(e => e.SubjectVisitPageModuleElementComments.Where(c => c.IsActive && !c.IsDeleted && c.No != null))
+                                  .OrderByDescending(c => c.CreatedAt)
+                                  .Select(c => c.CommentType)
+                                  .FirstOrDefault() == CommentType.Query_Unanswered 
+                                  ? 
+                                  CommentType.Query_Unanswered 
+                                  :
+                                  x.SubjectVisits.Where(v => v.IsActive && !v.IsDeleted)
+                                  .SelectMany(v => v.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
+                                  .SelectMany(p => p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted))
+                                  .SelectMany(m => m.SubjectVisitPageModuleElements.Where(e => e.IsActive && !e.IsDeleted && e.Query))
+                                  .SelectMany(e => e.SubjectVisitPageModuleElementComments.Where(c => c.IsActive && !c.IsDeleted && c.No != null))
+                                  .OrderByDescending(c => c.CreatedAt)
+                                  .Select(c => c.CommentType)
+                                  .FirstOrDefault() == CommentType.Query_Answered 
+                                  ?
+                                  CommentType.Query_Answered
+                                  :
+                                  x.SubjectVisits.Where(v => v.IsActive && !v.IsDeleted)
+                                  .SelectMany(v => v.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
+                                  .SelectMany(p => p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted))
+                                  .SelectMany(m => m.SubjectVisitPageModuleElements.Where(e => e.IsActive && !e.IsDeleted && e.Query))
+                                  .SelectMany(e => e.SubjectVisitPageModuleElementComments.Where(c => c.IsActive && !c.IsDeleted && c.No != null))
+                                  .OrderByDescending(c => c.CreatedAt)
+                                  .Select(c => c.CommentType)
+                                  .FirstOrDefault() == CommentType.Query_DataChangeAfterQuery 
+                                  ? 
+                                  CommentType.Query_DataChangeAfterQuery 
+                                  :
+                                  CommentType.Query_Closed,
+                    OpenQueries = x.SubjectVisits.Where(v => v.IsActive && !v.IsDeleted)
+                                  .SelectMany(v => v.SubjectVisitPages.Where(p => p.IsActive && !p.IsDeleted))
+                                  .SelectMany(p => p.SubjectVisitPageModules.Where(m => m.IsActive && !m.IsDeleted))
+                                  .SelectMany(m => m.SubjectVisitPageModuleElements.Where(e => e.IsActive && !e.IsDeleted && e.Query))
+                                  .SelectMany(e => e.SubjectVisitPageModuleElementComments.Where(c => c.IsActive && !c.IsDeleted && c.No != null).OrderByDescending(c => c.CreatedAt).Take(1))
+                                  .Where(c => c.CommentType == CommentType.Query_Unanswered)
+                                  .Select(c => c.No)
+                                  .Distinct()
+                                  .Count()
                 }).ToListAsync();
 
-            var role = roleSite.Select(x => new StudyUsersRolesDTO
+            if (result.Count > 0)
             {
-                RoleId = x.RoleId,
-                RoleName = x.RoleName
-            }).ToList();
+                var users = await _userService.GetUserList(result.Select(c => c.AddedById).ToList());
+                if (users.IsSuccessful)
+                {
+                    result.ForEach(c =>
+                    {
+                        var user = users.Data.FirstOrDefault(u => u.Id == c.AddedById);
+                        if (user != null)
+                        {
+                            c.AddedByName = user.Name + " " + user.LastName;
+                        }
+                    });
+                }
+            }
 
             await SetUserPermissions(dto.StudyId, dto.UserId);
 
@@ -135,7 +206,8 @@ namespace Helios.Core.Controllers
                 CanMonitoringMarkAsNull = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_MarkAsNull),
                 CanMonitoringPageFreeze = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageFreeze),
                 CanMonitoringPageLock = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_HasPageLock),
-                CanMonitoringQueryView = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView),
+                CanMonitoringOpenQuery = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_OpenQuery),
+                CanMonitoringAnswerQuery = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_AnswerQuery),
                 CanMonitoringSdv = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv),
                 CanMonitoringSeePageActionAudit = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Monitoring_SeePageActionAudit),
                 CanFormAddAdverseEvent = permissions.Any(perm => perm.PermissionKey == (int)StudyRolePermission.Form_AddAdverseEvent),
@@ -560,7 +632,8 @@ namespace Helios.Core.Controllers
                     MissingData = e.MissingData,
                     Sdv = e.Sdv,
                     Query = e.Query,
-                    IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted && comment.CommentType == (int)CommentType.SubjectElementComment)
+                    IsComment = e.SubjectVisitPageModuleElementComments.Any(comment => comment.IsActive && !comment.IsDeleted && comment.CommentType == CommentType.SubjectElementComment),
+                    CommentType = e.SubjectVisitPageModuleElementComments.Where(query => query.IsActive && !query.IsDeleted && query.No != null).OrderByDescending(query => query.CreatedAt).Select(query => query.CommentType).FirstOrDefault()
                 }).ToListAsync();
 
             foreach (var item in result)
@@ -608,6 +681,24 @@ namespace Helios.Core.Controllers
                     element.MissingData = false;
                     element.Sdv = false;
                     _context.SubjectVisitPageModuleElements.Update(element);
+                    if (element.Query)
+                    {
+                        var comment = await _context.SubjectVisitPageModuleElementComments.Where(query => query.IsActive && !query.IsDeleted && query.SubjectVisitPageModuleElementId == element.Id && query.No != null).OrderByDescending(query => query.CreatedAt).FirstOrDefaultAsync();
+
+                        if (comment != null && comment.CommentType == CommentType.Query_Unanswered)
+                        {
+                            await _context.SubjectVisitPageModuleElementComments.AddAsync(new SubjectVisitPageModuleElementComments
+                            {
+                                SubjectVisitPageModuleElementId = comment.SubjectVisitPageModuleElementId,
+                                TenantId = element.TenantId,
+                                Comment = comment.Comment,
+                                CommentType = CommentType.Query_DataChangeAfterQuery,
+                                StudyId = comment.StudyId,
+                                No = comment.No,
+                                SubjectId = comment.SubjectId
+                            });
+                        }
+                    }
                     var result = await _context.SaveCoreContextAsync(34, DateTimeOffset.Now) > 0;
                     if (result && model.Comment != null && model.CommentType != null)
                     {
@@ -1336,7 +1427,7 @@ namespace Helios.Core.Controllers
         [HttpGet]
         public async Task<List<SubjectCommentModel>> GetSubjectComments(Int64 subjectElementId)
         {
-            var comments = await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId && comment.CommentType == (int)CommentType.SubjectElementComment).Select(comment => new SubjectCommentModel
+            var comments = await _context.SubjectVisitPageModuleElementComments.Where(comment => comment.IsActive && !comment.IsDeleted && comment.SubjectVisitPageModuleElementId == subjectElementId && comment.CommentType == CommentType.SubjectElementComment).Select(comment => new SubjectCommentModel
             {
                 Id = comment.Id,
                 Comment = comment.Comment,
@@ -1377,7 +1468,7 @@ namespace Helios.Core.Controllers
                         SubjectVisitPageModuleElementId = dto.ElementId,
                         TenantId = baseDTO.TenantId,
                         Comment = dto.Comment.Trim(),
-                        CommentType = dto.CommentType,
+                        CommentType = (CommentType)dto.CommentType,
                     });
                 }
                 else
@@ -1390,7 +1481,6 @@ namespace Helios.Core.Controllers
 
                         _context.SubjectVisitPageModuleElementComments.Update(comment);
                     }
-
                 }
 
                 var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
@@ -1788,9 +1878,9 @@ namespace Helios.Core.Controllers
             {
                 BaseDTO baseDTO = Request.Headers.GetBaseInformation();
 
-                var sites = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId /*8*/ && x.AuthUserId == baseDTO.UserId /*34*/).SelectMany(x => x.StudyUserSites.Where(a => a.IsActive && !a.IsDeleted)).AsNoTracking().Select(x => x.SiteId).ToListAsync();
+                var sites = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == baseDTO.StudyId && x.AuthUserId == baseDTO.UserId).SelectMany(x => x.StudyUserSites.Where(a => a.IsActive && !a.IsDeleted)).AsNoTracking().Select(x => x.SiteId).ToListAsync();
 
-                var excludedElementTypes = new List<int> { 1, 17, 14, 15, 16, 3, 18 };
+                var excludedElementTypes = new List<int> { (int)ElementType.Label, (int)ElementType.AdversEventElement, (int)ElementType.ConcomitantMedication, (int)ElementType.Table, (int)ElementType.DataGrid, (int)ElementType.Hidden, (int)ElementType.Randomization };
 
                 return await _context.SubjectVisitPageModuleElements
                     .Where(elm => elm.IsActive && !elm.IsDeleted && sites.Contains(elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.SiteId) && !excludedElementTypes.Contains((int)elm.StudyVisitPageModuleElement.ElementType) && elm.SubjectVisitModule.IsActive && !elm.SubjectVisitModule.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsDeleted && elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsActive && !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsDeleted)
@@ -1817,6 +1907,210 @@ namespace Helios.Core.Controllers
             catch (Exception)
             {
                 return new List<SdvModel>();
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<dynamic>> SetSubjectQuery(SubjectQueryDTO dto)
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                if (dto.No == 0)
+                {
+                    var maxNo = await _context.SubjectVisitPageModuleElementComments.Where(query => query.IsActive && !query.IsDeleted && query.StudyId == baseDTO.StudyId && query.No != null).Select(query => query.No).MaxAsync() ?? 0;
+
+                    await _context.SubjectVisitPageModuleElementComments.AddAsync(new SubjectVisitPageModuleElementComments
+                    {
+                        SubjectVisitPageModuleElementId = dto.ElementId,
+                        TenantId = baseDTO.TenantId,
+                        Comment = dto.Comment.Trim(),
+                        CommentType = dto.CommentType,
+                        StudyId = baseDTO.StudyId,
+                        No = maxNo + 1,
+                        SubjectId = dto.SubjectId
+                    });
+
+                    var element = await _context.SubjectVisitPageModuleElements.FirstOrDefaultAsync(elm => elm.IsActive && !elm.IsDeleted && elm.Id == dto.ElementId);
+
+                    if (element != null) element.Query = true;
+                }
+                else
+                {
+                    if (dto.Id == 0)
+                    {
+                        await _context.SubjectVisitPageModuleElementComments.AddAsync(new SubjectVisitPageModuleElementComments
+                        {
+                            SubjectVisitPageModuleElementId = dto.ElementId,
+                            TenantId = baseDTO.TenantId,
+                            Comment = dto.Comment.Trim(),
+                            CommentType = dto.CommentType,
+                            StudyId = baseDTO.StudyId,
+                            No = dto.No,
+                            SubjectId = dto.SubjectId
+                        });
+                    }
+                    else
+                    {
+                        var query = await _context.SubjectVisitPageModuleElementComments.FirstOrDefaultAsync(comment => comment.IsActive && !comment.IsDeleted && comment.Id == dto.Id);
+
+                        if (query != null)
+                        {
+                            query.Comment = dto.Comment.Trim();
+
+                            _context.SubjectVisitPageModuleElementComments.Update(query);
+                        }
+                    }
+                }
+
+                var result = await _context.SaveCoreContextAsync(baseDTO.UserId, DateTimeOffset.Now) > 0;
+
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = result,
+                    Message = result ? "Successful" : "Unsuccessful"
+                };
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<dynamic>
+                {
+                    IsSuccess = false,
+                    Message = "An unexpected error occurred."
+                };
+            }
+        }
+
+        [HttpGet]
+        public async Task<List<SubjectQueryModel>> GetSubjectQueries(Int64 subjectElementId)
+        {
+            var queries = await _context.SubjectVisitPageModuleElementComments.Where(query => query.IsActive && !query.IsDeleted && query.SubjectVisitPageModuleElementId == subjectElementId && query.No != null).OrderBy(query => query.CreatedAt).Select(query => new SubjectQueryModel
+            {
+                Id = query.Id,
+                Comment = query.Comment,
+                CommentTime = query.UpdatedAt != new DateTimeOffset(new DateTime(1, 1, 1), TimeSpan.Zero) ? query.UpdatedAt : query.CreatedAt,
+                SenderId = query.AddedById,
+                No = query.No,
+                CommentType = query.CommentType
+            }).ToListAsync();
+
+            if (queries.Count > 0)
+            {
+                var users = await _userService.GetUserList(queries.Select(c => c.SenderId).ToList());
+                if (users.IsSuccessful)
+                {
+                    queries.ForEach(c =>
+                    {
+                        var user = users.Data.FirstOrDefault(u => u.Id == c.SenderId);
+                        if (user != null)
+                        {
+                            c.SenderName = user.Name + " " + user.LastName;
+                        }
+                    });
+                }
+            }
+
+            return queries;
+        }
+
+        [HttpGet]
+        public async Task<List<QueryListModel>> GetSubjectQueryList()
+        {
+            try
+            {
+                BaseDTO baseDTO = Request.Headers.GetBaseInformation();
+
+                var sites = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == /*baseDTO.StudyId*/ 56 && x.AuthUserId == /*baseDTO.UserId*/ 34).SelectMany(x => x.StudyUserSites.Where(a => a.IsActive && !a.IsDeleted)).AsNoTracking().Select(x => x.SiteId).ToListAsync();
+
+                var excludedElementTypes = new List<int> { (int)ElementType.Label, (int)ElementType.AdversEventElement, (int)ElementType.ConcomitantMedication, (int)ElementType.Table, (int)ElementType.DataGrid, (int)ElementType.Hidden, (int)ElementType.Calculated};
+
+                var result = await _context.SubjectVisitPageModuleElements
+                    .Where(elm => 
+                    elm.IsActive 
+                    && 
+                    !elm.IsDeleted 
+                    && 
+                    sites.Contains(elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.SiteId) 
+                    && 
+                    !excludedElementTypes.Contains((int)elm.StudyVisitPageModuleElement.ElementType) 
+                    &&
+                    elm.SubjectVisitModule.IsActive 
+                    && 
+                    !elm.SubjectVisitModule.IsDeleted 
+                    && 
+                    elm.SubjectVisitModule.SubjectVisitPage.IsActive 
+                    &&
+                    !elm.SubjectVisitModule.SubjectVisitPage.IsDeleted 
+                    && 
+                    elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsActive
+                    && 
+                    !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.IsDeleted 
+                    && 
+                    elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsActive
+                    && 
+                    !elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.IsDeleted
+                    &&
+                    elm.Query
+                    )
+                    .GroupBy(elm => new
+                    {
+                        SubjectNo = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.SubjectNumber,
+                        SiteName = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.Subject.Site.Name,
+                        Visit = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.StudyVisit.Name,
+                        Page = elm.SubjectVisitModule.SubjectVisitPage.StudyVisitPage.Name,
+                        PageId = elm.SubjectVisitModule.SubjectVisitPage.StudyVisitPageId,
+                        CreatedAt = elm.SubjectVisitPageModuleElementComments.Where(q => q.IsActive && !q.IsDeleted && q.No != null).OrderBy(q => q.CreatedAt).Select(q => q.CreatedAt).FirstOrDefault(),
+                        AddedById = elm.SubjectVisitPageModuleElementComments.Where(q => q.IsActive && !q.IsDeleted && q.No != null).OrderBy(q => q.CreatedAt).Select(q => q.AddedById).FirstOrDefault(),
+                        QueryNo = elm.SubjectVisitPageModuleElementComments.Where(q => q.IsActive && !q.IsDeleted && q.No != null).Select(q=> q.No).FirstOrDefault(),
+                        LastMessageInQuery = elm.SubjectVisitPageModuleElementComments.Where(q => q.IsActive && !q.IsDeleted && q.No != null).OrderByDescending(q => q.CreatedAt).Select(q=>q.Comment).FirstOrDefault(),
+                        Status = elm.SubjectVisitPageModuleElementComments.Where(q => q.IsActive && !q.IsDeleted && q.No != null).OrderByDescending(q => q.CreatedAt).Select(q => q.CommentType).FirstOrDefault(),
+                        ElementId = elm.Id,
+                        ElementName = elm.StudyVisitPageModuleElement.ElementName,
+                        ElementValue = elm.UserValue,
+                        SubjectId = elm.SubjectVisitModule.SubjectVisitPage.SubjectVisit.SubjectId
+                    })
+                    .AsNoTracking().ToListAsync();
+
+                var queries = result.Select(g => new QueryListModel
+                {
+                    SubjectNo = g.Key.SubjectNo,
+                    SiteName = g.Key.SiteName,
+                    VisitName = g.Key.Visit,
+                    PageName = g.Key.Page,
+                    PageId = g.Key.PageId,
+                    OpenedDayNumber = (DateTime.Now - g.Key.CreatedAt).Days,
+                    AddedById = g.Key.AddedById,
+                    QueryNo = g.Key.QueryNo,
+                    LastMessageInQuery = g.Key.LastMessageInQuery,
+                    Status = g.Key.Status,
+                    ElementId = g.Key.ElementId,
+                    ElementName = g.Key.ElementName,
+                    ElementValue = g.Key.ElementValue,
+                    SubjectId = g.Key.SubjectId
+                }).ToList();
+
+                if (queries.Count > 0)
+                {
+                    var users = await _userService.GetUserList(queries.Select(c => c.AddedById).ToList());
+                    if (users.IsSuccessful)
+                    {
+                        queries.ForEach(c =>
+                        {
+                            var user = users.Data.FirstOrDefault(u => u.Id == c.AddedById);
+                            if (user != null)
+                            {
+                                c.FullName = user.Name + " " + user.LastName;
+                            }
+                        });
+                    }
+                }
+
+                return queries;
+            }
+            catch (Exception e)
+            {
+                return new List<QueryListModel>();
             }
         }
     }

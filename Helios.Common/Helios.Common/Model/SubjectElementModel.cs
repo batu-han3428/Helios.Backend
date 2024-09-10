@@ -91,5 +91,6 @@ namespace Helios.Common.Model
         public List<SubjectElementModel>? ChildElements { get; set; } = new List<SubjectElementModel>();
 
         public bool IsComment { get; set; }
+        public CommentType? CommentType { get; set; }
     }
 }
