@@ -10,6 +10,8 @@ namespace Helios.Common.DTO
     public class SubjectMultiDTO
     {
         public Int64 Id { get; set; }
+        public Int64 FirstPageId { get; set; }
+        public int RowIndex { get; set; }
         public string FormName { get; set; }
         public string FormNo { get; set; }
         [Column(TypeName = "datetime")]
@@ -18,5 +20,6 @@ namespace Helios.Common.DTO
         public DateTimeOffset UpdatedAt { get; set; }
         public int Status { get; set; }
         public int FormStatus { get; set; }
+        public bool IsArchived { get; set; }
     }
 }
