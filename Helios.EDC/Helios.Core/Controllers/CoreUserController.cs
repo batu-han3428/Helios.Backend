@@ -186,29 +186,7 @@ namespace Helios.Core.Controllers
 
             return result;
         }
-
-        [HttpGet]
-        public async Task<PermissionListModel> GetUserPermissionsList(Int64 studyId, Int64 userId)
-        {
-            var permissionListModel = new PermissionListModel();
-            var role = await _context.StudyUsers.Where(x => x.IsActive && !x.IsDeleted && x.StudyId == studyId && x.AuthUserId == userId && x.StudyRole != null).Include(x => x.StudyRole).Select(x => new StudyUsersRolesDTO
-            {
-                RoleId = x.StudyRole.Id,
-                RoleName = x.StudyRole.Name
-            }).ToListAsync();
-            if (role.Count() > 0)
-            {
-                var permissions = await _context.Permissions.Where(x => x.StudyRoleId == role.FirstOrDefault().RoleId && x.StudyId == studyId).ToListAsync();
-                permissionListModel.HasSdv = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_Sdv);
-                permissionListModel.HasQuery = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Monitoring_QueryView);
-                permissionListModel.HasRandomizasyon = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_Randomize || x.PermissionKey == (int)StudyRolePermission.Subject_ViewRandomization);
-                permissionListModel.HasSubject = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.Subject_View);
-                permissionListModel.HasStudyDocument = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.StudyDocument_StudyFoldersView);
-                permissionListModel.HasMedicalCoding = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.MedicalCoding_CanCode);
-                permissionListModel.HasIwrs = permissions.Any(x => x.PermissionKey == (int)StudyRolePermission.IWRS_IwrsMarkAsRecieved || x.PermissionKey == (int)StudyRolePermission.IWRS_IwrsTransfer);
-            }
-            return permissionListModel;
-        }
+      
         [HttpGet]
         public async Task<bool> GetHasRole(Int64 studyId, Int64 userId)
         {

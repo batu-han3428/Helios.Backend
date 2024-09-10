@@ -1,12 +1,10 @@
 ﻿using Helios.Common.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Helios.Common.DTO
+namespace Helios.Common.Model
 {
-    public class SubjectDTO
+    public class SubjectListModel
     {
-        public Int64 StudyId { get; set; }
-        public Int64 SiteId { get; set; }
         public Int64 Id { get; set; }
         public Int64 FirstPageId { get; set; }
         public string InitialName { get; set; }
@@ -21,22 +19,8 @@ namespace Helios.Common.DTO
         public string RandomData { get; set; }
         public Int64 AddedById { get; set; }
         public string AddedByName { get; set; }
-        public bool SDV { get; set; }
-        public int Query { get; set; }
         public SdvStatus SdvStatus { get; set; }
         public CommentType QueryStatus { get; set; }
-        public bool OpenQueries { get; set; }
-    }
-
-    public class PermissionListModel
-    {       
-        public bool HasSdv { get; set; }
-        public bool HasQuery { get; set; }
-        public bool HasRandomizasyon { get; set; }
-        public bool HasSubject { get; set; }
-        public bool HasStudyDocument { get; set; }
-        public bool HasMedicalCoding { get; set; }
-        public bool HasIwrs { get; set; }
-
+        public int OpenQueries { get; set; }
     }
 }
