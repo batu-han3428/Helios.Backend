@@ -1,0 +1,62 @@
+version: '3.4'
+
+volumes:
+  data-volume:
+networks:
+  v3network:
+     name: v3network
+
+services:
+
+  rabbitmq:
+      image: rabbitmq:3-management-alpine
+      ports:
+          - 5672:5672
+          - 15672:15672
+      networks:
+          - v3network
+      volumes:
+        - ./volume/rabbitmq:/data
+
+  helios.authentication:
+    image: ${DOCKER_REGISTRY-}heliosauthentication
+    container_name: helios.authentication
+    build:
+      context: .
+      dockerfile: Helios.Auth/Helios.Authentication/Dockerfile
+    ports:
+        - "8080:8080"
+        - "8081:8081"
+    environment:
+      - AppConfig__RabbitMQCrf=rabbitmq://rabbitmq:5672/
+      - AppConfig__RabbitMQUserName=guest
+      - AppConfig__RabbitMQPassword=guest
+    networks:
+      v3network:
+        aliases:
+          - authentication
+
+  helios.core:
+    image: ${DOCKER_REGISTRY-}helioscore
+    container_name: helios.core
+    build:
+      context: .
+      dockerfile: Helios.EDC/Helios.Core/Dockerfile
+    ports:
+      - "3500:8080"
+      - "3501:8081"
+    networks:
+      v3network:
+        aliases:
+          - core
+
+  redis:
+    image: redis:latest
+    container_name: redis.cache
+    command: redis-server --requirepass heliosredis
+    ports:
+      - "6379:6379"
+    networks:
+      - v3network
+    
+  

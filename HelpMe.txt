@@ -1,0 +1,68 @@
+********************************
+Repos:
+
+Frontend : https://dev.azure.com/codeforapp/Medcase/_git/Helios.Frontend
+Backend: https://dev.azure.com/codeforapp/Medcase/_git/Medcase
+
+********************************
+
+Azure artifacts:
+Install :
+https://github.com/microsoft/artifacts-credprovider?tab=readme-ov-file#setup
+Add as system envoiment variable:
+$env:NUGET_PLUGIN_PATHS="C:\Users\inan\.nuget\plugins\netcore\CredentialProvider.Microsoft\CredentialProvider.Microsoft.exe"
+
+
+ [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Interactive'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+
+Dotnet resporse solution:
+dotnet restore --interactive .\Helios.sln
+
+
+To push package:
+---dotnet nuget push Helios.EDC\Helios.Common\bin\Debug\Helios.Common.1.0.0.1.nupkg --source "helios-v3" --api-key az --interactive
+
+./nuget.exe push -Source "helios-v3" -ApiKey az Helios.Common\Helios.Common\bin\Debug\Helios.Common.1.0.1.45.nupkg
+
+
+---dotnet nuget push --source "helios-v3" --api-key az <package-path>
+
+********************************
+
+Pushing Helios.Common.1.0.0.1.nupkg to 'https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/'...
+  PUT https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/
+    [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Silent'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+    [CredentialProvider]VstsCredentialProvider - Acquired bearer token using 'MSAL Interactive'
+    [CredentialProvider]VstsCredentialProvider - Attempting to exchange the bearer token for an Azure DevOps session token.
+  Accepted https://pkgs.dev.azure.com/codeforapp/68cc6015-db3c-4b39-81dd-cb8b44afe91f/_packaging/adfc4a35-634b-4790-9143-4bc8ab739561/nuget/v2/ 2727ms
+
+
+********************************
+
+docker login medcase.azurecr.io 
+username : medcase 
+password: 7bxV+9vsBuvDfbXu3Ut0e8z2qsXeKoAhXKpyCk3xkr+ACRBw4jaH
+
+
+az config set core.allow_broker=true
+az account clear
+az login
+
+*** az aks get-credentials --resource-group Medcase-Main --name *****
+
+********************************
+
+az acr login --name medcase
+
+docker build -f ".\Helios.Auth\Helios.Authentication\Dockerfile" --force-rm -t  helios-auth:v0.0.3 "."
+docker tag helios-auth:v0.0.3 medcase.azurecr.io/helios/helios-auth:v0.0.3
+docker push medcase.azurecr.io/helios/helios-auth:v0.0.3
+
+
+docker build -f ".\Helios.EDC\Helios.Core\Dockerfile" --force-rm -t  helios-core:v0.0.3 "."
+docker tag helios-core:v0.0.3 medcase.azurecr.io/helios/helios-core:v0.0.3
+docker push medcase.azurecr.io/helios/helios-core:v0.0.3
+
+********************************

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Update the package list
+sudo apt-get update
+
+# Install Docker
+sudo apt-get install -y docker.io
+
+# Enable Docker service to start on boot
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Install the Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+sudo apt-get update && sudo apt-get install -y kubectl
+
+
+# (Optional) Add current user to the docker group to avoid using 'sudo' with Docker
+sudo usermod -aG docker $USER
+sudo usermod -aG docker 'AzDevOps'
+
+sudo chown root:docker /var/run/docker.sock
+sudo chmod 660 /var/run/docker.sock
+sudo systemctl restart docker

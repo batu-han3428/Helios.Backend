@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: helios-v3-core-api-ingress
+  namespace: helios-testing
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    # ppgw.ingress.kubernetes.io/ssl-redirect: "true" # Redirect HTTP to HTTPS
+
+spec:
+  tls:
+  - hosts:
+    -  api-v3-test.helios-crf.com
+    secretName: tls-cloudflare-2024
+  rules:
+    - host: api-v3-test.helios-crf.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: helios-v3-core-api
+                port:
+                  number: 80 # Service port for HTTP

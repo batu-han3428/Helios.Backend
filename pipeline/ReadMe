@@ -1,0 +1,57 @@
+az account set --subscription "Microsoft Azure Sponsorship"
+az aks get-credentials --resource-group medcase-cluster --name medcase-cluster-dev
+
+
+az acr login --name medcase 
+
+kubectl apply -f test-service.yaml --namespace helios-testing
+kubectl apply -f .\deploy\ingress.yaml --namespace helios-testing
+
+
+
+az vm get-instance-view     --resource-group MEDCASE-CLUSTER     --name azure-devops     --query "instanceView.extensions"   
+
+az vmss extension set --resource-group MEDCASE-CLUSTER --vmss-name azure-devops --name TeamServicesAgentLinux --publisher Microsoft.VisualStudio.Services
+
+
+az vmss extension list   --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops
+
+az vmss extension delete  --resource-group MEDCASE-CLUSTER   --vmss-name azure-devops  --name Microsoft.Azure.DevOps.Pipelines.Agent
+
+az vmss create --name vmssagents-pool --resource-group  build-server-group --image Ubuntu2204 --vm-sku Standard_D2_v4 --storage-sku StandardSSD_LRS --authentication-type SSH --generate-ssh-keys --instance-count 2 --disable-overprovision --upgrade-policy-mode manual    --custom-data cloud-init.txt --single-placement-group false --platform-fault-domain-count 1  --orchestration-mode Uniform
+
+az vm run-command invoke -g myResourceGroup -n myVm --command-id RunShellScript --scripts "sudo usermod -aG docker AzDevOps"
+
+
+az vmss list-instances   --resource-group  build-server-group   --name vmssagents-pool   --query "[].{ID:instanceId, Name:name, IP:privateIpAddress}"   --output table
+
+az vmss run-command invoke  --resource-group build-server-group   --name vmssagents-pool   --command-id RunShellScript   --instance-id "5"   --scripts "sudo usermod -aG docker AzDevOps && sudo reboot"
+
+az vmss run-command invoke  --resource-group build-server-group   --name vmssagentspool   --command-id RunShellScript   --instance-id "3"   --scripts "sudo apt-get remove docker docker-engine docker.io containerd runc && sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io && sudo usermod -aG docker AzDevOps" 
+
+
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+az vmss extension set --resource-group build-server-group    --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"}'
+az vmss extension set --resource-group build-server-group    --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": ""}'
+
+az vmss extension set --resource-group build-server-group   --vmss-name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions   --settings '{"commandToExecute": "sudo apt-get update && sudo apt-get install -y docker.io"}'
+
+az vmss extension delete  --resource-group build-server-group   --vmss-name vmssagents-pool    --name CustomScript 
+
+
+az vmss extension set --resource-group build-server-group   --name vmssagents-pool    --name CustomScript   --publisher Microsoft.Azure.Extensions    --settings '{"commandToExecute": "curl -fsSL https://get.docker.com | sh"}'
+
+az vmss run-command invoke --resource-group build-server-group    --vmss-name vmssagents-pool  --command-id RunShellScript   --scripts '
+  apt-get update && apt-get install -y apt-transport-https curl && \
+  curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+  chmod +x ./kubectl && \
+  mv ./kubectl /usr/local/bin/kubectl && \
+  kubectl version --client'
+
+kubectl get deployment helios-v3-core-api --namespace helios-testing
+
+kubectl apply -f ./pipeline/deploy/deployment-core.yaml --namespace helios-testing

@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <style>
+
+        /* -------------------------------------
+            GLOBAL
+            A very basic CSS reset
+        ------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+            width: 100% !important;
+            height: 100%;
+            line-height: 1.6;
+        }
+
+        /* Let's make sure all tables have defaults */
+        table td {
+            vertical-align: top;
+        }
+
+        /* -------------------------------------
+            BODY & CONTAINER
+        ------------------------------------- */
+        body {
+            background-color: white;
+        }
+
+        .body-wrap {
+            background-color: white;
+            width: 100%;
+        }
+
+        .container {
+            display: block !important;
+            max-width: 600px !important;
+            margin: 0 auto !important;
+            /* makes it centered */
+            clear: both !important;
+        }
+
+        .mainContainer {
+            display: block !important;
+            width: 700px !important;
+            margin: 0 auto !important;
+            /* makes it centered */
+            clear: both !important;
+            background-color: #f4f4f4;
+        }
+
+        .content {
+            max-width: 700px;
+            margin: 0 auto;
+            display: block;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        /* -------------------------------------
+            HEADER, FOOTER, MAIN
+        ------------------------------------- */
+        .main {
+            border: 0px solid #FFFFFF;
+            border-radius: 3px;
+            width: 100%;
+            background-color: #f4f4f4;
+        }
+
+        .content-wrap {
+            padding: 20px;
+        }
+
+        .content-block {
+            padding: 0 0 20px;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .mainHeader {
+            text-align: left;
+            font-size: 16px;
+            color: black;
+            font-weight: 500;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer {
+            width: 100%;
+            clear: both;
+            color: #999;
+            padding: 20px;
+        }
+
+        .fullWidth {
+            width: 100% !important;
+        }
+
+        .footer a {
+            color: #999;
+        }
+
+        .footer p, .footer a, .footer unsubscribe, .footer td {
+            font-size: 12px;
+        }
+
+        /* -------------------------------------
+            TYPOGRAPHY
+        ------------------------------------- */
+        h1, h2, h3 {
+            font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+            color: #000;
+            margin: 40px 0 0;
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 500;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        h3 {
+            font-size: 18px;
+        }
+
+        h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        p, ul, ol {
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+            p li, ul li, ol li {
+                margin-left: 5px;
+                list-style-position: inside;
+            }
+
+        /* -------------------------------------
+            LINKS & BUTTONS
+        ------------------------------------- */
+        a {
+            color: #ffc600;
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            text-decoration: none;
+            color: #FFF;
+            background-color: #ffc600;
+            border: solid #ffc600;
+            border-width: 5px 10px;
+            line-height: 2;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        /* -------------------------------------
+            OTHER STYLES THAT MIGHT BE USEFUL
+        ------------------------------------- */
+        .last {
+            margin-bottom: 0;
+        }
+
+        .first {
+            margin-top: 0;
+        }
+
+        .firsttr {
+            margin-top: 20px;
+        }
+
+        .contactus {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .signature {
+            margin-bottom: 5px;
+        }
+
+        .adress {
+            margin-top: 10px;
+        }
+
+        .imgtr {
+            margin-bottom: 10px;
+        }
+
+        .aligncenter {
+            text-align: center;
+        }
+
+        .alignright {
+            text-align: right;
+        }
+
+        .alignleft {
+            text-align: left;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+
+
+        /* -------------------------------------
+            RESPONSIVE AND MOBILE FRIENDLY STYLES
+        ------------------------------------- */
+        @media only screen and (max-width: 640px) {
+            h1, h2, h3, h4 {
+                font-weight: 600 !important;
+                margin: 20px 0 5px !important;
+            }
+
+            h1 {
+                font-size: 22px !important;
+            }
+
+            h2 {
+                font-size: 18px !important;
+            }
+
+            h3 {
+                font-size: 16px !important;
+            }
+
+            .container {
+                width: 100% !important;
+            }
+
+            .content, .content-wrap {
+                padding: 10px !important;
+            }
+
+            .invoice {
+                width: 100% !important;
+            }
+        }
+
+        .helios-bg-yellow {
+            background: #ffc600 !important;
+        }
+    </style>
+
+</head>
+<body>
+    <table class="body-wrap">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="mainContainer">
+                    <div class="content">
+                        <table class="main">
+                            <tbody>
+                                <tr class="imgtr">
+                                    <td class="alignleft" style="border-bottom: 2px inset rgb(206, 203, 203); padding-bottom:10px">
+                                        <img height="40" src="data:image/png;base64, @imgbase64" />
+                                    </td>
+                                </tr>
+                                <tr class="firsttr">
+                                    <td class="content-wrap" style="border-bottom: 2px inset rgb(206, 203, 203); padding-bottom:20px">
+                                        <table class="fullWidth">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="content-block">
+                                                        Dear <b> @FullName,</b>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="content-block">
+                                                        Hesabınız oluşturulmuştur. Sisteme şifreniz ile giriş yapabilirsiniz.
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="content-block">
+                                                        <center>
+                                                            <p><b>Login Link : </b>@StudyWebLink</p>
+                                                        </center>
+
+                                                    </td>
+                                                </tr>
+
+                                                <tr class="contactus">
+                                                    <td class="alignleft content-block">
+                                                        <i>If you have any questions, please <a href="@ContactLink">contact us</a><br /></i>
+                                                    </td>
+                                                </tr>
+
+                                                <tr class="signature">
+                                                    <td class="alignleft content-block">
+                                                        Best regards,<br />
+                                                        Helios EDC Team
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr class="adress">
+                                    <td class="alignleft content-block" style="padding-top:10px;">
+                                        <a href="https://med-case.io/" style="text-decoration:none;color:gray;"><i>2017 © MedCase<br /></i> </a>
+                                        <a href="https://www.google.com/maps/contrib/112140323645738849387/photos/@41.0582303,28.97552,17z/data=!3m1!4b1!4m3!8m2!3m1!1e1" style="text-decoration: none; color: gray;"><i>Cumhuriyet District Haciahmet Silahsor Street Yeniyol Street No:2/58 Now, 34440 Sisli/Istanbul, Turkey</i></a><br />
+                                        <a href="@dynamicdomain/File_Upload_Info_Pdf/Clarification and Explicit Consent on the Protection of Personal Data_INVESTIGATORS_v1.0_01.December.2022.pdf" style=" color: gray;" download><i> Privacy Policy</i></a>|<a href="@dynamicdomain/File_Upload_Info_Pdf/MonitorCRO_Terms of Use_v2.0_04.January.2023.pdf" style=" color: gray;" download><i>Terms of Use</i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="footer">
+                            <table class="fullWidth">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
